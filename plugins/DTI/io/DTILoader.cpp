@@ -21,8 +21,7 @@
 
 #include "DTILoader.h"
 
-#include <brayns/json/JsonObjectMacro.h>
-#include <brayns/json/JsonSchemaValidator.h>
+#include <brayns/json/Json.h>
 #include <brayns/utils/FileReader.h>
 #include <brayns/utils/Log.h>
 #include <brayns/utils/string/StringJoiner.h>
@@ -34,32 +33,61 @@
 
 namespace
 {
-BRAYNS_JSON_OBJECT_BEGIN(DTIConfiguration)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, streamlines_path, "Path to the streamlines file")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, gids_to_streamlines_path, "Path to the gid-streamline mapping file")
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::string,
-    circuit_path,
-    "Path to the source circuit for spike simulation",
-    brayns::Required(false))
-BRAYNS_JSON_OBJECT_END()
+struct DTIConfiguration
+{
+    std::string streamlines_path;
+    std::string gids_to_streamlines_path;
+    std::string circuit_path;
+};
+} // namespace
 
+namespace brayns
+{
+template<>
+struct JsonAdapter<DTIConfiguration> : ObjectAdapter<DTIConfiguration>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("DTIConfiguration");
+        builder
+            .getset(
+                "streamlines_path",
+                [](auto &object) -> auto & { return object.streamlines_path; },
+                [](auto &object, auto value) { object.streamlines_path = std::move(value); })
+            .description("Path to the streamlines file");
+        builder
+            .getset(
+                "gids_to_streamlines_path",
+                [](auto &object) -> auto & { return object.gids_to_streamlines_path; },
+                [](auto &object, auto value) { object.gids_to_streamlines_path = std::move(value); })
+            .description("Path to the gid-streamline mapping file");
+        builder
+            .getset(
+                "circuit_path",
+                [](auto &object) -> auto & { return object.circuit_path; },
+                [](auto &object, auto value) { object.circuit_path = std::move(value); })
+            .description("Path to the source circuit for spike simulation")
+            .required(false);
+        return builder.build();
+    }
+};
+} // namespace brayns
+
+namespace
+{
 class DTIConfigurationReader
 {
 public:
     static DTIConfiguration read(const std::string &path)
     {
-        auto jsonString = brayns::FileReader::read(path);
-        auto json = brayns::Json::parse(jsonString);
+        auto data = brayns::FileReader::read(path);
+        auto json = brayns::Json::parse(data);
         auto schema = brayns::Json::getSchema<DTIConfiguration>();
-        auto jsonErrors = brayns::JsonSchemaValidator::validate(json, schema);
-
-        if (!jsonErrors.empty())
+        auto errors = brayns::Json::validate(json, schema);
+        if (!errors.empty())
         {
-            auto errorString = brayns::StringJoiner::join(jsonErrors, "\n");
-            throw std::invalid_argument("Ill-formed dti config file: " + errorString);
+            throw brayns::JsonSchemaException("Invalid DTI configuration", errors);
         }
-
         return brayns::Json::deserialize<DTIConfiguration>(json);
     }
 };

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include "Json.h"
+#include "JsonAdapter.h"
 
 namespace brayns
 {
@@ -59,23 +59,7 @@ public:
      */
     static JsonSchema getSchema()
     {
-        return Json::getSchema<std::decay_t<T>>();
-    }
-
-    /**
-     * @brief Construct an empty JSON buffer.
-     *
-     */
-    JsonBuffer() = default;
-
-    /**
-     * @brief Construct a buffer with value inside.
-     *
-     * @param value Value to store in JSON format.
-     */
-    explicit JsonBuffer(const T &value)
-        : _json(Json::serialize(value))
-    {
+        return JsonAdapter<T>::getSchema();
     }
 
     /**
@@ -107,7 +91,7 @@ public:
      */
     void extract(T &value) const
     {
-        Json::deserialize(_json, value);
+        JsonAdapter<T>::deserialize(_json, value);
     }
 
 private:

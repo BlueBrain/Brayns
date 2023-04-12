@@ -22,7 +22,7 @@
 
 #include <api/IUseCase.h>
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 enum class LayerDistanceType
 {
@@ -30,14 +30,43 @@ enum class LayerDistanceType
     upper
 };
 
+struct LayerDistanceParameters
+{
+    LayerDistanceType type = LayerDistanceType::lower;
+};
+
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(LayerDistanceType, {"lower", LayerDistanceType::lower}, {"upper", LayerDistanceType::upper})
-}
+template<>
+struct EnumReflector<LayerDistanceType>
+{
+    static EnumMap<LayerDistanceType> reflect()
+    {
+        return {{"lower", LayerDistanceType::lower}, {"upper", LayerDistanceType::upper}};
+    }
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(LayerDistanceParameters)
-BRAYNS_JSON_OBJECT_ENTRY(LayerDistanceType, type, "Type of distance to show")
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<LayerDistanceType> : EnumAdapter<LayerDistanceType>
+{
+};
+
+template<>
+struct JsonAdapter<LayerDistanceParameters> : ObjectAdapter<LayerDistanceParameters>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("LayerDistanceParameters");
+        builder
+            .getset(
+                "xz_coordinate",
+                [](auto &object) { return object.type; },
+                [](auto &object, auto value) { object.type = value; })
+            .description("Type of distance to show");
+        return builder.build();
+    }
+};
+} // namespace brayns
 
 class LayerDistance final : public IUseCase
 {

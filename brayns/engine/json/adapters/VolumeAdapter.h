@@ -22,7 +22,8 @@
 
 #include <brayns/engine/volume/VolumeDataType.h>
 #include <brayns/engine/volume/types/RegularVolume.h>
-#include <brayns/json/JsonAdapterMacro.h>
+
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
@@ -31,14 +32,43 @@ struct JsonAdapter<VolumeDataType> : EnumAdapter<VolumeDataType>
 {
 };
 
-BRAYNS_JSON_ADAPTER_BEGIN(RegularVolume)
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("data_type", dataType, "Voxel data type")
-BRAYNS_JSON_ADAPTER_ENTRY(voxels, "Voxel data as byte array")
-BRAYNS_JSON_ADAPTER_ENTRY(size, "Width, height and depth of the volume")
-BRAYNS_JSON_ADAPTER_ENTRY(spacing, "Voxel dimensions in world space")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY(
-    "data_on_vertex",
-    perVertexData,
-    "Specifies if the voxel is located at the cell vertices or in the center")
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<RegularVolume> : ObjectAdapter<RegularVolume>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("RegularVolume");
+        builder
+            .getset(
+                "data_type",
+                [](auto &object) { return object.dataType; },
+                [](auto &object, auto value) { object.dataType = value; })
+            .description("Voxel data as byte array");
+        builder
+            .getset(
+                "voxels",
+                [](auto &object) -> auto & { return object.voxels; },
+                [](auto &object, auto value) { object.voxels = std::move(value); })
+            .description("Voxel data type");
+        builder
+            .getset(
+                "size",
+                [](auto &object) -> auto & { return object.size; },
+                [](auto &object, const auto &value) { object.size = value; })
+            .description("Width, height and depth of the volume");
+        builder
+            .getset(
+                "spacing",
+                [](auto &object) -> auto & { return object.spacing; },
+                [](auto &object, const auto &value) { object.spacing = value; })
+            .description("Voxel dimensions in world space");
+        builder
+            .getset(
+                "data_on_vertex",
+                [](auto &object) { return object.perVertexData; },
+                [](auto &object, auto value) { object.perVertexData = value; })
+            .description("Specify if the voxel is located at the cell vertices or in the center");
+        return builder.build();
+    }
+};
+} // namespace brayns

@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-class RegistryEntrypoint : public Entrypoint<EmptyMessage, std::vector<std::string>>
+class RegistryEntrypoint : public Entrypoint<EmptyJson, std::vector<std::string>>
 {
 public:
     explicit RegistryEntrypoint(const EntrypointRegistry &entrypoints);

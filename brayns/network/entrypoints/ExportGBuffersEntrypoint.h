@@ -27,7 +27,7 @@
 
 namespace brayns
 {
-class ExportGBuffersEntrypoint final : public Entrypoint<GBuffersParams, EmptyMessage>
+class ExportGBuffersEntrypoint final : public Entrypoint<GBuffersParams, EmptyJson>
 {
 public:
     ExportGBuffersEntrypoint(Engine &engine, CancellationToken token);

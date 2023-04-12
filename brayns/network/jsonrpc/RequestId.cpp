@@ -98,7 +98,7 @@ JsonSchema JsonAdapter<RequestId>::getSchema()
 {
     JsonSchema schema;
     schema.title = "RequestId";
-    schema.oneOf = {JsonSchemaHelper::getNullSchema(), Json::getSchema<int64_t>(), Json::getSchema<std::string>()};
+    schema.oneOf = {Json::getSchema<EmptyJson>(), Json::getSchema<int64_t>(), Json::getSchema<std::string>()};
     return schema;
 }
 

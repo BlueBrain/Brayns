@@ -54,7 +54,7 @@ private:
     ModelManager &_models;
 };
 
-class ColorModelEntrypoint : public Entrypoint<ColorModelMessage, EmptyMessage>
+class ColorModelEntrypoint : public Entrypoint<ColorModelMessage, EmptyJson>
 {
 public:
     explicit ColorModelEntrypoint(ModelManager &models);

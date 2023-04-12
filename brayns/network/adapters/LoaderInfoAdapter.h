@@ -23,13 +23,32 @@
 
 #include <brayns/io/LoaderRegistry.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(LoaderInfo)
-BRAYNS_JSON_ADAPTER_ENTRY(name, "Loader name")
-BRAYNS_JSON_ADAPTER_ENTRY(extensions, "Supported file extensions")
-BRAYNS_JSON_ADAPTER_NAMED_ENTRY("input_parameters_schema", inputParametersSchema, "Loader properties")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<LoaderInfo> : ObjectAdapter<LoaderInfo>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("LoaderInfo");
+        builder
+            .get(
+                "name",
+                [](auto &object) -> auto & { return object.name; })
+            .description("Loader name");
+        builder
+            .get(
+                "extensions",
+                [](auto &object) -> auto & { return object.extensions; })
+            .description("Supported file extensions");
+        builder
+            .get(
+                "input_parameters_schema",
+                [](auto &object) -> auto & { return object.inputParametersSchema; })
+            .description("Loader properties");
+        return builder.build();
+    }
+};
 } // namespace brayns

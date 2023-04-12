@@ -22,54 +22,44 @@
 
 #include <brayns/json/JsonType.h>
 
-TEST_CASE("JsonTypeHelper")
+TEST_CASE("JsonTypeInfo")
 {
-    SUBCASE("check")
-    {
-        CHECK(brayns::JsonTypeHelper::check(brayns::JsonType::Array, brayns::JsonType::Array));
-        CHECK(brayns::JsonTypeHelper::check(brayns::JsonType::Number, brayns::JsonType::Integer));
-        CHECK_FALSE(brayns::JsonTypeHelper::check(brayns::JsonType::Integer, brayns::JsonType::Number));
-        CHECK_FALSE(brayns::JsonTypeHelper::check(brayns::JsonType::Object, brayns::JsonType::String));
-    }
     SUBCASE("isNumeric")
     {
-        CHECK_FALSE(brayns::JsonTypeHelper::isNumeric(brayns::JsonType::Undefined));
-        CHECK_FALSE(brayns::JsonTypeHelper::isNumeric(brayns::JsonType::Null));
-        CHECK_FALSE(brayns::JsonTypeHelper::isNumeric(brayns::JsonType::Boolean));
-        CHECK(brayns::JsonTypeHelper::isNumeric(brayns::JsonType::Integer));
-        CHECK(brayns::JsonTypeHelper::isNumeric(brayns::JsonType::Number));
-        CHECK_FALSE(brayns::JsonTypeHelper::isNumeric(brayns::JsonType::String));
-        CHECK_FALSE(brayns::JsonTypeHelper::isNumeric(brayns::JsonType::Array));
-        CHECK_FALSE(brayns::JsonTypeHelper::isNumeric(brayns::JsonType::Object));
+        CHECK_FALSE(brayns::JsonTypeInfo::isNumeric(brayns::JsonType::Undefined));
+        CHECK_FALSE(brayns::JsonTypeInfo::isNumeric(brayns::JsonType::Null));
+        CHECK_FALSE(brayns::JsonTypeInfo::isNumeric(brayns::JsonType::Boolean));
+        CHECK(brayns::JsonTypeInfo::isNumeric(brayns::JsonType::Integer));
+        CHECK(brayns::JsonTypeInfo::isNumeric(brayns::JsonType::Number));
+        CHECK_FALSE(brayns::JsonTypeInfo::isNumeric(brayns::JsonType::String));
+        CHECK_FALSE(brayns::JsonTypeInfo::isNumeric(brayns::JsonType::Array));
+        CHECK_FALSE(brayns::JsonTypeInfo::isNumeric(brayns::JsonType::Object));
     }
-}
-
-TEST_CASE("GetJsonType")
-{
-    SUBCASE("fromJson")
+    SUBCASE("getType")
     {
         struct NotJson
         {
         };
-        CHECK_EQ(brayns::GetJsonType::fromJson(NotJson()), brayns::JsonType::Undefined);
-        CHECK_EQ(brayns::GetJsonType::fromJson(brayns::JsonValue()), brayns::JsonType::Null);
-        CHECK_EQ(brayns::GetJsonType::fromJson(true), brayns::JsonType::Boolean);
-        CHECK_EQ(brayns::GetJsonType::fromJson(std::int16_t(1)), brayns::JsonType::Integer);
-        CHECK_EQ(brayns::GetJsonType::fromJson(std::uint32_t(1)), brayns::JsonType::Integer);
-        CHECK_EQ(brayns::GetJsonType::fromJson(1.0f), brayns::JsonType::Number);
-        CHECK_EQ(brayns::GetJsonType::fromJson(1.0), brayns::JsonType::Number);
-        CHECK_EQ(brayns::GetJsonType::fromJson(std::string("Test")), brayns::JsonType::String);
-        CHECK_EQ(brayns::GetJsonType::fromJson(Poco::makeShared<brayns::JsonArray>()), brayns::JsonType::Array);
-        CHECK_EQ(brayns::GetJsonType::fromJson(Poco::makeShared<brayns::JsonObject>()), brayns::JsonType::Object);
+        CHECK_THROWS_AS(brayns::JsonTypeInfo::getType(NotJson()), std::invalid_argument);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(brayns::JsonValue()), brayns::JsonType::Null);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(true), brayns::JsonType::Boolean);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(std::int16_t(1)), brayns::JsonType::Integer);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(std::uint32_t(1)), brayns::JsonType::Integer);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(1.0f), brayns::JsonType::Number);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(1.0), brayns::JsonType::Number);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(std::string("Test")), brayns::JsonType::String);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(Poco::makeShared<brayns::JsonArray>()), brayns::JsonType::Array);
+        CHECK_EQ(brayns::JsonTypeInfo::getType(Poco::makeShared<brayns::JsonObject>()), brayns::JsonType::Object);
     }
-    SUBCASE("fromPrimitive")
+    SUBCASE("getType<T>")
     {
-        CHECK_EQ(brayns::GetJsonType::fromPrimitive<std::nullptr_t>(), brayns::JsonType::Null);
-        CHECK_EQ(brayns::GetJsonType::fromPrimitive<bool>(), brayns::JsonType::Boolean);
-        CHECK_EQ(brayns::GetJsonType::fromPrimitive<std::int16_t>(), brayns::JsonType::Integer);
-        CHECK_EQ(brayns::GetJsonType::fromPrimitive<std::uint32_t>(), brayns::JsonType::Integer);
-        CHECK_EQ(brayns::GetJsonType::fromPrimitive<float>(), brayns::JsonType::Number);
-        CHECK_EQ(brayns::GetJsonType::fromPrimitive<double>(), brayns::JsonType::Number);
-        CHECK_EQ(brayns::GetJsonType::fromPrimitive<std::string>(), brayns::JsonType::String);
+        CHECK_EQ(brayns::JsonTypeInfo::getType<brayns::JsonValue>(), brayns::JsonType::Undefined);
+        CHECK_EQ(brayns::JsonTypeInfo::getType<brayns::EmptyJson>(), brayns::JsonType::Null);
+        CHECK_EQ(brayns::JsonTypeInfo::getType<bool>(), brayns::JsonType::Boolean);
+        CHECK_EQ(brayns::JsonTypeInfo::getType<std::int16_t>(), brayns::JsonType::Integer);
+        CHECK_EQ(brayns::JsonTypeInfo::getType<std::uint32_t>(), brayns::JsonType::Integer);
+        CHECK_EQ(brayns::JsonTypeInfo::getType<float>(), brayns::JsonType::Number);
+        CHECK_EQ(brayns::JsonTypeInfo::getType<double>(), brayns::JsonType::Number);
+        CHECK_EQ(brayns::JsonTypeInfo::getType<std::string>(), brayns::JsonType::String);
     }
 }

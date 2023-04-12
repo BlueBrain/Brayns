@@ -55,7 +55,7 @@ public:
      */
     virtual JsonSchema getParamsSchema() const override
     {
-        return Json::getSchema<EmptyMessage>();
+        return Json::getSchema<EmptyJson>();
     }
 
     /**
@@ -119,7 +119,7 @@ public:
      */
     virtual JsonSchema getResultSchema() const override
     {
-        return Json::getSchema<EmptyMessage>();
+        return Json::getSchema<EmptyJson>();
     }
 
     /**
@@ -131,7 +131,7 @@ public:
     {
         auto &params = request.getParams();
         Json::deserialize(params, _object);
-        auto result = Json::serialize(EmptyMessage());
+        auto result = Json::serialize(EmptyJson());
         request.reply(result);
     }
 

@@ -21,10 +21,8 @@
 #pragma once
 
 #include <brayns/engine/model/Model.h>
+
 #include <brayns/json/Json.h>
-#include <brayns/json/JsonSchema.h>
-#include <brayns/json/JsonSchemaValidator.h>
-#include <brayns/utils/string/StringJoiner.h>
 
 #include <functional>
 #include <string>
@@ -146,11 +144,6 @@ template<typename T>
 class Loader : public AbstractLoader
 {
 public:
-    Loader()
-        : _parameterSchema(Json::getSchema<T>())
-    {
-    }
-
     virtual ~Loader() = default;
 
     virtual const JsonSchema &getInputParametersSchema() const override
@@ -195,7 +188,7 @@ public:
         importFromFile(const std::string &path, const LoaderProgress &callback, const T &params) const = 0;
 
 private:
-    const JsonSchema _parameterSchema;
+    const JsonSchema _parameterSchema = Json::getSchema<T>();
 
     T _parseParameters(const JsonValue &input) const
     {
@@ -203,14 +196,11 @@ private:
         {
             return Json::deserialize<T>(Json::parse("{}"));
         }
-
-        auto errors = JsonSchemaValidator::validate(input, _parameterSchema);
+        auto errors = Json::validate(input, _parameterSchema);
         if (!errors.empty())
         {
-            auto message = "Cannot parse " + getName() + " parameters: " + StringJoiner::join(errors, ", ");
-            throw std::invalid_argument(message);
+            throw JsonSchemaException("Invalid loader parameters", errors);
         }
-
         return Json::deserialize<T>(input);
     }
 };

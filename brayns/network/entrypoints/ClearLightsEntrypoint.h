@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-class ClearLightsEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
+class ClearLightsEntrypoint : public Entrypoint<EmptyJson, EmptyJson>
 {
 public:
     explicit ClearLightsEntrypoint(ModelManager &models);

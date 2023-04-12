@@ -20,14 +20,56 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
-#include <brayns/json/adapters/JsonSchemaAdapter.h>
+#include <brayns/json/Json.h>
 
-BRAYNS_JSON_OBJECT_BEGIN(AvailableUseCasesMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model holding an atlas volume")
-BRAYNS_JSON_OBJECT_END()
+struct AvailableUseCasesMessage
+{
+    uint32_t model_id = 0;
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(UseCaseMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, name, "Use case name")
-BRAYNS_JSON_OBJECT_ENTRY(brayns::JsonSchema, params_schema, "Use case parameters schema")
-BRAYNS_JSON_OBJECT_END()
+struct UseCaseMessage
+{
+    std::string name;
+    brayns::JsonSchema params_schema;
+};
+
+namespace brayns
+{
+template<>
+struct JsonAdapter<AvailableUseCasesMessage> : ObjectAdapter<AvailableUseCasesMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("AvailableUseCasesMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
+            .description("ID of the model holding an atlas volume");
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonAdapter<UseCaseMessage> : ObjectAdapter<UseCaseMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("UseCaseMessage");
+        builder
+            .getset(
+                "name",
+                [](auto &object) -> auto & { return object.name; },
+                [](auto &object, auto value) { object.name = std::move(value); })
+            .description("Use case name");
+        builder
+            .getset(
+                "params_schema",
+                [](auto &object) -> auto & { return object.params_schema; },
+                [](auto &object, auto value) { object.params_schema = std::move(value); })
+            .description("Use case parameters schema");
+        return builder.build();
+    }
+};
+} // namespace brayns

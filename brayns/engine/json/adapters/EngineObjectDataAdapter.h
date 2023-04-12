@@ -20,13 +20,33 @@
 
 #pragma once
 
+#include <brayns/json/Json.h>
+
 #include <brayns/engine/json/EngineObjectData.h>
-#include <brayns/json/JsonAdapterMacro.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(EngineObjectData)
-BRAYNS_JSON_ADAPTER_ENTRY(name, "Object type name", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(params, "Object parameters", Required(false))
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<EngineObjectData> : ObjectAdapter<EngineObjectData>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("EngineObjectData");
+        builder
+            .getset(
+                "name",
+                [](auto &object) -> auto & { return object.name; },
+                [](auto &object, auto value) { object.name = std::move(value); })
+            .description("Object type name")
+            .required(false);
+        builder
+            .getset(
+                "params",
+                [](auto &object) -> auto & { return object.params; },
+                [](auto &object, const auto &value) { object.params = value; })
+            .description("Object parameters")
+            .required(false);
+        return builder.build();
+    }
+};
+} // namespace brayns

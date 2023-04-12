@@ -21,11 +21,19 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/JsonAdapter.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(RemoveLightsMessage)
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<uint32_t>, ids, "List of light ID to remove")
-BRAYNS_JSON_OBJECT_END()
+/**
+ * @brief JSON handling for JSON schemas.
+ *
+ */
+template<>
+struct JsonAdapter<JsonSchema>
+{
+    static JsonSchema getSchema();
+    static void serialize(const JsonSchema &schema, JsonValue &json);
+    static void deserialize(const JsonValue &json, JsonSchema &schema);
+};
 } // namespace brayns

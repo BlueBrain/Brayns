@@ -21,15 +21,37 @@
 
 #pragma once
 
-#include <brayns/json/JsonBuffer.h>
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/engine/json/adapters/ColorRampAdapter.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SetColorRampMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID")
-BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<ColorRamp>, color_ramp, "Color ramp")
-BRAYNS_JSON_OBJECT_END()
+struct SetColorRampMessage
+{
+    uint32_t id = 0;
+    JsonBuffer<ColorRamp> color_ramp;
+};
+
+template<>
+struct JsonAdapter<SetColorRampMessage> : ObjectAdapter<SetColorRampMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("SetColorRampMessage");
+        builder
+            .getset(
+                "id",
+                [](auto &object) { return object.id; },
+                [](auto &object, auto value) { object.id = value; })
+            .description("Model ID");
+        builder
+            .getset(
+                "color_ramp",
+                [](auto &object) -> auto & { return object.color_ramp; },
+                [](auto &object, const auto &value) { object.color_ramp = value; })
+            .description("Color ramp");
+        return builder.build();
+    }
+};
 } // namespace brayns

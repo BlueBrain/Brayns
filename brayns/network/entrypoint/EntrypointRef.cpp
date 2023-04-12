@@ -34,14 +34,14 @@ public:
         schema.async = entrypoint.isAsync();
         schema.deprecated = entrypoint.isDeprecated();
         auto params = entrypoint.getParamsSchema();
-        if (!brayns::JsonSchemaHelper::isNull(params))
+        if (params.type != brayns::JsonType::Null)
         {
             schema.params = std::move(params);
         }
         auto returns = entrypoint.getResultSchema();
-        if (!brayns::JsonSchemaHelper::isNull(returns))
+        if (returns.type != brayns::JsonType::Null)
         {
-            schema.returns = returns;
+            schema.returns = std::move(returns);
         }
     }
 };

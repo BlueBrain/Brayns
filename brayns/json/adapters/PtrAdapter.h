@@ -24,7 +24,7 @@
 #include <memory>
 #include <optional>
 
-#include "PrimitiveAdapter.h"
+#include <brayns/json/JsonAdapter.h>
 
 namespace brayns
 {
@@ -36,23 +36,13 @@ namespace brayns
 template<typename T>
 struct PtrAdapter
 {
-    /**
-     * @brief Create a JSON schema based on the value referenced by T.
-     *
-     * @return JsonSchema JSON schema of *T.
-     */
+    using ValueType = std::decay_t<decltype(*T{})>;
+
     static JsonSchema getSchema()
     {
-        using ValueType = std::decay_t<decltype(*T{})>;
-        return Json::getSchema<ValueType>();
+        return JsonAdapter<ValueType>::getSchema();
     }
 
-    /**
-     * @brief Serialize contained value if not null.
-     *
-     * @param value Input value.
-     * @param json Output JSON.
-     */
     static void serialize(const T &value, JsonValue &json)
     {
         if (!value)
@@ -60,15 +50,9 @@ struct PtrAdapter
             json.clear();
             return;
         }
-        Json::serialize(*value, json);
+        JsonAdapter<ValueType>::serialize(*value, json);
     }
 
-    /**
-     * @brief Deserialize contained value if not null.
-     *
-     * @param json Input JSON.
-     * @param value Output value.
-     */
     static void deserialize(const JsonValue &json, T &value)
     {
         if (json.isEmpty())
@@ -80,12 +64,12 @@ struct PtrAdapter
         {
             return;
         }
-        Json::deserialize(json, *value);
+        JsonAdapter<ValueType>::deserialize(json, *value);
     }
 };
 
 /**
- * @brief Allow JSON handling for pointer types.
+ * @brief JSON handling for raw pointers.
  *
  * @tparam T Referenced type.
  */
@@ -95,19 +79,13 @@ struct JsonAdapter<T *> : PtrAdapter<T *>
 };
 
 /**
- * @brief Allow JSON handling for std::unique_ptr.
+ * @brief JSON handling for std::unique_ptr<T>.
  *
  * @tparam T Referenced type.
  */
 template<typename T>
 struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
 {
-    /**
-     * @brief Create value using make_unique<T>() if empty.
-     *
-     * @param json Input JSON.
-     * @param value Output value.
-     */
     static void deserialize(const JsonValue &json, std::unique_ptr<T> &value)
     {
         if (json.isEmpty())
@@ -119,12 +97,12 @@ struct JsonAdapter<std::unique_ptr<T>> : PtrAdapter<std::unique_ptr<T>>
         {
             value = std::make_unique<T>();
         }
-        Json::deserialize(json, *value);
+        JsonAdapter<T>::deserialize(json, *value);
     }
 };
 
 /**
- * @brief Allow JSON handling for std::shared_ptr.
+ * @brief JSON handling for std::shared_ptr<T>.
  *
  * @tparam T Referenced type.
  */
@@ -148,24 +126,18 @@ struct JsonAdapter<std::shared_ptr<T>> : PtrAdapter<std::shared_ptr<T>>
         {
             value = std::make_shared<T>();
         }
-        Json::deserialize(json, *value);
+        JsonAdapter<T>::deserialize(json, *value);
     }
 };
 
 /**
- * @brief Allow JSON handling for std::optional.
+ * @brief JSON handling for std::optional<T>.
  *
  * @tparam T Referenced type.
  */
 template<typename T>
 struct JsonAdapter<std::optional<T>> : PtrAdapter<std::optional<T>>
 {
-    /**
-     * @brief Emplace object using value.emplace() if empty.
-     *
-     * @param json Input JSON.
-     * @param value Output value.
-     */
     static void deserialize(const JsonValue &json, std::optional<T> &value)
     {
         if (json.isEmpty())
@@ -177,7 +149,7 @@ struct JsonAdapter<std::optional<T>> : PtrAdapter<std::optional<T>>
         {
             value.emplace();
         }
-        Json::deserialize(json, *value);
+        JsonAdapter<T>::deserialize(json, *value);
     }
 };
 } // namespace brayns

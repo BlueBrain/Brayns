@@ -21,15 +21,45 @@
 #include <doctest/doctest.h>
 
 #include <brayns/io/LoaderRegistry.h>
-#include <brayns/json/JsonObjectMacro.h>
+
+#include <brayns/json/Json.h>
 
 namespace
 {
-BRAYNS_JSON_OBJECT_BEGIN(MockParameters)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, stringParam, "A string parameters")
-BRAYNS_JSON_OBJECT_ENTRY(int, intParam, "An integer parameter")
-BRAYNS_JSON_OBJECT_END()
+struct MockParameters
+{
+    std::string stringParam;
+    int intParam = 0;
+};
+} // namespace
 
+namespace brayns
+{
+template<>
+struct JsonAdapter<MockParameters> : ObjectAdapter<MockParameters>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("MockParameters");
+        builder
+            .getset(
+                "stringParam",
+                [](auto &object) -> auto & { return object.stringParam; },
+                [](auto &object, auto value) { object.stringParam = std::move(value); })
+            .description("A string parameter");
+        builder
+            .getset(
+                "intParam",
+                [](auto &object) { return object.intParam; },
+                [](auto &object, auto value) { object.intParam = value; })
+            .description("An integer parameter");
+        return builder.build();
+    }
+};
+} // namespace brayns
+
+namespace
+{
 class MockLoader final : public brayns::Loader<MockParameters>
 {
 public:
@@ -103,7 +133,7 @@ public:
         return {};
     }
 };
-}
+} // namespace
 
 TEST_CASE("Loader registry")
 {

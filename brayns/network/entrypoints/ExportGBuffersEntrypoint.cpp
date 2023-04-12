@@ -150,12 +150,12 @@ public:
         if (path.empty())
         {
             auto data = ImageHelper::encode(framebuffer, params.channels);
-            request.reply(brayns::EmptyMessage(), data);
+            request.reply(brayns::EmptyJson(), data);
             return;
         }
 
         ImageHelper::save(framebuffer, params.channels, path);
-        request.reply(brayns::EmptyMessage());
+        request.reply(brayns::EmptyJson());
     }
 };
 
@@ -263,4 +263,4 @@ void ExportGBuffersEntrypoint::onDisconnect()
         _token.cancel();
     }
 }
-}
+} // namespace brayns

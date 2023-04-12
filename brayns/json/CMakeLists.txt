@@ -5,7 +5,8 @@ add_library(braynsJson SHARED ${BRAYNSJSON_SOURCES} ${BRAYNSJSON_HEADERS})
 
 target_include_directories(braynsJson PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
-    $<INSTALL_INTERFACE:include>)
+    $<INSTALL_INTERFACE:include>
+)
 
 target_link_libraries(braynsJson PUBLIC Poco::JSON braynsUtils)
 

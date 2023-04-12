@@ -21,42 +21,47 @@
 #include <doctest/doctest.h>
 
 #include <brayns/json/Json.h>
-#include <brayns/json/JsonSchemaValidator.h>
-#include <brayns/json/adapters/PrimitiveAdapter.h>
 
-TEST_CASE("JsonSchemaValidator")
+TEST_CASE("JsonValidator")
 {
     SUBCASE("Wildcard")
     {
-        auto schema = brayns::JsonSchemaHelper::getWildcardSchema();
+        auto schema = brayns::JsonSchema();
         auto json = brayns::Json::parse(R"({"test": 10})");
-        auto errors = brayns::JsonSchemaValidator::validate(json, schema);
+
+        auto errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
+
         json = 1;
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
     }
     SUBCASE("One of")
     {
         auto schema = brayns::JsonSchema();
         schema.oneOf = {brayns::Json::getSchema<double>(), brayns::Json::getSchema<std::string>()};
-        auto errors = brayns::JsonSchemaValidator::validate(1.0f, schema);
+
+        auto errors = brayns::Json::validate(1.0f, schema);
         CHECK(errors.empty());
-        errors = brayns::JsonSchemaValidator::validate("Test", schema);
+
+        errors = brayns::Json::validate("Test", schema);
         CHECK(errors.empty());
-        errors = brayns::JsonSchemaValidator::validate(true, schema);
+
+        errors = brayns::Json::validate(true, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Cannot find a schema in oneOf that matches the given input");
+        CHECK_EQ(errors[0].message, "invalid oneOf, no schemas match input");
     }
     SUBCASE("Invalid type")
     {
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::String;
-        auto errors = brayns::JsonSchemaValidator::validate(1, schema);
+
+        auto errors = brayns::Json::validate(1, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Invalid type: expected 'string', got 'integer'");
+        CHECK_EQ(errors[0].message, "invalid type, expected string got integer");
+
         schema.type = brayns::JsonType::Number;
-        errors = brayns::JsonSchemaValidator::validate(1, schema);
+        errors = brayns::Json::validate(1, schema);
         CHECK(errors.empty());
     }
     SUBCASE("Limits")
@@ -65,50 +70,69 @@ TEST_CASE("JsonSchemaValidator")
         schema.type = brayns::JsonType::Integer;
         schema.minimum = -1;
         schema.maximum = 3;
-        auto errors = brayns::JsonSchemaValidator::validate(1, schema);
+
+        auto errors = brayns::Json::validate(1, schema);
         CHECK(errors.empty());
-        errors = brayns::JsonSchemaValidator::validate(-1, schema);
+
+        errors = brayns::Json::validate(-1, schema);
         CHECK(errors.empty());
-        errors = brayns::JsonSchemaValidator::validate(3, schema);
+
+        errors = brayns::Json::validate(3, schema);
         CHECK(errors.empty());
-        errors = brayns::JsonSchemaValidator::validate(-2, schema);
+
+        errors = brayns::Json::validate(-2, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Value below minimum: expected >= -1, got -2");
-        errors = brayns::JsonSchemaValidator::validate(4, schema);
+        CHECK_EQ(errors[0].message, "value below minimum -2 < -1");
+
+        errors = brayns::Json::validate(4, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Value above maximum: expected <= 3, got 4");
+        CHECK_EQ(errors[0].message, "value above maximum 4 > 3");
+
+        schema.minimum = std::nullopt;
+        schema.maximum = std::nullopt;
+        errors = brayns::Json::validate(-8, schema);
+        CHECK(errors.empty());
+        errors = brayns::Json::validate(125, schema);
+        CHECK(errors.empty());
     }
     SUBCASE("Enums")
     {
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::String;
         schema.enums = {"test1", "test2"};
-        auto errors = brayns::JsonSchemaValidator::validate("test1", schema);
+
+        auto errors = brayns::Json::validate("test1", schema);
         CHECK(errors.empty());
-        errors = brayns::JsonSchemaValidator::validate("test2", schema);
+
+        errors = brayns::Json::validate("test2", schema);
         CHECK(errors.empty());
-        errors = brayns::JsonSchemaValidator::validate("Test2", schema);
+
+        errors = brayns::Json::validate("Test2", schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Invalid enum: 'Test2' not in ['test1', 'test2']");
+        CHECK_EQ(errors[0].message, "invalid enum 'Test2' not in ['test1', 'test2']");
     }
     SUBCASE("Property type")
     {
         auto internal = brayns::JsonSchema();
         internal.type = brayns::JsonType::Object;
         internal.properties = {{"integer", brayns::Json::getSchema<int>()}};
+
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::Object;
         schema.properties = {{"internal", internal}};
+
         auto json = brayns::Json::parse(R"({"internal": 1})");
-        auto errors = brayns::JsonSchemaValidator::validate(json, schema);
+        auto errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Invalid type for internal: expected 'object', got 'integer'");
+        CHECK_EQ(errors[0].message, "invalid type, expected object got integer");
+
         json = brayns::Json::parse(R"({"internal": {"integer": true}})");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Invalid type for internal.integer: expected 'integer', got 'boolean'");
+        CHECK_EQ(errors[0].message, "invalid type, expected integer got boolean");
+
         json = brayns::Json::parse(R"({"internal": {"integer": 1}})");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
     }
     SUBCASE("Missing property")
@@ -118,28 +142,42 @@ TEST_CASE("JsonSchemaValidator")
         schema.properties = {
             {"integer", brayns::Json::getSchema<int>()},
             {"string", brayns::Json::getSchema<std::string>()}};
-        schema.required = {"integer"};
+        schema.properties.at("integer").required = true;
+
         auto json = brayns::Json::parse(R"({"integer": 1, "string": "test"})");
-        auto errors = brayns::JsonSchemaValidator::validate(json, schema);
+        auto errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
+
         json = brayns::Json::parse(R"({"string": "test"})");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Missing property: 'integer'");
+        CHECK_EQ(errors[0].message, "missing required property 'integer'");
+
         json = brayns::Json::parse(R"({"integer": 1})");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
     }
-    SUBCASE("Additional properties")
+    SUBCASE("Unknown properties")
     {
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::Object;
+        auto readOnly = brayns::Json::getSchema<int>();
+        readOnly.required = true;
+        readOnly.readOnly = true;
+        schema.properties["readOnly"] = std::move(readOnly);
+
         auto json = brayns::Json::parse(R"({"something": 1})");
-        auto errors = brayns::JsonSchemaValidator::validate(json, schema);
+        auto errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Unknown property: 'something'");
-        brayns::JsonSchemaHelper::allowAnyAdditionalProperty(schema);
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        CHECK_EQ(errors[0].message, "unknown property 'something'");
+
+        json = brayns::Json::parse(R"({"readOnly": 1})");
+        errors = brayns::Json::validate(json, schema);
+        CHECK_EQ(errors.size(), 1);
+        CHECK_EQ(errors[0].message, "read only property 'readOnly'");
+
+        json = brayns::Json::parse(R"({})");
+        errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
     }
     SUBCASE("Item type")
@@ -147,16 +185,19 @@ TEST_CASE("JsonSchemaValidator")
         auto schema = brayns::JsonSchema();
         schema.type = brayns::JsonType::Array;
         schema.items = {brayns::Json::getSchema<int>()};
+
         auto json = brayns::Json::parse(R"([1, 2, 3])");
-        auto errors = brayns::JsonSchemaValidator::validate(json, schema);
+        auto errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
+
         json = brayns::Json::parse(R"([])");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
+
         json = brayns::Json::parse(R"([1, "test", 2])");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Invalid type for [1]: expected 'integer', got 'string'");
+        CHECK_EQ(errors[0].message, "invalid type, expected integer got string");
     }
     SUBCASE("Item count")
     {
@@ -165,19 +206,44 @@ TEST_CASE("JsonSchemaValidator")
         schema.items = {brayns::Json::getSchema<int>()};
         schema.minItems = 1;
         schema.maxItems = 3;
+
         auto json = brayns::Json::parse(R"([1])");
-        auto errors = brayns::JsonSchemaValidator::validate(json, schema);
+        auto errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
+
         json = brayns::Json::parse(R"([1, 2, 3])");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK(errors.empty());
+
         json = brayns::Json::parse(R"([])");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Not enough items: expected at least 1 item(s), got 0");
+        CHECK_EQ(errors[0].message, "item count below minimum 0 < 1");
+
         json = brayns::Json::parse(R"([1, 2, 3, 4])");
-        errors = brayns::JsonSchemaValidator::validate(json, schema);
+        errors = brayns::Json::validate(json, schema);
         CHECK_EQ(errors.size(), 1);
-        CHECK_EQ(errors[0], "Too many items: expected at most 3 item(s), got 4");
+        CHECK_EQ(errors[0].message, "item count above maximum 4 > 3");
+    }
+    SUBCASE("Nested")
+    {
+        auto internal = brayns::JsonSchema();
+        internal.type = brayns::JsonType::Object;
+        internal.properties["test3"] = brayns::Json::getSchema<std::vector<int>>();
+
+        auto schema = brayns::JsonSchema();
+        schema.type = brayns::JsonType::Object;
+        auto integer = brayns::Json::getSchema<int>();
+        integer.required = true;
+        schema.properties["test1"] = std::move(integer);
+        schema.properties["test2"] = internal;
+
+        auto json = brayns::Json::parse(R"({"test2": {"test3": [1.3]}})");
+        auto errors = brayns::Json::validate(json, schema);
+        CHECK_EQ(errors.size(), 2);
+
+        auto messages = brayns::JsonErrorFormatter::format(errors);
+        CHECK_EQ(messages[0], "test2.test3[0]: invalid type, expected integer got number");
+        CHECK_EQ(messages[1], "missing required property 'test1'");
     }
 }

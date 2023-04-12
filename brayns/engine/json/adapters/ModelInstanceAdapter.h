@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/engine/model/ModelInstance.h>
 
@@ -31,12 +31,39 @@
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ModelInstance)
-BRAYNS_JSON_ADAPTER_GET("model_id", getID, "Model ID")
-BRAYNS_JSON_ADAPTER_GET("model_type", getModelType, "Model type")
-BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Model axis-aligned bounds")
-BRAYNS_JSON_ADAPTER_GET("info", getModelData, "Model-specific metadata")
-BRAYNS_JSON_ADAPTER_GETSET("transform", getTransform, setTransform, "Model transform")
-BRAYNS_JSON_ADAPTER_GETSET("is_visible", isVisible, setVisible, "Wether the model is being rendered or not")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<ModelInstance> : ObjectAdapter<ModelInstance>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("ModelInstance");
+        builder.get("model_id", [](auto &object) { return object.getID(); }).description("Model ID");
+        builder
+            .get(
+                "model_type",
+                [](auto &object) -> auto & { return object.getModelType(); })
+            .description("Model type");
+        builder
+            .get(
+                "bounds",
+                [](auto &object) -> auto & { return object.getBounds(); })
+            .description("Model bounds");
+        builder.get("info", [](auto &object) { return object.getModelData(); }).description("Model-specific info");
+        builder
+            .getset(
+                "transform",
+                [](auto &object) -> auto & { return object.getTransform(); },
+                [](auto &object, const auto &value) { object.setTransform(value); })
+            .description("Model transform")
+            .required(false);
+        builder
+            .getset(
+                "is_visible",
+                [](auto &object) { return object.isVisible(); },
+                [](auto &object, auto value) { object.setVisible(value); })
+            .description("Wether the model is being rendered or not")
+            .required(false);
+        return builder.build();
+    }
+};
 } // namespace brayns

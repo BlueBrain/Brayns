@@ -21,21 +21,80 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SchemaParams)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, endpoint, "Name of the endpoint")
-BRAYNS_JSON_OBJECT_END()
+struct SchemaParams
+{
+    std::string endpoint;
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(SchemaResult)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, plugin, "Name of the plugin that loads the entrypoint")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, title, "Name of the entrypoint")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, description, "Description of the entrypoint")
-BRAYNS_JSON_OBJECT_ENTRY(bool, async, "Check if the entrypoint is asynchronous")
-BRAYNS_JSON_OBJECT_ENTRY(bool, deprecated, "If true, the entrypoint will be removed / renamed in the next release")
-BRAYNS_JSON_OBJECT_ENTRY(std::optional<JsonSchema>, params, "Input schema", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::optional<JsonSchema>, returns, "Output schema", Required(false))
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<SchemaParams> : ObjectAdapter<SchemaParams>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("SchemaParams");
+        builder
+            .getset(
+                "endpoint",
+                [](auto &object) -> auto & { return object.endpoint; },
+                [](auto &object, auto value) { object.endpoint = std::move(value); })
+            .description("Name of the endpoint");
+        return builder.build();
+    }
+};
+
+struct SchemaResult
+{
+    std::string plugin;
+    std::string title;
+    std::string description;
+    bool async = false;
+    bool deprecated = false;
+    std::optional<JsonSchema> params;
+    std::optional<JsonSchema> returns;
+};
+
+template<>
+struct JsonAdapter<SchemaResult> : ObjectAdapter<SchemaResult>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("SchemaResult");
+        builder
+            .get(
+                "plugin",
+                [](auto &object) -> auto & { return object.plugin; })
+            .description("Name of the plugin that loads the entrypoint");
+        builder
+            .get(
+                "title",
+                [](auto &object) -> auto & { return object.title; })
+            .description("Name of the entrypoint (method)");
+        builder
+            .get(
+                "description",
+                [](auto &object) -> auto & { return object.description; })
+            .description("Description of the entrypoint");
+        builder.get("async", [](auto &object) { return object.async; })
+            .description("Check if the entrypoint is asynchronous (send progress and can be cancelled)");
+        builder.get("deprecated", [](auto &object) { return object.deprecated; })
+            .description("If true, the entrypoint will be removed / renamed in the next release");
+        builder
+            .get(
+                "params",
+                [](auto &object) -> auto & { return object.params; })
+            .description("Input schema")
+            .required(false);
+        builder
+            .get(
+                "returns",
+                [](auto &object) -> auto & { return object.returns; })
+            .description("Output schema")
+            .required(false);
+        return builder.build();
+    }
+};
 } // namespace brayns

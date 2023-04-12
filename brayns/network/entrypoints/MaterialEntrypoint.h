@@ -43,10 +43,10 @@ private:
 };
 
 template<typename MaterialType>
-class SetMaterialEntrypoint : public Entrypoint<SetMaterialMessage<MaterialType>, EmptyMessage>
+class SetMaterialEntrypoint : public Entrypoint<SetMaterialMessage<MaterialType>, EmptyJson>
 {
 public:
-    using Request = typename Entrypoint<SetMaterialMessage<MaterialType>, EmptyMessage>::Request;
+    using Request = typename Entrypoint<SetMaterialMessage<MaterialType>, EmptyJson>::Request;
 
     explicit SetMaterialEntrypoint(ModelManager &models)
         : _models(models)
@@ -72,7 +72,7 @@ public:
         buffer.extract(materialData);
         *material = Material(std::move(materialData));
 
-        request.reply(EmptyMessage());
+        request.reply(EmptyJson());
     }
 
 private:

@@ -42,7 +42,7 @@ private:
     ModelManager &_models;
 };
 
-class SetColorRampEntrypoint : public Entrypoint<SetColorRampMessage, EmptyMessage>
+class SetColorRampEntrypoint : public Entrypoint<SetColorRampMessage, EmptyJson>
 {
 public:
     explicit SetColorRampEntrypoint(ModelManager &models);

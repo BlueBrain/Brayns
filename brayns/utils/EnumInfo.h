@@ -37,6 +37,11 @@ using EnumMap = std::vector<std::pair<std::string, T>>;
 template<typename T>
 struct EnumReflector
 {
+    template<typename U>
+    static constexpr auto alwaysFalse = false;
+
+    static_assert(alwaysFalse<T>, "Enumeration is not reflected");
+
     /**
      * @brief Return a new EnumMap with values and names of T.
      *
@@ -49,30 +54,16 @@ struct EnumReflector
 };
 
 /**
- * @brief Static storage for an instance of EnumMap<T>.
- *
- * @tparam T Enum type.
- */
-template<typename T>
-struct EnumStorage
-{
-    /**
-     * @brief Enum name-value mapping.
-     *
-     */
-    static inline const EnumMap<T> mapping = EnumReflector<T>::reflect();
-};
-
-/**
  * @brief Shortcut to get enum info.
  *
  */
-struct EnumInfo
+class EnumInfo
 {
+public:
     template<typename T>
     static const EnumMap<T> &getMapping()
     {
-        return EnumStorage<T>::mapping;
+        return _mapping<T>;
     }
 
     template<typename T>
@@ -81,9 +72,9 @@ struct EnumInfo
         auto &mapping = getMapping<T>();
         std::vector<std::string> names;
         names.reserve(mapping.size());
-        for (const auto &[key, item] : mapping)
+        for (const auto &pair : mapping)
         {
-            names.push_back(key);
+            names.push_back(pair.first);
         }
         return names;
     }
@@ -94,9 +85,9 @@ struct EnumInfo
         auto &mapping = getMapping<T>();
         std::vector<T> values;
         values.reserve(values.size());
-        for (const auto &[key, item] : values)
+        for (const auto &pair : mapping)
         {
-            values.push_back(item);
+            values.push_back(pair.second);
         }
         return values;
     }
@@ -150,5 +141,9 @@ struct EnumInfo
         }
         throw std::runtime_error("Invalid enum name '" + name + "'");
     }
+
+private:
+    template<typename T>
+    static inline const EnumMap<T> _mapping = EnumReflector<T>::reflect();
 };
 } // namespace brayns

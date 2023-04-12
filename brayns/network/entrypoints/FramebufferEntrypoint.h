@@ -27,7 +27,7 @@
 
 namespace brayns
 {
-class SetStaticFramebufferEntrypoint final : public Entrypoint<EmptyMessage, EmptyMessage>
+class SetStaticFramebufferEntrypoint final : public Entrypoint<EmptyJson, EmptyJson>
 {
 public:
     explicit SetStaticFramebufferEntrypoint(Engine &engine);
@@ -40,7 +40,7 @@ private:
     Engine &_engine;
 };
 
-class SetProgressiveFramebufferEntrypoint final : public Entrypoint<ProgressiveFrameMessage, EmptyMessage>
+class SetProgressiveFramebufferEntrypoint final : public Entrypoint<ProgressiveFrameMessage, EmptyJson>
 {
 public:
     explicit SetProgressiveFramebufferEntrypoint(Engine &engine);

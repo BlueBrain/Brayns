@@ -27,7 +27,7 @@
 
 namespace brayns
 {
-class GetSceneEntrypoint : public Entrypoint<EmptyMessage, SceneProxy>
+class GetSceneEntrypoint : public Entrypoint<EmptyJson, Scene>
 {
 public:
     explicit GetSceneEntrypoint(const Scene &scene);
@@ -38,6 +38,6 @@ public:
     virtual void onRequest(const Request &request) override;
 
 private:
-    SceneProxy _sceneProxy;
+    const Scene &_scene;
 };
 } // namespace brayns

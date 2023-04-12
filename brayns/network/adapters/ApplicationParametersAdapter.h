@@ -21,14 +21,31 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/parameters/ApplicationParameters.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ApplicationParameters)
-BRAYNS_JSON_ADAPTER_GET("plugins", getPlugins, "Loaded plugins")
-BRAYNS_JSON_ADAPTER_GETSET("viewport", getWindowSize, setWindowSize, "Window size")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<ApplicationParameters> : ObjectAdapter<ApplicationParameters>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("ApplicationParameters");
+        builder
+            .get(
+                "plugins",
+                [](auto &object) -> auto & { return object.getPlugins(); })
+            .description("Plugins loaded when the application was started");
+        builder
+            .getset(
+                "viewport",
+                [](auto &object) -> auto & { return object.getWindowSize(); },
+                [](auto &object, const auto &value) { object.setWindowSize(value); })
+            .description("Framebuffer resolution in pixels")
+            .required(false);
+        return builder.build();
+    }
+};
 } // namespace brayns

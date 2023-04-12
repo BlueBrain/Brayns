@@ -21,11 +21,28 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(GetModelMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, id, "Model ID")
-BRAYNS_JSON_OBJECT_END()
+struct GetModelMessage
+{
+    uint32_t id = 0;
+};
+
+template<>
+struct JsonAdapter<GetModelMessage> : ObjectAdapter<GetModelMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("GetModelMessage");
+        builder
+            .getset(
+                "id",
+                [](auto &object) { return object.id; },
+                [](auto &object, auto value) { object.id = value; })
+            .description("Model ID");
+        return builder.build();
+    }
+};
 } // namespace brayns

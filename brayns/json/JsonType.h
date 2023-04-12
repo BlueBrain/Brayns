@@ -26,7 +26,10 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include <spdlog/fmt/ostr.h>
+
 #include <Poco/JSON/Array.h>
+#include <Poco/JSON/JSONException.h>
 #include <Poco/JSON/Object.h>
 
 #include <brayns/utils/EnumInfo.h>
@@ -34,10 +37,18 @@
 namespace brayns
 {
 /**
- * @brief JSON value (object, array, string, number, bool, null).
+ * @brief JSON value among object, array, string, number, bool or null.
  *
  */
 using JsonValue = Poco::Dynamic::Var;
+
+/**
+ * @brief Null JSON.
+ *
+ */
+struct EmptyJson
+{
+};
 
 /**
  * @brief JSON array (vector of JsonValue).
@@ -52,20 +63,10 @@ using JsonArray = Poco::JSON::Array;
 using JsonObject = Poco::JSON::Object;
 
 /**
- * @brief Shorcut for map<string, T> to avoid commas in macros.
+ * @brief Exception thrown when the JSON parsing fails.
  *
- * @tparam T Map value type.
  */
-template<typename T>
-using StringMap = std::map<std::string, T>;
-
-/**
- * @brief Shorcut for unordered_map<string, T> to avoid commas in macros.
- *
- * @tparam T Map value type.
- */
-template<typename T>
-using StringHash = std::unordered_map<std::string, T>;
+using JsonParsingError = Poco::JSON::JSONException;
 
 /**
  * @brief All available JSON types.
@@ -83,93 +84,126 @@ enum class JsonType
     Object
 };
 
+/**
+ * @brief Reflect JsonType keys.
+ *
+ */
 template<>
 struct EnumReflector<JsonType>
 {
-    static EnumMap<JsonType> reflect()
-    {
-        return {
-            {"undefined", JsonType::Undefined},
-            {"null", JsonType::Null},
-            {"boolean", JsonType::Boolean},
-            {"integer", JsonType::Integer},
-            {"number", JsonType::Number},
-            {"string", JsonType::String},
-            {"array", JsonType::Array},
-            {"object", JsonType::Object}};
-    }
+    static EnumMap<JsonType> reflect();
 };
 
 /**
  * @brief Helper class to get info about JSON type.
  *
  */
-struct JsonTypeHelper
+class JsonTypeInfo
 {
-    /**
-     * @brief Check if the given type is accepted by required.
-     *
-     * @param required Required type.
-     * @param type Type to check.
-     * @return true Type is accepted by required.
-     * @return false Type is not accepted by required.
-     */
-    static bool check(JsonType required, JsonType type);
-
-    /**
-     * @brief Check if the given type is numeric (number or integer).
-     *
-     * @param type Type to check.
-     * @return true Type is numeric.
-     * @return false Type is not numeric.
-     */
-    static bool isNumeric(JsonType type);
-};
-
-/**
- * @brief Helper type to get JSON type.
- *
- */
-struct GetJsonType
-{
+public:
     /**
      * @brief Return the JSON type from a JSON value.
      *
      * @param json JSON to evaluate.
      * @return JsonType JSON type.
+     * @throw std::invalid_argument Not a valid JSON type.
      */
-    static JsonType fromJson(const JsonValue &json);
+    static JsonType getType(const JsonValue &json);
 
     /**
-     * @brief Return the JSON type from a primitive type.
+     * @brief Check if the given type is numeric (integer or number).
      *
-     * @tparam T Primitive type to check.
-     * @return JsonType JSON type.
+     * @param type JSON type to check.
+     * @return true Type is numeric.
+     * @return false Type is not numeric.
+     */
+    static constexpr bool isNumeric(JsonType type)
+    {
+        return type == JsonType::Integer || type == JsonType::Number;
+    }
+
+    /**
+     * @brief Map primitive JSON types to C++ type.
+     *
+     * @tparam T Type to map.
+     * @return JsonType JSON type of T.
      */
     template<typename T>
-    static constexpr JsonType fromPrimitive()
+    static constexpr JsonType getType()
     {
-        if (std::is_same<T, nullptr_t>())
+        if constexpr (std::is_same_v<T, JsonValue>)
+        {
+            return JsonType::Undefined;
+        }
+        else if constexpr (std::is_same_v<T, EmptyJson>)
         {
             return JsonType::Null;
         }
-        if (std::is_same<T, bool>())
+        else if constexpr (std::is_same_v<T, bool>)
         {
             return JsonType::Boolean;
         }
-        if (std::is_integral<T>())
+        else if constexpr (std::is_integral_v<T>)
         {
             return JsonType::Integer;
         }
-        if (std::is_arithmetic<T>())
+        else if constexpr (std::is_arithmetic_v<T>)
         {
             return JsonType::Number;
         }
-        if (std::is_same<T, std::string>())
+        else if constexpr (std::is_same_v<T, std::string>)
         {
             return JsonType::String;
         }
-        return JsonType::Undefined;
+        else
+        {
+            static_assert(_alwaysFalse<T>, "Not a primitive type");
+        }
     }
+
+    /**
+     * @brief Check if the given C++ type is numeric from a JSON perspective.
+     *
+     * @tparam T Type to check.
+     * @return true T is numeric.
+     * @return false T is not numeric.
+     */
+    template<typename T>
+    static constexpr bool isNumeric()
+    {
+        auto type = getType<T>();
+        return isNumeric(type);
+    }
+
+private:
+    template<typename T>
+    static constexpr auto _alwaysFalse = false;
+};
+
+/**
+ * @brief Helper class to extract JSON elements.
+ *
+ */
+class JsonExtractor
+{
+public:
+    static const JsonArray &extractArray(const JsonValue &json);
+    static const JsonObject &extractObject(const JsonValue &json);
+};
+
+/**
+ * @brief Helper class to create JSON elements.
+ *
+ */
+class JsonFactory
+{
+public:
+    static JsonArray &emplaceArray(JsonValue &json);
+    static JsonObject &emplaceObject(JsonValue &json);
 };
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonType &type);
+} // namespace std

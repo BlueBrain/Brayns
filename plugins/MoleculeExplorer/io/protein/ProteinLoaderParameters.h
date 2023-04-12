@@ -20,30 +20,65 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 enum class ProteinLoaderColorScheme
 {
-    None = 0,
-    ById = 1,
-    ProteinAtoms = 2,
-    ProteinChains = 3,
-    ProteinResidues = 4
+    None,
+    ById,
+    ProteinAtoms,
+    ProteinChains,
+    ProteinResidues
+};
+
+struct ProteinLoaderParameters
+{
+    ProteinLoaderColorScheme color_scheme = ProteinLoaderColorScheme::None;
+    double radius_multiplier = 0;
 };
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(
-    ProteinLoaderColorScheme,
-    {"none", ProteinLoaderColorScheme::None},
-    {"by_id", ProteinLoaderColorScheme::ById},
-    {"protein_atoms", ProteinLoaderColorScheme::ProteinAtoms},
-    {"protein_chains", ProteinLoaderColorScheme::ProteinChains},
-    {"protein_residues", ProteinLoaderColorScheme::ProteinResidues})
-}
+template<>
+struct EnumReflector<ProteinLoaderColorScheme>
+{
+    static EnumMap<ProteinLoaderColorScheme> reflect()
+    {
+        return {
+            {"none", ProteinLoaderColorScheme::None},
+            {"by_id", ProteinLoaderColorScheme::ById},
+            {"protein_atoms", ProteinLoaderColorScheme::ProteinAtoms},
+            {"protein_chains", ProteinLoaderColorScheme::ProteinChains},
+            {"protein_residues", ProteinLoaderColorScheme::ProteinResidues}};
+    }
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(ProteinLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(ProteinLoaderColorScheme, color_scheme, "Proteins coloring scheme", brayns::Default("none"))
-BRAYNS_JSON_OBJECT_ENTRY(double, radius_multiplier, "Protein sample radius multiplier", brayns::Default(1.0))
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<ProteinLoaderColorScheme> : EnumAdapter<ProteinLoaderColorScheme>
+{
+};
+
+template<>
+struct JsonAdapter<ProteinLoaderParameters> : ObjectAdapter<ProteinLoaderParameters>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("ProteinLoaderParameters");
+        builder
+            .getset(
+                "color_scheme",
+                [](auto &object) { return object.color_scheme; },
+                [](auto &object, auto value) { object.color_scheme = value; })
+            .description("Proteins coloring scheme")
+            .defaultValue(ProteinLoaderColorScheme::None);
+        builder
+            .getset(
+                "radius_multiplier",
+                [](auto &object) { return object.radius_multiplier; },
+                [](auto &object, auto value) { object.radius_multiplier = value; })
+            .description("Protein sample radius multiplier")
+            .defaultValue(1);
+        return builder.build();
+    }
+};
+} // namespace brayns

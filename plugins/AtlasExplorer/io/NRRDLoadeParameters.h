@@ -20,21 +20,48 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <api/VoxelType.h>
 
+struct NRRDLoaderParameters
+{
+    VoxelType type = VoxelType::Scalar;
+};
+
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_ENUM(
-    VoxelType,
-    {"scalar", VoxelType::Scalar},
-    {"orientation", VoxelType::Orientation},
-    {"flatmap", VoxelType::Flatmap},
-    {"layer_distance", VoxelType::LayerDistance})
-}
+template<>
+struct EnumReflector<VoxelType>
+{
+    static EnumMap<VoxelType> reflect()
+    {
+        return {
+            {"scalar", VoxelType::Scalar},
+            {"orientation", VoxelType::Orientation},
+            {"flatmap", VoxelType::Flatmap},
+            {"layer_distance", VoxelType::LayerDistance}};
+    }
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(NRRDLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(VoxelType, type, "Voxel type to interpret the atlas being loaded")
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<VoxelType> : EnumAdapter<VoxelType>
+{
+};
+
+template<>
+struct JsonAdapter<NRRDLoaderParameters> : ObjectAdapter<NRRDLoaderParameters>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("NRRDLoaderParameters");
+        builder
+            .getset(
+                "type",
+                [](auto &object) { return object.type; },
+                [](auto &object, auto value) { object.type = value; })
+            .description("Voxel type to interpret the atlas being loaded");
+        return builder.build();
+    }
+};
+} // namespace brayns

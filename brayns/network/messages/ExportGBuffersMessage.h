@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/engine/json/adapters/EngineObjectDataAdapter.h>
 #include <brayns/engine/json/adapters/FramebufferChannelAdapter.h>
@@ -28,17 +28,72 @@
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(GBuffersParams)
-BRAYNS_JSON_OBJECT_ENTRY(Vector2ui, resolution, "Image resolution", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, camera, "Camera definition", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(View, camera_view, "Camera view settings", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, renderer, "Renderer definition", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::string,
-    file_path,
-    "Buffers will be saved at this path if specified, otherwise it will be returned as EXR encoded binary data",
-    Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<FramebufferChannel>, channels, "G buffer channels to export")
-BRAYNS_JSON_OBJECT_END()
-}
+struct GBuffersParams
+{
+    Vector2ui resolution{0};
+    EngineObjectData camera;
+    View camera_view;
+    EngineObjectData renderer;
+    uint32_t simulation_frame = 0;
+    std::string file_path;
+    std::vector<FramebufferChannel> channels;
+};
+
+template<>
+struct JsonAdapter<GBuffersParams> : ObjectAdapter<GBuffersParams>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("GBuffersParams");
+        builder
+            .getset(
+                "resolution",
+                [](auto &object) -> auto & { return object.resolution; },
+                [](auto &object, const auto &value) { object.resolution = value; })
+            .description("Image resolution")
+            .required(false);
+        builder
+            .getset(
+                "camera",
+                [](auto &object) -> auto & { return object.camera; },
+                [](auto &object, const auto &value) { object.camera = value; })
+            .description("Camera definition")
+            .required(false);
+        builder
+            .getset(
+                "camera_view",
+                [](auto &object) -> auto & { return object.camera_view; },
+                [](auto &object, const auto &value) { object.camera_view = value; })
+            .description("Camera view")
+            .required(false);
+        builder
+            .getset(
+                "renderer",
+                [](auto &object) -> auto & { return object.renderer; },
+                [](auto &object, const auto &value) { object.renderer = value; })
+            .description("Renderer")
+            .required(false);
+        builder
+            .getset(
+                "simulation_frame",
+                [](auto &object) { return object.simulation_frame; },
+                [](auto &object, auto value) { object.simulation_frame = value; })
+            .description("Simulation frame to render")
+            .required(false);
+        builder
+            .getset(
+                "file_path",
+                [](auto &object) -> auto & { return object.file_path; },
+                [](auto &object, auto value) { object.file_path = std::move(value); })
+            .description("Path to save the buffer as EXR, encoded data is returned if unset")
+            .required(false);
+        builder
+            .getset(
+                "channels",
+                [](auto &object) -> auto & { return object.channels; },
+                [](auto &object, auto value) { object.channels = std::move(value); })
+            .description("Framebuffer channels to export");
+        return builder.build();
+    }
+};
+} // namespace brayns

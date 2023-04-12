@@ -22,7 +22,6 @@
 #pragma once
 
 #include <map>
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -38,13 +37,7 @@ namespace brayns
 struct JsonSchema
 {
     /**
-     * @brief Union description, empty if not an union.
-     *
-     */
-    std::vector<JsonSchema> oneOf;
-
-    /**
-     * @brief Title of the schema (type name usually).
+     * @brief Title of the schema.
      *
      */
     std::string title;
@@ -56,68 +49,49 @@ struct JsonSchema
     std::string description;
 
     /**
-     * @brief JSON type.
+     * @brief Cannot be omitted if inside an object.
      *
      */
-    JsonType type = JsonType::Undefined;
+    bool required = false;
 
     /**
-     * @brief Check if read only.
+     * @brief Cannot be written if true.
      *
      */
     bool readOnly = false;
 
     /**
-     * @brief Check if write only.
+     * @brief Cannot be read if true.
      *
      */
     bool writeOnly = false;
 
     /**
-     * @brief Default value (null if not set).
+     * @brief Default value.
      *
      */
     JsonValue defaultValue;
 
     /**
-     * @brief Optional min value if number.
+     * @brief JSON type if not a union.
+     *
+     */
+    JsonType type = JsonType::Undefined;
+
+    /**
+     * @brief Optional min value if integer or number.
      *
      */
     std::optional<double> minimum;
 
     /**
-     * @brief Optional max value if number.
+     * @brief Optional max value if integer or number.
      *
      */
     std::optional<double> maximum;
 
     /**
-     * @brief Enum description, empty if not an enum.
-     *
-     */
-    std::vector<std::string> enums;
-
-    /**
-     * @brief List of object properties if object, else empty.
-     *
-     */
-    std::map<std::string, JsonSchema> properties;
-
-    /**
-     * @brief List of required properties if object, else empty.
-     *
-     */
-    std::vector<std::string> required;
-
-    /**
-     * @brief Description of additional properties, can be an empty schema if
-     * any property is authorized, empty if not authorized.
-     *
-     */
-    std::vector<JsonSchema> additionalProperties;
-
-    /**
-     * @brief Item description if array, else empty.
+     * @brief Holds one schema of items if array or map, else empty.
      *
      */
     std::vector<JsonSchema> items;
@@ -133,126 +107,23 @@ struct JsonSchema
      *
      */
     std::optional<size_t> maxItems;
-};
-
-/**
- * @brief Helper class to get some basic info about a JSON schema.
- *
- */
-struct JsonSchemaHelper
-{
-    /**
-     * @brief Check if the schema is a wildcard (allow anything).
-     *
-     * @param schema Schema to check.
-     * @return true Wildcard schema.
-     * @return false Not a wildcard schema.
-     */
-    static bool isWildcard(const JsonSchema &schema);
 
     /**
-     * @brief Check if the schema specifies a null element.
+     * @brief List of object properties if object, else empty.
      *
-     * @param schema Schema to check.
-     * @return true Null.
-     * @return false Not null.
      */
-    static bool isNull(const JsonSchema &schema);
+    std::map<std::string, JsonSchema> properties;
 
     /**
-     * @brief Check wether the schema is an union.
+     * @brief Enum description, empty if not an enum.
      *
-     * @param schema Schema to check.
-     * @return true Union.
-     * @return false Not an union.
      */
-    static bool isOneOf(const JsonSchema &schema);
+    std::vector<std::string> enums;
 
     /**
-     * @brief Check if the schema describes a number or an integer.
+     * @brief Union description, empty if not an union.
      *
-     * @param schema Schema to check.
-     * @return true Number or integer.
-     * @return false Not numeric.
      */
-    static bool isNumeric(const JsonSchema &schema);
-
-    /**
-     * @brief Check wether the schema is an enum.
-     *
-     * @param schema Schema to check.
-     * @return true Enum.
-     * @return false Not an enum.
-     */
-    static bool isEnum(const JsonSchema &schema);
-
-    /**
-     * @brief Check if the schema is an object.
-     *
-     * @param schema Schema to check.
-     * @return true Object.
-     * @return false Not an object.
-     */
-    static bool isObject(const JsonSchema &schema);
-
-    /**
-     * @brief Check if the schema is an array.
-     *
-     * @param schema Schema to check.
-     * @return true Array.
-     * @return false Not an array.
-     */
-    static bool isArray(const JsonSchema &schema);
-
-    /**
-     * @brief Check if the schema has the given property.
-     *
-     * @param schema Schema to check.
-     * @param key Key to find in schema properties.
-     * @return true Has property.
-     * @return false Don't have the property.
-     */
-    static bool hasProperty(const JsonSchema &schema, const std::string &key);
-
-    /**
-     * @brief Check wether the property is required in the given schema.
-     *
-     * @param schema Schema to check.
-     * @param key Property key to test.
-     * @return true Property is required.
-     * @return false Property is not required.
-     */
-    static bool isRequired(const JsonSchema &schema, const std::string &key);
-
-    /**
-     * @brief Check if the given schema validate the given type.
-     *
-     * @param schema Schema to check.
-     * @param type Type to check.
-     * @return true The type is allowed by schema.
-     * @return false The type is not allowed by schema.
-     */
-    static bool checkType(const JsonSchema &schema, JsonType type);
-
-    /**
-     * @brief Set a wildcard for authorized additional properties.
-     *
-     * @param schema Schema to update.
-     */
-    static void allowAnyAdditionalProperty(JsonSchema &schema);
-
-    /**
-     * @brief Get a wildcard schema (allow everything)
-     *
-     * @return JsonSchema Wildcard schema.
-     */
-    static JsonSchema getWildcardSchema();
-
-    /**
-     * @brief Get the schema of null (nothing to provide).
-     *
-     * @return JsonSchema Null schema.
-     */
-    static JsonSchema getNullSchema();
+    std::vector<JsonSchema> oneOf;
 };
 } // namespace brayns

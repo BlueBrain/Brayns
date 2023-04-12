@@ -27,7 +27,7 @@
 
 namespace brayns
 {
-class QuitEntrypoint : public Entrypoint<EmptyMessage, EmptyMessage>
+class QuitEntrypoint : public Entrypoint<EmptyJson, EmptyJson>
 {
 public:
     explicit QuitEntrypoint(Engine &engine);

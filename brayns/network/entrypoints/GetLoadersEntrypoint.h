@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-class GetLoadersEntrypoint : public Entrypoint<EmptyMessage, std::vector<LoaderInfo>>
+class GetLoadersEntrypoint : public Entrypoint<EmptyJson, std::vector<LoaderInfo>>
 {
 public:
     explicit GetLoadersEntrypoint(const LoaderRegistry &loaders);

@@ -20,13 +20,26 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 #include "Cylindric.h"
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Cylindric)
-BRAYNS_JSON_ADAPTER_ENTRY(fovy, "Vertical field of view (in degrees)", Required(false))
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<Cylindric> : ObjectAdapter<Cylindric>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("Cylindric");
+        builder
+            .getset(
+                "fovy",
+                [](auto &object) { return object.fovy; },
+                [](auto &object, auto value) { object.fovy = value; })
+            .description("Vertical field of view (in degrees)")
+            .required(false);
+        return builder.build();
+    }
+};
+} // namespace brayns

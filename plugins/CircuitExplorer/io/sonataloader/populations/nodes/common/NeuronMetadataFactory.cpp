@@ -20,6 +20,8 @@
 
 #include <brayns/engine/components/Metadata.h>
 
+#include <brayns/utils/string/StringJoiner.h>
+
 namespace
 {
 struct SonataNeuronMetadataKey

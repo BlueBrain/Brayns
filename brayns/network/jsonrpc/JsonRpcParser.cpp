@@ -21,10 +21,10 @@
 
 #include "JsonRpcParser.h"
 
-#include <Poco/JSON/JSONException.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <brayns/json/Json.h>
-#include <brayns/json/JsonSchemaValidator.h>
+
 #include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/string/StringExtractor.h>
 
@@ -41,7 +41,7 @@ public:
         {
             return brayns::Json::parse(std::string(data));
         }
-        catch (const Poco::JSON::JSONException &e)
+        catch (const brayns::JsonParsingError &e)
         {
             throw brayns::ParsingErrorException(e.displayText());
         }
@@ -53,10 +53,10 @@ class RequestSchemaValidator
 public:
     static void validate(const brayns::JsonValue &json)
     {
-        auto errors = brayns::JsonSchemaValidator::validate(json, _schema);
+        auto errors = brayns::Json::validate(json, _schema);
         if (!errors.empty())
         {
-            throw brayns::InvalidRequestException("Invalid request schema", errors);
+            throw brayns::InvalidRequestException("Invalid JSON-RPC request schema", errors);
         }
     }
 
@@ -71,7 +71,7 @@ public:
     {
         if (message.jsonrpc != "2.0")
         {
-            throw brayns::InvalidRequestException("Unsupported JSON-RPC version: '" + message.jsonrpc + "'");
+            throw brayns::InvalidRequestException(fmt::format("Unsupported JSON-RPC version: '{}'", message.jsonrpc));
         }
         auto &method = message.method;
         if (method.empty())
@@ -107,8 +107,7 @@ public:
         auto jsonSize = brayns::Parser::extractChunk<uint32_t>(data, brayns::ByteOrder::LittleEndian);
         if (jsonSize > size - 4)
         {
-            auto message = "Invalid binary packet, JSON size too big: " + std::to_string(jsonSize);
-            throw brayns::ParsingErrorException(message);
+            throw brayns::ParsingErrorException(fmt::format("Invalid binary packet, JSON size too bi: {}", jsonSize));
         }
         return jsonSize;
     }

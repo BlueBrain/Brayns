@@ -43,6 +43,6 @@ std::string ClearLightsEntrypoint::getDescription() const
 void ClearLightsEntrypoint::onRequest(const Request &request)
 {
     ModelsOperations::removeLights(_models);
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 } // namespace brayns

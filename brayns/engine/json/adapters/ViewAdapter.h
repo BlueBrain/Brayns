@@ -21,13 +21,36 @@
 #pragma once
 
 #include <brayns/engine/camera/View.h>
-#include <brayns/json/JsonAdapterMacro.h>
+
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(View)
-BRAYNS_JSON_ADAPTER_ENTRY(position, "Camera position")
-BRAYNS_JSON_ADAPTER_ENTRY(target, "Camera target")
-BRAYNS_JSON_ADAPTER_ENTRY(up, "Camera up vector")
-BRAYNS_JSON_ADAPTER_END()
-}
+template<>
+struct JsonAdapter<View> : ObjectAdapter<View>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("View");
+        builder
+            .getset(
+                "position",
+                [](auto &object) -> auto & { return object.position; },
+                [](auto &object, const auto &value) { object.position = value; })
+            .description("Camera position XYZ");
+        builder
+            .getset(
+                "target",
+                [](auto &object) -> auto & { return object.target; },
+                [](auto &object, const auto &value) { object.target = value; })
+            .description("Camera target XYZ");
+        builder
+            .getset(
+                "up",
+                [](auto &object) -> auto & { return object.up; },
+                [](auto &object, const auto &value) { object.up = value; })
+            .description("Camera up vector XYZ");
+        return builder.build();
+    }
+};
+} // namespace brayns

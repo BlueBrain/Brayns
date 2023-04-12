@@ -48,7 +48,7 @@ bool ClearClipPlanesEntrypoint::isDeprecated() const
 void ClearClipPlanesEntrypoint::onRequest(const Request &request)
 {
     ModelsOperations::removeClippers(_models);
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 
 ClearClippingGeometriesEntrypoint::ClearClippingGeometriesEntrypoint(ModelManager &models)
@@ -69,6 +69,6 @@ std::string ClearClippingGeometriesEntrypoint::getDescription() const
 void ClearClippingGeometriesEntrypoint::onRequest(const Request &request)
 {
     ModelsOperations::removeClippers(_models);
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 } // namespace brayns

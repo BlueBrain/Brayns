@@ -17,7 +17,7 @@ Adds a list of axis-aligned bound limited planes.
     {
         "type": "array",
         "items": {
-            "title": "GeometryWithColor<BoundedPlane>",
+            "title": "GeometryWithColor",
             "type": "object",
             "properties": {
                 "color": {
@@ -40,7 +40,7 @@ Adds a list of axis-aligned bound limited planes.
                             "type": "object",
                             "properties": {
                                 "max": {
-                                    "description": "Maximum bound corner (top front right)",
+                                    "description": "Top front right corner XYZ",
                                     "type": "array",
                                     "items": {
                                         "type": "number"
@@ -49,7 +49,7 @@ Adds a list of axis-aligned bound limited planes.
                                     "maxItems": 3
                                 },
                                 "min": {
-                                    "description": "Minimum bound corner (bottom back left)",
+                                    "description": "Bottom back left corner XYZ",
                                     "type": "array",
                                     "items": {
                                         "type": "number"
@@ -59,13 +59,13 @@ Adds a list of axis-aligned bound limited planes.
                                 }
                             },
                             "required": [
-                                "min",
-                                "max"
+                                "max",
+                                "min"
                             ],
                             "additionalProperties": false
                         },
                         "coefficients": {
-                            "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                            "description": "Equation coefficients ABCD from Ax + By + Cz + D = 0",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -75,15 +75,15 @@ Adds a list of axis-aligned bound limited planes.
                         }
                     },
                     "required": [
-                        "coefficients",
-                        "bounds"
+                        "bounds",
+                        "coefficients"
                     ],
                     "additionalProperties": false
                 }
             },
             "required": [
-                "geometry",
-                "color"
+                "color",
+                "geometry"
             ],
             "additionalProperties": false
         }
@@ -98,12 +98,12 @@ Adds a list of axis-aligned bound limited planes.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -113,7 +113,7 @@ Adds a list of axis-aligned bound limited planes.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -123,11 +123,15 @@ Adds a list of axis-aligned bound limited planes.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -169,24 +173,28 @@ Adds a list of axis-aligned bound limited planes.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -195,10 +203,10 @@ Adds a list of axis-aligned bound limited planes.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -264,6 +272,12 @@ Adds a list of axis-aligned bound limited planes.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -281,7 +295,7 @@ Adds a list of boxes to the scene.
     {
         "type": "array",
         "items": {
-            "title": "GeometryWithColor<Box>",
+            "title": "GeometryWithColor",
             "type": "object",
             "properties": {
                 "color": {
@@ -299,7 +313,7 @@ Adds a list of boxes to the scene.
                     "type": "object",
                     "properties": {
                         "max": {
-                            "description": "Maximum bound corner (top front right)",
+                            "description": "Top front right corner XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -308,7 +322,7 @@ Adds a list of boxes to the scene.
                             "maxItems": 3
                         },
                         "min": {
-                            "description": "Minimum bound corner (bottom back left)",
+                            "description": "Bottom back left corner XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -318,15 +332,15 @@ Adds a list of boxes to the scene.
                         }
                     },
                     "required": [
-                        "min",
-                        "max"
+                        "max",
+                        "min"
                     ],
                     "additionalProperties": false
                 }
             },
             "required": [
-                "geometry",
-                "color"
+                "color",
+                "geometry"
             ],
             "additionalProperties": false
         }
@@ -341,12 +355,12 @@ Adds a list of boxes to the scene.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -356,7 +370,7 @@ Adds a list of boxes to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -366,11 +380,15 @@ Adds a list of boxes to the scene.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -412,24 +430,28 @@ Adds a list of boxes to the scene.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -438,10 +460,10 @@ Adds a list of boxes to the scene.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -507,6 +529,12 @@ Adds a list of boxes to the scene.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -524,7 +552,7 @@ Adds a list of capsules to the scene.
     {
         "type": "array",
         "items": {
-            "title": "GeometryWithColor<Capsule>",
+            "title": "GeometryWithColor",
             "type": "object",
             "properties": {
                 "color": {
@@ -542,7 +570,7 @@ Adds a list of capsules to the scene.
                     "type": "object",
                     "properties": {
                         "p0": {
-                            "description": "Starting point of the capsule",
+                            "description": "Start point of the capsule XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -551,7 +579,7 @@ Adds a list of capsules to the scene.
                             "maxItems": 3
                         },
                         "p1": {
-                            "description": "Ending point of the capsule",
+                            "description": "End point of the capsule XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -570,16 +598,16 @@ Adds a list of capsules to the scene.
                     },
                     "required": [
                         "p0",
-                        "r0",
                         "p1",
+                        "r0",
                         "r1"
                     ],
                     "additionalProperties": false
                 }
             },
             "required": [
-                "geometry",
-                "color"
+                "color",
+                "geometry"
             ],
             "additionalProperties": false
         }
@@ -594,12 +622,12 @@ Adds a list of capsules to the scene.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -609,7 +637,7 @@ Adds a list of capsules to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -619,11 +647,15 @@ Adds a list of capsules to the scene.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -665,24 +697,28 @@ Adds a list of capsules to the scene.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -691,10 +727,10 @@ Adds a list of capsules to the scene.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -760,6 +796,12 @@ Adds a list of capsules to the scene.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -783,7 +825,7 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
         "type": "object",
         "properties": {
             "coefficients": {
-                "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                "description": "Equation coefficients ABCD from Ax + By + Cz + D = 0",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -807,12 +849,12 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -822,7 +864,7 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -832,11 +874,15 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -878,24 +924,28 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -904,10 +954,10 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -973,6 +1023,12 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -1008,7 +1064,7 @@ Add a list of axis-aligned bound limited clipping planes.
                             "type": "object",
                             "properties": {
                                 "max": {
-                                    "description": "Maximum bound corner (top front right)",
+                                    "description": "Top front right corner XYZ",
                                     "type": "array",
                                     "items": {
                                         "type": "number"
@@ -1017,7 +1073,7 @@ Add a list of axis-aligned bound limited clipping planes.
                                     "maxItems": 3
                                 },
                                 "min": {
-                                    "description": "Minimum bound corner (bottom back left)",
+                                    "description": "Bottom back left corner XYZ",
                                     "type": "array",
                                     "items": {
                                         "type": "number"
@@ -1027,13 +1083,13 @@ Add a list of axis-aligned bound limited clipping planes.
                                 }
                             },
                             "required": [
-                                "min",
-                                "max"
+                                "max",
+                                "min"
                             ],
                             "additionalProperties": false
                         },
                         "coefficients": {
-                            "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                            "description": "Equation coefficients ABCD from Ax + By + Cz + D = 0",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -1043,8 +1099,8 @@ Add a list of axis-aligned bound limited clipping planes.
                         }
                     },
                     "required": [
-                        "coefficients",
-                        "bounds"
+                        "bounds",
+                        "coefficients"
                     ],
                     "additionalProperties": false
                 }
@@ -1065,12 +1121,12 @@ Add a list of axis-aligned bound limited clipping planes.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1080,7 +1136,7 @@ Add a list of axis-aligned bound limited clipping planes.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1090,11 +1146,15 @@ Add a list of axis-aligned bound limited clipping planes.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -1136,24 +1196,28 @@ Add a list of axis-aligned bound limited clipping planes.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -1162,10 +1226,10 @@ Add a list of axis-aligned bound limited clipping planes.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -1231,6 +1295,12 @@ Add a list of axis-aligned bound limited clipping planes.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -1261,7 +1331,7 @@ Add a list of clipping boxes to the scene.
                     "type": "object",
                     "properties": {
                         "max": {
-                            "description": "Maximum bound corner (top front right)",
+                            "description": "Top front right corner XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -1270,7 +1340,7 @@ Add a list of clipping boxes to the scene.
                             "maxItems": 3
                         },
                         "min": {
-                            "description": "Minimum bound corner (bottom back left)",
+                            "description": "Bottom back left corner XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -1280,8 +1350,8 @@ Add a list of clipping boxes to the scene.
                         }
                     },
                     "required": [
-                        "min",
-                        "max"
+                        "max",
+                        "min"
                     ],
                     "additionalProperties": false
                 }
@@ -1302,12 +1372,12 @@ Add a list of clipping boxes to the scene.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1317,7 +1387,7 @@ Add a list of clipping boxes to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1327,11 +1397,15 @@ Add a list of clipping boxes to the scene.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -1373,24 +1447,28 @@ Add a list of clipping boxes to the scene.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -1399,10 +1477,10 @@ Add a list of clipping boxes to the scene.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -1468,6 +1546,12 @@ Add a list of clipping boxes to the scene.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -1498,7 +1582,7 @@ Add a list of clipping capsules to the scene.
                     "type": "object",
                     "properties": {
                         "p0": {
-                            "description": "Starting point of the capsule",
+                            "description": "Start point of the capsule XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -1507,7 +1591,7 @@ Add a list of clipping capsules to the scene.
                             "maxItems": 3
                         },
                         "p1": {
-                            "description": "Ending point of the capsule",
+                            "description": "End point of the capsule XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -1526,8 +1610,8 @@ Add a list of clipping capsules to the scene.
                     },
                     "required": [
                         "p0",
-                        "r0",
                         "p1",
+                        "r0",
                         "r1"
                     ],
                     "additionalProperties": false
@@ -1549,12 +1633,12 @@ Add a list of clipping capsules to the scene.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1564,7 +1648,7 @@ Add a list of clipping capsules to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1574,11 +1658,15 @@ Add a list of clipping capsules to the scene.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -1620,24 +1708,28 @@ Add a list of clipping capsules to the scene.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -1646,10 +1738,10 @@ Add a list of clipping capsules to the scene.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -1715,6 +1807,12 @@ Add a list of clipping capsules to the scene.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -1745,7 +1843,7 @@ Add a list of clipping planes to the scene.
                     "type": "object",
                     "properties": {
                         "coefficients": {
-                            "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                            "description": "Equation coefficients ABCD from Ax + By + Cz + D = 0",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -1776,12 +1874,12 @@ Add a list of clipping planes to the scene.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1791,7 +1889,7 @@ Add a list of clipping planes to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1801,11 +1899,15 @@ Add a list of clipping planes to the scene.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -1847,24 +1949,28 @@ Add a list of clipping planes to the scene.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -1873,10 +1979,10 @@ Add a list of clipping planes to the scene.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -1942,6 +2048,12 @@ Add a list of clipping planes to the scene.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -1972,7 +2084,7 @@ Add a list of clipping spheres to the scene.
                     "type": "object",
                     "properties": {
                         "center": {
-                            "description": "Sphere center point",
+                            "description": "Sphere center XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -2008,12 +2120,12 @@ Add a list of clipping spheres to the scene.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2023,7 +2135,7 @@ Add a list of clipping spheres to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2033,11 +2145,15 @@ Add a list of clipping spheres to the scene.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -2079,24 +2195,28 @@ Add a list of clipping spheres to the scene.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -2105,10 +2225,10 @@ Add a list of clipping spheres to the scene.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -2174,6 +2294,12 @@ Add a list of clipping spheres to the scene.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -2192,8 +2318,13 @@ Adds an ambient light which iluminates the scene from all directions.
         "type": "object",
         "properties": {
             "color": {
-                "description": "Light color (Normalized RGB)",
+                "description": "Light color RGB normalized",
                 "type": "array",
+                "default": [
+                    1,
+                    1,
+                    1
+                ],
                 "items": {
                     "type": "number"
                 },
@@ -2203,6 +2334,7 @@ Adds an ambient light which iluminates the scene from all directions.
             "intensity": {
                 "description": "Light intensity",
                 "type": "number",
+                "default": 1,
                 "minimum": 0
             }
         },
@@ -2218,12 +2350,12 @@ Adds an ambient light which iluminates the scene from all directions.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2233,7 +2365,7 @@ Adds an ambient light which iluminates the scene from all directions.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2243,11 +2375,15 @@ Adds an ambient light which iluminates the scene from all directions.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -2289,24 +2425,28 @@ Adds an ambient light which iluminates the scene from all directions.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -2315,10 +2455,10 @@ Adds an ambient light which iluminates the scene from all directions.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -2384,6 +2524,12 @@ Adds an ambient light which iluminates the scene from all directions.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -2402,8 +2548,13 @@ Adds a directional light which iluminates the scene from a given direction.
         "type": "object",
         "properties": {
             "color": {
-                "description": "Light color (Normalized RGB)",
+                "description": "Light color RGB normalized",
                 "type": "array",
+                "default": [
+                    1,
+                    1,
+                    1
+                ],
                 "items": {
                     "type": "number"
                 },
@@ -2411,8 +2562,13 @@ Adds a directional light which iluminates the scene from a given direction.
                 "maxItems": 3
             },
             "direction": {
-                "description": "Light direction vector",
+                "description": "Light direction XYZ",
                 "type": "array",
+                "default": [
+                    -1,
+                    -1,
+                    0
+                ],
                 "items": {
                     "type": "number"
                 },
@@ -2422,6 +2578,7 @@ Adds a directional light which iluminates the scene from a given direction.
             "intensity": {
                 "description": "Light intensity",
                 "type": "number",
+                "default": 1,
                 "minimum": 0
             }
         },
@@ -2437,12 +2594,12 @@ Adds a directional light which iluminates the scene from a given direction.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2452,7 +2609,7 @@ Adds a directional light which iluminates the scene from a given direction.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2462,11 +2619,15 @@ Adds a directional light which iluminates the scene from a given direction.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -2508,24 +2669,28 @@ Adds a directional light which iluminates the scene from a given direction.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -2534,10 +2699,10 @@ Adds a directional light which iluminates the scene from a given direction.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -2603,6 +2768,12 @@ Adds a directional light which iluminates the scene from a given direction.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -2621,8 +2792,13 @@ Add a quad light which iluminates the scene on a specific area.
         "type": "object",
         "properties": {
             "color": {
-                "description": "Light color (Normalized RGB)",
+                "description": "Light color RGB normalized",
                 "type": "array",
+                "default": [
+                    1,
+                    1,
+                    1
+                ],
                 "items": {
                     "type": "number"
                 },
@@ -2630,8 +2806,13 @@ Add a quad light which iluminates the scene on a specific area.
                 "maxItems": 3
             },
             "edge1": {
-                "description": "Sets one of the quad light edges",
+                "description": "Edge 1 XYZ",
                 "type": "array",
+                "default": [
+                    1,
+                    0,
+                    0
+                ],
                 "items": {
                     "type": "number"
                 },
@@ -2639,8 +2820,13 @@ Add a quad light which iluminates the scene on a specific area.
                 "maxItems": 3
             },
             "edge2": {
-                "description": "Sets one of the quad light edges",
+                "description": "Edge 2 XYZ",
                 "type": "array",
+                "default": [
+                    0,
+                    0,
+                    1
+                ],
                 "items": {
                     "type": "number"
                 },
@@ -2650,11 +2836,17 @@ Add a quad light which iluminates the scene on a specific area.
             "intensity": {
                 "description": "Light intensity",
                 "type": "number",
+                "default": 1,
                 "minimum": 0
             },
             "position": {
-                "description": "Sets the corner position of the quad light",
+                "description": "Light base corner position XYZ",
                 "type": "array",
+                "default": [
+                    0,
+                    0,
+                    0
+                ],
                 "items": {
                     "type": "number"
                 },
@@ -2674,12 +2866,12 @@ Add a quad light which iluminates the scene on a specific area.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2689,7 +2881,7 @@ Add a quad light which iluminates the scene on a specific area.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2699,11 +2891,15 @@ Add a quad light which iluminates the scene on a specific area.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -2745,24 +2941,28 @@ Add a quad light which iluminates the scene on a specific area.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -2771,10 +2971,10 @@ Add a quad light which iluminates the scene on a specific area.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -2840,6 +3040,12 @@ Add a quad light which iluminates the scene on a specific area.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -2861,21 +3067,21 @@ progress notifications.
         "type": "object",
         "properties": {
             "loader_name": {
-                "description": "Name of the loader to use",
+                "description": "Name of the loader used to parse the model file",
                 "type": "string"
             },
             "loader_properties": {
                 "description": "Settings to configure the loading process"
             },
             "path": {
-                "description": "Path to the file to load",
+                "description": "Path of the file to load",
                 "type": "string"
             }
         },
         "required": [
-            "path",
             "loader_name",
-            "loader_properties"
+            "loader_properties",
+            "path"
         ],
         "additionalProperties": false
     }
@@ -2892,12 +3098,12 @@ progress notifications.
             "properties": {
                 "bounds": {
                     "title": "Bounds",
-                    "description": "Model axis-aligned bounds",
+                    "description": "Model bounds",
                     "type": "object",
                     "readOnly": true,
                     "properties": {
                         "max": {
-                            "description": "Bounds maximum (top front right corner)",
+                            "description": "Top front right corner",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -2907,7 +3113,7 @@ progress notifications.
                             "maxItems": 3
                         },
                         "min": {
-                            "description": "Bounds minimum (bottom back left corner)",
+                            "description": "Bottom back left corner",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -2917,11 +3123,15 @@ progress notifications.
                             "maxItems": 3
                         }
                     },
+                    "required": [
+                        "max",
+                        "min"
+                    ],
                     "additionalProperties": false
                 },
                 "info": {
                     "title": "ModelInfo",
-                    "description": "Model-specific metadata",
+                    "description": "Model-specific info",
                     "type": "object",
                     "readOnly": true,
                     "properties": {
@@ -2963,24 +3173,28 @@ progress notifications.
                         },
                         "load_info": {
                             "title": "LoadInfo",
-                            "description": "Model load information",
+                            "description": "Model load info",
                             "type": "object",
                             "readOnly": true,
                             "properties": {
                                 "load_parameters": {
-                                    "description": "Loader configuration"
+                                    "description": "Loader settings",
+                                    "readOnly": true
                                 },
                                 "loader_name": {
-                                    "description": "Loader used",
-                                    "type": "string"
+                                    "description": "Loader name",
+                                    "type": "string",
+                                    "readOnly": true
                                 },
                                 "path": {
                                     "description": "File path in case of file load type",
-                                    "type": "string"
+                                    "type": "string",
+                                    "readOnly": true
                                 },
                                 "source": {
                                     "description": "Model load source",
                                     "type": "string",
+                                    "readOnly": true,
                                     "enum": [
                                         "from_file",
                                         "from_blob",
@@ -2989,10 +3203,10 @@ progress notifications.
                                 }
                             },
                             "required": [
-                                "source",
-                                "path",
+                                "load_parameters",
                                 "loader_name",
-                                "load_parameters"
+                                "path",
+                                "source"
                             ],
                             "additionalProperties": false
                         },
@@ -3058,6 +3272,12 @@ progress notifications.
                     "additionalProperties": false
                 }
             },
+            "required": [
+                "bounds",
+                "info",
+                "model_id",
+                "model_type"
+            ],
             "additionalProperties": false
         }
     }
@@ -3076,7 +3296,7 @@ Adds a list of planes to the scene.
     {
         "type": "array",
         "items": {
-            "title": "GeometryWithColor<Plane>",
+            "title": "GeometryWithColor",
             "type": "object",
             "properties": {
                 "color": {
@@ -3094,7 +3314,7 @@ Adds a list of planes to the scene.
                     "type": "object",
                     "properties": {
                         "coefficients": {
-                            "description": "Plane equation coefficients (A, B, C, D from Ax + By + Cz + D = 0)",
+                            "description": "Equation coefficients ABCD from Ax + By + Cz + D = 0",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -3110,8 +3330,8 @@ Adds a list of planes to the scene.
                 }
             },
             "required": [
-                "geometry",
-                "color"
+                "color",
+                "geometry"
             ],
             "additionalProperties": false
         }
@@ -3126,12 +3346,12 @@ Adds a list of planes to the scene.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -3141,7 +3361,7 @@ Adds a list of planes to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -3151,11 +3371,15 @@ Adds a list of planes to the scene.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -3197,24 +3421,28 @@ Adds a list of planes to the scene.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -3223,10 +3451,10 @@ Adds a list of planes to the scene.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -3292,6 +3520,12 @@ Adds a list of planes to the scene.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -3309,7 +3543,7 @@ Adds a list of spheres to the scene.
     {
         "type": "array",
         "items": {
-            "title": "GeometryWithColor<Sphere>",
+            "title": "GeometryWithColor",
             "type": "object",
             "properties": {
                 "color": {
@@ -3327,7 +3561,7 @@ Adds a list of spheres to the scene.
                     "type": "object",
                     "properties": {
                         "center": {
-                            "description": "Sphere center point",
+                            "description": "Sphere center XYZ",
                             "type": "array",
                             "items": {
                                 "type": "number"
@@ -3348,8 +3582,8 @@ Adds a list of spheres to the scene.
                 }
             },
             "required": [
-                "geometry",
-                "color"
+                "color",
+                "geometry"
             ],
             "additionalProperties": false
         }
@@ -3364,12 +3598,12 @@ Adds a list of spheres to the scene.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -3379,7 +3613,7 @@ Adds a list of spheres to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -3389,11 +3623,15 @@ Adds a list of spheres to the scene.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -3435,24 +3673,28 @@ Adds a list of spheres to the scene.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -3461,10 +3703,10 @@ Adds a list of spheres to the scene.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -3530,6 +3772,12 @@ Adds a list of spheres to the scene.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -3679,11 +3927,11 @@ Applies the specified color method to the model with the given color input.
                 "minimum": 0
             },
             "method": {
-                "description": "The method to use for coloring",
+                "description": "Coloring method",
                 "type": "string"
             },
             "values": {
-                "description": "Color input",
+                "description": "Coloring parameters",
                 "type": "object",
                 "additionalProperties": {
                     "type": "array",
@@ -3723,18 +3971,18 @@ A switch to enable or disable simulation on a model.
         "type": "object",
         "properties": {
             "enabled": {
-                "description": "Bool flag enabling or disabling the simulation",
+                "description": "Enable simulation if true",
                 "type": "boolean"
             },
             "model_id": {
-                "description": "ID of the model to enable or disable simulation",
+                "description": "ID of the model to color",
                 "type": "integer",
                 "minimum": 0
             }
         },
         "required": [
-            "model_id",
-            "enabled"
+            "enabled",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -3814,11 +4062,11 @@ progress notifications.
             },
             "camera_view": {
                 "title": "View",
-                "description": "Camera view settings",
+                "description": "Camera view",
                 "type": "object",
                 "properties": {
                     "position": {
-                        "description": "Camera position",
+                        "description": "Camera position XYZ",
                         "type": "array",
                         "items": {
                             "type": "number"
@@ -3827,7 +4075,7 @@ progress notifications.
                         "maxItems": 3
                     },
                     "target": {
-                        "description": "Camera target",
+                        "description": "Camera target XYZ",
                         "type": "array",
                         "items": {
                             "type": "number"
@@ -3836,7 +4084,7 @@ progress notifications.
                         "maxItems": 3
                     },
                     "up": {
-                        "description": "Camera up vector",
+                        "description": "Camera up vector XYZ",
                         "type": "array",
                         "items": {
                             "type": "number"
@@ -3853,7 +4101,7 @@ progress notifications.
                 "additionalProperties": false
             },
             "channels": {
-                "description": "G buffer channels to export",
+                "description": "Framebuffer channels to export",
                 "type": "array",
                 "items": {
                     "type": "string",
@@ -3866,12 +4114,12 @@ progress notifications.
                 }
             },
             "file_path": {
-                "description": "Buffers will be saved at this path if specified, otherwise it will be returned as EXR encoded binary data",
+                "description": "Path to save the buffer as EXR, encoded data is returned if unset",
                 "type": "string"
             },
             "renderer": {
                 "title": "EngineObjectData",
-                "description": "Renderer definition",
+                "description": "Renderer",
                 "type": "object",
                 "properties": {
                     "name": {
@@ -3930,7 +4178,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
         "type": "object",
         "properties": {
             "plugins": {
-                "description": "Loaded plugins",
+                "description": "Plugins loaded when the application was started",
                 "type": "array",
                 "readOnly": true,
                 "items": {
@@ -3938,7 +4186,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 }
             },
             "viewport": {
-                "description": "Window size",
+                "description": "Framebuffer resolution in pixels",
                 "type": "array",
                 "items": {
                     "type": "integer",
@@ -3948,6 +4196,9 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "maxItems": 2
             }
         },
+        "required": [
+            "plugins"
+        ],
         "additionalProperties": false
     }
 
@@ -3970,7 +4221,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
         "type": "object",
         "properties": {
             "height": {
-                "description": "Orthographic projection plane height",
+                "description": "Height of the projection plane",
                 "type": "number"
             }
         },
@@ -4052,7 +4303,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
         "type": "object",
         "properties": {
             "position": {
-                "description": "Camera position",
+                "description": "Camera position XYZ",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -4061,7 +4312,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "maxItems": 3
             },
             "target": {
-                "description": "Camera target",
+                "description": "Camera target XYZ",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -4070,7 +4321,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "maxItems": 3
             },
             "up": {
-                "description": "Camera up vector",
+                "description": "Camera up vector XYZ",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -4158,7 +4409,7 @@ Get the color ramp of the given model.
         "type": "object",
         "properties": {
             "colors": {
-                "description": "List of colors (RGBA) to map",
+                "description": "RGBA colors",
                 "type": "array",
                 "items": {
                     "type": "array",
@@ -4167,10 +4418,11 @@ Get the color ramp of the given model.
                     },
                     "minItems": 4,
                     "maxItems": 4
-                }
+                },
+                "maxItems": 256
             },
             "range": {
-                "description": "Values range",
+                "description": "Value range",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -4197,12 +4449,12 @@ Returns a list of input variables for a given model and color method.
         "type": "object",
         "properties": {
             "id": {
-                "description": "ID of the model to check",
+                "description": "ID of the model that will be colored",
                 "type": "integer",
                 "minimum": 0
             },
             "method": {
-                "description": "The method to query for color values",
+                "description": "Coloring method which values will be returned",
                 "type": "string"
             }
         },
@@ -4248,23 +4500,27 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "extensions": {
                     "description": "Supported file extensions",
                     "type": "array",
+                    "readOnly": true,
                     "items": {
                         "type": "string"
                     }
                 },
                 "input_parameters_schema": {
+                    "title": "JsonSchema",
                     "description": "Loader properties",
-                    "type": "object"
+                    "type": "object",
+                    "readOnly": true
                 },
                 "name": {
                     "description": "Loader name",
-                    "type": "string"
+                    "type": "string",
+                    "readOnly": true
                 }
             },
             "required": [
-                "name",
                 "extensions",
-                "input_parameters_schema"
+                "input_parameters_schema",
+                "name"
             ],
             "additionalProperties": false
         }
@@ -4304,7 +4560,7 @@ Returns the material of the given model as a car paint material, if possible.
         "type": "object",
         "properties": {
             "flake_density": {
-                "description": "Metal flakes density",
+                "description": "Metal flake density",
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1
@@ -4347,7 +4603,7 @@ Returns the material of the given model as a emissive material, if possible.
         "type": "object",
         "properties": {
             "color": {
-                "description": "Base color of the material",
+                "description": "Emission color",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -4356,7 +4612,7 @@ Returns the material of the given model as a emissive material, if possible.
                 "maxItems": 3
             },
             "intensity": {
-                "description": "Emitted light intensity",
+                "description": "Emission intensity",
                 "type": "number",
                 "minimum": 0
             }
@@ -4439,7 +4695,7 @@ Returns the material of the given model as a matte material, if possible.
         "type": "object",
         "properties": {
             "opacity": {
-                "description": "Opacity of the surface",
+                "description": "Surface opacity",
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1
@@ -4525,7 +4781,7 @@ Returns the material of the given model as a phong material, if possible.
         "type": "object",
         "properties": {
             "opacity": {
-                "description": "Opacity of the surface",
+                "description": "Surface opacity",
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1
@@ -4568,7 +4824,7 @@ Returns the material of the given model as a plastic material, if possible.
         "type": "object",
         "properties": {
             "opacity": {
-                "description": "Opacity of the surface",
+                "description": "Surface opacity",
                 "type": "number",
                 "minimum": 0,
                 "maximum": 1
@@ -4646,12 +4902,12 @@ Get all the information of the given model.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -4661,7 +4917,7 @@ Get all the information of the given model.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -4671,11 +4927,15 @@ Get all the information of the given model.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -4717,24 +4977,28 @@ Get all the information of the given model.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -4743,10 +5007,10 @@ Get all the information of the given model.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -4812,6 +5076,12 @@ Get all the information of the given model.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -4950,7 +5220,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -4960,7 +5230,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -4970,6 +5240,10 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "models": {
@@ -4982,12 +5256,12 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                     "properties": {
                         "bounds": {
                             "title": "Bounds",
-                            "description": "Model axis-aligned bounds",
+                            "description": "Model bounds",
                             "type": "object",
                             "readOnly": true,
                             "properties": {
                                 "max": {
-                                    "description": "Bounds maximum (top front right corner)",
+                                    "description": "Top front right corner",
                                     "type": "array",
                                     "readOnly": true,
                                     "items": {
@@ -4997,7 +5271,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                                     "maxItems": 3
                                 },
                                 "min": {
-                                    "description": "Bounds minimum (bottom back left corner)",
+                                    "description": "Bottom back left corner",
                                     "type": "array",
                                     "readOnly": true,
                                     "items": {
@@ -5007,11 +5281,15 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                                     "maxItems": 3
                                 }
                             },
+                            "required": [
+                                "max",
+                                "min"
+                            ],
                             "additionalProperties": false
                         },
                         "info": {
                             "title": "ModelInfo",
-                            "description": "Model-specific metadata",
+                            "description": "Model-specific info",
                             "type": "object",
                             "readOnly": true,
                             "properties": {
@@ -5053,24 +5331,28 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                                 },
                                 "load_info": {
                                     "title": "LoadInfo",
-                                    "description": "Model load information",
+                                    "description": "Model load info",
                                     "type": "object",
                                     "readOnly": true,
                                     "properties": {
                                         "load_parameters": {
-                                            "description": "Loader configuration"
+                                            "description": "Loader settings",
+                                            "readOnly": true
                                         },
                                         "loader_name": {
-                                            "description": "Loader used",
-                                            "type": "string"
+                                            "description": "Loader name",
+                                            "type": "string",
+                                            "readOnly": true
                                         },
                                         "path": {
                                             "description": "File path in case of file load type",
-                                            "type": "string"
+                                            "type": "string",
+                                            "readOnly": true
                                         },
                                         "source": {
                                             "description": "Model load source",
                                             "type": "string",
+                                            "readOnly": true,
                                             "enum": [
                                                 "from_file",
                                                 "from_blob",
@@ -5079,10 +5361,10 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                                         }
                                     },
                                     "required": [
-                                        "source",
-                                        "path",
+                                        "load_parameters",
                                         "loader_name",
-                                        "load_parameters"
+                                        "path",
+                                        "source"
                                     ],
                                     "additionalProperties": false
                                 },
@@ -5148,10 +5430,20 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                             "additionalProperties": false
                         }
                     },
+                    "required": [
+                        "bounds",
+                        "info",
+                        "model_id",
+                        "model_type"
+                    ],
                     "additionalProperties": false
                 }
             }
         },
+        "required": [
+            "bounds",
+            "models"
+        ],
         "additionalProperties": false
     }
 
@@ -5174,23 +5466,25 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
         "type": "object",
         "properties": {
             "current": {
-                "description": "Current frame index",
+                "description": "Current simulation frame index",
                 "type": "integer",
                 "minimum": 0
             },
             "dt": {
-                "description": "Frame time",
+                "description": "Delta time between two frames",
                 "type": "number",
                 "readOnly": true
             },
             "end_frame": {
-                "description": "Global final simulation frame index",
+                "description": "Final simulation frame index",
                 "type": "integer",
+                "readOnly": true,
                 "minimum": 0
             },
             "start_frame": {
-                "description": "Global initial simulation frame index",
+                "description": "Initial simulation frame index",
                 "type": "integer",
+                "readOnly": true,
                 "minimum": 0
             },
             "unit": {
@@ -5199,6 +5493,12 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "readOnly": true
             }
         },
+        "required": [
+            "dt",
+            "end_frame",
+            "start_frame",
+            "unit"
+        ],
         "additionalProperties": false
     }
 
@@ -5222,19 +5522,23 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
         "properties": {
             "major": {
                 "description": "Major version",
-                "type": "integer"
+                "type": "integer",
+                "readOnly": true
             },
             "minor": {
                 "description": "Minor version",
-                "type": "integer"
+                "type": "integer",
+                "readOnly": true
             },
             "patch": {
-                "description": "Patch level",
-                "type": "integer"
+                "description": "Patch version",
+                "type": "integer",
+                "readOnly": true
             },
             "revision": {
                 "description": "SCM revision",
-                "type": "string"
+                "type": "string",
+                "readOnly": true
             }
         },
         "required": [
@@ -5261,7 +5565,7 @@ Inspect the scene at x-y position.
         "type": "object",
         "properties": {
             "position": {
-                "description": "Position XY (normalized)",
+                "description": "Normalized screen position XY",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -5284,20 +5588,24 @@ Inspect the scene at x-y position.
         "type": "object",
         "properties": {
             "hit": {
-                "description": "A boolean flag indicating wether there was a hit. If false, the rest of the fields must be ignored",
-                "type": "boolean"
+                "description": "True if a model was at given position, otherwise the rest is invalid",
+                "type": "boolean",
+                "readOnly": true
             },
             "metadata": {
-                "description": "Extra attributes which vary depending on the type of model hitted"
+                "description": "Extra attributes depending on the type of model hitted",
+                "readOnly": true
             },
             "model_id": {
-                "description": "ID of the model hitted",
+                "description": "ID of the model that was hit at given position",
                 "type": "integer",
+                "readOnly": true,
                 "minimum": 0
             },
             "position": {
-                "description": "3D hit position",
+                "description": "World position XYZ where the model was hit",
                 "type": "array",
+                "readOnly": true,
                 "items": {
                     "type": "number"
                 },
@@ -5307,9 +5615,9 @@ Inspect the scene at x-y position.
         },
         "required": [
             "hit",
-            "position",
+            "metadata",
             "model_id",
-            "metadata"
+            "position"
         ],
         "additionalProperties": false
     }
@@ -5329,12 +5637,12 @@ Creates new instances of the given model. The underneath data is shared across a
         "type": "object",
         "properties": {
             "model_id": {
-                "description": "Model to instantiate",
+                "description": "ID of the model to instantiate",
                 "type": "integer",
                 "minimum": 0
             },
             "transforms": {
-                "description": "New instances transforms",
+                "description": "Transformations to apply to the new instances",
                 "type": "array",
                 "items": {
                     "title": "Transform",
@@ -5391,12 +5699,12 @@ Creates new instances of the given model. The underneath data is shared across a
             "properties": {
                 "bounds": {
                     "title": "Bounds",
-                    "description": "Model axis-aligned bounds",
+                    "description": "Model bounds",
                     "type": "object",
                     "readOnly": true,
                     "properties": {
                         "max": {
-                            "description": "Bounds maximum (top front right corner)",
+                            "description": "Top front right corner",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -5406,7 +5714,7 @@ Creates new instances of the given model. The underneath data is shared across a
                             "maxItems": 3
                         },
                         "min": {
-                            "description": "Bounds minimum (bottom back left corner)",
+                            "description": "Bottom back left corner",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -5416,11 +5724,15 @@ Creates new instances of the given model. The underneath data is shared across a
                             "maxItems": 3
                         }
                     },
+                    "required": [
+                        "max",
+                        "min"
+                    ],
                     "additionalProperties": false
                 },
                 "info": {
                     "title": "ModelInfo",
-                    "description": "Model-specific metadata",
+                    "description": "Model-specific info",
                     "type": "object",
                     "readOnly": true,
                     "properties": {
@@ -5462,24 +5774,28 @@ Creates new instances of the given model. The underneath data is shared across a
                         },
                         "load_info": {
                             "title": "LoadInfo",
-                            "description": "Model load information",
+                            "description": "Model load info",
                             "type": "object",
                             "readOnly": true,
                             "properties": {
                                 "load_parameters": {
-                                    "description": "Loader configuration"
+                                    "description": "Loader settings",
+                                    "readOnly": true
                                 },
                                 "loader_name": {
-                                    "description": "Loader used",
-                                    "type": "string"
+                                    "description": "Loader name",
+                                    "type": "string",
+                                    "readOnly": true
                                 },
                                 "path": {
                                     "description": "File path in case of file load type",
-                                    "type": "string"
+                                    "type": "string",
+                                    "readOnly": true
                                 },
                                 "source": {
                                     "description": "Model load source",
                                     "type": "string",
+                                    "readOnly": true,
                                     "enum": [
                                         "from_file",
                                         "from_blob",
@@ -5488,10 +5804,10 @@ Creates new instances of the given model. The underneath data is shared across a
                                 }
                             },
                             "required": [
-                                "source",
-                                "path",
+                                "load_parameters",
                                 "loader_name",
-                                "load_parameters"
+                                "path",
+                                "source"
                             ],
                             "additionalProperties": false
                         },
@@ -5557,6 +5873,12 @@ Creates new instances of the given model. The underneath data is shared across a
                     "additionalProperties": false
                 }
             },
+            "required": [
+                "bounds",
+                "info",
+                "model_id",
+                "model_type"
+            ],
             "additionalProperties": false
         }
     }
@@ -5614,7 +5936,7 @@ Remove the model(s) from the ID list from the scene.
         "type": "object",
         "properties": {
             "ids": {
-                "description": "List of model ID to remove",
+                "description": "Model ID list",
                 "type": "array",
                 "items": {
                     "type": "integer",
@@ -5648,7 +5970,7 @@ Render an image of the current context and retreive it according to given params
         "type": "object",
         "properties": {
             "accumulate": {
-                "description": "Keep rendering until max accumulation",
+                "description": "Render all images until max accumulation",
                 "type": "boolean",
                 "default": false
             },
@@ -5688,11 +6010,13 @@ Render an image of the current context and retreive it according to given params
             "accumulation": {
                 "description": "Current frame accumulation",
                 "type": "integer",
+                "readOnly": true,
                 "minimum": 0
             },
             "max_accumulation": {
                 "description": "Maximum frame accumulation",
                 "type": "integer",
+                "readOnly": true,
                 "minimum": 0
             }
         },
@@ -5736,40 +6060,49 @@ Get the JSON schema of the given entrypoint.
         "type": "object",
         "properties": {
             "async": {
-                "description": "Check if the entrypoint is asynchronous",
-                "type": "boolean"
+                "description": "Check if the entrypoint is asynchronous (send progress and can be cancelled)",
+                "type": "boolean",
+                "readOnly": true
             },
             "deprecated": {
                 "description": "If true, the entrypoint will be removed / renamed in the next release",
-                "type": "boolean"
+                "type": "boolean",
+                "readOnly": true
             },
             "description": {
                 "description": "Description of the entrypoint",
-                "type": "string"
+                "type": "string",
+                "readOnly": true
             },
             "params": {
+                "title": "JsonSchema",
                 "description": "Input schema",
-                "type": "object"
+                "type": "object",
+                "readOnly": true
             },
             "plugin": {
                 "description": "Name of the plugin that loads the entrypoint",
-                "type": "string"
+                "type": "string",
+                "readOnly": true
             },
             "returns": {
+                "title": "JsonSchema",
                 "description": "Output schema",
-                "type": "object"
+                "type": "object",
+                "readOnly": true
             },
             "title": {
-                "description": "Name of the entrypoint",
-                "type": "string"
+                "description": "Name of the entrypoint (method)",
+                "type": "string",
+                "readOnly": true
             }
         },
         "required": [
-            "plugin",
-            "title",
-            "description",
             "async",
-            "deprecated"
+            "deprecated",
+            "description",
+            "plugin",
+            "title"
         ],
         "additionalProperties": false
     }
@@ -5789,7 +6122,7 @@ Set the current state of the application parameters.
         "type": "object",
         "properties": {
             "plugins": {
-                "description": "Loaded plugins",
+                "description": "Plugins loaded when the application was started",
                 "type": "array",
                 "readOnly": true,
                 "items": {
@@ -5797,7 +6130,7 @@ Set the current state of the application parameters.
                 }
             },
             "viewport": {
-                "description": "Window size",
+                "description": "Framebuffer resolution in pixels",
                 "type": "array",
                 "items": {
                     "type": "integer",
@@ -5807,6 +6140,9 @@ Set the current state of the application parameters.
                 "maxItems": 2
             }
         },
+        "required": [
+            "plugins"
+        ],
         "additionalProperties": false
     }
 
@@ -5830,7 +6166,7 @@ Sets the current camera to an orthographic one, with the specified parameters.
         "type": "object",
         "properties": {
             "height": {
-                "description": "Orthographic projection plane height",
+                "description": "Height of the projection plane",
                 "type": "number"
             }
         },
@@ -5895,7 +6231,7 @@ Sets the camera view settings.
         "type": "object",
         "properties": {
             "position": {
-                "description": "Camera position",
+                "description": "Camera position XYZ",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -5904,7 +6240,7 @@ Sets the camera view settings.
                 "maxItems": 3
             },
             "target": {
-                "description": "Camera target",
+                "description": "Camera target XYZ",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -5913,7 +6249,7 @@ Sets the camera view settings.
                 "maxItems": 3
             },
             "up": {
-                "description": "Camera up vector",
+                "description": "Camera up vector XYZ",
                 "type": "array",
                 "items": {
                     "type": "number"
@@ -5955,7 +6291,7 @@ Set the color ramp of the given model.
                 "type": "object",
                 "properties": {
                     "colors": {
-                        "description": "List of colors (RGBA) to map",
+                        "description": "RGBA colors",
                         "type": "array",
                         "items": {
                             "type": "array",
@@ -5964,10 +6300,11 @@ Set the color ramp of the given model.
                             },
                             "minItems": 4,
                             "maxItems": 4
-                        }
+                        },
+                        "maxItems": 256
                     },
                     "range": {
-                        "description": "Values range",
+                        "description": "Value range",
                         "type": "array",
                         "items": {
                             "type": "number"
@@ -5985,8 +6322,8 @@ Set the color ramp of the given model.
             }
         },
         "required": [
-            "id",
-            "color_ramp"
+            "color_ramp",
+            "id"
         ],
         "additionalProperties": false
     }
@@ -6061,7 +6398,7 @@ Updates the material of the given model to a car paint material. This material i
                 "type": "object",
                 "properties": {
                     "flake_density": {
-                        "description": "Metal flakes density",
+                        "description": "Metal flake density",
                         "type": "number",
                         "minimum": 0,
                         "maximum": 1
@@ -6070,14 +6407,14 @@ Updates the material of the given model to a car paint material. This material i
                 "additionalProperties": false
             },
             "model_id": {
-                "description": "Model ID",
+                "description": "ID of the model to apply the material",
                 "type": "integer",
                 "minimum": 0
             }
         },
         "required": [
-            "model_id",
-            "material"
+            "material",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -6107,7 +6444,7 @@ Updates the material of the given model to an emisive material. This material is
                 "type": "object",
                 "properties": {
                     "color": {
-                        "description": "Base color of the material",
+                        "description": "Emission color",
                         "type": "array",
                         "items": {
                             "type": "number"
@@ -6116,7 +6453,7 @@ Updates the material of the given model to an emisive material. This material is
                         "maxItems": 3
                     },
                     "intensity": {
-                        "description": "Emitted light intensity",
+                        "description": "Emission intensity",
                         "type": "number",
                         "minimum": 0
                     }
@@ -6124,14 +6461,14 @@ Updates the material of the given model to an emisive material. This material is
                 "additionalProperties": false
             },
             "model_id": {
-                "description": "Model ID",
+                "description": "ID of the model to apply the material",
                 "type": "integer",
                 "minimum": 0
             }
         },
         "required": [
-            "model_id",
-            "material"
+            "material",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -6168,14 +6505,14 @@ Updates the material of the given model to a glass material. This material is on
                 "additionalProperties": false
             },
             "model_id": {
-                "description": "Model ID",
+                "description": "ID of the model to apply the material",
                 "type": "integer",
                 "minimum": 0
             }
         },
         "required": [
-            "model_id",
-            "material"
+            "material",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -6205,7 +6542,7 @@ Updates the material of the given model to a matte material. This material is on
                 "type": "object",
                 "properties": {
                     "opacity": {
-                        "description": "Opacity of the surface",
+                        "description": "Surface opacity",
                         "type": "number",
                         "minimum": 0,
                         "maximum": 1
@@ -6214,14 +6551,14 @@ Updates the material of the given model to a matte material. This material is on
                 "additionalProperties": false
             },
             "model_id": {
-                "description": "Model ID",
+                "description": "ID of the model to apply the material",
                 "type": "integer",
                 "minimum": 0
             }
         },
         "required": [
-            "model_id",
-            "material"
+            "material",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -6260,14 +6597,14 @@ Updates the material of the given model to a metal material. This material is on
                 "additionalProperties": false
             },
             "model_id": {
-                "description": "Model ID",
+                "description": "ID of the model to apply the material",
                 "type": "integer",
                 "minimum": 0
             }
         },
         "required": [
-            "model_id",
-            "material"
+            "material",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -6297,7 +6634,7 @@ Updates the material of the given model to the phong material. This material wor
                 "type": "object",
                 "properties": {
                     "opacity": {
-                        "description": "Opacity of the surface",
+                        "description": "Surface opacity",
                         "type": "number",
                         "minimum": 0,
                         "maximum": 1
@@ -6306,14 +6643,14 @@ Updates the material of the given model to the phong material. This material wor
                 "additionalProperties": false
             },
             "model_id": {
-                "description": "Model ID",
+                "description": "ID of the model to apply the material",
                 "type": "integer",
                 "minimum": 0
             }
         },
         "required": [
-            "model_id",
-            "material"
+            "material",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -6343,7 +6680,7 @@ Updates the material of the given model to a plastic material. This material is 
                 "type": "object",
                 "properties": {
                     "opacity": {
-                        "description": "Opacity of the surface",
+                        "description": "Surface opacity",
                         "type": "number",
                         "minimum": 0,
                         "maximum": 1
@@ -6352,14 +6689,14 @@ Updates the material of the given model to a plastic material. This material is 
                 "additionalProperties": false
             },
             "model_id": {
-                "description": "Model ID",
+                "description": "ID of the model to apply the material",
                 "type": "integer",
                 "minimum": 0
             }
         },
         "required": [
-            "model_id",
-            "material"
+            "material",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -6477,23 +6814,25 @@ Set the current state of the simulation parameters.
         "type": "object",
         "properties": {
             "current": {
-                "description": "Current frame index",
+                "description": "Current simulation frame index",
                 "type": "integer",
                 "minimum": 0
             },
             "dt": {
-                "description": "Frame time",
+                "description": "Delta time between two frames",
                 "type": "number",
                 "readOnly": true
             },
             "end_frame": {
-                "description": "Global final simulation frame index",
+                "description": "Final simulation frame index",
                 "type": "integer",
+                "readOnly": true,
                 "minimum": 0
             },
             "start_frame": {
-                "description": "Global initial simulation frame index",
+                "description": "Initial simulation frame index",
                 "type": "integer",
+                "readOnly": true,
                 "minimum": 0
             },
             "unit": {
@@ -6502,6 +6841,12 @@ Set the current state of the simulation parameters.
                 "readOnly": true
             }
         },
+        "required": [
+            "dt",
+            "end_frame",
+            "start_frame",
+            "unit"
+        ],
         "additionalProperties": false
     }
 
@@ -6544,11 +6889,11 @@ progress notifications.
             },
             "camera_view": {
                 "title": "View",
-                "description": "Camera view settings",
+                "description": "Camera view",
                 "type": "object",
                 "properties": {
                     "position": {
-                        "description": "Camera position",
+                        "description": "Camera position XYZ",
                         "type": "array",
                         "items": {
                             "type": "number"
@@ -6557,7 +6902,7 @@ progress notifications.
                         "maxItems": 3
                     },
                     "target": {
-                        "description": "Camera target",
+                        "description": "Camera target XYZ",
                         "type": "array",
                         "items": {
                             "type": "number"
@@ -6566,7 +6911,7 @@ progress notifications.
                         "maxItems": 3
                     },
                     "up": {
-                        "description": "Camera up vector",
+                        "description": "Camera up vector XYZ",
                         "type": "array",
                         "items": {
                             "type": "number"
@@ -6583,7 +6928,7 @@ progress notifications.
                 "additionalProperties": false
             },
             "file_path": {
-                "description": "Snapshot will be saved at this path if specified, otherwise it will be returned as binary data with format from image_settings",
+                "description": "Path to save image, raw encoded data will be returned if empty",
                 "type": "string"
             },
             "image_settings": {
@@ -6593,15 +6938,17 @@ progress notifications.
                 "properties": {
                     "format": {
                         "description": "Image format (jpg or png)",
-                        "type": "string"
+                        "type": "string",
+                        "default": "png"
                     },
                     "quality": {
                         "description": "Image quality (0 = lowest quality, 100 = highest quality",
                         "type": "integer",
+                        "default": 100,
                         "minimum": 0
                     },
                     "size": {
-                        "description": "Image dimensions [width, height]",
+                        "description": "Image width and height",
                         "type": "array",
                         "items": {
                             "type": "integer",
@@ -6646,17 +6993,20 @@ progress notifications.
         "properties": {
             "color_buffer": {
                 "title": "ColorBufferMessage",
-                "description": "Snapshot color buffer encoded in params format",
+                "description": "Encoded snapshot color buffer",
                 "type": "object",
+                "readOnly": true,
                 "properties": {
                     "offset": {
-                        "description": "Buffer data offset in attached binary",
+                        "description": "Data offset in attached binary",
                         "type": "integer",
+                        "readOnly": true,
                         "minimum": 0
                     },
                     "size": {
-                        "description": "Buffer data size in attached binary",
+                        "description": "Data size in attached binary",
                         "type": "integer",
+                        "readOnly": true,
                         "minimum": 0
                     }
                 },
@@ -6694,12 +7044,12 @@ Update the model with the given values and return its new state.
                 "properties": {
                     "bounds": {
                         "title": "Bounds",
-                        "description": "Model axis-aligned bounds",
+                        "description": "Model bounds",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "max": {
-                                "description": "Bounds maximum (top front right corner)",
+                                "description": "Top front right corner",
                                 "type": "array",
                                 "readOnly": true,
                                 "items": {
@@ -6709,7 +7059,7 @@ Update the model with the given values and return its new state.
                                 "maxItems": 3
                             },
                             "min": {
-                                "description": "Bounds minimum (bottom back left corner)",
+                                "description": "Bottom back left corner",
                                 "type": "array",
                                 "readOnly": true,
                                 "items": {
@@ -6719,11 +7069,15 @@ Update the model with the given values and return its new state.
                                 "maxItems": 3
                             }
                         },
+                        "required": [
+                            "max",
+                            "min"
+                        ],
                         "additionalProperties": false
                     },
                     "info": {
                         "title": "ModelInfo",
-                        "description": "Model-specific metadata",
+                        "description": "Model-specific info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
@@ -6765,24 +7119,28 @@ Update the model with the given values and return its new state.
                             },
                             "load_info": {
                                 "title": "LoadInfo",
-                                "description": "Model load information",
+                                "description": "Model load info",
                                 "type": "object",
                                 "readOnly": true,
                                 "properties": {
                                     "load_parameters": {
-                                        "description": "Loader configuration"
+                                        "description": "Loader settings",
+                                        "readOnly": true
                                     },
                                     "loader_name": {
-                                        "description": "Loader used",
-                                        "type": "string"
+                                        "description": "Loader name",
+                                        "type": "string",
+                                        "readOnly": true
                                     },
                                     "path": {
                                         "description": "File path in case of file load type",
-                                        "type": "string"
+                                        "type": "string",
+                                        "readOnly": true
                                     },
                                     "source": {
                                         "description": "Model load source",
                                         "type": "string",
+                                        "readOnly": true,
                                         "enum": [
                                             "from_file",
                                             "from_blob",
@@ -6791,10 +7149,10 @@ Update the model with the given values and return its new state.
                                     }
                                 },
                                 "required": [
-                                    "source",
-                                    "path",
+                                    "load_parameters",
                                     "loader_name",
-                                    "load_parameters"
+                                    "path",
+                                    "source"
                                 ],
                                 "additionalProperties": false
                             },
@@ -6860,6 +7218,12 @@ Update the model with the given values and return its new state.
                         "additionalProperties": false
                     }
                 },
+                "required": [
+                    "bounds",
+                    "info",
+                    "model_id",
+                    "model_type"
+                ],
                 "additionalProperties": false
             },
             "model_id": {
@@ -6869,8 +7233,8 @@ Update the model with the given values and return its new state.
             }
         },
         "required": [
-            "model_id",
-            "model"
+            "model",
+            "model_id"
         ],
         "additionalProperties": false
     }
@@ -6884,12 +7248,12 @@ Update the model with the given values and return its new state.
         "properties": {
             "bounds": {
                 "title": "Bounds",
-                "description": "Model axis-aligned bounds",
+                "description": "Model bounds",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Bounds maximum (top front right corner)",
+                        "description": "Top front right corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -6899,7 +7263,7 @@ Update the model with the given values and return its new state.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bounds minimum (bottom back left corner)",
+                        "description": "Bottom back left corner",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -6909,11 +7273,15 @@ Update the model with the given values and return its new state.
                         "maxItems": 3
                     }
                 },
+                "required": [
+                    "max",
+                    "min"
+                ],
                 "additionalProperties": false
             },
             "info": {
                 "title": "ModelInfo",
-                "description": "Model-specific metadata",
+                "description": "Model-specific info",
                 "type": "object",
                 "readOnly": true,
                 "properties": {
@@ -6955,24 +7323,28 @@ Update the model with the given values and return its new state.
                     },
                     "load_info": {
                         "title": "LoadInfo",
-                        "description": "Model load information",
+                        "description": "Model load info",
                         "type": "object",
                         "readOnly": true,
                         "properties": {
                             "load_parameters": {
-                                "description": "Loader configuration"
+                                "description": "Loader settings",
+                                "readOnly": true
                             },
                             "loader_name": {
-                                "description": "Loader used",
-                                "type": "string"
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
                             },
                             "path": {
                                 "description": "File path in case of file load type",
-                                "type": "string"
+                                "type": "string",
+                                "readOnly": true
                             },
                             "source": {
                                 "description": "Model load source",
                                 "type": "string",
+                                "readOnly": true,
                                 "enum": [
                                     "from_file",
                                     "from_blob",
@@ -6981,10 +7353,10 @@ Update the model with the given values and return its new state.
                             }
                         },
                         "required": [
-                            "source",
-                            "path",
+                            "load_parameters",
                             "loader_name",
-                            "load_parameters"
+                            "path",
+                            "source"
                         ],
                         "additionalProperties": false
                     },
@@ -7050,6 +7422,12 @@ Update the model with the given values and return its new state.
                 "additionalProperties": false
             }
         },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
         "additionalProperties": false
     }
 
@@ -7083,9 +7461,9 @@ progress notifications.
             }
         },
         "required": [
-            "type",
             "loader_name",
-            "loader_properties"
+            "loader_properties",
+            "type"
         ],
         "additionalProperties": false
     }
@@ -7102,12 +7480,12 @@ progress notifications.
             "properties": {
                 "bounds": {
                     "title": "Bounds",
-                    "description": "Model axis-aligned bounds",
+                    "description": "Model bounds",
                     "type": "object",
                     "readOnly": true,
                     "properties": {
                         "max": {
-                            "description": "Bounds maximum (top front right corner)",
+                            "description": "Top front right corner",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -7117,7 +7495,7 @@ progress notifications.
                             "maxItems": 3
                         },
                         "min": {
-                            "description": "Bounds minimum (bottom back left corner)",
+                            "description": "Bottom back left corner",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -7127,11 +7505,15 @@ progress notifications.
                             "maxItems": 3
                         }
                     },
+                    "required": [
+                        "max",
+                        "min"
+                    ],
                     "additionalProperties": false
                 },
                 "info": {
                     "title": "ModelInfo",
-                    "description": "Model-specific metadata",
+                    "description": "Model-specific info",
                     "type": "object",
                     "readOnly": true,
                     "properties": {
@@ -7173,24 +7555,28 @@ progress notifications.
                         },
                         "load_info": {
                             "title": "LoadInfo",
-                            "description": "Model load information",
+                            "description": "Model load info",
                             "type": "object",
                             "readOnly": true,
                             "properties": {
                                 "load_parameters": {
-                                    "description": "Loader configuration"
+                                    "description": "Loader settings",
+                                    "readOnly": true
                                 },
                                 "loader_name": {
-                                    "description": "Loader used",
-                                    "type": "string"
+                                    "description": "Loader name",
+                                    "type": "string",
+                                    "readOnly": true
                                 },
                                 "path": {
                                     "description": "File path in case of file load type",
-                                    "type": "string"
+                                    "type": "string",
+                                    "readOnly": true
                                 },
                                 "source": {
                                     "description": "Model load source",
                                     "type": "string",
+                                    "readOnly": true,
                                     "enum": [
                                         "from_file",
                                         "from_blob",
@@ -7199,10 +7585,10 @@ progress notifications.
                                 }
                             },
                             "required": [
-                                "source",
-                                "path",
+                                "load_parameters",
                                 "loader_name",
-                                "load_parameters"
+                                "path",
+                                "source"
                             ],
                             "additionalProperties": false
                         },
@@ -7268,6 +7654,12 @@ progress notifications.
                     "additionalProperties": false
                 }
             },
+            "required": [
+                "bounds",
+                "info",
+                "model_id",
+                "model_type"
+            ],
             "additionalProperties": false
         }
     }

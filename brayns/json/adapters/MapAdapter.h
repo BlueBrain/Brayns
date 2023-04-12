@@ -32,8 +32,7 @@ namespace brayns
 /**
  * @brief Helper class to serialize map-like types to a JSON object.
  *
- * Map-like means iterable yielding pair<string, T> and operator[string] to
- * emplace values.
+ * Map types have methods begin(), end() and operator[](const std::string &).
  *
  * @tparam T Map-like type.
  */
@@ -42,76 +41,54 @@ struct MapAdapter
 {
     using ValueType = typename T::mapped_type;
 
-    /**
-     * @brief Create a schema with object type and T::value_type
-     * additionalProperties schema.
-     *
-     * @return JsonSchema T schema.
-     */
     static JsonSchema getSchema()
     {
-        JsonSchema schema;
+        auto schema = JsonSchema();
         schema.type = JsonType::Object;
-        schema.additionalProperties = {Json::getSchema<ValueType>()};
+        schema.items = {JsonAdapter<ValueType>::getSchema()};
         return schema;
     }
 
-    /**
-     * @brief Create a JSON object in json with all key-value pairs from value.
-     *
-     * @param value Input value.
-     * @param json Output JSON.
-     */
     static void serialize(const T &value, JsonValue &json)
     {
-        auto object = Poco::makeShared<JsonObject>();
+        auto &object = JsonFactory::emplaceObject(json);
         for (const auto &[key, item] : value)
         {
-            auto jsonItem = Json::serialize(item);
-            object->set(key, jsonItem);
+            auto child = JsonValue();
+            JsonAdapter<ValueType>::serialize(item, child);
+            object.set(key, child);
         }
-        json = object;
     }
 
-    /**
-     * @brief Extract a JsonObject::Ptr from json and serialize in value.
-     *
-     * @param json Input JSON.
-     * @param value Ouput value.
-     */
     static void deserialize(const JsonValue &json, T &value)
     {
-        auto object = JsonExtractor::extractObject(json);
-        if (!object)
-        {
-            throw std::runtime_error("Not a JSON object");
-        }
+        auto &object = JsonExtractor::extractObject(json);
         value.clear();
-        for (const auto &[key, item] : *object)
+        for (const auto &[key, child] : object)
         {
-            Json::deserialize(item, value[key]);
+            auto &item = value[key];
+            JsonAdapter<ValueType>::deserialize(child, item);
         }
     }
 };
 
 /**
- * @brief Partial specialization of JsonAdapter for std::map<std::string, T>.
+ * @brief JSON handling for std::map<std::string, T>.
  *
- * @tparam T Type of the map values.
+ * @tparam T Value type.
  */
 template<typename T>
-struct JsonAdapter<StringMap<T>> : MapAdapter<StringMap<T>>
+struct JsonAdapter<std::map<std::string, T>> : MapAdapter<std::map<std::string, T>>
 {
 };
 
 /**
- * @brief Partial specialization of JsonAdapter for
- * std::unordered_map<std::string, T>.
+ * @brief JSON handling for std::unordered_map<std::string, T>.
  *
- * @tparam T Type of the map values.
+ * @tparam T Value type.
  */
 template<typename T>
-struct JsonAdapter<StringHash<T>> : MapAdapter<StringHash<T>>
+struct JsonAdapter<std::unordered_map<std::string, T>> : MapAdapter<std::unordered_map<std::string, T>>
 {
 };
 } // namespace brayns

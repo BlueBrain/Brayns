@@ -21,12 +21,6 @@
 #include <doctest/doctest.h>
 
 #include <brayns/json/Json.h>
-#include <brayns/json/adapters/ArrayAdapter.h>
-#include <brayns/json/adapters/EnumAdapter.h>
-#include <brayns/json/adapters/GlmAdapter.h>
-#include <brayns/json/adapters/MapAdapter.h>
-#include <brayns/json/adapters/PrimitiveAdapter.h>
-#include <brayns/json/adapters/PtrAdapter.h>
 
 enum class TestEnum
 {
@@ -49,7 +43,7 @@ template<>
 struct JsonAdapter<TestEnum> : EnumAdapter<TestEnum>
 {
 };
-}
+} // namespace brayns
 
 TEST_CASE("JsonAdapters")
 {
@@ -88,8 +82,8 @@ TEST_CASE("JsonAdapters")
     {
         auto schema = brayns::Json::getSchema<std::map<std::string, int>>();
         CHECK_EQ(schema.type, brayns::JsonType::Object);
-        CHECK_EQ(schema.additionalProperties.size(), 1);
-        CHECK_EQ(schema.additionalProperties[0].type, brayns::JsonType::Integer);
+        CHECK_EQ(schema.items.size(), 1);
+        CHECK_EQ(schema.items[0].type, brayns::JsonType::Integer);
         auto json = brayns::Json::stringify(std::map<std::string, int>({{"test", 1}}));
         CHECK_EQ(json, "{\"test\":1}");
         auto value = brayns::Json::parse<std::map<std::string, int>>("{\"test\": 1}");
@@ -107,5 +101,22 @@ TEST_CASE("JsonAdapters")
     {
         auto schema = brayns::Json::getSchema<std::unique_ptr<int>>();
         CHECK_EQ(schema.type, brayns::JsonType::Integer);
+    }
+    SUBCASE("Schema")
+    {
+        auto schema = brayns::Json::getSchema<int>();
+        auto json = brayns::Json::stringify(schema);
+        auto ref = R"({"type":"integer"})";
+        CHECK_EQ(json, ref);
+
+        schema = brayns::Json::getSchema<std::string>();
+        json = brayns::Json::stringify(schema);
+        ref = R"({"type":"string"})";
+        CHECK_EQ(json, ref);
+
+        schema = brayns::Json::getSchema<std::vector<int>>();
+        json = brayns::Json::stringify(schema);
+        ref = R"({"items":{"type":"integer"},"type":"array"})";
+        CHECK_EQ(json, ref);
     }
 }

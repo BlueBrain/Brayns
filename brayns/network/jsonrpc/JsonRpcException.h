@@ -25,7 +25,7 @@
 
 #include <spdlog/fmt/ostr.h>
 
-#include <brayns/json/JsonType.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
@@ -54,7 +54,7 @@ public:
      * @param message Error description.
      * @param data Additional optional error data.
      */
-    JsonRpcException(int code, const std::string &message, const JsonValue &data = {});
+    explicit JsonRpcException(int code, const std::string &message, const JsonValue &data = {});
 
     /**
      * @brief Get the error code of the exception.
@@ -94,7 +94,7 @@ class InvalidRequestException : public JsonRpcException
 public:
     explicit InvalidRequestException(const std::string &message);
 
-    InvalidRequestException(const std::string &message, const std::vector<std::string> &errors);
+    explicit InvalidRequestException(const std::string &message, const JsonErrors &errors);
 };
 
 /**
@@ -116,7 +116,7 @@ class InvalidParamsException : public JsonRpcException
 public:
     explicit InvalidParamsException(const std::string &message);
 
-    InvalidParamsException(const std::string &message, const std::vector<std::string> &errors);
+    explicit InvalidParamsException(const std::string &message, const JsonErrors &errors);
 };
 
 /**
@@ -136,7 +136,7 @@ public:
 class TaskCancelledException : public JsonRpcException
 {
 public:
-    TaskCancelledException();
+    explicit TaskCancelledException();
 };
 } // namespace brayns
 

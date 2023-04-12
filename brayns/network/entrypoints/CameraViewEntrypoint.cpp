@@ -43,7 +43,7 @@ void SetCameraViewEntrypoint::onRequest(const Request &request)
     auto view = camera.getView();
     request.getParams(view);
     camera.setView(view);
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 
 GetCameraViewEntrypoint::GetCameraViewEntrypoint(Engine &engine)

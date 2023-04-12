@@ -21,28 +21,25 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
+#include "JsonError.h"
 #include "JsonSchema.h"
-#include "JsonType.h"
 
 namespace brayns
 {
 /**
- * @brief Validate a JSON value using a JSON schema.
+ * @brief JSON schema validator.
  *
  */
-class JsonSchemaValidator
+class JsonValidator
 {
 public:
     /**
-     * @brief Validate json with schema and return the list of errors.
+     * @brief Validate JSON using schema and store result into errors.
      *
-     * @param json JSON value to check.
-     * @param schema JSON schema pattern.
-     * @return std::vector<std::string> Error list (empty if valid).
+     * @param json JSON to validate.
+     * @param schema JSON schema.
+     * @param errors Output errors.
      */
-    static std::vector<std::string> validate(const JsonValue &json, const JsonSchema &schema);
+    static void validate(const JsonValue &json, const JsonSchema &schema, JsonErrorBuilder &errors);
 };
 } // namespace brayns

@@ -21,11 +21,28 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(ExitLaterMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, minutes, "Number of minutes after which Brayns will shut down")
-BRAYNS_JSON_OBJECT_END()
+struct ExitLaterMessage
+{
+    uint32_t minutes = 0;
+};
+
+template<>
+struct JsonAdapter<ExitLaterMessage> : ObjectAdapter<ExitLaterMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("ExitLaterMessage");
+        builder
+            .getset(
+                "minutes",
+                [](auto &object) { return object.minutes; },
+                [](auto &object, auto value) { object.minutes = value; })
+            .description("Number of minutes after which Brayns will shut down");
+        return builder.build();
+    }
+};
 } // namespace brayns

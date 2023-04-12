@@ -21,13 +21,42 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(UploadModelParams)
-BRAYNS_JSON_OBJECT_ENTRY(std::string, type, "File extension")
-BRAYNS_JSON_OBJECT_ENTRY(std::string, loader_name, "Loader name")
-BRAYNS_JSON_OBJECT_ENTRY(JsonValue, loader_properties, "Loader properties")
-BRAYNS_JSON_OBJECT_END()
+struct UploadModelParams
+{
+    std::string type;
+    std::string loader_name;
+    JsonValue loader_properties;
+};
+
+template<>
+struct JsonAdapter<UploadModelParams> : ObjectAdapter<UploadModelParams>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("UploadModelParams");
+        builder
+            .getset(
+                "type",
+                [](auto &object) -> auto & { return object.type; },
+                [](auto &object, auto value) { object.type = std::move(value); })
+            .description("File extension");
+        builder
+            .getset(
+                "loader_name",
+                [](auto &object) -> auto & { return object.loader_name; },
+                [](auto &object, auto value) { object.loader_name = std::move(value); })
+            .description("Loader name");
+        builder
+            .getset(
+                "loader_properties",
+                [](auto &object) -> auto & { return object.loader_properties; },
+                [](auto &object, const auto &value) { object.loader_properties = value; })
+            .description("Loader properties");
+        return builder.build();
+    }
+};
 } // namespace brayns

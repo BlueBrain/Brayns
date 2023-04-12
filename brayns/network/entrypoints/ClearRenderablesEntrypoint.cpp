@@ -44,6 +44,6 @@ void ClearRenderablesEntrypoint::onRequest(const Request &request)
 {
     ModelsOperations::removeRenderables(_models);
     _simulation.reset();
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 }

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/engine/json/adapters/EngineObjectDataAdapter.h>
 #include <brayns/engine/json/adapters/ViewAdapter.h>
@@ -29,31 +29,100 @@
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(SnapshotParams)
-BRAYNS_JSON_OBJECT_ENTRY(ImageSettings, image_settings, "Image settings", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, camera, "Camera definition", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(View, camera_view, "Camera view settings", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(EngineObjectData, renderer, "Renderer definition", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, simulation_frame, "Simulation frame to render", Required(false))
-BRAYNS_JSON_OBJECT_ENTRY(
-    std::string,
-    file_path,
-    "Snapshot will be saved at this path if specified, otherwise it will be returned as binary data with format from "
-    "image_settings",
-    Required(false))
-BRAYNS_JSON_OBJECT_END()
+struct SnapshotParams
+{
+    ImageSettings image_settings;
+    EngineObjectData camera;
+    View camera_view;
+    EngineObjectData renderer;
+    uint32_t simulation_frame;
+    std::string file_path;
+};
 
-#define BRAYNS_BUFFER_PROPERTIES() \
-    BRAYNS_JSON_OBJECT_ENTRY(size_t, offset, "Buffer data offset in attached binary") \
-    BRAYNS_JSON_OBJECT_ENTRY(size_t, size, "Buffer data size in attached binary")
+template<>
+struct JsonAdapter<SnapshotParams> : ObjectAdapter<SnapshotParams>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("SnapshotParams");
+        builder
+            .getset(
+                "image_settings",
+                [](auto &object) -> auto & { return object.image_settings; },
+                [](auto &object, auto value) { object.image_settings = std::move(value); })
+            .description("Image settings")
+            .required(false);
+        builder
+            .getset(
+                "camera",
+                [](auto &object) -> auto & { return object.camera; },
+                [](auto &object, const auto &value) { object.camera = value; })
+            .description("Camera definition")
+            .required(false);
+        builder
+            .getset(
+                "camera_view",
+                [](auto &object) -> auto & { return object.camera_view; },
+                [](auto &object, const auto &value) { object.camera_view = value; })
+            .description("Camera view")
+            .required(false);
+        builder
+            .getset(
+                "renderer",
+                [](auto &object) -> auto & { return object.renderer; },
+                [](auto &object, const auto &value) { object.renderer = value; })
+            .description("Renderer definition")
+            .required(false);
+        builder
+            .getset(
+                "simulation_frame",
+                [](auto &object) { return object.simulation_frame; },
+                [](auto &object, auto value) { object.simulation_frame = value; })
+            .description("Simulation frame to render")
+            .required(false);
+        builder
+            .getset(
+                "file_path",
+                [](auto &object) -> auto & { return object.file_path; },
+                [](auto &object, auto value) { object.file_path = std::move(value); })
+            .description("Path to save image, raw encoded data will be returned if empty")
+            .required(false);
+        return builder.build();
+    }
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(ColorBufferMessage)
-BRAYNS_BUFFER_PROPERTIES()
-BRAYNS_JSON_OBJECT_END()
+struct ColorBufferMessage
+{
+    size_t offset = 0;
+    size_t size = 0;
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(SnapshotResult)
-BRAYNS_JSON_OBJECT_ENTRY(ColorBufferMessage, color_buffer, "Snapshot color buffer encoded in params format")
-BRAYNS_JSON_OBJECT_END()
+template<>
+struct JsonAdapter<ColorBufferMessage> : ObjectAdapter<ColorBufferMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("ColorBufferMessage");
+        builder.get("offset", [](auto &object) { return object.offset; }).description("Data offset in attached binary");
+        builder.get("size", [](auto &object) { return object.size; }).description("Data size in attached binary");
+        return builder.build();
+    }
+};
 
-#undef BRAYNS_BUFFER_PROPERTIES
+struct SnapshotResult
+{
+    ColorBufferMessage color_buffer;
+};
+
+template<>
+struct JsonAdapter<SnapshotResult> : ObjectAdapter<SnapshotResult>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("SnapshotResult");
+        builder.get("color_buffer", [](auto &object) { return object.color_buffer; })
+            .description("Encoded snapshot color buffer");
+        return builder.build();
+    }
+};
 } // namespace brayns

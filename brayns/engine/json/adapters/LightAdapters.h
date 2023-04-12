@@ -24,30 +24,92 @@
 #include <brayns/engine/light/types/DirectionalLight.h>
 #include <brayns/engine/light/types/QuadLight.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-#define BRAYNS_LIGHT_PROPERTIES() \
-    BRAYNS_JSON_ADAPTER_ENTRY(color, "Light color (Normalized RGB)", Required(false)) \
-    BRAYNS_JSON_ADAPTER_ENTRY(intensity, "Light intensity", Minimum(0.0), Required(false))
+class LightAdapter
+{
+public:
+    template<typename T>
+    static void reflect(JsonObjectBuilder<T> &builder)
+    {
+        builder
+            .getset(
+                "color",
+                [](auto &object) -> auto & { return object.color; },
+                [](auto &object, const auto &value) { object.color = value; })
+            .description("Light color RGB normalized")
+            .defaultValue(Vector3f(1));
+        builder
+            .getset(
+                "intensity",
+                [](auto &object) { return object.intensity; },
+                [](auto &object, auto value) { object.intensity = value; })
+            .description("Light intensity")
+            .minimum(0)
+            .defaultValue(1);
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(AmbientLight)
-BRAYNS_LIGHT_PROPERTIES()
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<AmbientLight> : ObjectAdapter<AmbientLight>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("AmbientLight");
+        LightAdapter::reflect(builder);
+        return builder.build();
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(DirectionalLight)
-BRAYNS_JSON_ADAPTER_ENTRY(direction, "Light direction vector", Required(false))
-BRAYNS_LIGHT_PROPERTIES()
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<DirectionalLight> : ObjectAdapter<DirectionalLight>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("DirectionalLight");
+        LightAdapter::reflect(builder);
+        builder
+            .getset(
+                "direction",
+                [](auto &object) -> auto & { return object.direction; },
+                [](auto &object, const auto &value) { object.direction = value; })
+            .description("Light direction XYZ")
+            .defaultValue(Vector3f(-1, -1, 0));
+        return builder.build();
+    }
+};
 
-BRAYNS_JSON_ADAPTER_BEGIN(QuadLight)
-BRAYNS_JSON_ADAPTER_ENTRY(position, "Sets the corner position of the quad light", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(edge1, "Sets one of the quad light edges", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(edge2, "Sets one of the quad light edges", Required(false))
-BRAYNS_LIGHT_PROPERTIES()
-BRAYNS_JSON_ADAPTER_END()
-
-#undef BRAYNS_LIGHT_PROPERTIES
-
+template<>
+struct JsonAdapter<QuadLight> : ObjectAdapter<QuadLight>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("QuadLight");
+        LightAdapter::reflect(builder);
+        builder
+            .getset(
+                "position",
+                [](auto &object) -> auto & { return object.position; },
+                [](auto &object, const auto &value) { object.position = value; })
+            .description("Light base corner position XYZ")
+            .defaultValue(Vector3f(0));
+        builder
+            .getset(
+                "edge1",
+                [](auto &object) -> auto & { return object.edge1; },
+                [](auto &object, const auto &value) { object.edge1 = value; })
+            .description("Edge 1 XYZ")
+            .defaultValue(Vector3f(1, 0, 0));
+        builder
+            .getset(
+                "edge2",
+                [](auto &object) -> auto & { return object.edge2; },
+                [](auto &object, const auto &value) { object.edge2 = value; })
+            .description("Edge 2 XYZ")
+            .defaultValue(Vector3f(0, 0, 1));
+        return builder.build();
+    }
+};
 } // namespace brayns

@@ -21,11 +21,30 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(ProgressiveFrameMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, scale, "Frame size reduction factor", brayns::Default(4), brayns::Minimum(1))
-BRAYNS_JSON_OBJECT_END()
-}
+struct ProgressiveFrameMessage
+{
+    uint32_t scale = 0;
+};
+
+template<>
+struct JsonAdapter<ProgressiveFrameMessage> : ObjectAdapter<ProgressiveFrameMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("ProgressiveFrameMessage");
+        builder
+            .getset(
+                "scale",
+                [](auto &object) { return object.scale; },
+                [](auto &object, auto value) { object.scale = value; })
+            .description("Frame size reduction factor")
+            .minimum(1)
+            .defaultValue(4);
+        return builder.build();
+    }
+};
+} // namespace brayns

@@ -20,10 +20,28 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
-#include <cstdint>
+struct LoadedIdsModelMessage
+{
+    uint32_t model_id = 0;
+};
 
-BRAYNS_JSON_OBJECT_BEGIN(LoadedIdsModelMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "ID of the model to query")
-BRAYNS_JSON_OBJECT_END()
+namespace brayns
+{
+template<>
+struct JsonAdapter<LoadedIdsModelMessage> : ObjectAdapter<LoadedIdsModelMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("LoadedIdsModelMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
+            .description("ID of the model to query");
+        return builder.build();
+    }
+};
+} // namespace brayns

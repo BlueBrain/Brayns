@@ -21,13 +21,43 @@
 #pragma once
 
 #include <brayns/engine/json/adapters/VolumeAdapter.h>
-#include <brayns/json/JsonObjectMacro.h>
+
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(RawVolumeLoaderParameters)
-BRAYNS_JSON_OBJECT_ENTRY(Vector3ui, dimensions, "Volume grid size (x,y,z)")
-BRAYNS_JSON_OBJECT_ENTRY(Vector3f, spacing, "Volume grid cell spacing")
-BRAYNS_JSON_OBJECT_ENTRY(VolumeDataType, data_type, "Volume byte data type")
-BRAYNS_JSON_OBJECT_END()
+struct RawVolumeLoaderParameters
+{
+    Vector3ui dimensions{0};
+    Vector3f spacing{0};
+    VolumeDataType data_type = VolumeDataType::UnsignedChar;
+};
+
+template<>
+struct JsonAdapter<RawVolumeLoaderParameters> : ObjectAdapter<RawVolumeLoaderParameters>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("RawVolumeLoaderParameters");
+        builder
+            .getset(
+                "dimensions",
+                [](auto &object) -> auto & { return object.dimensions; },
+                [](auto &object, const auto &value) { object.dimensions = value; })
+            .description("Volume grid size XYZ");
+        builder
+            .getset(
+                "spacing",
+                [](auto &object) -> auto & { return object.spacing; },
+                [](auto &object, const auto &value) { object.spacing = value; })
+            .description("Volume grid cell spacing XYZ");
+        builder
+            .getset(
+                "data_type",
+                [](auto &object) { return object.data_type; },
+                [](auto &object, auto value) { object.data_type = value; })
+            .description("Volume byte data type");
+        return builder.build();
+    }
+};
 } // namespace brayns

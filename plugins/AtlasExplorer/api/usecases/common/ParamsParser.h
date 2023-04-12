@@ -19,7 +19,6 @@
  */
 
 #include <brayns/json/Json.h>
-#include <brayns/json/JsonSchemaValidator.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 class ParamsParser
@@ -29,7 +28,7 @@ public:
     static T parse(const brayns::JsonValue &payload)
     {
         const auto schema = brayns::Json::getSchema<T>();
-        const auto errors = brayns::JsonSchemaValidator::validate(payload, schema);
+        const auto errors = brayns::Json::validate(payload, schema);
 
         if (!errors.empty())
         {

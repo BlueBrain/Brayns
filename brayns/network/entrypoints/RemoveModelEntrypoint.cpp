@@ -46,6 +46,6 @@ void RemoveModelEntrypoint::onRequest(const Request &request)
     auto params = request.getParams();
     _models.removeModelInstancesById(params.ids);
     SimulationScanner::scanAndUpdate(_models, _simulation);
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 } // namespace brayns

@@ -20,29 +20,40 @@
 
 #pragma once
 
+#include <brayns/json/Json.h>
+
 #include <brayns/engine/json/adapters/MaterialAdapters.h>
-#include <brayns/json/JsonBuffer.h>
 
 namespace brayns
 {
-template<typename MaterialType>
+template<typename T>
 struct SetMaterialMessage
 {
     uint32_t model_id = 0;
-    JsonBuffer<MaterialType> material;
+    JsonBuffer<T> material;
 };
 
-#define BRAYNS_SET_MATERIAL_ADAPTER(TYPE) \
-    BRAYNS_JSON_ADAPTER_BEGIN(SetMaterialMessage<TYPE>) \
-    BRAYNS_JSON_ADAPTER_ENTRY(model_id, "Model ID") \
-    BRAYNS_JSON_ADAPTER_ENTRY(material, "Material parameters") \
-    BRAYNS_JSON_ADAPTER_END()
+template<typename T>
+struct JsonAdapter<SetMaterialMessage<T>> : ObjectAdapter<SetMaterialMessage<T>>
+{
+    using Builder = JsonObjectBuilder<SetMaterialMessage<T>>;
 
-BRAYNS_SET_MATERIAL_ADAPTER(CarPaint)
-BRAYNS_SET_MATERIAL_ADAPTER(Emissive)
-BRAYNS_SET_MATERIAL_ADAPTER(Glass)
-BRAYNS_SET_MATERIAL_ADAPTER(Matte)
-BRAYNS_SET_MATERIAL_ADAPTER(Metal)
-BRAYNS_SET_MATERIAL_ADAPTER(Phong)
-BRAYNS_SET_MATERIAL_ADAPTER(Plastic)
-}
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("SetMaterialMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
+            .description("ID of the model to apply the material");
+        builder
+            .getset(
+                "material",
+                [](auto &object) -> auto & { return object.material; },
+                [](auto &object, const auto &value) { object.material = value; })
+            .description("Material parameters");
+        return builder.build();
+    }
+};
+} // namespace brayns

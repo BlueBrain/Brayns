@@ -21,15 +21,37 @@
 
 #pragma once
 
-#include <brayns/json/JsonBuffer.h>
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/engine/json/adapters/ModelInstanceAdapter.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(UpdateModelMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "Model ID")
-BRAYNS_JSON_OBJECT_ENTRY(JsonBuffer<ModelInstance>, model, "Model data to update")
-BRAYNS_JSON_OBJECT_END()
+struct UpdateModelMessage
+{
+    uint32_t model_id = 0;
+    JsonBuffer<ModelInstance> model;
+};
+
+template<>
+struct JsonAdapter<UpdateModelMessage> : ObjectAdapter<UpdateModelMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("UpdateModelMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
+            .description("Model ID");
+        builder
+            .getset(
+                "model",
+                [](auto &object) -> auto & { return object.model; },
+                [](auto &object, const auto &value) { object.model = value; })
+            .description("Model data to update");
+        return builder.build();
+    }
+};
 } // namespace brayns

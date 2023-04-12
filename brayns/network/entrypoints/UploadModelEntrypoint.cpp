@@ -79,10 +79,10 @@ public:
         const brayns::UploadModelParams &params,
         const brayns::LoaderRegistry &loaders)
     {
-        auto &name = params.loader_name;
-        auto &type = params.type;
         try
         {
+            auto &name = params.loader_name;
+            auto &type = params.type;
             return loaders.getSuitableLoader("", type, name);
         }
         catch (const std::runtime_error &e)
@@ -105,46 +105,35 @@ public:
     }
 };
 
-class BinaryModelHandler
+class BinaryModelLoader
 {
 public:
-    BinaryModelHandler(
-        brayns::ModelManager &models,
+    static void load(
+        const brayns::UploadModelEntrypoint::Request &request,
+        brayns::ModelManager &manager,
         const brayns::LoaderRegistry &loaders,
         brayns::CancellationToken &token)
-        : _models(models)
-        , _loaders(loaders)
-        , _token(token)
-    {
-    }
-
-    void handle(const brayns::UploadModelEntrypoint::Request &request)
     {
         auto params = request.getParams();
         auto &data = request.getBinary();
 
         RequestValidator::validate(params, data);
 
-        auto progress = brayns::ProgressHandler(_token, request);
+        auto progress = brayns::ProgressHandler(token, request);
         auto blob = BlobLoader::load(params, data);
         progress.notify("Model uploaded", 0.5);
 
-        auto &loader = LoaderFinder::find(params, _loaders);
+        auto &loader = LoaderFinder::find(params, loaders);
         auto parameters = params.loader_properties;
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
         auto models = loader.loadFromBlob(blob, brayns::LoaderProgress(callback), parameters);
-        auto result = _models.add(std::move(models));
+        auto result = manager.add(std::move(models));
 
         auto loadInfo = LoadInfoFactory::create(params);
         brayns::AddLoadInfo::toInstances(loadInfo, result);
 
         request.reply(result);
     }
-
-private:
-    brayns::ModelManager &_models;
-    const brayns::LoaderRegistry &_loaders;
-    brayns::CancellationToken &_token;
 };
 } // namespace
 
@@ -179,8 +168,7 @@ bool UploadModelEntrypoint::isAsync() const
 
 void UploadModelEntrypoint::onRequest(const Request &request)
 {
-    BinaryModelHandler handler(_models, _loaders, _token);
-    handler.handle(request);
+    BinaryModelLoader::load(request, _models, _loaders, _token);
     SimulationScanner::scanAndUpdate(_models, _simulation);
 }
 

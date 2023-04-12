@@ -28,7 +28,7 @@
 
 namespace brayns
 {
-class RemoveModelEntrypoint : public Entrypoint<RemoveModelMessage, EmptyMessage>
+class RemoveModelEntrypoint : public Entrypoint<RemoveModelMessage, EmptyJson>
 {
 public:
     RemoveModelEntrypoint(ModelManager &models, SimulationParameters &simulation);

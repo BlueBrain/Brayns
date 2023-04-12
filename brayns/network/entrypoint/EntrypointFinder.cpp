@@ -21,7 +21,7 @@
 
 #include "EntrypointFinder.h"
 
-#include <brayns/json/JsonSchemaValidator.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
@@ -65,7 +65,7 @@ private:
 
     static void _validate(const brayns::JsonValue &params, const brayns::JsonSchema &schema)
     {
-        auto errors = brayns::JsonSchemaValidator::validate(params, schema);
+        auto errors = brayns::Json::validate(params, schema);
         if (!errors.empty())
         {
             throw brayns::InvalidParamsException("Invalid params schema", errors);

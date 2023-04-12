@@ -23,13 +23,38 @@
 
 #include <brayns/engine/components/Transform.h>
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(Transform)
-BRAYNS_JSON_ADAPTER_ENTRY(translation, "Translation XYZ", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(rotation, "Rotation XYZW", Required(false))
-BRAYNS_JSON_ADAPTER_ENTRY(scale, "Scale XYZ", Required(false))
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<Transform> : ObjectAdapter<Transform>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("Transform");
+        builder
+            .getset(
+                "translation",
+                [](auto &object) -> auto & { return object.translation; },
+                [](auto &object, const auto &value) { object.translation = value; })
+            .description("Translation XYZ")
+            .required(false);
+        builder
+            .getset(
+                "rotation",
+                [](auto &object) -> auto & { return object.rotation; },
+                [](auto &object, const auto &value) { object.rotation = value; })
+            .description("Rotation XYZW")
+            .required(false);
+        builder
+            .getset(
+                "scale",
+                [](auto &object) -> auto & { return object.scale; },
+                [](auto &object, const auto &value) { object.scale = value; })
+            .description("Scale XYZ")
+            .required(false);
+        return builder.build();
+    }
+};
 } // namespace brayns

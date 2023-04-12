@@ -23,12 +23,12 @@
 
 #include <brayns/engine/core/Engine.h>
 #include <brayns/engine/json/adapters/RendererAdapters.h>
-#include <brayns/json/JsonSchemaValidator.h>
+
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns
 {
-class GetRendererTypeEntrypoint final : public Entrypoint<EmptyMessage, std::string>
+class GetRendererTypeEntrypoint final : public Entrypoint<EmptyJson, std::string>
 {
 public:
     explicit GetRendererTypeEntrypoint(Engine &engine);
@@ -43,10 +43,10 @@ private:
 };
 
 template<typename T>
-class SetRendererEntrypoint : public Entrypoint<T, EmptyMessage>
+class SetRendererEntrypoint : public Entrypoint<T, EmptyJson>
 {
 public:
-    using Request = typename Entrypoint<T, EmptyMessage>::Request;
+    using Request = typename Entrypoint<T, EmptyJson>::Request;
 
     explicit SetRendererEntrypoint(Engine &engine)
         : _engine(engine)
@@ -63,7 +63,7 @@ public:
         }
         request.getParams(data);
         renderer.set(data);
-        request.reply(EmptyMessage());
+        request.reply(EmptyJson());
     }
 
 private:
@@ -89,10 +89,10 @@ public:
 };
 
 template<typename T>
-class GetRendererEntrypoint : public Entrypoint<EmptyMessage, T>
+class GetRendererEntrypoint : public Entrypoint<EmptyJson, T>
 {
 public:
-    using Request = typename Entrypoint<EmptyMessage, T>::Request;
+    using Request = typename Entrypoint<EmptyJson, T>::Request;
 
     explicit GetRendererEntrypoint(Engine &engine)
         : _engine(engine)

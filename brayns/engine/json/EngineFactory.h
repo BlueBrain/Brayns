@@ -24,8 +24,9 @@
 #include <brayns/engine/light/Light.h>
 #include <brayns/engine/material/Material.h>
 #include <brayns/engine/renderer/Renderer.h>
+
 #include <brayns/json/Json.h>
-#include <brayns/json/JsonSchemaValidator.h>
+
 #include <brayns/utils/string/StringJoiner.h>
 
 #include "EngineObjectData.h"
@@ -62,11 +63,10 @@ public:
         T deserialize(const JsonValue &payload) const override
         {
             auto schema = Json::getSchema<SubT>();
-            auto schemaErrors = JsonSchemaValidator::validate(payload, schema);
-            if (!schemaErrors.empty())
+            auto errors = Json::validate(payload, schema);
+            if (!errors.empty())
             {
-                auto errors = StringJoiner::join(schemaErrors, "\n");
-                throw std::invalid_argument("Cannot parse json: " + errors);
+                throw JsonSchemaException("Invalid engine JSON schema", errors);
             }
             auto data = Json::deserialize<SubT>(payload);
             return T(data);

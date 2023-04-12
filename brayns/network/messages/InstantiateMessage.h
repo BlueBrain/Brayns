@@ -20,14 +20,37 @@
 
 #pragma once
 
-#include <brayns/json/JsonObjectMacro.h>
+#include <brayns/json/Json.h>
 
 #include <brayns/engine/json/adapters/TransformAdapter.h>
 
 namespace brayns
 {
-BRAYNS_JSON_OBJECT_BEGIN(InstantiateMessage)
-BRAYNS_JSON_OBJECT_ENTRY(uint32_t, model_id, "Model to instantiate")
-BRAYNS_JSON_OBJECT_ENTRY(std::vector<Transform>, transforms, "New instances transforms")
-BRAYNS_JSON_OBJECT_END()
-}
+struct InstantiateMessage
+{
+    uint32_t model_id = 0;
+    std::vector<Transform> transforms;
+};
+
+template<>
+struct JsonAdapter<InstantiateMessage> : ObjectAdapter<InstantiateMessage>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("InstantiateMessage");
+        builder
+            .getset(
+                "model_id",
+                [](auto &object) { return object.model_id; },
+                [](auto &object, auto value) { object.model_id = value; })
+            .description("ID of the model to instantiate");
+        builder
+            .getset(
+                "transforms",
+                [](auto &object) -> auto & { return object.transforms; },
+                [](auto &object, auto value) { object.transforms = std::move(value); })
+            .description("Transformations to apply to the new instances");
+        return builder.build();
+    }
+};
+} // namespace brayns

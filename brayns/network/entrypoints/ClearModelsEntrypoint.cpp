@@ -43,6 +43,6 @@ void ClearModelsEntrypoint::onRequest(const Request &request)
 {
     _models.removeAllModelInstances();
     _simulation.reset();
-    request.reply(EmptyMessage());
+    request.reply(EmptyJson());
 }
 } // namespace brayns

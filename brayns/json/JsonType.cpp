@@ -21,19 +21,24 @@
 
 #include "JsonType.h"
 
+#include <stdexcept>
+
 namespace brayns
 {
-bool JsonTypeHelper::check(JsonType required, JsonType type)
+EnumMap<JsonType> EnumReflector<JsonType>::reflect()
 {
-    return required == type || (required == JsonType::Number && type == JsonType::Integer);
+    return {
+        {"undefined", JsonType::Undefined},
+        {"null", JsonType::Null},
+        {"boolean", JsonType::Boolean},
+        {"integer", JsonType::Integer},
+        {"number", JsonType::Number},
+        {"string", JsonType::String},
+        {"array", JsonType::Array},
+        {"object", JsonType::Object}};
 }
 
-bool JsonTypeHelper::isNumeric(JsonType type)
-{
-    return type == JsonType::Integer || type == JsonType::Number;
-}
-
-JsonType GetJsonType::fromJson(const JsonValue &json)
+JsonType JsonTypeInfo::getType(const JsonValue &json)
 {
     if (json.isEmpty())
     {
@@ -63,6 +68,38 @@ JsonType GetJsonType::fromJson(const JsonValue &json)
     {
         return JsonType::Object;
     }
-    return JsonType::Undefined;
+    throw std::invalid_argument("Value is not a JSON type");
+}
+
+const JsonArray &JsonExtractor::extractArray(const JsonValue &json)
+{
+    return *json.extract<JsonArray::Ptr>();
+}
+
+const JsonObject &JsonExtractor::extractObject(const JsonValue &json)
+{
+    return *json.extract<JsonObject::Ptr>();
+}
+
+JsonArray &JsonFactory::emplaceArray(JsonValue &json)
+{
+    auto array = Poco::makeShared<JsonArray>();
+    json = array;
+    return *array;
+}
+
+JsonObject &JsonFactory::emplaceObject(JsonValue &json)
+{
+    auto object = Poco::makeShared<JsonObject>();
+    json = object;
+    return *object;
 }
 } // namespace brayns
+
+namespace std
+{
+std::ostream &operator<<(std::ostream &stream, const brayns::JsonType &type)
+{
+    return stream << brayns::EnumInfo::getName(type);
+}
+} // namespace std

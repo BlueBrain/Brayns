@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-class CancelEntrypoint : public Entrypoint<CancelParams, EmptyMessage>
+class CancelEntrypoint : public Entrypoint<CancelParams, EmptyJson>
 {
 public:
     explicit CancelEntrypoint(TaskManager &tasks);

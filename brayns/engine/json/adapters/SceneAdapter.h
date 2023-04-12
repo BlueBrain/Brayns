@@ -21,39 +21,27 @@
 #pragma once
 
 #include <brayns/engine/scene/Scene.h>
-#include <brayns/json/JsonAdapterMacro.h>
+
+#include <brayns/json/Json.h>
 
 #include "BoundsAdapter.h"
 #include "ModelInstanceAdapter.h"
 
 namespace brayns
 {
-class SceneProxy
+template<>
+struct JsonAdapter<Scene> : ObjectAdapter<Scene>
 {
-public:
-    explicit SceneProxy(const Scene *scene = nullptr)
-        : _scene(scene)
+    static JsonObjectInfo reflect()
     {
+        auto builder = Builder("Scene");
+        builder.get("bounds", [](auto &object) { return object.getBounds(); }).description("Scene bounds");
+        builder
+            .get(
+                "models",
+                [](auto &object) -> auto & { return object.getModels().getAllModelInstances(); })
+            .description("Scene models");
+        return builder.build();
     }
-
-    Bounds getBounds() const noexcept
-    {
-        assert(_scene);
-        return _scene->getBounds();
-    }
-
-    const std::vector<std::unique_ptr<ModelInstance>> &getAllInstances() const noexcept
-    {
-        assert(_scene);
-        return _scene->getModels().getAllModelInstances();
-    }
-
-private:
-    const Scene *_scene;
 };
-
-BRAYNS_JSON_ADAPTER_BEGIN(SceneProxy)
-BRAYNS_JSON_ADAPTER_GET("bounds", getBounds, "Scene bounds")
-BRAYNS_JSON_ADAPTER_GET("models", getAllInstances, "Scene models")
-BRAYNS_JSON_ADAPTER_END()
-}
+} // namespace brayns

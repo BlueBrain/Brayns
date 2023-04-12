@@ -30,29 +30,21 @@ namespace brayns
 {
 std::string Json::stringify(const JsonValue &json)
 {
-    std::ostringstream stream;
+    auto stream = std::ostringstream();
     Poco::JSON::Stringifier::condense(json, stream);
     return stream.str();
 }
 
 JsonValue Json::parse(const std::string &json)
 {
-    Poco::JSON::Parser parser;
+    auto parser = Poco::JSON::Parser();
     return parser.parse(json);
 }
 
-JsonSchema JsonAdapter<JsonValue>::getSchema()
+JsonErrors Json::validate(const JsonValue &json, const JsonSchema &schema)
 {
-    return JsonSchemaHelper::getWildcardSchema();
-}
-
-void JsonAdapter<JsonValue>::serialize(const JsonValue &value, JsonValue &json)
-{
-    json = value;
-}
-
-void JsonAdapter<JsonValue>::deserialize(const JsonValue &json, JsonValue &value)
-{
-    value = json;
+    auto errors = JsonErrorBuilder();
+    JsonValidator::validate(json, schema, errors);
+    return errors.build();
 }
 } // namespace brayns

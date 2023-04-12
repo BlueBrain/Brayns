@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/json/JsonAdapterMacro.h>
+#include <brayns/json/Json.h>
 
 #include "LoadInfoAdapter.h"
 #include "TransformAdapter.h"
@@ -30,9 +30,22 @@
 
 namespace brayns
 {
-BRAYNS_JSON_ADAPTER_BEGIN(ModelInfo)
-BRAYNS_JSON_ADAPTER_GET("load_info", getLoadInfo, "Model load information")
-BRAYNS_JSON_ADAPTER_GET("metadata", getMetadata, "Model-specific metadata")
-BRAYNS_JSON_ADAPTER_GET("base_transform", getBaseTransform, "Model transform")
-BRAYNS_JSON_ADAPTER_END()
+template<>
+struct JsonAdapter<ModelInfo> : ObjectAdapter<ModelInfo>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("ModelInfo");
+        builder.get("load_info", [](auto &object) { return object.getLoadInfo(); })
+            .description("Model load info")
+            .required(false);
+        builder.get("metadata", [](auto &object) { return object.getMetadata(); })
+            .description("Model-specific metadata")
+            .required(false);
+        builder.get("base_transform", [](auto &object) { return object.getBaseTransform(); })
+            .description("Model transform")
+            .required(false);
+        return builder.build();
+    }
+};
 } // namespace brayns
