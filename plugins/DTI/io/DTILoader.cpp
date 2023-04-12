@@ -86,7 +86,7 @@ public:
         auto errors = brayns::Json::validate(json, schema);
         if (!errors.empty())
         {
-            throw brayns::JsonSchemaException("Invalid DTI configuration", std::move(errors));
+            throw brayns::JsonSchemaException("Invalid DTI configuration", errors);
         }
         return brayns::Json::deserialize<DTIConfiguration>(json);
     }

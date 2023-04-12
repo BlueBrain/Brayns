@@ -66,7 +66,7 @@ public:
             auto errors = Json::validate(payload, schema);
             if (!errors.empty())
             {
-                throw JsonSchemaException("Invalid engine JSON schema", std::move(errors));
+                throw JsonSchemaException("Invalid engine JSON schema", errors);
             }
             auto data = Json::deserialize<SubT>(payload);
             return T(data);

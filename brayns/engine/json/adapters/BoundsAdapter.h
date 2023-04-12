@@ -36,12 +36,12 @@ struct JsonAdapter<Bounds> : ObjectAdapter<Bounds>
             .get(
                 "min",
                 [](auto &object) -> auto & { return object.getMin(); })
-            .description("Bottom back left corner");
+            .description("Bottom back left corner XYZ");
         builder
             .get(
                 "max",
                 [](auto &object) -> auto & { return object.getMax(); })
-            .description("Top front right corner");
+            .description("Top front right corner XYZ");
         return builder.build();
     }
 };
