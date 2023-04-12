@@ -96,11 +96,11 @@ public:
     static Poco::Net::Context::Ptr create(const brayns::NetworkParameters &parameters)
     {
         auto usage = Poco::Net::Context::TLS_SERVER_USE;
-        auto caLocation = parameters.getCALocation();
-        auto context = Poco::makeAuto<Poco::Net::Context>(usage, caLocation);
-        auto certificateFile = parameters.getCertificateFile();
-        auto certificate = Poco::Crypto::X509Certificate(certificateFile);
-        context->useCertificate(certificate);
+        auto params = Poco::Net::Context::Params();
+        params.verificationMode = Poco::Net::Context::VERIFY_NONE;
+        params.caLocation = parameters.getCALocation();
+        params.certificateFile = parameters.getCertificateFile();
+        auto context = Poco::makeAuto<Poco::Net::Context>(usage, params);
         auto privateKeyFile = parameters.getPrivateKeyFile();
         auto privateKeyPassphrase = parameters.getPrivateKeyPassphrase();
         auto privateKey = Poco::Crypto::EVPPKey("", privateKeyFile, privateKeyPassphrase);
