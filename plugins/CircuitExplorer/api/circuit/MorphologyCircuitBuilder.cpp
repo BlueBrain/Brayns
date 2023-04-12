@@ -72,6 +72,17 @@ public:
     }
 };
 
+class MorphIOSingletonFixer
+{
+public:
+    static void fix(const MorphologyMap &map)
+    {
+        auto it = map.pathToCellIndices.begin();
+        auto path = it->first;
+        NeuronMorphologyReader::read(path, true, true, true);
+    }
+};
+
 class ParallelMorphologyLoader
 {
 public:
@@ -91,6 +102,9 @@ public:
         auto axon = morphologyParameters.load_axon;
         auto dendrites = morphologyParameters.load_dendrites;
         auto pipeline = NeuronMorphologyPipeline::fromParameters(morphologyParameters);
+
+        // TODO: Remove once a new version of MorphIO is released (current version is 3.3.4)
+        MorphIOSingletonFixer::fix(morphologyMap);
 
         auto loadFn = [&](const std::string &path, const std::vector<size_t> &indices)
         {
