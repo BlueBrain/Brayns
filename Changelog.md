@@ -1,5 +1,19 @@
 # Change Log
 
+## [3.1.1](https://github.com/BlueBrain/Brayns/tree/3.1.1)
+
+**Implemented fixes and enhancements:**
+
+- JSON refactoring [\#1168](https://github.com/BlueBrain/Brayns/pull/1168)
+- Fixed SSL certificate chain issue [\#1171](https://github.com/BlueBrain/Brayns/pull/1171)
+- Self adjust progressive framebuffer [\#1169](https://github.com/BlueBrain/Brayns/pull/1169)
+- Temporary MorphIO singleton race condition fix [\#1170](https://github.com/BlueBrain/Brayns/pull/1170)
+- Fixed SONATA efferent edge loading [\#1167](https://github.com/BlueBrain/Brayns/pull/1167)
+- Fixed SONATA nodeset selection [\#1166](https://github.com/BlueBrain/Brayns/pull/1166)
+- C++20 code compliance [\#1165](https://github.com/BlueBrain/Brayns/pull/1165)
+- Updated Poco dependency version [\#1164](https://github.com/BlueBrain/Brayns/pull/1164)
+- Updated libsonata dependency version [\#1163](https://github.com/BlueBrain/Brayns/pull/1163)
+
 ## [3.1.0](https://github.com/BlueBrain/Brayns/tree/3.1.0)
 
 **Minor breaking changes**

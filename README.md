@@ -46,12 +46,13 @@ Optionally, to build the core plugins of Brayns, the following components are re
 Brayns uses further dependencies, but if they are not present on the system, it will download them by itself during build.
 
 * glm 0.9.9.8 (https://github.com/g-truc/glm/tree/0.9.9.8)
-* Poco libraries 1.11.1 (https://github.com/pocoproject/poco/tree/poco-1.11.1-release)
+* Poco libraries 1.12.4 (https://github.com/pocoproject/poco/tree/poco-1.12.4-release)
 * spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
 * stb (https://github.com/nothings/stb)
-* libsonata 0.1.13 (https://github.com/BlueBrain/libsonata/tree/v0.1.13)
+* tinyexr (https://github.com/syoyo/tinyexr/tree/v1.0.1)
+* libsonata 0.1.17 (https://github.com/BlueBrain/libsonata/tree/v0.1.17)
 * MVDTool 2.4.4 (https://github.com/BlueBrain/MVDTool/tree/v2.4.4)
-* MorphIO 3.3.3 (https://github.com/BlueBrain/MorphIO/tree/v3.3.3)
+* MorphIO 3.3.4 (https://github.com/BlueBrain/MorphIO/tree/v3.3.4)
 * Brion 3.3.9 (https://github.com/BlueBrain/Brion/tree/3.3.9)
 
 ### Build command

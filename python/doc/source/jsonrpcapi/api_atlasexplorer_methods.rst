@@ -106,7 +106,7 @@ Visualizes the specified use case based on the atlas data of the given model.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -116,7 +116,7 @@ Visualizes the specified use case based on the atlas data of the given model.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {

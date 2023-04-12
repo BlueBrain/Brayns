@@ -17,7 +17,7 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT sonata_FOUND AND
         FetchContent_Declare(
             libsonata
             GIT_REPOSITORY https://github.com/BlueBrain/libsonata.git
-            GIT_TAG v0.1.17
+            GIT_TAG v0.1.18
             GIT_SHALLOW OFF # Required for its own CMakeLists.txt not to fail
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsonata

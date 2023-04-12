@@ -103,7 +103,7 @@ Adds a list of axis-aligned bound limited planes.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -113,7 +113,7 @@ Adds a list of axis-aligned bound limited planes.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -360,7 +360,7 @@ Adds a list of boxes to the scene.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -370,7 +370,7 @@ Adds a list of boxes to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -627,7 +627,7 @@ Adds a list of capsules to the scene.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -637,7 +637,7 @@ Adds a list of capsules to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -854,7 +854,7 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -864,7 +864,7 @@ Old way of adding clip plane, use 'add-clipping-planes' instead.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1126,7 +1126,7 @@ Add a list of axis-aligned bound limited clipping planes.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1136,7 +1136,7 @@ Add a list of axis-aligned bound limited clipping planes.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1377,7 +1377,7 @@ Add a list of clipping boxes to the scene.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1387,7 +1387,7 @@ Add a list of clipping boxes to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1638,7 +1638,7 @@ Add a list of clipping capsules to the scene.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1648,7 +1648,7 @@ Add a list of clipping capsules to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1879,7 +1879,7 @@ Add a list of clipping planes to the scene.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -1889,7 +1889,7 @@ Add a list of clipping planes to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2125,7 +2125,7 @@ Add a list of clipping spheres to the scene.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2135,7 +2135,7 @@ Add a list of clipping spheres to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2355,7 +2355,7 @@ Adds an ambient light which iluminates the scene from all directions.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2365,7 +2365,7 @@ Adds an ambient light which iluminates the scene from all directions.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2599,7 +2599,7 @@ Adds a directional light which iluminates the scene from a given direction.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2609,7 +2609,7 @@ Adds a directional light which iluminates the scene from a given direction.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2871,7 +2871,7 @@ Add a quad light which iluminates the scene on a specific area.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -2881,7 +2881,7 @@ Add a quad light which iluminates the scene on a specific area.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -3103,7 +3103,7 @@ progress notifications.
                     "readOnly": true,
                     "properties": {
                         "max": {
-                            "description": "Top front right corner",
+                            "description": "Top front right corner XYZ",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -3113,7 +3113,7 @@ progress notifications.
                             "maxItems": 3
                         },
                         "min": {
-                            "description": "Bottom back left corner",
+                            "description": "Bottom back left corner XYZ",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -3351,7 +3351,7 @@ Adds a list of planes to the scene.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -3361,7 +3361,7 @@ Adds a list of planes to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -3603,7 +3603,7 @@ Adds a list of spheres to the scene.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -3613,7 +3613,7 @@ Adds a list of spheres to the scene.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -4907,7 +4907,7 @@ Get all the information of the given model.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -4917,7 +4917,7 @@ Get all the information of the given model.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -5220,7 +5220,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -5230,7 +5230,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -5261,7 +5261,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                             "readOnly": true,
                             "properties": {
                                 "max": {
-                                    "description": "Top front right corner",
+                                    "description": "Top front right corner XYZ",
                                     "type": "array",
                                     "readOnly": true,
                                     "items": {
@@ -5271,7 +5271,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                                     "maxItems": 3
                                 },
                                 "min": {
-                                    "description": "Bottom back left corner",
+                                    "description": "Bottom back left corner XYZ",
                                     "type": "array",
                                     "readOnly": true,
                                     "items": {
@@ -5704,7 +5704,7 @@ Creates new instances of the given model. The underneath data is shared across a
                     "readOnly": true,
                     "properties": {
                         "max": {
-                            "description": "Top front right corner",
+                            "description": "Top front right corner XYZ",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -5714,7 +5714,7 @@ Creates new instances of the given model. The underneath data is shared across a
                             "maxItems": 3
                         },
                         "min": {
-                            "description": "Bottom back left corner",
+                            "description": "Bottom back left corner XYZ",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -7049,7 +7049,7 @@ Update the model with the given values and return its new state.
                         "readOnly": true,
                         "properties": {
                             "max": {
-                                "description": "Top front right corner",
+                                "description": "Top front right corner XYZ",
                                 "type": "array",
                                 "readOnly": true,
                                 "items": {
@@ -7059,7 +7059,7 @@ Update the model with the given values and return its new state.
                                 "maxItems": 3
                             },
                             "min": {
-                                "description": "Bottom back left corner",
+                                "description": "Bottom back left corner XYZ",
                                 "type": "array",
                                 "readOnly": true,
                                 "items": {
@@ -7253,7 +7253,7 @@ Update the model with the given values and return its new state.
                 "readOnly": true,
                 "properties": {
                     "max": {
-                        "description": "Top front right corner",
+                        "description": "Top front right corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -7263,7 +7263,7 @@ Update the model with the given values and return its new state.
                         "maxItems": 3
                     },
                     "min": {
-                        "description": "Bottom back left corner",
+                        "description": "Bottom back left corner XYZ",
                         "type": "array",
                         "readOnly": true,
                         "items": {
@@ -7485,7 +7485,7 @@ progress notifications.
                     "readOnly": true,
                     "properties": {
                         "max": {
-                            "description": "Top front right corner",
+                            "description": "Top front right corner XYZ",
                             "type": "array",
                             "readOnly": true,
                             "items": {
@@ -7495,7 +7495,7 @@ progress notifications.
                             "maxItems": 3
                         },
                         "min": {
-                            "description": "Bottom back left corner",
+                            "description": "Bottom back left corner XYZ",
                             "type": "array",
                             "readOnly": true,
                             "items": {
