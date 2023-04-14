@@ -220,6 +220,10 @@ TEST_CASE("Parsing")
         CHECK_EQ(internal.test2, 2);
         CHECK_EQ(internal.test3, 3);
     }
+}
+
+TEST_CASE("Stringify")
+{
     SUBCASE("Stringify")
     {
         auto ref = R"({"get":2,"getset":1,"methods":4})";
