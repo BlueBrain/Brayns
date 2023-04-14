@@ -65,10 +65,12 @@ struct JsonAdapter<Internal> : ObjectAdapter<Internal>
             [](auto &object, auto value) { object.test1 = value; });
         builder.get("get", [](auto &object) { return object.test2; });
         builder.set<int>("set", [](auto &object, auto value) { object.test3 = value; });
-        builder.getset(
-            "methods",
-            [](auto &object) { return object.get(); },
-            [](auto &object, auto value) { object.set(value); });
+        builder
+            .getset(
+                "methods",
+                [](auto &object) { return object.get(); },
+                [](auto &object, auto value) { object.set(value); })
+            .defaultValue(1);
         return builder.build();
     }
 };
@@ -209,6 +211,14 @@ TEST_CASE("Parsing")
         CHECK_EQ(internal.test1, 1);
         CHECK_EQ(internal.test2, 6);
         CHECK_EQ(internal.test3, 2);
+    }
+    SUBCASE("Default")
+    {
+        auto json = R"({"getset": 1, "set": 3})";
+        auto internal = brayns::Json::parse<Internal>(json);
+        CHECK_EQ(internal.test1, 1);
+        CHECK_EQ(internal.test2, 2);
+        CHECK_EQ(internal.test3, 3);
     }
     SUBCASE("Stringify")
     {

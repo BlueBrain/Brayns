@@ -64,6 +64,10 @@ void JsonObjectHandler::deserialize(const JsonObjectInfo &object, const JsonValu
             continue;
         }
         auto child = result.get(property.name);
+        if (child.isEmpty())
+        {
+            child = property.schema.defaultValue;
+        }
         if (child.isEmpty() && !property.schema.required)
         {
             continue;
