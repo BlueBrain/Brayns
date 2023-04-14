@@ -163,7 +163,8 @@ struct JsonAdapter<ErrorInfo> : ObjectAdapter<ErrorInfo>
             .get(
                 "data",
                 [](auto &object) -> auto & { return object.data; })
-            .description("Additional error info");
+            .description("Additional error info")
+            .required(false);
         return builder.build();
     }
 };
