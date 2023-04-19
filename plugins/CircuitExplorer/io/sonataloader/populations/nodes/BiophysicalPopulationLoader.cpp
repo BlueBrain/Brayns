@@ -24,6 +24,31 @@
 #include <io/sonataloader/populations/nodes/common/NeuronReportFactory.h>
 #include <io/sonataloader/populations/nodes/common/SomaImporter.h>
 
+#include <brayns/utils/Log.h>
+
+namespace
+{
+class RotationExtractor
+{
+public:
+    static std::vector<brayns::Quaternion> extract(
+        const bbp::sonata::NodePopulation &population,
+        const bbp::sonata::Selection &selection)
+    {
+        try
+        {
+            return sonataloader::Cells::getRotations(population, selection);
+        }
+        catch (...)
+        {
+        }
+
+        brayns::Log::warn("[CE] Cannot retrieve '{}' rotations, using identity", population.name());
+        return std::vector<brayns::Quaternion>(selection.flatSize());
+    }
+};
+}
+
 namespace sonataloader
 {
 std::string_view BiophysicalPopulationLoader::getPopulationType() const noexcept
@@ -47,7 +72,7 @@ void BiophysicalPopulationLoader::load(NodeLoadContext &context) const
 
     auto &population = context.population;
     auto &selection = context.selection;
-    auto rotations = Cells::getRotations(population, selection);
+    auto rotations = RotationExtractor::extract(population, selection);
     MorphologyImporter::import(context, rotations);
 }
 } // namespace sonataloader
