@@ -86,9 +86,8 @@ public:
             return selection;
         }
 
-        auto flat = selection.flatten();
-        flat.resize(limit);
-        return bbp::sonata::Selection::fromValues(flat);
+        auto percentage = static_cast<float>(limit) / static_cast<float>(selection.flatSize());
+        return sonataloader::PercentageFilter::filter(selection, percentage);
     }
 };
 }
