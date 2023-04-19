@@ -75,6 +75,22 @@ public:
         }
     }
 };
+
+class NodeCountLimiter
+{
+public:
+    static bbp::sonata::Selection limit(const bbp::sonata::Selection &selection, size_t limit)
+    {
+        if (selection.flatSize() <= limit)
+        {
+            return selection;
+        }
+
+        auto flat = selection.flatten();
+        flat.resize(limit);
+        return bbp::sonata::Selection::fromValues(flat);
+    }
+};
 }
 
 namespace sonataloader
@@ -127,7 +143,7 @@ bbp::sonata::Selection NodeSelector::select(const Config &config, const SonataNo
             result = result & reportSelection;
         }
         SelectionChecker::check(result, nodePopulation);
-        return result;
+        return NodeCountLimiter::limit(result, params.node_count_limit);
     }
 
     auto result = NodeSetFilter::filter(config, nodePopulation, nodeSets);
@@ -138,9 +154,9 @@ bbp::sonata::Selection NodeSelector::select(const Config &config, const SonataNo
     }
 
     result = PercentageFilter::filter(result, percentage);
-    SelectionChecker::check(result, nodePopulation);
 
-    return result;
+    SelectionChecker::check(result, nodePopulation);
+    return NodeCountLimiter::limit(result, params.node_count_limit);
 }
 
 bbp::sonata::Selection EdgeSelector::select(

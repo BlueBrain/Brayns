@@ -39,6 +39,12 @@ class SonataNodes:
     density: float | None = None
     names: list[str] | None = None
     ids: list[int] | None = None
+    node_count_limit: int | None = None
+
+    def limit(self, node_count_limit) -> SonataNodes:
+        """Limit the number nodes to be loaded."""
+        self.node_count_limit = node_count_limit
+        return self
 
     @staticmethod
     def all() -> SonataNodes:
@@ -261,6 +267,8 @@ def _serialize_nodes(nodes: SonataNodes) -> dict[str, Any]:
         message["node_sets"] = nodes.names
     if nodes.ids is not None:
         message["node_ids"] = nodes.ids
+    if nodes.node_count_limit is not None:
+        message["node_count_limit"] = nodes.node_count_limit
     return message
 
 
