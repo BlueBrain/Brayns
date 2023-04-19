@@ -30,6 +30,8 @@ namespace brayns
 class IColorMethod
 {
 public:
+    virtual ~IColorMethod() = default;
+
     virtual std::string getName() const = 0;
     virtual std::vector<std::string> getValues(Components &components) const = 0;
     virtual void apply(Components &components, const ColorMethodInput &input) const = 0;

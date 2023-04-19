@@ -26,5 +26,7 @@
 class INeuronMorphologyProcessor
 {
 public:
+    virtual ~INeuronMorphologyProcessor() = default;
+
     virtual void process(NeuronMorphology &morphology) const = 0;
 };

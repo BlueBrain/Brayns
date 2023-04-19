@@ -38,7 +38,7 @@ public:
     };
 
 public:
-    void reset();
+    void reset() override;
     void readGidRowFile(const std::string &path) override;
     void readStreamlinesFile(const std::string &path) override;
     void buildGeometry(float radius, brayns::Model &model) override;

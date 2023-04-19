@@ -15,7 +15,6 @@ variables:
   SPACK_PACKAGE_NAME: brayns
   SPACK_PACKAGE_COMPILER: gcc
   SPACK_PACKAGE_REF: ""
-  SPACK_PACKAGE_SPEC: ^ospray@2.10.0
 
 spack_setup:
   extends: .spack_setup_ccache
