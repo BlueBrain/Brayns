@@ -41,7 +41,7 @@ class SonataNodes:
     ids: list[int] | None = None
     node_count_limit: int | None = None
 
-    def limit(self, node_count_limit) -> SonataNodes:
+    def limit(self, node_count_limit: int) -> SonataNodes:
         """Limit the number nodes to be loaded."""
         self.node_count_limit = node_count_limit
         return self
