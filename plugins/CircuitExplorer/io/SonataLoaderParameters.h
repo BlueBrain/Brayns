@@ -45,6 +45,7 @@ struct SonataNodePopulationParameters
     std::vector<std::string> node_sets;
     float node_percentage = 0;
     std::vector<uint64_t> node_ids;
+    size_t node_count_limit = 0;
     sonataloader::ReportType report_type = sonataloader::ReportType::None;
     std::string report_name;
     float spike_transition_time = 0;
@@ -180,6 +181,13 @@ struct JsonAdapter<SonataNodePopulationParameters> : ObjectAdapter<SonataNodePop
                 [](auto &object) -> auto & { return object.node_ids; },
                 [](auto &object, auto value) { object.node_ids = std::move(value); })
             .description("List of node IDs to load (invalidates 'node_percentage' and 'node_sets')")
+            .required(false);
+        builder
+            .getset(
+                "node_count_limit",
+                [](auto &object) -> auto & { return object.node_count_limit; },
+                [](auto &object, auto value) { object.node_count_limit = value; })
+            .description("Maximum number of nodes to load")
             .required(false);
         builder
             .getset(
