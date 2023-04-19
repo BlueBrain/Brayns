@@ -81,7 +81,7 @@ class NodeCountLimiter
 public:
     static bbp::sonata::Selection limit(const bbp::sonata::Selection &selection, size_t limit)
     {
-        if (selection.flatSize() <= limit)
+        if (limit == 0 || selection.flatSize() <= limit)
         {
             return selection;
         }
