@@ -1,5 +1,13 @@
 # Change Log
 
+## [3.1.2](https://github.com/BlueBrain/Brayns/tree/3.1.2)
+
+**Implemented fixes and enhancements:**
+
+- Sonata node orientation is now optional [\#1175](https://github.com/BlueBrain/Brayns/pull/1175)
+- Node count limit added for Sonata loader [\#1174](https://github.com/BlueBrain/Brayns/pull/1174)
+- Fix bug with JSON default values [\#1173](https://github.com/BlueBrain/Brayns/pull/1173)
+
 ## [3.1.1](https://github.com/BlueBrain/Brayns/tree/3.1.1)
 
 **Implemented fixes and enhancements:**
