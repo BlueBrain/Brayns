@@ -117,8 +117,6 @@ ADD . ${BRAYNS_SRC}
 
 # Install Brayns
 # https://github.com/BlueBrain/Brayns
-
-# TODO: "|| exit 0"  hack to be removed as soon as MVDTool export issue is fixed.
 RUN cd ${BRAYNS_SRC} \
    && mkdir -p build \
    && cd build \

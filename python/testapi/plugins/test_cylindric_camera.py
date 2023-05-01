@@ -18,15 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-# from testapi.core.test_camera import run_projection_tests
+from testapi.core.test_camera import run_projection_tests
 from testapi.simple_test_case import SimpleTestCase
 
-# import brayns
+import brayns
 
 
 class TestCylindricCamera(SimpleTestCase):
     def test_cylindric_projection(self) -> None:
-        """projection = brayns.CylindricProjection(
+        projection = brayns.CylindricProjection(
             fovy=brayns.Fovy(45, degrees=True),
         )
-        run_projection_tests(self, projection)"""
+        run_projection_tests(self, projection)
