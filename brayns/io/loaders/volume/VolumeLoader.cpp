@@ -39,7 +39,7 @@ namespace
 class MhdRequiredKeys
 {
 public:
-    inline static const std::vector<std::string> requiredKeys =
+    static inline const std::vector<std::string> requiredKeys =
         {"ObjectType", "DimSize", "ElementSpacing", "ElementType", "ElementDataFile"};
 
     static void check(const std::unordered_map<std::string, std::string> &mhd)
@@ -92,7 +92,7 @@ public:
 class MhdDataTypeConverter
 {
 public:
-    inline static const std::unordered_map<std::string, brayns::VolumeDataType> converter = {
+    static inline const std::unordered_map<std::string, brayns::VolumeDataType> converter = {
         {"MET_FLOAT", brayns::VolumeDataType::Float},
         {"MET_DOUBLE", brayns::VolumeDataType::Double},
         {"MET_UCHAR", brayns::VolumeDataType::UnsignedChar},
@@ -179,9 +179,9 @@ private:
 class ModelBuilder
 {
 public:
-    explicit ModelBuilder(brayns::Model &model)
-        : _components(model.getComponents())
-        , _systems(model.getSystems())
+    explicit ModelBuilder(brayns::Model &model):
+        _components(model.getComponents()),
+        _systems(model.getSystems())
     {
     }
 
@@ -250,8 +250,9 @@ std::vector<std::string> RawVolumeLoader::getSupportedExtensions() const
     return {"raw"};
 }
 
-std::vector<std::shared_ptr<Model>> MHDVolumeLoader::importFromBlob(const Blob &blob, const LoaderProgress &callback)
-    const
+std::vector<std::shared_ptr<Model>> MHDVolumeLoader::importFromBlob(
+    const Blob &blob,
+    const LoaderProgress &callback) const
 {
     (void)blob;
     (void)callback;

@@ -86,7 +86,7 @@ public:
 class ParallelMorphologyLoader
 {
 public:
-    inline static constexpr size_t maxThreads = 800;
+    static inline constexpr size_t maxThreads = 800;
 
     static std::vector<NeuronGeometry> load(
         const MorphologyMap &morphologyMap,
@@ -150,10 +150,10 @@ public:
 class ModelBuilder
 {
 public:
-    explicit ModelBuilder(brayns::Model &model)
-        : _components(model.getComponents())
-        , _systems(model.getSystems())
-        , _modelType(model.getType())
+    explicit ModelBuilder(brayns::Model &model):
+        _components(model.getComponents()),
+        _systems(model.getSystems()),
+        _modelType(model.getType())
     {
     }
 
@@ -213,8 +213,10 @@ private:
 };
 }
 
-std::vector<CellCompartments>
-    MorphologyCircuitBuilder::build(brayns::Model &model, Context context, ProgressUpdater &updater)
+std::vector<CellCompartments> MorphologyCircuitBuilder::build(
+    brayns::Model &model,
+    Context context,
+    ProgressUpdater &updater)
 {
     auto &morphPaths = context.morphologyPaths;
     auto &morphParams = context.morphologyParams;

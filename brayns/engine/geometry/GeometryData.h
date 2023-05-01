@@ -47,8 +47,8 @@ class GeometryData final : public IGeometryData
 public:
     using Type = std::decay_t<DataType>;
 
-    explicit GeometryData(std::vector<Type> primitives)
-        : primitives(std::move(primitives))
+    explicit GeometryData(std::vector<Type> primitives):
+        primitives(std::move(primitives))
     {
     }
 

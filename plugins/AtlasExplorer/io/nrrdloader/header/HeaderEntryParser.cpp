@@ -723,8 +723,8 @@ private:
 };
 }
 
-HeaderEntryParser::HeaderEntryParser()
-    : _table(HeaderEntryParserTableBuilder::build())
+HeaderEntryParser::HeaderEntryParser():
+    _table(HeaderEntryParserTableBuilder::build())
 {
 }
 

@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(ModelManager &models)
-    : AddLightEntrypoint(models)
+AddLightAmbientEntrypoint::AddLightAmbientEntrypoint(ModelManager &models):
+    AddLightEntrypoint(models)
 {
 }
 
@@ -40,8 +40,8 @@ std::string AddLightAmbientEntrypoint::getDescription() const
     return "Adds an ambient light which iluminates the scene from all directions";
 }
 
-AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(ModelManager &models)
-    : AddLightEntrypoint(models)
+AddLightDirectionalEntrypoint::AddLightDirectionalEntrypoint(ModelManager &models):
+    AddLightEntrypoint(models)
 {
 }
 
@@ -55,8 +55,8 @@ std::string AddLightDirectionalEntrypoint::getDescription() const
     return "Adds a directional light which iluminates the scene from a given direction";
 }
 
-AddLightQuadEntrypoint::AddLightQuadEntrypoint(ModelManager &models)
-    : AddLightEntrypoint(models)
+AddLightQuadEntrypoint::AddLightQuadEntrypoint(ModelManager &models):
+    AddLightEntrypoint(models)
 {
 }
 

@@ -35,8 +35,8 @@ class AddClippingGeometryEntrypoint : public Entrypoint<ClippingGeometry<T>, Mod
 public:
     using Request = typename Entrypoint<ClippingGeometry<T>, ModelInstance>::Request;
 
-    explicit AddClippingGeometryEntrypoint(ModelManager &models)
-        : _models(models)
+    explicit AddClippingGeometryEntrypoint(ModelManager &models):
+        _models(models)
     {
     }
 

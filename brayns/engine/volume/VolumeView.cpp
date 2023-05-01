@@ -24,14 +24,14 @@ namespace
 {
 struct VolumeViewParameters
 {
-    inline static const std::string colorRamp = "transferFunction";
+    static inline const std::string colorRamp = "transferFunction";
 };
 }
 
 namespace brayns
 {
-VolumeView::VolumeView(const Volume &volume)
-    : _handle(volume.getHandle())
+VolumeView::VolumeView(const Volume &volume):
+    _handle(volume.getHandle())
 {
 }
 

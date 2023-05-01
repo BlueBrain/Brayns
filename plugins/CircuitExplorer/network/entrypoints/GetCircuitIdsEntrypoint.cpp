@@ -24,8 +24,8 @@
 
 #include <components/CircuitIds.h>
 
-GetCircuitIdsEntrypoint::GetCircuitIdsEntrypoint(brayns::ModelManager &models)
-    : _models(models)
+GetCircuitIdsEntrypoint::GetCircuitIdsEntrypoint(brayns::ModelManager &models):
+    _models(models)
 {
 }
 

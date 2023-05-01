@@ -68,8 +68,10 @@ public:
         return parse(parsers, format, {data, size});
     }
 
-    static brayns::TriangleMesh
-        parse(const brayns::MeshParserRegistry &parsers, const std::string &format, std::string_view data)
+    static brayns::TriangleMesh parse(
+        const brayns::MeshParserRegistry &parsers,
+        const std::string &format,
+        std::string_view data)
     {
         auto &parser = parsers.getParser(format);
         auto mesh = _parse(parser, data);

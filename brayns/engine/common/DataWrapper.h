@@ -39,8 +39,8 @@ template<typename DataType, typename OsprayHandle, template<typename> typename T
 class DataWrapper final : public IDataWrapper<OsprayHandle>
 {
 public:
-    explicit DataWrapper(DataType value)
-        : data(std::move(value))
+    explicit DataWrapper(DataType value):
+        data(std::move(value))
     {
     }
 
@@ -73,8 +73,8 @@ class SpatialDataWrapper final : public ISpatialDataWrapper<OsprayHandle>
 public:
     using Type = std::decay_t<DataType>;
 
-    explicit SpatialDataWrapper(Type value)
-        : data(std::move(value))
+    explicit SpatialDataWrapper(Type value):
+        data(std::move(value))
     {
     }
 

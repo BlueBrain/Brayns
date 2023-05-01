@@ -32,7 +32,7 @@ struct AttributeMethodEntry
 class AttributeMethodMapping
 {
 public:
-    inline static const std::vector<AttributeMethodEntry> mapping = {
+    static inline const std::vector<AttributeMethodEntry> mapping = {
         {BrainColorMethod::ByEtype, "etype"},
         {BrainColorMethod::ByHemisphere, "hemisphere"},
         {BrainColorMethod::ByLayer, "layer"},
@@ -97,8 +97,8 @@ public:
 
 namespace sonataloader
 {
-SonataColorData::SonataColorData(bbp::sonata::NodePopulation population)
-    : _population(std::move(population))
+SonataColorData::SonataColorData(bbp::sonata::NodePopulation population):
+    _population(std::move(population))
 {
 }
 

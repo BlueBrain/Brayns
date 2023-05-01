@@ -26,8 +26,8 @@
 
 namespace brayns
 {
-AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(ModelManager &models)
-    : _models(models)
+AddClipPlaneEntrypoint::AddClipPlaneEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

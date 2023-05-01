@@ -132,8 +132,9 @@ public:
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<std::shared_ptr<Model>> importFromFile(const std::string &fileName, const LoaderProgress &callback)
-        const final;
+    std::vector<std::shared_ptr<Model>> importFromFile(
+        const std::string &fileName,
+        const LoaderProgress &callback) const final;
 
     /**
      * @brief Import the mesh in the given scene from the given blob of data.

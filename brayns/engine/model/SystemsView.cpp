@@ -22,9 +22,9 @@
 
 namespace brayns
 {
-SystemsView::SystemsView(Systems &systems, Components &components)
-    : _systems(&systems)
-    , _components(&components)
+SystemsView::SystemsView(Systems &systems, Components &components):
+    _systems(&systems),
+    _components(&components)
 {
 }
 

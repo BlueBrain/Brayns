@@ -26,10 +26,10 @@ namespace
 {
 struct DirectionalLightParameters
 {
-    inline static const std::string color = "color";
-    inline static const std::string intensity = "intensity";
-    inline static const std::string direction = "direction";
-    inline static const std::string angularDiameter = "angularDiameter";
+    static inline const std::string color = "color";
+    static inline const std::string intensity = "intensity";
+    static inline const std::string direction = "direction";
+    static inline const std::string angularDiameter = "angularDiameter";
 };
 }
 

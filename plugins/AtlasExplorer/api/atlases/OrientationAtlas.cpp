@@ -63,9 +63,9 @@ private:
 OrientationAtlas::OrientationAtlas(
     const brayns::Vector3ui &size,
     const brayns::Vector3f &spacing,
-    const IDataMangler &dataMangler)
-    : Atlas(size, spacing)
-    , _voxels(QuaternionExtractor::extract(dataMangler))
+    const IDataMangler &dataMangler):
+    Atlas(size, spacing),
+    _voxels(QuaternionExtractor::extract(dataMangler))
 {
 }
 

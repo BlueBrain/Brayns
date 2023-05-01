@@ -43,8 +43,8 @@ class RendererData final : public IRendererData
 public:
     using Type = std::decay_t<DataType>;
 
-    explicit RendererData(Type value)
-        : data(std::move(value))
+    explicit RendererData(Type value):
+        data(std::move(value))
     {
     }
 

@@ -29,7 +29,7 @@
 class ScalarAtlas final : public Atlas
 {
 public:
-    inline static const VoxelType type = VoxelType::Scalar;
+    static inline const VoxelType type = VoxelType::Scalar;
 
 public:
     ScalarAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);

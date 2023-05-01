@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-GetModelEntrypoint::GetModelEntrypoint(ModelManager &models)
-    : _models(models)
+GetModelEntrypoint::GetModelEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

@@ -77,10 +77,10 @@ private:
 
 struct RegularVolumeParameters
 {
-    inline static const std::string osprayName = "structuredRegular";
-    inline static const std::string data = "data";
-    inline static const std::string cellCentered = "cellCentered";
-    inline static const std::string gridSpacing = "gridSpacing";
+    static inline const std::string osprayName = "structuredRegular";
+    static inline const std::string data = "data";
+    static inline const std::string cellCentered = "cellCentered";
+    static inline const std::string gridSpacing = "gridSpacing";
 };
 }
 

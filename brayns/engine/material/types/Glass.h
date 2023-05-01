@@ -34,8 +34,8 @@ template<>
 class MaterialTraits<Glass>
 {
 public:
-    inline static const std::string handleName = "thinGlass";
-    inline static const std::string name = "glass";
+    static inline const std::string handleName = "thinGlass";
+    static inline const std::string name = "glass";
 
     static void updateData(ospray::cpp::Material &handle, Glass &data);
 };

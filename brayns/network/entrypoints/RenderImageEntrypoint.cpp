@@ -128,8 +128,8 @@ public:
 
 namespace brayns
 {
-RenderImageEntrypoint::RenderImageEntrypoint(Engine &engine)
-    : _engine(engine)
+RenderImageEntrypoint::RenderImageEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 

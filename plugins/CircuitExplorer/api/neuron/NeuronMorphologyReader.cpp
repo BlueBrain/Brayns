@@ -43,7 +43,7 @@ public:
     }
 
 private:
-    inline static std::mutex _h5Mutex;
+    static inline std::mutex _h5Mutex;
 };
 
 class SomaReader

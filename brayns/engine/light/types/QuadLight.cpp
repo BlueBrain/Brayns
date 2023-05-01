@@ -26,11 +26,11 @@ namespace
 {
 struct QuadLightParameters
 {
-    inline static const std::string color = "color";
-    inline static const std::string intensity = "intensity";
-    inline static const std::string position = "position";
-    inline static const std::string edge1 = "edge1";
-    inline static const std::string edge2 = "edge2";
+    static inline const std::string color = "color";
+    static inline const std::string intensity = "intensity";
+    static inline const std::string position = "position";
+    static inline const std::string edge1 = "edge1";
+    static inline const std::string edge2 = "edge2";
 };
 }
 

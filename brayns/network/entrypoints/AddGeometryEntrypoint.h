@@ -42,8 +42,8 @@ class AddGeometryEntrypoint : public Entrypoint<std::vector<GeometryWithColor<T>
 public:
     using Request = typename Entrypoint<std::vector<GeometryWithColor<T>>, ModelInstance>::Request;
 
-    explicit AddGeometryEntrypoint(ModelManager &models)
-        : _models(models)
+    explicit AddGeometryEntrypoint(ModelManager &models):
+        _models(models)
     {
     }
 

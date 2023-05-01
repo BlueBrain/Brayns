@@ -82,11 +82,11 @@ public:
 
 struct TriangleMeshParameters
 {
-    inline static const std::string position = "vertex.position";
-    inline static const std::string index = "index";
-    inline static const std::string normal = "vertex.normal";
-    inline static const std::string uv = "vertex.texcoord";
-    inline static const std::string color = "vertex.color";
+    static inline const std::string position = "vertex.position";
+    static inline const std::string index = "index";
+    static inline const std::string normal = "vertex.normal";
+    static inline const std::string uv = "vertex.texcoord";
+    static inline const std::string color = "vertex.color";
 };
 } // namespace
 

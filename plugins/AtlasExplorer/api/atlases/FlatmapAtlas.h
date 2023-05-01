@@ -26,7 +26,7 @@
 class FlatmapAtlas final : public Atlas
 {
 public:
-    inline static const VoxelType type = VoxelType::Flatmap;
+    static inline const VoxelType type = VoxelType::Flatmap;
 
 public:
     FlatmapAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);

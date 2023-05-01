@@ -46,9 +46,9 @@ public:
 };
 }
 
-VisualizeAtlasUseCaseEntrypoint::VisualizeAtlasUseCaseEntrypoint(brayns::ModelManager &models)
-    : _models(models)
-    , _useCases(UseCaseManager::createDefault())
+VisualizeAtlasUseCaseEntrypoint::VisualizeAtlasUseCaseEntrypoint(brayns::ModelManager &models):
+    _models(models),
+    _useCases(UseCaseManager::createDefault())
 {
 }
 

@@ -36,8 +36,8 @@ public:
 
 namespace brayns
 {
-ProgressiveFrameHandler::ProgressiveFrameHandler(uint32_t scale)
-    : _scale(scale)
+ProgressiveFrameHandler::ProgressiveFrameHandler(uint32_t scale):
+    _scale(scale)
 {
     if (_scale == 0)
     {

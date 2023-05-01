@@ -24,7 +24,7 @@ namespace
 {
 struct CylindricParameters
 {
-    inline static const std::string fovy = "fovy";
+    static inline const std::string fovy = "fovy";
 };
 }
 

@@ -47,8 +47,8 @@ class SetCameraEntrypoint : public Entrypoint<T, EmptyJson>
 public:
     using Request = typename Entrypoint<T, EmptyJson>::Request;
 
-    explicit SetCameraEntrypoint(Engine &engine)
-        : _engine(engine)
+    explicit SetCameraEntrypoint(Engine &engine):
+        _engine(engine)
     {
     }
 
@@ -94,8 +94,8 @@ class GetCameraEntrypoint : public Entrypoint<EmptyJson, T>
 public:
     using Request = typename Entrypoint<EmptyJson, T>::Request;
 
-    explicit GetCameraEntrypoint(Engine &engine)
-        : _engine(engine)
+    explicit GetCameraEntrypoint(Engine &engine):
+        _engine(engine)
     {
     }
 

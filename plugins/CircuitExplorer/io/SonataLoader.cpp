@@ -125,15 +125,8 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
             auto edgeSelection = sl::EdgeSelector::select(config, edgeParams, nodeSelection);
             auto edgeModelType = sl::ModelTypeFinder::fromEdges(edges, edgeParams.load_afferent, config);
             auto edgeModel = std::make_shared<brayns::Model>(edgeModelType);
-            auto edgeContext = sl::EdgeLoadContext{
-                config,
-                edgeParams,
-                nodes,
-                edges,
-                nodeSelection,
-                edgeSelection,
-                *edgeModel,
-                progress};
+            auto edgeContext =
+                sl::EdgeLoadContext{config, edgeParams, nodes, edges, nodeSelection, edgeSelection, *edgeModel, progress};
             sl::EdgeLoader::loadEdges(edgeContext);
             result.push_back(std::move(edgeModel));
             progress.endStage();

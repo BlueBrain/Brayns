@@ -25,27 +25,27 @@
 
 namespace brayns
 {
-ArgvValue::ArgvValue(bool boolean)
-    : _type(ArgvType::Boolean)
-    , _boolean(boolean)
+ArgvValue::ArgvValue(bool boolean):
+    _type(ArgvType::Boolean),
+    _boolean(boolean)
 {
 }
 
-ArgvValue::ArgvValue(int64_t integer)
-    : _type(ArgvType::Integer)
-    , _integer(integer)
+ArgvValue::ArgvValue(int64_t integer):
+    _type(ArgvType::Integer),
+    _integer(integer)
 {
 }
 
-ArgvValue::ArgvValue(double number)
-    : _type(ArgvType::Number)
-    , _number(number)
+ArgvValue::ArgvValue(double number):
+    _type(ArgvType::Number),
+    _number(number)
 {
 }
 
-ArgvValue::ArgvValue(std::string string)
-    : _type(ArgvType::String)
-    , _string(std::move(string))
+ArgvValue::ArgvValue(std::string string):
+    _type(ArgvType::String),
+    _string(std::move(string))
 {
 }
 

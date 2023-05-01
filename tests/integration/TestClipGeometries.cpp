@@ -43,8 +43,11 @@ class ClippingBuilder
 {
 public:
     template<typename T>
-    static void
-        build(brayns::Engine &engine, T geometry, const brayns::Transform transform = {}, bool invertNormals = false)
+    static void build(
+        brayns::Engine &engine,
+        T geometry,
+        const brayns::Transform transform = {},
+        bool invertNormals = false)
     {
         auto model = brayns::ClippingModelBuilder::build<T>({std::move(geometry)}, invertNormals);
 

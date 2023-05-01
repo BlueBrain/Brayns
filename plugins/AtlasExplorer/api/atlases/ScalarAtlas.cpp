@@ -25,9 +25,9 @@
 #include <cassert>
 #include <cmath>
 
-ScalarAtlas::ScalarAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data)
-    : Atlas(size, spacing)
-    , _data(data.asDoubles())
+ScalarAtlas::ScalarAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data):
+    Atlas(size, spacing),
+    _data(data.asDoubles())
 {
     auto minMax = DataMinMax::compute(_data);
     _min = minMax.first;

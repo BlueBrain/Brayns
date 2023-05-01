@@ -26,8 +26,8 @@ namespace
 {
 struct IsosurfaceParameters
 {
-    inline static const std::string volume = "volume";
-    inline static const std::string isovalue = "isovalue";
+    static inline const std::string volume = "volume";
+    static inline const std::string isovalue = "isovalue";
 };
 }
 

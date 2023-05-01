@@ -24,8 +24,8 @@
 
 namespace brayns
 {
-LoaderProgress::LoaderProgress(CallbackFn callback)
-    : _callback(std::move(callback))
+LoaderProgress::LoaderProgress(CallbackFn callback):
+    _callback(std::move(callback))
 {
 }
 

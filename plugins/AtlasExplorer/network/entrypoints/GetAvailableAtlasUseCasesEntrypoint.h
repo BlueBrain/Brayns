@@ -29,8 +29,8 @@
 
 #include <vector>
 
-class GetAvailableAtlasUseCasesEntrypoint
-    : public brayns::Entrypoint<AvailableUseCasesMessage, std::vector<UseCaseMessage>>
+class GetAvailableAtlasUseCasesEntrypoint :
+    public brayns::Entrypoint<AvailableUseCasesMessage, std::vector<UseCaseMessage>>
 {
 public:
     explicit GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models);

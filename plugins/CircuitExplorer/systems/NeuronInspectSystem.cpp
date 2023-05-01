@@ -30,7 +30,7 @@ namespace
 {
 struct ResultParameters
 {
-    inline static const std::string neuronId = "neuron_id";
+    static inline const std::string neuronId = "neuron_id";
 };
 
 class HittedMorphologyFinder

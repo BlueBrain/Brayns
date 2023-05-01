@@ -24,8 +24,8 @@
 
 namespace brayns
 {
-GetColorMethodsEntrypoint::GetColorMethodsEntrypoint(ModelManager &models)
-    : _models(models)
+GetColorMethodsEntrypoint::GetColorMethodsEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 
@@ -48,8 +48,8 @@ void GetColorMethodsEntrypoint::onRequest(const Request &request)
     request.reply(systemView.getColorMethods());
 }
 
-GetColorValuesEntrypoint::GetColorValuesEntrypoint(ModelManager &models)
-    : _models(models)
+GetColorValuesEntrypoint::GetColorValuesEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 
@@ -72,8 +72,8 @@ void GetColorValuesEntrypoint::onRequest(const Request &request)
     request.reply(systemView.getColorValues(params.method));
 }
 
-ColorModelEntrypoint::ColorModelEntrypoint(ModelManager &models)
-    : _models(models)
+ColorModelEntrypoint::ColorModelEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

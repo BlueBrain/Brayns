@@ -29,17 +29,17 @@ namespace
 {
 struct ColorMapParameters
 {
-    inline static const std::string name = "piecewiseLinear";
-    inline static const std::string colors = "color";
-    inline static const std::string opacity = "opacity";
-    inline static const std::string range = "value";
+    static inline const std::string name = "piecewiseLinear";
+    static inline const std::string colors = "color";
+    static inline const std::string opacity = "opacity";
+    static inline const std::string range = "value";
 };
 }
 
 namespace brayns
 {
-ShadingColorRamp::ShadingColorRamp()
-    : _handle(ColorMapParameters::name)
+ShadingColorRamp::ShadingColorRamp():
+    _handle(ColorMapParameters::name)
 {
 }
 

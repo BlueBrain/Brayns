@@ -36,8 +36,8 @@ struct NeuronSectionList
         mappings.push_back(std::move(mapping));
     }
 
-    explicit NeuronSectionList(std::vector<std::vector<NeuronSectionMapping>> mappings)
-        : mappings(std::move(mappings))
+    explicit NeuronSectionList(std::vector<std::vector<NeuronSectionMapping>> mappings):
+        mappings(std::move(mappings))
     {
     }
 

@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-UpdateModelEntrypoint::UpdateModelEntrypoint(ModelManager &models)
-    : _models(models)
+UpdateModelEntrypoint::UpdateModelEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

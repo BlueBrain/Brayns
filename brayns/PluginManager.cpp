@@ -75,8 +75,8 @@ private:
 
 namespace brayns
 {
-PluginManager::PluginManager(PluginAPI &api)
-    : _api(api)
+PluginManager::PluginManager(PluginAPI &api):
+    _api(api)
 {
 }
 

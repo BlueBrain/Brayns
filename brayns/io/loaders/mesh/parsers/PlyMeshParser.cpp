@@ -867,8 +867,7 @@ private:
 class TristripExtractor
 {
 public:
-    static void
-        extract(std::string_view &data, Format format, const Property &property, std::vector<int32_t> &tristrips)
+    static void extract(std::string_view &data, Format format, const Property &property, std::vector<int32_t> &tristrips)
     {
         switch (property.semantic)
         {
@@ -880,8 +879,11 @@ public:
     }
 
 private:
-    static void
-        _extract(std::string_view &data, Format format, const Property &property, std::vector<int32_t> &tristrips)
+    static void _extract(
+        std::string_view &data,
+        Format format,
+        const Property &property,
+        std::vector<int32_t> &tristrips)
     {
         auto size = PropertyExtractor::extractSize(data, format, property);
         if (size == 0)

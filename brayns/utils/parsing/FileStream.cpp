@@ -27,8 +27,8 @@
 
 namespace brayns
 {
-FileStream::FileStream(std::string_view data)
-    : _data(data)
+FileStream::FileStream(std::string_view data):
+    _data(data)
 {
 }
 

@@ -96,9 +96,9 @@ public:
 
 namespace brayns
 {
-ClientTask::ClientTask(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener)
-    : _parameters(parameters)
-    , _manager(std::move(listener))
+ClientTask::ClientTask(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener):
+    _parameters(parameters),
+    _manager(std::move(listener))
 {
 }
 
@@ -160,8 +160,8 @@ void ClientTask::_run()
     }
 }
 
-ClientSocket::ClientSocket(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener)
-    : _task(parameters, std::move(listener))
+ClientSocket::ClientSocket(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener):
+    _task(parameters, std::move(listener))
 {
     Log::info("Client socket initialization.");
 }

@@ -24,9 +24,9 @@ namespace
 {
 struct PerspectiveParameters
 {
-    inline static const std::string fovy = "fovy";
-    inline static const std::string aperture = "apertureRadius";
-    inline static const std::string focus = "focusDistance";
+    static inline const std::string fovy = "fovy";
+    static inline const std::string aperture = "apertureRadius";
+    static inline const std::string focus = "focusDistance";
 };
 }
 

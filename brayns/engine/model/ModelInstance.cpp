@@ -47,26 +47,26 @@ public:
 
 struct InstanceParameters
 {
-    inline static const std::string transform = "transform";
+    static inline const std::string transform = "transform";
 };
 }
 
 namespace brayns
 {
-ModelInstance::ModelInstance(uint32_t instanceId, std::shared_ptr<Model> model)
-    : _id(instanceId)
-    , _model(std::move(model))
-    , _handle(_model->getHandle())
+ModelInstance::ModelInstance(uint32_t instanceId, std::shared_ptr<Model> model):
+    _id(instanceId),
+    _model(std::move(model)),
+    _handle(_model->getHandle())
 {
     computeBounds();
 }
 
-ModelInstance::ModelInstance(uint32_t instanceId, const ModelInstance &other)
-    : _id(instanceId)
-    , _transform(other._transform)
-    , _bounds(other._bounds)
-    , _model(other._model)
-    , _handle(_model->getHandle())
+ModelInstance::ModelInstance(uint32_t instanceId, const ModelInstance &other):
+    _id(instanceId),
+    _transform(other._transform),
+    _bounds(other._bounds),
+    _model(other._model),
+    _handle(_model->getHandle())
 {
 }
 

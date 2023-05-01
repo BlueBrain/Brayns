@@ -43,10 +43,10 @@ public:
     }
 
 private:
-    inline static const std::string _geometryParam = "geometry";
-    inline static const std::string _volumeParam = "volume";
-    inline static const std::string _clippingParam = "clippingGeometry";
-    inline static const std::string _lightParam = "light";
+    static inline const std::string _geometryParam = "geometry";
+    static inline const std::string _volumeParam = "volume";
+    static inline const std::string _clippingParam = "clippingGeometry";
+    static inline const std::string _lightParam = "light";
 
     template<typename HandleType, typename ComponentType>
     static std::vector<HandleType> _compileHandles(brayns::Components &components)
@@ -77,8 +77,8 @@ private:
 
 namespace brayns
 {
-Model::Model(std::string type)
-    : _type(std::move(type))
+Model::Model(std::string type):
+    _type(std::move(type))
 {
 }
 

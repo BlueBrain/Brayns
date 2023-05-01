@@ -31,7 +31,7 @@ template<>
 class brayns::ProjectionTraits<Cylindric>
 {
 public:
-    inline static const std::string name = "cylindric";
+    static inline const std::string name = "cylindric";
 
     static void checkParameters(const Cylindric &data);
     static void updateData(ospray::cpp::Camera &handle, Cylindric &data);

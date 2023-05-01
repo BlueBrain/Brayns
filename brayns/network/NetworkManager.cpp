@@ -195,8 +195,8 @@ public:
 
 namespace brayns
 {
-NetworkManager::NetworkManager(PluginAPI &api)
-    : _api(api)
+NetworkManager::NetworkManager(PluginAPI &api):
+    _api(api)
 {
     auto listener = std::make_unique<brayns::SocketListener>(_clients, _entrypoints, _tasks);
     _socket = SocketFactory::createSocket(_api, std::move(listener));

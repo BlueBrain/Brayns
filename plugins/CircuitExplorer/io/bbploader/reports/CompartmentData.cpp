@@ -20,8 +20,8 @@
 
 namespace bbploader
 {
-CompartmentData::CompartmentData(std::unique_ptr<brion::CompartmentReport> report)
-    : _report(std::move(report))
+CompartmentData::CompartmentData(std::unique_ptr<brion::CompartmentReport> report):
+    _report(std::move(report))
 {
 }
 

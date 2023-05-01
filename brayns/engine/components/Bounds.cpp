@@ -22,9 +22,9 @@
 
 namespace brayns
 {
-Bounds::Bounds(const Vector3f &minB, const Vector3f &maxB)
-    : _min(minB)
-    , _max(maxB)
+Bounds::Bounds(const Vector3f &minB, const Vector3f &maxB):
+    _min(minB),
+    _max(maxB)
 {
     if (glm::min(_min, _max) != _min)
     {

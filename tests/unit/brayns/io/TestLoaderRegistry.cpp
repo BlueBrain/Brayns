@@ -63,8 +63,8 @@ namespace
 class MockLoader final : public brayns::Loader<MockParameters>
 {
 public:
-    inline static const std::string name = "mock-loader";
-    inline static const std::vector<std::string> extensions = {".a"};
+    static inline const std::string name = "mock-loader";
+    static inline const std::vector<std::string> extensions = {".a"};
 
     std::string getName() const override
     {
@@ -102,8 +102,8 @@ public:
 class MockNoInputLoader final : public brayns::NoInputLoader
 {
 public:
-    inline static const std::string name = "mock-noinput-loader";
-    inline static const std::vector<std::string> extensions = {".b"};
+    static inline const std::string name = "mock-noinput-loader";
+    static inline const std::vector<std::string> extensions = {".b"};
 
     std::string getName() const override
     {

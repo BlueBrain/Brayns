@@ -43,8 +43,8 @@ public:
      *
      * @param object Object bound to the entrypoint.
      */
-    explicit GetEntrypoint(const ObjectType &object)
-        : _object(object)
+    explicit GetEntrypoint(const ObjectType &object):
+        _object(object)
     {
     }
 
@@ -97,8 +97,8 @@ public:
      *
      * @param object Object bound to the entrypoint.
      */
-    explicit SetEntrypoint(ObjectType &object)
-        : _object(object)
+    explicit SetEntrypoint(ObjectType &object):
+        _object(object)
     {
     }
 

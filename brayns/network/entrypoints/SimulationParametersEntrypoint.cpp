@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetSimulationParametersEntrypoint::GetSimulationParametersEntrypoint(const SimulationParameters &parameters)
-    : GetEntrypoint(parameters)
+GetSimulationParametersEntrypoint::GetSimulationParametersEntrypoint(const SimulationParameters &parameters):
+    GetEntrypoint(parameters)
 {
 }
 
@@ -38,8 +38,8 @@ std::string GetSimulationParametersEntrypoint::getDescription() const
     return "Get the current state of the simulation parameters";
 }
 
-SetSimulationParametersEntrypoint::SetSimulationParametersEntrypoint(SimulationParameters &parameters)
-    : SetEntrypoint(parameters)
+SetSimulationParametersEntrypoint::SetSimulationParametersEntrypoint(SimulationParameters &parameters):
+    SetEntrypoint(parameters)
 {
 }
 

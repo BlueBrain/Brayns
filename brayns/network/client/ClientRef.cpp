@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-ClientRef::ClientRef(std::shared_ptr<IWebSocket> socket)
-    : _socket(std::move(socket))
+ClientRef::ClientRef(std::shared_ptr<IWebSocket> socket):
+    _socket(std::move(socket))
 {
     assert(_socket);
 }

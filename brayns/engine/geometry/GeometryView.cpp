@@ -26,17 +26,17 @@ namespace
 {
 struct GeometryViewParameters
 {
-    inline static const std::string material = "material";
-    inline static const std::string color = "color";
-    inline static const std::string index = "index";
-    inline static const std::string invertNormals = "invertNormals";
+    static inline const std::string material = "material";
+    static inline const std::string color = "color";
+    static inline const std::string index = "index";
+    static inline const std::string invertNormals = "invertNormals";
 };
 }
 
 namespace brayns
 {
-GeometryView::GeometryView(const Geometry &geometry)
-    : _handle(geometry.getHandle())
+GeometryView::GeometryView(const Geometry &geometry):
+    _handle(geometry.getHandle())
 {
     (void)geometry;
 }

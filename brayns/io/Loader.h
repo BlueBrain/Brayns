@@ -122,8 +122,10 @@ public:
      * @param params A JSON object with the parameters to configure the load.
      * @return a list of loaded models.
      */
-    virtual std::vector<std::shared_ptr<Model>>
-        loadFromBlob(const Blob &blob, const LoaderProgress &callback, const JsonValue &params) const = 0;
+    virtual std::vector<std::shared_ptr<Model>> loadFromBlob(
+        const Blob &blob,
+        const LoaderProgress &callback,
+        const JsonValue &params) const = 0;
 
     /**
      * @brief Loads a list of models from a file.
@@ -132,8 +134,10 @@ public:
      * @param params A JSON object with the parameters to configure the load.
      * @return a list of loaded models.
      */
-    virtual std::vector<std::shared_ptr<Model>>
-        loadFromFile(const std::string &path, const LoaderProgress &callback, const JsonValue &params) const = 0;
+    virtual std::vector<std::shared_ptr<Model>> loadFromFile(
+        const std::string &path,
+        const LoaderProgress &callback,
+        const JsonValue &params) const = 0;
 };
 
 /**
@@ -151,15 +155,19 @@ public:
         return _parameterSchema;
     }
 
-    virtual std::vector<std::shared_ptr<Model>>
-        loadFromBlob(const Blob &blob, const LoaderProgress &callback, const JsonValue &params) const override
+    virtual std::vector<std::shared_ptr<Model>> loadFromBlob(
+        const Blob &blob,
+        const LoaderProgress &callback,
+        const JsonValue &params) const override
     {
         const T inputParams = _parseParameters(params);
         return importFromBlob(blob, callback, inputParams);
     }
 
-    virtual std::vector<std::shared_ptr<Model>>
-        loadFromFile(const std::string &path, const LoaderProgress &callback, const JsonValue &params) const override
+    virtual std::vector<std::shared_ptr<Model>> loadFromFile(
+        const std::string &path,
+        const LoaderProgress &callback,
+        const JsonValue &params) const override
     {
         const T inputParams = _parseParameters(params);
         return importFromFile(path, callback, inputParams);
@@ -173,8 +181,10 @@ public:
      * @param params Parameters to configure the load.
      * @return a list of loaded models.
      */
-    virtual std::vector<std::shared_ptr<Model>>
-        importFromBlob(const Blob &blob, const LoaderProgress &callback, const T &params) const = 0;
+    virtual std::vector<std::shared_ptr<Model>> importFromBlob(
+        const Blob &blob,
+        const LoaderProgress &callback,
+        const T &params) const = 0;
 
     /**
      * @copydoc AbstractLoader::loadFromFile()
@@ -184,8 +194,10 @@ public:
      * @param params Parameters to configure the load.
      * @return a list of loaded models.
      */
-    virtual std::vector<std::shared_ptr<Model>>
-        importFromFile(const std::string &path, const LoaderProgress &callback, const T &params) const = 0;
+    virtual std::vector<std::shared_ptr<Model>> importFromFile(
+        const std::string &path,
+        const LoaderProgress &callback,
+        const T &params) const = 0;
 
 private:
     const JsonSchema _parameterSchema = Json::getSchema<T>();
@@ -232,8 +244,9 @@ public:
      * @param ccallback A callback to update the progress to the caller.
      * @return a list of loaded models.
      */
-    virtual std::vector<std::shared_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback)
-        const = 0;
+    virtual std::vector<std::shared_ptr<Model>> importFromBlob(
+        const Blob &blob,
+        const LoaderProgress &callback) const = 0;
 
     /**
      * @copydoc AbstractLoader::loadFromFile()
@@ -241,8 +254,9 @@ public:
      * @param callback A callback to update the progress to the caller.
      * @return a list of loaded models.
      */
-    virtual std::vector<std::shared_ptr<Model>> importFromFile(const std::string &path, const LoaderProgress &callback)
-        const = 0;
+    virtual std::vector<std::shared_ptr<Model>> importFromFile(
+        const std::string &path,
+        const LoaderProgress &callback) const = 0;
 
     std::vector<std::shared_ptr<Model>> importFromBlob(
         const Blob &blob,

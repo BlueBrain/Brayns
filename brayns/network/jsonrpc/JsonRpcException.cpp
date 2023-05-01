@@ -38,15 +38,15 @@ public:
 
 namespace brayns
 {
-JsonRpcException::JsonRpcException(const std::string &message)
-    : std::runtime_error(message)
+JsonRpcException::JsonRpcException(const std::string &message):
+    std::runtime_error(message)
 {
 }
 
-JsonRpcException::JsonRpcException(int code, const std::string &message, const JsonValue &data)
-    : std::runtime_error(message)
-    , _code(code)
-    , _data(data)
+JsonRpcException::JsonRpcException(int code, const std::string &message, const JsonValue &data):
+    std::runtime_error(message),
+    _code(code),
+    _data(data)
 {
 }
 
@@ -60,43 +60,43 @@ const JsonValue &JsonRpcException::getData() const
     return _data;
 }
 
-ParsingErrorException::ParsingErrorException(const std::string &message)
-    : JsonRpcException(-32700, fmt::format("Invalid JSON: '{}'", message))
+ParsingErrorException::ParsingErrorException(const std::string &message):
+    JsonRpcException(-32700, fmt::format("Invalid JSON: '{}'", message))
 {
 }
 
-InvalidRequestException::InvalidRequestException(const std::string &message)
-    : JsonRpcException(-32600, message)
+InvalidRequestException::InvalidRequestException(const std::string &message):
+    JsonRpcException(-32600, message)
 {
 }
 
-InvalidRequestException::InvalidRequestException(const std::string &message, const JsonErrors &errors)
-    : JsonRpcException(-32600, message, ErrorFormatter::format(errors))
+InvalidRequestException::InvalidRequestException(const std::string &message, const JsonErrors &errors):
+    JsonRpcException(-32600, message, ErrorFormatter::format(errors))
 {
 }
 
-MethodNotFoundException::MethodNotFoundException(const std::string &method)
-    : JsonRpcException(-32601, fmt::format("Method '{}' not found", method))
+MethodNotFoundException::MethodNotFoundException(const std::string &method):
+    JsonRpcException(-32601, fmt::format("Method '{}' not found", method))
 {
 }
 
-InvalidParamsException::InvalidParamsException(const std::string &message)
-    : JsonRpcException(-32602, message)
+InvalidParamsException::InvalidParamsException(const std::string &message):
+    JsonRpcException(-32602, message)
 {
 }
 
-InvalidParamsException::InvalidParamsException(const std::string &message, const JsonErrors &errors)
-    : JsonRpcException(-32602, message, ErrorFormatter::format(errors))
+InvalidParamsException::InvalidParamsException(const std::string &message, const JsonErrors &errors):
+    JsonRpcException(-32602, message, ErrorFormatter::format(errors))
 {
 }
 
-InternalErrorException::InternalErrorException(const std::string &message)
-    : JsonRpcException(-32603, message)
+InternalErrorException::InternalErrorException(const std::string &message):
+    JsonRpcException(-32603, message)
 {
 }
 
-TaskCancelledException::TaskCancelledException()
-    : JsonRpcException(20, "Task has been cancelled")
+TaskCancelledException::TaskCancelledException():
+    JsonRpcException(20, "Task has been cancelled")
 {
 }
 } // namespace brayns

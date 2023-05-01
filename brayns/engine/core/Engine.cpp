@@ -114,12 +114,12 @@ Engine::OsprayModuleHandler::~OsprayModuleHandler()
     ospShutdown();
 }
 
-Engine::Engine(ParametersManager &parameters)
-    : _params(parameters)
-    , _osprayDevice(OsprayDeviceInitializer::init(parameters))
-    , _frameBuffer(std::make_unique<StaticFrameHandler>())
-    , _camera(Perspective())
-    , _renderer(Interactive())
+Engine::Engine(ParametersManager &parameters):
+    _params(parameters),
+    _osprayDevice(OsprayDeviceInitializer::init(parameters)),
+    _frameBuffer(std::make_unique<StaticFrameHandler>()),
+    _camera(Perspective()),
+    _renderer(Interactive())
 {
     EngineFactoriesInitializer::init(_factories);
 }

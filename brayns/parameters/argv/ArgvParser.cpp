@@ -37,9 +37,9 @@ using ArgvMap = std::unordered_map<std::string, std::vector<brayns::ArgvValue>>;
 class ArgvStream
 {
 public:
-    ArgvStream(int argc, const char **argv)
-        : _argc(argc)
-        , _argv(argv)
+    ArgvStream(int argc, const char **argv):
+        _argc(argc),
+        _argv(argv)
     {
     }
 
@@ -111,8 +111,8 @@ private:
 class ArgvItemCountValidator
 {
 public:
-    explicit ArgvItemCountValidator(const brayns::ArgvProperty &property)
-        : _property(property)
+    explicit ArgvItemCountValidator(const brayns::ArgvProperty &property):
+        _property(property)
     {
     }
 
@@ -154,8 +154,8 @@ private:
 class ArgvNumberExtractor
 {
 public:
-    explicit ArgvNumberExtractor(const brayns::ArgvProperty &property)
-        : _property(property)
+    explicit ArgvNumberExtractor(const brayns::ArgvProperty &property):
+        _property(property)
     {
     }
 
@@ -217,8 +217,8 @@ private:
 class ArgvEnumParser
 {
 public:
-    explicit ArgvEnumParser(const brayns::ArgvProperty &property)
-        : _property(property)
+    explicit ArgvEnumParser(const brayns::ArgvProperty &property):
+        _property(property)
     {
     }
 
@@ -270,8 +270,8 @@ private:
 class ArgvBooleanParser
 {
 public:
-    explicit ArgvBooleanParser(const brayns::ArgvProperty &property)
-        : _property(property)
+    explicit ArgvBooleanParser(const brayns::ArgvProperty &property):
+        _property(property)
     {
     }
 
@@ -308,8 +308,8 @@ private:
 class ArgvIntegerParser
 {
 public:
-    explicit ArgvIntegerParser(const brayns::ArgvProperty &property)
-        : _property(property)
+    explicit ArgvIntegerParser(const brayns::ArgvProperty &property):
+        _property(property)
     {
     }
 
@@ -349,8 +349,8 @@ private:
 class ArgvNumberParser
 {
 public:
-    explicit ArgvNumberParser(const brayns::ArgvProperty &property)
-        : _property(property)
+    explicit ArgvNumberParser(const brayns::ArgvProperty &property):
+        _property(property)
     {
     }
 
@@ -373,8 +373,8 @@ private:
 class ArgvStringParser
 {
 public:
-    explicit ArgvStringParser(const brayns::ArgvProperty &property)
-        : _property(property)
+    explicit ArgvStringParser(const brayns::ArgvProperty &property):
+        _property(property)
     {
     }
 
@@ -395,8 +395,8 @@ private:
 class ArgvValueParser
 {
 public:
-    explicit ArgvValueParser(const brayns::ArgvProperty &property)
-        : _property(property)
+    explicit ArgvValueParser(const brayns::ArgvProperty &property):
+        _property(property)
     {
     }
 
@@ -459,8 +459,8 @@ private:
 class ArgvParserHelper
 {
 public:
-    explicit ArgvParserHelper(const std::vector<brayns::ArgvProperty> &properties)
-        : _properties(properties)
+    explicit ArgvParserHelper(const std::vector<brayns::ArgvProperty> &properties):
+        _properties(properties)
     {
     }
 
@@ -503,8 +503,8 @@ private:
 class ArgvLoader
 {
 public:
-    explicit ArgvLoader(const std::vector<brayns::ArgvProperty> &properties)
-        : _properties(properties)
+    explicit ArgvLoader(const std::vector<brayns::ArgvProperty> &properties):
+        _properties(properties)
     {
     }
 
@@ -528,8 +528,8 @@ private:
 
 namespace brayns
 {
-ArgvParser::ArgvParser(const std::vector<ArgvProperty> &properties)
-    : _properties(properties)
+ArgvParser::ArgvParser(const std::vector<ArgvProperty> &properties):
+    _properties(properties)
 {
 }
 

@@ -28,16 +28,16 @@ namespace
 {
 struct Attributes
 {
-    inline static const std::string efferentSurfaceX = "efferent_surface_x";
-    inline static const std::string efferentSurfaceY = "efferent_surface_y";
-    inline static const std::string efferentSurfaceZ = "efferent_surface_z";
-    inline static const std::string afferentSurfaceX = "afferent_surface_x";
-    inline static const std::string afferentSurfaceY = "afferent_surface_y";
-    inline static const std::string afferentSurfaceZ = "afferent_surface_z";
-    inline static const std::string astrocyteCenterX = "astrocyte_center_x";
-    inline static const std::string astrocyteCenterY = "astrocyte_center_y";
-    inline static const std::string astrocyteCenterZ = "astrocyte_center_z";
-    inline static const std::string endFeetId = "endfoot_id";
+    static inline const std::string efferentSurfaceX = "efferent_surface_x";
+    static inline const std::string efferentSurfaceY = "efferent_surface_y";
+    static inline const std::string efferentSurfaceZ = "efferent_surface_z";
+    static inline const std::string afferentSurfaceX = "afferent_surface_x";
+    static inline const std::string afferentSurfaceY = "afferent_surface_y";
+    static inline const std::string afferentSurfaceZ = "afferent_surface_z";
+    static inline const std::string astrocyteCenterX = "astrocyte_center_x";
+    static inline const std::string astrocyteCenterY = "astrocyte_center_y";
+    static inline const std::string astrocyteCenterZ = "astrocyte_center_z";
+    static inline const std::string endFeetId = "endfoot_id";
 };
 
 class PositionReader

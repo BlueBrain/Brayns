@@ -173,9 +173,9 @@ public:
 class SphereGenerator
 {
 public:
-    inline static constexpr float nanoToMicrons = 0.001f;
-    inline static constexpr float angstromsToMicrons = 0.0001f;
-    inline static constexpr float positionMultiplier = 10.f;
+    static inline constexpr float nanoToMicrons = 0.001f;
+    static inline constexpr float angstromsToMicrons = 0.0001f;
+    static inline constexpr float positionMultiplier = 10.f;
 
     static std::vector<brayns::Sphere> generate(const std::vector<Atom> &atoms, const std::vector<float> &radii)
     {

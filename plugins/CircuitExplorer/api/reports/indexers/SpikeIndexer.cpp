@@ -38,9 +38,9 @@ public:
 };
 }
 
-SpikeIndexer::SpikeIndexer(const std::vector<CellCompartments> &cellCompartments)
-    : _cellSubElements(CellSubElementCount::fromCellComparments(cellCompartments))
-    , _totalElements(std::accumulate(_cellSubElements.begin(), _cellSubElements.end(), 0))
+SpikeIndexer::SpikeIndexer(const std::vector<CellCompartments> &cellCompartments):
+    _cellSubElements(CellSubElementCount::fromCellComparments(cellCompartments)),
+    _totalElements(std::accumulate(_cellSubElements.begin(), _cellSubElements.end(), 0))
 {
 }
 

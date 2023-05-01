@@ -51,9 +51,9 @@ public:
 };
 }
 
-GetAvailableAtlasUseCasesEntrypoint::GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models)
-    : _models(models)
-    , _useCases(UseCaseManager::createDefault())
+GetAvailableAtlasUseCasesEntrypoint::GetAvailableAtlasUseCasesEntrypoint(brayns::ModelManager &models):
+    _models(models),
+    _useCases(UseCaseManager::createDefault())
 {
 }
 

@@ -30,7 +30,7 @@ namespace
 {
 struct FrameBufferParameters
 {
-    inline static const std::string operations = "imageOperation";
+    static inline const std::string operations = "imageOperation";
 };
 
 /**
@@ -163,9 +163,9 @@ public:
 class FrameStream
 {
 public:
-    explicit FrameStream(const ospray::cpp::FrameBuffer &handle)
-        : _handle(handle)
-        , _channelHandle(nullptr)
+    explicit FrameStream(const ospray::cpp::FrameBuffer &handle):
+        _handle(handle),
+        _channelHandle(nullptr)
     {
     }
 

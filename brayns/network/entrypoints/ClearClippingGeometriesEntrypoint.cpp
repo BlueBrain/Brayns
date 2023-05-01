@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-ClearClipPlanesEntrypoint::ClearClipPlanesEntrypoint(ModelManager &models)
-    : _models(models)
+ClearClipPlanesEntrypoint::ClearClipPlanesEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 
@@ -51,8 +51,8 @@ void ClearClipPlanesEntrypoint::onRequest(const Request &request)
     request.reply(EmptyJson());
 }
 
-ClearClippingGeometriesEntrypoint::ClearClippingGeometriesEntrypoint(ModelManager &models)
-    : _models(models)
+ClearClippingGeometriesEntrypoint::ClearClippingGeometriesEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

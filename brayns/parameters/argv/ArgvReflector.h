@@ -144,6 +144,7 @@ public:
         return stream.str();
     }
 };
+
 template<typename T>
 struct ArgvReflector
 {

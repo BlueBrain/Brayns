@@ -49,8 +49,8 @@ public:
 
 namespace brayns
 {
-EntrypointRef::EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> entrypoint)
-    : _entrypoint(std::move(entrypoint))
+EntrypointRef::EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> entrypoint):
+    _entrypoint(std::move(entrypoint))
 {
     assert(_entrypoint);
     _schema.plugin = std::move(plugin);

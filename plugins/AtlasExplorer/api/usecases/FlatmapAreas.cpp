@@ -124,7 +124,7 @@ private:
 class ColorRoulette
 {
 public:
-    inline static const std::vector<brayns::Vector4f> colors = {
+    static inline const std::vector<brayns::Vector4f> colors = {
         {1.f, 0.f, 0.f, 1.f},
         {0.f, 1.f, 0.f, 1.f},
         {0.f, 0.f, 1.f, 1.f},

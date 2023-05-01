@@ -68,8 +68,8 @@ public:
 class ModelBuilder
 {
 public:
-    explicit ModelBuilder(brayns::Model &model)
-        : _model(model)
+    explicit ModelBuilder(brayns::Model &model):
+        _model(model)
     {
     }
 

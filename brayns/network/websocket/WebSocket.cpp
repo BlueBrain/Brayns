@@ -150,8 +150,8 @@ private:
 
 namespace brayns
 {
-WebSocket::WebSocket(const Poco::Net::WebSocket &socket)
-    : _socket(socket)
+WebSocket::WebSocket(const Poco::Net::WebSocket &socket):
+    _socket(socket)
 {
     _socket.setReceiveTimeout(Poco::Timespan());
     _socket.setSendTimeout(Poco::Timespan());

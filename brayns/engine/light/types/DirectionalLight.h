@@ -35,8 +35,8 @@ template<>
 class LightTraits<DirectionalLight>
 {
 public:
-    inline static const std::string handleName = "distant";
-    inline static const std::string name = "directional";
+    static inline const std::string handleName = "distant";
+    static inline const std::string name = "directional";
 
     static Bounds computeBounds(const Matrix4f &matrix, const DirectionalLight &data)
     {

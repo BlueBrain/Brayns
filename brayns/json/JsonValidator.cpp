@@ -68,8 +68,10 @@ private:
 class NumberValidator
 {
 public:
-    static void
-        validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
+    static void validate(
+        const brayns::JsonValue &json,
+        const brayns::JsonSchema &schema,
+        brayns::JsonErrorBuilder &errors)
     {
         auto value = json.convert<double>();
         checkRange(value, schema, errors);
@@ -91,8 +93,10 @@ public:
 class ArrayValidator
 {
 public:
-    static void
-        validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
+    static void validate(
+        const brayns::JsonValue &json,
+        const brayns::JsonSchema &schema,
+        brayns::JsonErrorBuilder &errors)
     {
         if (schema.items.empty())
         {
@@ -134,8 +138,10 @@ public:
 class MapValidator
 {
 public:
-    static void
-        validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
+    static void validate(
+        const brayns::JsonValue &json,
+        const brayns::JsonSchema &schema,
+        brayns::JsonErrorBuilder &errors)
     {
         if (schema.items.empty())
         {
@@ -162,8 +168,10 @@ public:
 class ObjectValidator
 {
 public:
-    static void
-        validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
+    static void validate(
+        const brayns::JsonValue &json,
+        const brayns::JsonSchema &schema,
+        brayns::JsonErrorBuilder &errors)
     {
         auto &object = brayns::JsonExtractor::extractObject(json);
         auto &properties = schema.properties;
@@ -223,15 +231,19 @@ public:
 class EnumValidator
 {
 public:
-    static void
-        validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
+    static void validate(
+        const brayns::JsonValue &json,
+        const brayns::JsonSchema &schema,
+        brayns::JsonErrorBuilder &errors)
     {
         auto &value = json.extract<std::string>();
         checkValues(value, schema.enums, errors);
     }
 
-    static void
-        checkValues(const std::string &value, const std::vector<std::string> &values, brayns::JsonErrorBuilder &errors)
+    static void checkValues(
+        const std::string &value,
+        const std::vector<std::string> &values,
+        brayns::JsonErrorBuilder &errors)
     {
         if (std::find(values.begin(), values.end(), value) != values.end())
         {
@@ -255,8 +267,10 @@ public:
 class OneOfValidator
 {
 public:
-    static void
-        validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
+    static void validate(
+        const brayns::JsonValue &json,
+        const brayns::JsonSchema &schema,
+        brayns::JsonErrorBuilder &errors)
     {
         checkAtLeastOneSchemaMatches(json, schema.oneOf, errors);
     }
@@ -283,8 +297,10 @@ public:
 class ValidationDispatcher
 {
 public:
-    static void
-        validate(const brayns::JsonValue &json, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
+    static void validate(
+        const brayns::JsonValue &json,
+        const brayns::JsonSchema &schema,
+        brayns::JsonErrorBuilder &errors)
     {
         if (!schema.oneOf.empty())
         {

@@ -76,8 +76,8 @@ void JsonObjectHandler::deserialize(const JsonObjectInfo &object, const JsonValu
     }
 }
 
-JsonPropertyBuilder::JsonPropertyBuilder(JsonProperty &property)
-    : _property(property)
+JsonPropertyBuilder::JsonPropertyBuilder(JsonProperty &property):
+    _property(property)
 {
 }
 

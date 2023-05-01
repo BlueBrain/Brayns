@@ -26,8 +26,8 @@ namespace
 {
 struct AmbientLightParameters
 {
-    inline static const std::string color = "color";
-    inline static const std::string intensity = "intensity";
+    static inline const std::string color = "color";
+    static inline const std::string intensity = "intensity";
 };
 }
 

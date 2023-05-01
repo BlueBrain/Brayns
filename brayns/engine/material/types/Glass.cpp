@@ -26,7 +26,7 @@ namespace
 {
 struct GlassParameters
 {
-    inline static const std::string indexOfRefraction = "eta";
+    static inline const std::string indexOfRefraction = "eta";
 };
 }
 

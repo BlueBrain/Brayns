@@ -22,9 +22,9 @@
 class MockEntrypoint : public brayns::Entrypoint<int, int>
 {
 public:
-    MockEntrypoint(std::string method = "test", int reply = 0)
-        : _method(std::move(method))
-        , _reply(reply)
+    MockEntrypoint(std::string method = "test", int reply = 0):
+        _method(std::move(method)),
+        _reply(reply)
     {
     }
 

@@ -33,8 +33,8 @@ template<typename T>
 class RendererTraits
 {
 public:
-    inline static const std::string handleName;
-    inline static const std::string name;
+    static inline const std::string handleName;
+    static inline const std::string name;
 
     static void checkParameters(const T &data)
     {

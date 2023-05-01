@@ -25,9 +25,9 @@
 
 namespace brayns
 {
-RemoveModelEntrypoint::RemoveModelEntrypoint(ModelManager &models, SimulationParameters &simulation)
-    : _models(models)
-    , _simulation(simulation)
+RemoveModelEntrypoint::RemoveModelEntrypoint(ModelManager &models, SimulationParameters &simulation):
+    _models(models),
+    _simulation(simulation)
 {
 }
 

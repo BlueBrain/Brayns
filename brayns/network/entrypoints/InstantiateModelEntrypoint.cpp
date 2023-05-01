@@ -22,8 +22,8 @@
 
 namespace brayns
 {
-InstantiateModelEntrypoint::InstantiateModelEntrypoint(ModelManager &models)
-    : _models(models)
+InstantiateModelEntrypoint::InstantiateModelEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

@@ -50,7 +50,7 @@ public:
     }
 
 private:
-    inline static const std::string source = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    static inline const std::string source = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     static bool _exists(const std::string &filename)
     {

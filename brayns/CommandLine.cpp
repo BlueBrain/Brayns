@@ -175,9 +175,9 @@ std::string CommandLine::getVersion()
     return VersionFormatter::format();
 }
 
-CommandLine::CommandLine(int argc, const char **argv)
-    : _argc(argc)
-    , _argv(argv)
+CommandLine::CommandLine(int argc, const char **argv):
+    _argc(argc),
+    _argv(argv)
 {
 }
 

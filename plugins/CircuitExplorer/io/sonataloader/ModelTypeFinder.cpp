@@ -26,7 +26,7 @@
 
 namespace
 {
-inline static const std::unordered_map<std::string_view, std::string> nodeToType = {
+static inline const std::unordered_map<std::string_view, std::string> nodeToType = {
     {sonataloader::NodeNames::astrocyte, ModelType::astroctyes},
     {sonataloader::NodeNames::biophysical, ModelType::neurons},
     {sonataloader::NodeNames::pointNeuron, ModelType::neurons},
@@ -47,8 +47,10 @@ const std::string &ModelTypeFinder::fromNodes(const bbp::sonata::NodePopulation 
     return it->second;
 }
 
-const std::string &
-    ModelTypeFinder::fromEdges(const bbp::sonata::EdgePopulation &edges, bool afferent, const Config &config)
+const std::string &ModelTypeFinder::fromEdges(
+    const bbp::sonata::EdgePopulation &edges,
+    bool afferent,
+    const Config &config)
 {
     auto populationType = PopulationType::getEdgeType(edges, config);
     if (populationType == EdgeNames::endfoot)

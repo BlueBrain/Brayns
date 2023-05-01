@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetRendererTypeEntrypoint::GetRendererTypeEntrypoint(Engine &engine)
-    : _engine(engine)
+GetRendererTypeEntrypoint::GetRendererTypeEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 
@@ -45,8 +45,8 @@ void GetRendererTypeEntrypoint::onRequest(const Request &request)
     request.reply(name);
 }
 
-SetRendererInteractiveEntrypoint::SetRendererInteractiveEntrypoint(Engine &engine)
-    : SetRendererEntrypoint<Interactive>(engine)
+SetRendererInteractiveEntrypoint::SetRendererInteractiveEntrypoint(Engine &engine):
+    SetRendererEntrypoint<Interactive>(engine)
 {
 }
 
@@ -60,8 +60,8 @@ std::string SetRendererInteractiveEntrypoint::getDescription() const
     return "Sets the system renderer to the interactive one";
 }
 
-SetRendererProductionEntrypoint::SetRendererProductionEntrypoint(Engine &engine)
-    : SetRendererEntrypoint<Production>(engine)
+SetRendererProductionEntrypoint::SetRendererProductionEntrypoint(Engine &engine):
+    SetRendererEntrypoint<Production>(engine)
 {
 }
 
@@ -75,8 +75,8 @@ std::string SetRendererProductionEntrypoint::getDescription() const
     return "Sets the system renderer to the production one";
 }
 
-GetRendererInteractiveEntrypoint::GetRendererInteractiveEntrypoint(Engine &engine)
-    : GetRendererEntrypoint<Interactive>(engine)
+GetRendererInteractiveEntrypoint::GetRendererInteractiveEntrypoint(Engine &engine):
+    GetRendererEntrypoint<Interactive>(engine)
 {
 }
 
@@ -90,8 +90,8 @@ std::string GetRendererInteractiveEntrypoint::getDescription() const
     return "Returns the current renderer as interactive renderer, if possible";
 }
 
-GetRendererProductionEntrypoint::GetRendererProductionEntrypoint(Engine &engine)
-    : GetRendererEntrypoint<Production>(engine)
+GetRendererProductionEntrypoint::GetRendererProductionEntrypoint(Engine &engine):
+    GetRendererEntrypoint<Production>(engine)
 {
 }
 

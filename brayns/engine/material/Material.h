@@ -44,11 +44,11 @@ public:
     using Traits = MaterialTraits<T>;
 
     template<typename MaterialType = Phong>
-    Material(MaterialType data = MaterialType())
-        : _handleName(MaterialTraits<MaterialType>::handleName)
-        , _materialName(MaterialTraits<MaterialType>::name)
-        , _handle("", _handleName)
-        , _data(std::make_unique<Data<MaterialType>>(std::move(data)))
+    Material(MaterialType data = MaterialType()):
+        _handleName(MaterialTraits<MaterialType>::handleName),
+        _materialName(MaterialTraits<MaterialType>::name),
+        _handle("", _handleName),
+        _data(std::make_unique<Data<MaterialType>>(std::move(data)))
     {
         _data->pushTo(_handle);
     }

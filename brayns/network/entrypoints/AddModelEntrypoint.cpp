@@ -89,11 +89,11 @@ AddModelEntrypoint::AddModelEntrypoint(
     ModelManager &models,
     LoaderRegistry &loaders,
     SimulationParameters &simulation,
-    CancellationToken token)
-    : _models(models)
-    , _loaders(loaders)
-    , _simulation(simulation)
-    , _token(token)
+    CancellationToken token):
+    _models(models),
+    _loaders(loaders),
+    _simulation(simulation),
+    _token(token)
 {
 }
 

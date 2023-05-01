@@ -24,9 +24,9 @@
 
 namespace brayns
 {
-ClearRenderablesEntrypoint::ClearRenderablesEntrypoint(ModelManager &models, SimulationParameters &simulation)
-    : _models(models)
-    , _simulation(simulation)
+ClearRenderablesEntrypoint::ClearRenderablesEntrypoint(ModelManager &models, SimulationParameters &simulation):
+    _models(models),
+    _simulation(simulation)
 {
 }
 

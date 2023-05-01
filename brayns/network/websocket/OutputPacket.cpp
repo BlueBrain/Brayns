@@ -35,9 +35,9 @@ OutputPacket OutputPacket::fromText(std::string_view data)
     return {data, Poco::Net::WebSocket::FRAME_TEXT};
 }
 
-OutputPacket::OutputPacket(std::string_view data, int flags)
-    : _data(data)
-    , _flags(flags)
+OutputPacket::OutputPacket(std::string_view data, int flags):
+    _data(data),
+    _flags(flags)
 {
 }
 

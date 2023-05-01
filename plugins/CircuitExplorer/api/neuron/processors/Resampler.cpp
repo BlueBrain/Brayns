@@ -26,8 +26,8 @@ public:
     using Section = NeuronMorphology::Section;
     using Sample = NeuronMorphology::SectionSample;
 
-    explicit SectionResampler(float treshold)
-        : _treshold(treshold)
+    explicit SectionResampler(float treshold):
+        _treshold(treshold)
     {
     }
 
@@ -85,8 +85,8 @@ private:
 };
 }
 
-Resampler::Resampler(float treshold)
-    : _treshold(treshold)
+Resampler::Resampler(float treshold):
+    _treshold(treshold)
 {
 }
 

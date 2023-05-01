@@ -33,8 +33,10 @@ namespace
 class SomaImporter
 {
 public:
-    static std::vector<CellCompartments>
-        import(const bbploader::LoadContext &context, brayns::Model &model, std::unique_ptr<IBrainColorData> colorData)
+    static std::vector<CellCompartments> import(
+        const bbploader::LoadContext &context,
+        brayns::Model &model,
+        std::unique_ptr<IBrainColorData> colorData)
     {
         auto &circuit = context.circuit;
         auto &gids = context.gids;
@@ -128,8 +130,10 @@ public:
 
 namespace bbploader
 {
-std::vector<CellCompartments>
-    CellLoader::load(const LoadContext &context, ProgressUpdater &updater, brayns::Model &model)
+std::vector<CellCompartments> CellLoader::load(
+    const LoadContext &context,
+    ProgressUpdater &updater,
+    brayns::Model &model)
 {
     auto &params = context.loadParameters;
     auto &morphSettings = params.neuron_morphology_parameters;

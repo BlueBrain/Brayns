@@ -36,14 +36,15 @@ template<>
 class GeometryTraits<Box>
 {
 public:
-    inline static const std::string handleName = "box";
-    inline static const std::string name = "box";
+    static inline const std::string handleName = "box";
+    static inline const std::string name = "box";
 
     static Bounds computeBounds(const Matrix4f &matrix, const Box &data);
     static void updateData(ospray::cpp::Geometry &handle, std::vector<Box> &data);
 };
 
 } // namespace brayns
+
 namespace ospray
 {
 OSPTYPEFOR_SPECIALIZATION(brayns::Box, OSP_BOX3F)

@@ -34,8 +34,8 @@ template<>
 class LightTraits<AmbientLight>
 {
 public:
-    inline static const std::string handleName = "ambient";
-    inline static const std::string name = "ambient";
+    static inline const std::string handleName = "ambient";
+    static inline const std::string name = "ambient";
 
     static Bounds computeBounds(const Matrix4f &matrix, const AmbientLight &light)
     {

@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-QuitEntrypoint::QuitEntrypoint(Engine &engine)
-    : _engine(engine)
+QuitEntrypoint::QuitEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 

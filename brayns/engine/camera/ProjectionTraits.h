@@ -33,7 +33,7 @@ template<typename T>
 class ProjectionTraits
 {
 public:
-    inline static const std::string name;
+    static inline const std::string name;
 
     static void checkParameters(const T &data)
     {

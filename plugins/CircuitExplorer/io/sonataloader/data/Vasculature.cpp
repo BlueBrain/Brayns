@@ -24,18 +24,18 @@ namespace
 {
 struct Attributes
 {
-    inline static const std::string startX = "start_x";
-    inline static const std::string startY = "start_y";
-    inline static const std::string startZ = "start_z";
-    inline static const std::string endX = "end_x";
-    inline static const std::string endY = "end_y";
-    inline static const std::string endZ = "end_z";
-    inline static const std::string startDiameter = "start_diameter";
-    inline static const std::string endDiameter = "end_diameter";
-    inline static const std::string startNode = "start_node";
-    inline static const std::string endNode = "end_node";
-    inline static const std::string type = "type";
-    inline static const std::string sectionId = "section_id";
+    static inline const std::string startX = "start_x";
+    static inline const std::string startY = "start_y";
+    static inline const std::string startZ = "start_z";
+    static inline const std::string endX = "end_x";
+    static inline const std::string endY = "end_y";
+    static inline const std::string endZ = "end_z";
+    static inline const std::string startDiameter = "start_diameter";
+    static inline const std::string endDiameter = "end_diameter";
+    static inline const std::string startNode = "start_node";
+    static inline const std::string endNode = "end_node";
+    static inline const std::string type = "type";
+    static inline const std::string sectionId = "section_id";
 };
 
 class DataReader

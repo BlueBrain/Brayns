@@ -91,8 +91,10 @@ struct PopulationInfo
 class PopulationLoader
 {
 public:
-    static std::shared_ptr<brayns::Model>
-        load(const PopulationInfo &info, const CellPlacementLoaderParameters &parameters, ProgressUpdater &updater)
+    static std::shared_ptr<brayns::Model> load(
+        const PopulationInfo &info,
+        const CellPlacementLoaderParameters &parameters,
+        ProgressUpdater &updater)
     {
         auto nodes = bbp::sonata::NodePopulation(info.path, "", info.name);
         auto selection = sonataloader::PercentageFilter::filter(nodes.selectAll(), parameters.percentage);

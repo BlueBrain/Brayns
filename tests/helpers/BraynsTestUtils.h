@@ -43,11 +43,11 @@
 class BraynsTestUtils
 {
 private:
-    inline static auto args = "brayns";
+    static inline auto args = "brayns";
 
 public:
-    explicit BraynsTestUtils()
-        : _brayns(1, &args)
+    explicit BraynsTestUtils():
+        _brayns(1, &args)
     {
     }
 
@@ -84,8 +84,10 @@ public:
     }
 
     template<typename T>
-    brayns::ModelInstance *
-        addVolume(T volume, const brayns::Transform &transform = {}, const brayns::ColorRamp &colorRamp = {})
+    brayns::ModelInstance *addVolume(
+        T volume,
+        const brayns::Transform &transform = {},
+        const brayns::ColorRamp &colorRamp = {})
     {
         auto model = std::make_shared<brayns::Model>("volume");
 

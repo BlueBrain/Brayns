@@ -40,8 +40,10 @@ public:
 class BaseGIDsFetcher
 {
 public:
-    static brain::GIDSet
-        fromParameters(const brion::BlueConfig &config, const brain::Circuit &circuit, const BBPLoaderParameters &input)
+    static brain::GIDSet fromParameters(
+        const brion::BlueConfig &config,
+        const brain::Circuit &circuit,
+        const BBPLoaderParameters &input)
     {
         if (input.gids.has_value())
         {
@@ -63,11 +65,14 @@ public:
         return circuit.getGIDs();
     };
 };
+
 class ReportGIDIntersector
 {
 public:
-    static brain::GIDSet
-        intersect(const brion::BlueConfig &config, const std::string &reportName, const brain::GIDSet &source)
+    static brain::GIDSet intersect(
+        const brion::BlueConfig &config,
+        const std::string &reportName,
+        const brain::GIDSet &source)
     {
         auto reportPath = config.getReportSource(reportName).getPath();
         const brion::URI uri(reportPath);
@@ -106,8 +111,10 @@ public:
 
 namespace bbploader
 {
-brain::GIDSet
-    GIDLoader::compute(const brion::BlueConfig &config, const brain::Circuit &circuit, const BBPLoaderParameters &input)
+brain::GIDSet GIDLoader::compute(
+    const brion::BlueConfig &config,
+    const brain::Circuit &circuit,
+    const BBPLoaderParameters &input)
 {
     auto inputGidList = input.gids.has_value();
     auto baseGids = BaseGIDsFetcher::fromParameters(config, circuit, input);

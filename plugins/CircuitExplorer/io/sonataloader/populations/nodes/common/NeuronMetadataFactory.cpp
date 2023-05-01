@@ -26,10 +26,10 @@ namespace
 {
 struct SonataNeuronMetadataKey
 {
-    inline static const std::string type = "population_type";
-    inline static const std::string name = "population_name";
-    inline static const std::string neuronCount = "loaded_neuron_count";
-    inline static const std::string nodeSets = "node_sets";
+    static inline const std::string type = "population_type";
+    static inline const std::string name = "population_name";
+    static inline const std::string neuronCount = "loaded_neuron_count";
+    static inline const std::string nodeSets = "node_sets";
 };
 }
 

@@ -40,8 +40,8 @@ namespace
 class RequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-    explicit RequestHandler(brayns::SocketManager &manager)
-        : _manager(manager)
+    explicit RequestHandler(brayns::SocketManager &manager):
+        _manager(manager)
     {
     }
 
@@ -75,8 +75,8 @@ private:
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-    explicit RequestHandlerFactory(brayns::SocketManager &manager)
-        : _manager(manager)
+    explicit RequestHandlerFactory(brayns::SocketManager &manager):
+        _manager(manager)
     {
     }
 
@@ -163,8 +163,8 @@ public:
 
 namespace brayns
 {
-ServerSocket::ServerSocket(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener)
-    : _manager(std::move(listener))
+ServerSocket::ServerSocket(const NetworkParameters &parameters, std::unique_ptr<ISocketListener> listener):
+    _manager(std::move(listener))
 {
     try
     {

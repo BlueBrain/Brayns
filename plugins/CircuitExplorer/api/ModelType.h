@@ -22,11 +22,11 @@
 
 struct ModelType
 {
-    inline static const std::string neurons = "neurons";
-    inline static const std::string astroctyes = "astrocytes";
-    inline static const std::string vasculature = "vasculature";
-    inline static const std::string afferentSynapses = "afferent_synapses";
-    inline static const std::string efferentSynapses = "efferent_synapses";
-    inline static const std::string endfeet = "endfeet";
-    inline static const std::string morphology = "morphology";
+    static inline const std::string neurons = "neurons";
+    static inline const std::string astroctyes = "astrocytes";
+    static inline const std::string vasculature = "vasculature";
+    static inline const std::string afferentSynapses = "afferent_synapses";
+    static inline const std::string efferentSynapses = "efferent_synapses";
+    static inline const std::string endfeet = "endfeet";
+    static inline const std::string morphology = "morphology";
 };

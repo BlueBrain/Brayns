@@ -22,8 +22,8 @@
 
 namespace brayns
 {
-AddBoundedPlanesEntrypoint::AddBoundedPlanesEntrypoint(ModelManager &models)
-    : AddGeometryEntrypoint<BoundedPlane>(models)
+AddBoundedPlanesEntrypoint::AddBoundedPlanesEntrypoint(ModelManager &models):
+    AddGeometryEntrypoint<BoundedPlane>(models)
 {
 }
 
@@ -37,8 +37,8 @@ std::string AddBoundedPlanesEntrypoint::getDescription() const
     return "Adds a list of axis-aligned bound limited planes";
 }
 
-AddBoxesEntrypoint::AddBoxesEntrypoint(ModelManager &models)
-    : AddGeometryEntrypoint<Box>(models)
+AddBoxesEntrypoint::AddBoxesEntrypoint(ModelManager &models):
+    AddGeometryEntrypoint<Box>(models)
 {
 }
 
@@ -52,8 +52,8 @@ std::string AddBoxesEntrypoint::getDescription() const
     return "Adds a list of boxes to the scene";
 }
 
-AddPlanesEntrypoint::AddPlanesEntrypoint(ModelManager &models)
-    : AddGeometryEntrypoint<Plane>(models)
+AddPlanesEntrypoint::AddPlanesEntrypoint(ModelManager &models):
+    AddGeometryEntrypoint<Plane>(models)
 {
 }
 
@@ -67,8 +67,8 @@ std::string AddPlanesEntrypoint::getDescription() const
     return "Adds a list of planes to the scene";
 }
 
-AddCapsulesEntrypoint::AddCapsulesEntrypoint(ModelManager &models)
-    : AddGeometryEntrypoint<Capsule>(models)
+AddCapsulesEntrypoint::AddCapsulesEntrypoint(ModelManager &models):
+    AddGeometryEntrypoint<Capsule>(models)
 {
 }
 
@@ -82,8 +82,8 @@ std::string AddCapsulesEntrypoint::getDescription() const
     return "Adds a list of capsules to the scene";
 }
 
-AddSpheresEntrypoint::AddSpheresEntrypoint(ModelManager &models)
-    : AddGeometryEntrypoint<Sphere>(models)
+AddSpheresEntrypoint::AddSpheresEntrypoint(ModelManager &models):
+    AddGeometryEntrypoint<Sphere>(models)
 {
 }
 

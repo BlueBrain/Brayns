@@ -27,7 +27,7 @@ namespace
 {
 struct WorldParameters
 {
-    inline static const std::string instance = "instance";
+    static inline const std::string instance = "instance";
 };
 
 class WorldInstances

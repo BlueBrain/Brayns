@@ -29,8 +29,8 @@
 
 #include <unordered_set>
 
-BrainDatasetColorMethod::BrainDatasetColorMethod(BrainColorMethod method)
-    : _method(method)
+BrainDatasetColorMethod::BrainDatasetColorMethod(BrainColorMethod method):
+    _method(method)
 {
 }
 

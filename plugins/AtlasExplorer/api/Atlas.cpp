@@ -57,9 +57,9 @@ public:
 };
 }
 
-Atlas::Atlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing)
-    : _size(size)
-    , _spacing(spacing)
+Atlas::Atlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing):
+    _size(size),
+    _spacing(spacing)
 {
 }
 

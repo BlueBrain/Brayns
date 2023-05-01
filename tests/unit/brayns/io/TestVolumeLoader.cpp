@@ -125,9 +125,7 @@ TEST_CASE("Mhd Volume loader")
             loader.importFromFile(TestPaths::Volumes::invalidMhd, {}),
             "Incomplete MHD file. Missing ElementType");
 
-        CHECK_THROWS_WITH(
-            loader.importFromFile(TestPaths::Volumes::badFormatMhd, {}),
-            "Unsupported data type: MET_INT");
+        CHECK_THROWS_WITH(loader.importFromFile(TestPaths::Volumes::badFormatMhd, {}), "Unsupported data type: MET_INT");
 
         CHECK_THROWS_WITH(
             loader.importFromFile(TestPaths::Volumes::badObjectTypeMhd, {}),

@@ -55,8 +55,10 @@ public:
         return {"c", "d"};
     }
 
-    void apply(const std::string &method, const brayns::ColorMethodInput &input, brayns::Components &components)
-        const override
+    void apply(
+        const std::string &method,
+        const brayns::ColorMethodInput &input,
+        brayns::Components &components) const override
     {
         auto &color = components.add<brayns::Vector4f>();
 

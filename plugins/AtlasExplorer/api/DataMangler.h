@@ -49,8 +49,8 @@ template<typename T>
 class DataMangler final : public IDataMangler
 {
 public:
-    explicit DataMangler(std::vector<T> data)
-        : _data(std::move(data))
+    explicit DataMangler(std::vector<T> data):
+        _data(std::move(data))
     {
         static_assert(std::is_scalar_v<T>, "DataMangler only supports scalar values");
     }

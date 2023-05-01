@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-RegistryEntrypoint::RegistryEntrypoint(const EntrypointRegistry &entrypoints)
-    : _entrypoints(entrypoints)
+RegistryEntrypoint::RegistryEntrypoint(const EntrypointRegistry &entrypoints):
+    _entrypoints(entrypoints)
 {
 }
 
