@@ -26,8 +26,8 @@ namespace
 {
 struct CarPaintParameters
 {
-    inline static const std::string baseColor = "baseColor";
-    inline static const std::string flakeDensity = "flakeDensity";
+    static inline const std::string baseColor = "baseColor";
+    static inline const std::string flakeDensity = "flakeDensity";
 };
 }
 

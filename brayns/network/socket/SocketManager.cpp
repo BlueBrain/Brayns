@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-SocketManager::SocketManager(std::unique_ptr<ISocketListener> listener)
-    : _listener(std::move(listener))
+SocketManager::SocketManager(std::unique_ptr<ISocketListener> listener):
+    _listener(std::move(listener))
 {
     assert(_listener);
 }

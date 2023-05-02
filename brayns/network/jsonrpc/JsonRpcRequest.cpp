@@ -28,10 +28,10 @@
 
 namespace brayns
 {
-JsonRpcRequest::JsonRpcRequest(ClientRef client, RequestMessage message, std::string binary)
-    : _client(std::move(client))
-    , _message(std::move(message))
-    , _binary(std::move(binary))
+JsonRpcRequest::JsonRpcRequest(ClientRef client, RequestMessage message, std::string binary):
+    _client(std::move(client)),
+    _message(std::move(message)),
+    _binary(std::move(binary))
 {
 }
 

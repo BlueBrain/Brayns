@@ -80,9 +80,9 @@ public:
 
 namespace brayns
 {
-PrimitiveColorMethod::PrimitiveColorMethod(std::string name, size_t primitiveCount)
-    : _name(std::move(name))
-    , _primitiveCount(primitiveCount)
+PrimitiveColorMethod::PrimitiveColorMethod(std::string name, size_t primitiveCount):
+    _name(std::move(name)),
+    _primitiveCount(primitiveCount)
 {
     assert(_primitiveCount > 0);
 }

@@ -23,13 +23,13 @@
 
 namespace brayns
 {
-JsonPathElement::JsonPathElement(size_t index)
-    : _value(index)
+JsonPathElement::JsonPathElement(size_t index):
+    _value(index)
 {
 }
 
-JsonPathElement::JsonPathElement(std::string key)
-    : _value(std::move(key))
+JsonPathElement::JsonPathElement(std::string key):
+    _value(std::move(key))
 {
 }
 
@@ -119,9 +119,9 @@ std::vector<std::string> JsonErrorFormatter::format(const JsonErrors &errors)
     return messages;
 }
 
-JsonSchemaException::JsonSchemaException(const std::string &message, JsonErrors errors)
-    : std::runtime_error(message)
-    , _errors(std::move(errors))
+JsonSchemaException::JsonSchemaException(const std::string &message, JsonErrors errors):
+    std::runtime_error(message),
+    _errors(std::move(errors))
 {
 }
 

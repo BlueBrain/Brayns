@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-CancelEntrypoint::CancelEntrypoint(TaskManager &tasks)
-    : _tasks(tasks)
+CancelEntrypoint::CancelEntrypoint(TaskManager &tasks):
+    _tasks(tasks)
 {
 }
 

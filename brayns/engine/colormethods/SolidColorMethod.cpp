@@ -31,8 +31,8 @@ namespace
 {
 struct SolidMethodNames
 {
-    inline static const std::string name = "solid";
-    inline static const std::string value = "color";
+    static inline const std::string name = "solid";
+    static inline const std::string value = "color";
 };
 
 class ColorFiller

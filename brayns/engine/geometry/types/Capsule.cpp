@@ -28,10 +28,10 @@ namespace
 {
 struct CapsuleParameters
 {
-    inline static const std::string type = "type";
-    inline static const std::string basis = "basis";
-    inline static const std::string position = "vertex.position_radius";
-    inline static const std::string index = "index";
+    static inline const std::string type = "type";
+    static inline const std::string basis = "basis";
+    static inline const std::string position = "vertex.position_radius";
+    static inline const std::string index = "index";
 };
 }
 

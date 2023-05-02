@@ -33,8 +33,10 @@ namespace sl = sonataloader;
 class SonataCompartmentMapping
 {
 public:
-    static std::vector<CellReportMapping>
-        generate(const std::string &path, const std::string &population, const std::vector<uint64_t> &nodeList)
+    static std::vector<CellReportMapping> generate(
+        const std::string &path,
+        const std::string &population,
+        const std::vector<uint64_t> &nodeList)
     {
         auto compartmentsSize = _computeCompartmentsSize(path, population, nodeList);
         return _computeMapping(compartmentsSize);

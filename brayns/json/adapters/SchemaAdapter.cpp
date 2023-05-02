@@ -131,9 +131,7 @@ private:
         }
     }
 
-    static void _serializeObject(
-        const std::map<std::string, brayns::JsonSchema> &properties,
-        brayns::JsonObject &object)
+    static void _serializeObject(const std::map<std::string, brayns::JsonSchema> &properties, brayns::JsonObject &object)
     {
         Helper::set(object, "additionalProperties", false);
         if (properties.empty())

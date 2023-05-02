@@ -54,8 +54,10 @@ public:
 class NodeReportFilter
 {
 public:
-    static bbp::sonata::Selection
-        filter(const sonataloader::Config &config, const std::string &reportName, const std::string &population)
+    static bbp::sonata::Selection filter(
+        const sonataloader::Config &config,
+        const std::string &reportName,
+        const std::string &population)
     {
         auto reportPath = config.getReportPath(reportName);
         auto nodeIds = sonataloader::SimulationMapping::getCompartmentNodes(reportPath, population);

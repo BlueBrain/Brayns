@@ -34,9 +34,9 @@ public:
 
 struct MorphologyFormat
 {
-    inline static const std::string swc = "swc";
-    inline static const std::string h5 = "h5v1";
-    inline static const std::string ascii = "neurolucida-asc";
+    static inline const std::string swc = "swc";
+    static inline const std::string h5 = "h5v1";
+    static inline const std::string ascii = "neurolucida-asc";
 };
 
 class MorphologyPathResolver
@@ -122,9 +122,9 @@ public:
 
 namespace sonataloader
 {
-MorphologyPath::MorphologyPath(std::string path, std::string extension)
-    : _path(std::move(path))
-    , _extension(std::move(extension))
+MorphologyPath::MorphologyPath(std::string path, std::string extension):
+    _path(std::move(path)),
+    _extension(std::move(extension))
 {
 }
 
@@ -133,10 +133,10 @@ std::string MorphologyPath::buildPath(const std::string &morphologyName) const n
     return _path + "/" + morphologyName + "." + _extension;
 }
 
-Config::Config(const std::string &path)
-    : _circuitConfigDir(PathResolver::resolveParentPath(path))
-    , _simConfig(SimulationFactory::tryToCreate(path))
-    , _config(bbp::sonata::CircuitConfig::fromFile(_simConfig ? _simConfig->getNetwork() : path))
+Config::Config(const std::string &path):
+    _circuitConfigDir(PathResolver::resolveParentPath(path)),
+    _simConfig(SimulationFactory::tryToCreate(path)),
+    _config(bbp::sonata::CircuitConfig::fromFile(_simConfig ? _simConfig->getNetwork() : path))
 {
 }
 

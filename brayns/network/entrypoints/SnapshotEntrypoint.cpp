@@ -192,9 +192,9 @@ public:
 
 namespace brayns
 {
-SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, CancellationToken token)
-    : _engine(engine)
-    , _token(token)
+SnapshotEntrypoint::SnapshotEntrypoint(Engine &engine, CancellationToken token):
+    _engine(engine),
+    _token(token)
 {
 }
 

@@ -41,8 +41,8 @@ UseCaseManager UseCaseManager::createDefault()
     return UseCaseManager(std::move(useCases));
 }
 
-UseCaseManager::UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases)
-    : _useCases(std::move(useCases))
+UseCaseManager::UseCaseManager(std::vector<std::unique_ptr<IUseCase>> useCases):
+    _useCases(std::move(useCases))
 {
 }
 

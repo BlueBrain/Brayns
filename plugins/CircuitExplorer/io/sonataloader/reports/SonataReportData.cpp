@@ -22,7 +22,7 @@
 
 namespace
 {
-inline static constexpr double sonataEpsilon = 1e-6;
+static inline constexpr double sonataEpsilon = 1e-6;
 }
 
 namespace sonataloader
@@ -30,10 +30,10 @@ namespace sonataloader
 SonataReportData::SonataReportData(
     const std::string &reportPath,
     const std::string &population,
-    bbp::sonata::Selection selection)
-    : _reader(bbp::sonata::ElementReportReader(reportPath))
-    , _population(_reader.openPopulation(population))
-    , _selection(std::move(selection))
+    bbp::sonata::Selection selection):
+    _reader(bbp::sonata::ElementReportReader(reportPath)),
+    _population(_reader.openPopulation(population)),
+    _selection(std::move(selection))
 {
     auto [start, end, dt] = _population.getTimes();
     _start = start;

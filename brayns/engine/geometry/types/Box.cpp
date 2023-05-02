@@ -26,7 +26,7 @@ namespace
 {
 struct BoxParameters
 {
-    inline static const std::string box = "box";
+    static inline const std::string box = "box";
 };
 }
 

@@ -44,7 +44,7 @@ namespace
 class XyzReader
 {
 public:
-    inline static constexpr float defaultRadius = 0.15f;
+    static inline constexpr float defaultRadius = 0.15f;
 
     static std::vector<brayns::Sphere> fromBytes(const brayns::LoaderProgress &callback, const std::string &bytes)
     {

@@ -26,15 +26,15 @@
 
 namespace brayns
 {
-RequestId::RequestId(int64_t value)
-    : _type(typeid(int64_t))
-    , _int(value)
+RequestId::RequestId(int64_t value):
+    _type(typeid(int64_t)),
+    _int(value)
 {
 }
 
-RequestId::RequestId(std::string value)
-    : _type(typeid(std::string))
-    , _string(std::move(value))
+RequestId::RequestId(std::string value):
+    _type(typeid(std::string)),
+    _string(std::move(value))
 {
 }
 

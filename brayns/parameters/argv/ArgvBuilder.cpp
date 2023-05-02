@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-ArgvBuilder::ArgvBuilder(std::vector<ArgvProperty> &properties)
-    : _properties(properties)
+ArgvBuilder::ArgvBuilder(std::vector<ArgvProperty> &properties):
+    _properties(properties)
 {
 }
 

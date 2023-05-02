@@ -76,9 +76,9 @@ private:
 class ParentChildrenSmoother
 {
 public:
-    ParentChildrenSmoother(float somaRadiusMultiplier, float maxParentChildrenChange)
-        : _somaRadiusMultiplier(somaRadiusMultiplier)
-        , _maxParentChildrenChange(maxParentChildrenChange)
+    ParentChildrenSmoother(float somaRadiusMultiplier, float maxParentChildrenChange):
+        _somaRadiusMultiplier(somaRadiusMultiplier),
+        _maxParentChildrenChange(maxParentChildrenChange)
     {
     }
 

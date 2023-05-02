@@ -23,9 +23,9 @@
 
 namespace brayns
 {
-ClientRequest::ClientRequest(ClientRef client, InputPacket packet)
-    : _client(std::move(client))
-    , _packet(std::move(packet))
+ClientRequest::ClientRequest(ClientRef client, InputPacket packet):
+    _client(std::move(client)),
+    _packet(std::move(packet))
 {
 }
 

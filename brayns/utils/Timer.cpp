@@ -35,8 +35,8 @@ int64_t getDuration(const std::chrono::high_resolution_clock::time_point &start)
 
 namespace brayns
 {
-Timer::Timer()
-    : _startTime(clock::now())
+Timer::Timer():
+    _startTime(clock::now())
 {
 }
 

@@ -47,8 +47,8 @@ public:
 class MVD2Circuit final : public CircuitAccessor
 {
 public:
-    explicit MVD2Circuit(const std::string &path)
-        : _circuit(path)
+    explicit MVD2Circuit(const std::string &path):
+        _circuit(path)
     {
     }
 
@@ -149,8 +149,8 @@ template<class CircuitType>
 class GenericCircuit : public CircuitAccessor
 {
 public:
-    explicit GenericCircuit(std::unique_ptr<CircuitType> &&circuit)
-        : _circuit(std::move(circuit))
+    explicit GenericCircuit(std::unique_ptr<CircuitType> &&circuit):
+        _circuit(std::move(circuit))
     {
     }
 
@@ -266,8 +266,8 @@ public:
 class MethodQuerier
 {
 public:
-    explicit MethodQuerier(const CircuitAccessor &circuit)
-        : _circuit(circuit)
+    explicit MethodQuerier(const CircuitAccessor &circuit):
+        _circuit(circuit)
     {
     }
 
@@ -299,7 +299,7 @@ private:
 class ValidMethodBuilder
 {
 public:
-    inline static const std::vector<BrainColorMethod> validMethods = {
+    static inline const std::vector<BrainColorMethod> validMethods = {
         BrainColorMethod::ByEtype,
         BrainColorMethod::ByLayer,
         BrainColorMethod::ByMorphology,
@@ -332,9 +332,9 @@ public:
 
 namespace bbploader
 {
-BBPColorData::BBPColorData(std::string circuitPath, std::string circuitPop)
-    : _circuitPath(std::move(circuitPath))
-    , _circuitPop(std::move(circuitPop))
+BBPColorData::BBPColorData(std::string circuitPath, std::string circuitPop):
+    _circuitPath(std::move(circuitPath)),
+    _circuitPop(std::move(circuitPop))
 {
 }
 

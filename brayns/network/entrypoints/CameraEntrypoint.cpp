@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetCameraTypeEntrypoint::GetCameraTypeEntrypoint(Engine &engine)
-    : _engine(engine)
+GetCameraTypeEntrypoint::GetCameraTypeEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 
@@ -45,8 +45,8 @@ void GetCameraTypeEntrypoint::onRequest(const Request &request)
     request.reply(name);
 }
 
-SetCameraPerspectiveEntrypoint::SetCameraPerspectiveEntrypoint(Engine &engine)
-    : SetCameraEntrypoint<Perspective>(engine)
+SetCameraPerspectiveEntrypoint::SetCameraPerspectiveEntrypoint(Engine &engine):
+    SetCameraEntrypoint<Perspective>(engine)
 {
 }
 
@@ -60,8 +60,8 @@ std::string SetCameraPerspectiveEntrypoint::getDescription() const
     return "Sets the current camera to a perspective one, with the specified parameters";
 }
 
-SetCameraOrthographicEntrypoint::SetCameraOrthographicEntrypoint(Engine &engine)
-    : SetCameraEntrypoint<Orthographic>(engine)
+SetCameraOrthographicEntrypoint::SetCameraOrthographicEntrypoint(Engine &engine):
+    SetCameraEntrypoint<Orthographic>(engine)
 {
 }
 
@@ -75,8 +75,8 @@ std::string SetCameraOrthographicEntrypoint::getDescription() const
     return "Sets the current camera to an orthographic one, with the specified parameters";
 }
 
-GetCameraPerspectiveEntrypoint::GetCameraPerspectiveEntrypoint(Engine &engine)
-    : GetCameraEntrypoint<Perspective>(engine)
+GetCameraPerspectiveEntrypoint::GetCameraPerspectiveEntrypoint(Engine &engine):
+    GetCameraEntrypoint<Perspective>(engine)
 {
 }
 
@@ -90,8 +90,8 @@ std::string GetCameraPerspectiveEntrypoint::getDescription() const
     return "Returns the current camera as perspective";
 }
 
-GetCameraOrthographicEntrypoint::GetCameraOrthographicEntrypoint(Engine &engine)
-    : GetCameraEntrypoint<Orthographic>(engine)
+GetCameraOrthographicEntrypoint::GetCameraOrthographicEntrypoint(Engine &engine):
+    GetCameraEntrypoint<Orthographic>(engine)
 {
 }
 

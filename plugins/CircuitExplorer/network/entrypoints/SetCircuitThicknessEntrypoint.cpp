@@ -99,8 +99,8 @@ private:
 };
 } // namespace
 
-SetCircuitThicknessEntrypoint::SetCircuitThicknessEntrypoint(brayns::ModelManager &models)
-    : _models(models)
+SetCircuitThicknessEntrypoint::SetCircuitThicknessEntrypoint(brayns::ModelManager &models):
+    _models(models)
 {
 }
 

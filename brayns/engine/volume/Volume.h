@@ -46,11 +46,11 @@ public:
     using Traits = VolumeTraits<T>;
 
     template<typename T>
-    explicit Volume(T data)
-        : _handleName(VolumeTraits<T>::handleName)
-        , _volumeName(VolumeTraits<T>::name)
-        , _handle(_handleName)
-        , _data(std::make_unique<Data<T>>(std::move(data)))
+    explicit Volume(T data):
+        _handleName(VolumeTraits<T>::handleName),
+        _volumeName(VolumeTraits<T>::name),
+        _handle(_handleName),
+        _data(std::make_unique<Data<T>>(std::move(data)))
     {
     }
 

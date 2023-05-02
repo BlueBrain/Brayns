@@ -24,6 +24,7 @@
 #include "common/StreamlineData.h"
 
 #include <map>
+
 namespace dti
 {
 class DTIBuilder final : public IDTIBuilder

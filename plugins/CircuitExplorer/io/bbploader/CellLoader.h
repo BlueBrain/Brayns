@@ -64,7 +64,9 @@ public:
      * @param model Model where the cell geometries will be stored
      * @return std::vector<CellCompartments> cell compartement mapping
      */
-    static std::vector<CellCompartments>
-        load(const LoadContext &context, ProgressUpdater &updater, brayns::Model &model);
+    static std::vector<CellCompartments> load(
+        const LoadContext &context,
+        ProgressUpdater &updater,
+        brayns::Model &model);
 };
 } // namespace bbploader

@@ -70,9 +70,9 @@ public:
 
 namespace brayns
 {
-GenericColorSystem::GenericColorSystem(ColorMethodList methods)
-    : _methods(std::move(methods))
-    , _methodNames(MethodNameList::build(_methods))
+GenericColorSystem::GenericColorSystem(ColorMethodList methods):
+    _methods(std::move(methods)),
+    _methodNames(MethodNameList::build(_methods))
 {
 }
 

@@ -40,6 +40,7 @@ TEST_CASE("JsonTypeInfo")
         struct NotJson
         {
         };
+
         CHECK_THROWS_AS(brayns::JsonTypeInfo::getType(NotJson()), std::invalid_argument);
         CHECK_EQ(brayns::JsonTypeInfo::getType(brayns::JsonValue()), brayns::JsonType::Null);
         CHECK_EQ(brayns::JsonTypeInfo::getType(true), brayns::JsonType::Boolean);

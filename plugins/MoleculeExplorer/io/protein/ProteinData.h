@@ -56,9 +56,9 @@ struct AtomicRadius
 
 struct ProteinData
 {
-    inline static constexpr float defaultRadius = 25.f;
+    static inline constexpr float defaultRadius = 25.f;
 
-    inline static const std::array<ProteinColorMap, 113> colorIndices = {
+    static inline const std::array<ProteinColorMap, 113> colorIndices = {
         {{"H", 0},    {"He", 1},   {"Li", 2},   {"Be", 3},   {"B", 4},    {"C", 5},    {"N", 6},    {"O", 7},
          {"F", 8},    {"Ne", 9},   {"Na", 10},  {"Mg", 11},  {"Al", 12},  {"Si", 13},  {"P", 14},   {"S", 15},
          {"Cl", 16},  {"Ar", 17},  {"K", 18},   {"Ca", 19},  {"Sc", 20},  {"Ti", 21},  {"V", 22},   {"Cr", 23},
@@ -75,7 +75,7 @@ struct ProteinData
          {"Db", 104}, {"Sg", 105}, {"Bh", 106}, {"Hs", 107}, {"Mt", 108}, {"", 109},   {"", 110},   {"", 111},
          {"", 112}}};
 
-    inline static const std::array<brayns::Vector4f, 113> colors = {{
+    static inline const std::array<brayns::Vector4f, 113> colors = {{
         {0.87, 0.87, 0.87, 1}, {0.85, 1, 1, 1},       {0.8, 0.5, 1, 1},
         {0.76, 1, 0, 1},       {1, 0.71, 0.71, 1},    {0.56, 0.56, 0.56, 1},
         {0.19, 0.31, 0.97, 1}, {1, 0.051, 0.051, 1},  {0.62, 0.02, 0.0039, 1},
@@ -117,7 +117,7 @@ struct ProteinData
     }};
 
     // atomic radii in microns
-    inline static const std::array<AtomicRadius, 113> atomicRadii = {
+    static inline const std::array<AtomicRadius, 113> atomicRadii = {
         {{"C", 67.f, 1},
          {"N", 56.f, 2},
          {"O", 48.f, 3},

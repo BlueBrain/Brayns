@@ -28,7 +28,9 @@ namespace bbploader
 class GIDLoader
 {
 public:
-    static brain::GIDSet
-        compute(const brion::BlueConfig &config, const brain::Circuit &circuit, const BBPLoaderParameters &input);
+    static brain::GIDSet compute(
+        const brion::BlueConfig &config,
+        const brain::Circuit &circuit,
+        const BBPLoaderParameters &input);
 };
 }

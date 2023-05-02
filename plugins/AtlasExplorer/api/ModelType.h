@@ -24,5 +24,5 @@
 
 struct ModelType
 {
-    inline static const std::string atlas = "atlas";
+    static inline const std::string atlas = "atlas";
 };

@@ -35,8 +35,8 @@ template<>
 class GeometryTraits<Isosurface>
 {
 public:
-    inline static const std::string handleName = "isosurface";
-    inline static const std::string name = "isosurface";
+    static inline const std::string handleName = "isosurface";
+    static inline const std::string name = "isosurface";
 
     static Bounds computeBounds(const Matrix4f &matrix, const Isosurface &data);
     static void updateData(ospray::cpp::Geometry &handle, std::vector<Isosurface> &primitives);

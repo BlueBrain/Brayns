@@ -20,8 +20,8 @@
 
 #include "CylindricCameraEntrypoint.h"
 
-SetCylindricCameraEntrypoint::SetCylindricCameraEntrypoint(brayns::Engine &engine)
-    : brayns::SetCameraEntrypoint<Cylindric>(engine)
+SetCylindricCameraEntrypoint::SetCylindricCameraEntrypoint(brayns::Engine &engine):
+    brayns::SetCameraEntrypoint<Cylindric>(engine)
 {
 }
 
@@ -35,8 +35,8 @@ std::string SetCylindricCameraEntrypoint::getDescription() const
     return "Sets the current camera to a cylindric one, with the specified parameters";
 }
 
-GetCylindricCameraEntrypoint::GetCylindricCameraEntrypoint(brayns::Engine &engine)
-    : brayns::GetCameraEntrypoint<Cylindric>(engine)
+GetCylindricCameraEntrypoint::GetCylindricCameraEntrypoint(brayns::Engine &engine):
+    brayns::GetCameraEntrypoint<Cylindric>(engine)
 {
 }
 

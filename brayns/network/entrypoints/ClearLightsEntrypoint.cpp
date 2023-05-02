@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-ClearLightsEntrypoint::ClearLightsEntrypoint(ModelManager &models)
-    : _models(models)
+ClearLightsEntrypoint::ClearLightsEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

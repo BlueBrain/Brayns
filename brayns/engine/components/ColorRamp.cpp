@@ -26,9 +26,9 @@
 
 namespace brayns
 {
-ColorRamp::ColorRamp()
-    : _colors({{0, 0, 0, 0}, {1, 1, 1, 1}})
-    , _valuesRange({0, 255})
+ColorRamp::ColorRamp():
+    _colors({{0, 0, 0, 0}, {1, 1, 1, 1}}),
+    _valuesRange({0, 255})
 {
 }
 

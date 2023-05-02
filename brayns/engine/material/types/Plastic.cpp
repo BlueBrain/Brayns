@@ -27,11 +27,11 @@ namespace
 {
 struct PlasticParameters
 {
-    inline static const std::string color = "baseColor";
-    inline static const std::string roughness = "roughness";
-    inline static const std::string coat = "coat";
-    inline static const std::string coatThickness = "coatThickness";
-    inline static const std::string opacity = "opacity";
+    static inline const std::string color = "baseColor";
+    static inline const std::string roughness = "roughness";
+    static inline const std::string coat = "coat";
+    static inline const std::string coatThickness = "coatThickness";
+    static inline const std::string opacity = "opacity";
 };
 }
 

@@ -22,8 +22,8 @@
 
 namespace brayns
 {
-AddClippingBoundedPlanesEntrypoint::AddClippingBoundedPlanesEntrypoint(ModelManager &models)
-    : AddClippingGeometryEntrypoint<BoundedPlane>(models)
+AddClippingBoundedPlanesEntrypoint::AddClippingBoundedPlanesEntrypoint(ModelManager &models):
+    AddClippingGeometryEntrypoint<BoundedPlane>(models)
 {
 }
 
@@ -37,8 +37,8 @@ std::string AddClippingBoundedPlanesEntrypoint::getDescription() const
     return "Add a list of axis-aligned bound limited clipping planes";
 }
 
-AddClippingBoxesEntrypoint::AddClippingBoxesEntrypoint(ModelManager &models)
-    : AddClippingGeometryEntrypoint<Box>(models)
+AddClippingBoxesEntrypoint::AddClippingBoxesEntrypoint(ModelManager &models):
+    AddClippingGeometryEntrypoint<Box>(models)
 {
 }
 
@@ -52,8 +52,8 @@ std::string AddClippingBoxesEntrypoint::getDescription() const
     return "Add a list of clipping boxes to the scene";
 }
 
-AddClippingPlanesEntrypoint::AddClippingPlanesEntrypoint(ModelManager &models)
-    : AddClippingGeometryEntrypoint<Plane>(models)
+AddClippingPlanesEntrypoint::AddClippingPlanesEntrypoint(ModelManager &models):
+    AddClippingGeometryEntrypoint<Plane>(models)
 {
 }
 
@@ -67,8 +67,8 @@ std::string AddClippingPlanesEntrypoint::getDescription() const
     return "Add a list of clipping planes to the scene";
 }
 
-AddClippingCapsulesEntrypoint::AddClippingCapsulesEntrypoint(ModelManager &models)
-    : AddClippingGeometryEntrypoint<Capsule>(models)
+AddClippingCapsulesEntrypoint::AddClippingCapsulesEntrypoint(ModelManager &models):
+    AddClippingGeometryEntrypoint<Capsule>(models)
 {
 }
 
@@ -82,8 +82,8 @@ std::string AddClippingCapsulesEntrypoint::getDescription() const
     return "Add a list of clipping capsules to the scene";
 }
 
-AddClippingSpheresEntrypoint::AddClippingSpheresEntrypoint(ModelManager &models)
-    : AddClippingGeometryEntrypoint<Sphere>(models)
+AddClippingSpheresEntrypoint::AddClippingSpheresEntrypoint(ModelManager &models):
+    AddClippingGeometryEntrypoint<Sphere>(models)
 {
 }
 

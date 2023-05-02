@@ -40,8 +40,8 @@ public:
      *
      * @param request Request to wrap.
      */
-    explicit EntrypointRequest(JsonRpcRequest request)
-        : _request(std::move(request))
+    explicit EntrypointRequest(JsonRpcRequest request):
+        _request(std::move(request))
     {
     }
 

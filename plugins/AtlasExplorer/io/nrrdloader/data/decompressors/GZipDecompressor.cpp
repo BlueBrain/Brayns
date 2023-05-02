@@ -90,7 +90,6 @@ std::string GZipDecompressor::decompress(std::string input) const
         }
 
         uncompressedSize += (nextDecompressionSize - decompressInfo.avail_out);
-
     } while (decompressInfo.avail_out == 0);
 
     inflateEnd(&decompressInfo);

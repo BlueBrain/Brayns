@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-GetColorRampEntrypoint::GetColorRampEntrypoint(ModelManager &models)
-    : _models(models)
+GetColorRampEntrypoint::GetColorRampEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 
@@ -55,8 +55,8 @@ void GetColorRampEntrypoint::onRequest(const Request &request)
     throw JsonRpcException("The requested model does not have a color ramp");
 }
 
-SetColorRampEntrypoint::SetColorRampEntrypoint(ModelManager &models)
-    : _models(models)
+SetColorRampEntrypoint::SetColorRampEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

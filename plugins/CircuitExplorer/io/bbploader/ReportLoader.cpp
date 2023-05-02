@@ -36,9 +36,9 @@ public:
 class CompartmentHandler : public IHandler
 {
 public:
-    CompartmentHandler(const bbploader::LoadContext &context, const std::vector<CellCompartments> &compartments)
-        : _context(context)
-        , _compartments(compartments)
+    CompartmentHandler(const bbploader::LoadContext &context, const std::vector<CellCompartments> &compartments):
+        _context(context),
+        _compartments(compartments)
     {
     }
 
@@ -80,9 +80,9 @@ private:
 class SpikeHandler : public IHandler
 {
 public:
-    SpikeHandler(const bbploader::LoadContext &context, const std::vector<CellCompartments> &compartments)
-        : _context(context)
-        , _compartments(compartments)
+    SpikeHandler(const bbploader::LoadContext &context, const std::vector<CellCompartments> &compartments):
+        _context(context),
+        _compartments(compartments)
     {
     }
 

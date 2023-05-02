@@ -26,8 +26,8 @@ namespace
 class SceneInspector
 {
 public:
-    explicit SceneInspector(brayns::Engine &engine)
-        : _engine(engine)
+    explicit SceneInspector(brayns::Engine &engine):
+        _engine(engine)
     {
     }
 
@@ -121,8 +121,8 @@ private:
 
 namespace brayns
 {
-InspectEntrypoint::InspectEntrypoint(Engine &engine)
-    : _engine(engine)
+InspectEntrypoint::InspectEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 

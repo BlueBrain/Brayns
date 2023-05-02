@@ -26,6 +26,6 @@ namespace dti
 {
 struct ModelType
 {
-    inline static const std::string dti = "dti";
+    static inline const std::string dti = "dti";
 };
 }

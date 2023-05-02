@@ -26,9 +26,9 @@ namespace
 {
 struct ProductionParameters
 {
-    inline static const std::string spp = "pixelSamples";
-    inline static const std::string pathLength = "maxPathLength";
-    inline static const std::string background = "backgroundColor";
+    static inline const std::string spp = "pixelSamples";
+    static inline const std::string pathLength = "maxPathLength";
+    static inline const std::string background = "backgroundColor";
 };
 }
 

@@ -37,9 +37,7 @@ namespace
 class ParamsBuilder
 {
 public:
-    static brayns::GBuffersParams build(
-        const brayns::ExportGBuffersEntrypoint::Request &request,
-        brayns::Engine &engine)
+    static brayns::GBuffersParams build(const brayns::ExportGBuffersEntrypoint::Request &request, brayns::Engine &engine)
     {
         brayns::GBuffersParams params;
 
@@ -223,9 +221,9 @@ public:
 
 namespace brayns
 {
-ExportGBuffersEntrypoint::ExportGBuffersEntrypoint(Engine &engine, CancellationToken token)
-    : _engine(engine)
-    , _token(token)
+ExportGBuffersEntrypoint::ExportGBuffersEntrypoint(Engine &engine, CancellationToken token):
+    _engine(engine),
+    _token(token)
 {
 }
 

@@ -44,9 +44,9 @@ struct TaskController
 class MockTask : public brayns::ITask
 {
 public:
-    MockTask(TaskSettings settings, TaskController &controller)
-        : _settings(std::move(settings))
-        , _controller(controller)
+    MockTask(TaskSettings settings, TaskController &controller):
+        _settings(std::move(settings)),
+        _controller(controller)
     {
     }
 

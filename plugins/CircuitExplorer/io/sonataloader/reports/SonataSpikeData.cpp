@@ -26,13 +26,13 @@ SonataSpikeData::SonataSpikeData(
     const std::string &reportPath,
     const std::string &population,
     bbp::sonata::Selection selection,
-    float interval)
-    : _reader(bbp::sonata::SpikeReader(reportPath))
-    , _population(_reader.openPopulation(population))
-    , _selection(std::move(selection))
-    , _mapping(SpikeMappingGenerator::generate(_selection.flatten()))
-    , _calculator(interval)
-    , _interval(interval)
+    float interval):
+    _reader(bbp::sonata::SpikeReader(reportPath)),
+    _population(_reader.openPopulation(population)),
+    _selection(std::move(selection)),
+    _mapping(SpikeMappingGenerator::generate(_selection.flatten())),
+    _calculator(interval),
+    _interval(interval)
 {
     auto [start, end] = _population.getTimes();
     _start = start;

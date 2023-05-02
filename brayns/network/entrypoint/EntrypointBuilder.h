@@ -28,9 +28,9 @@ namespace brayns
 class EntrypointBuilder
 {
 public:
-    EntrypointBuilder(std::string plugin, INetworkInterface &interface)
-        : _plugin(std::move(plugin))
-        , _interface(interface)
+    EntrypointBuilder(std::string plugin, INetworkInterface &interface):
+        _plugin(std::move(plugin)),
+        _interface(interface)
     {
     }
 

@@ -67,9 +67,9 @@ public:
 
 namespace brayns
 {
-JsonRpcTask::JsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint)
-    : _request(std::move(request))
-    , _entrypoint(entrypoint)
+JsonRpcTask::JsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint):
+    _request(std::move(request)),
+    _entrypoint(entrypoint)
 {
     assert(_request.getMethod() == _entrypoint.getMethod());
 }

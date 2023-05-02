@@ -33,8 +33,8 @@ namespace sl = sonataloader;
 class NodeChecker
 {
 public:
-    explicit NodeChecker(const sonataloader::Config &config)
-        : _config(config)
+    explicit NodeChecker(const sonataloader::Config &config):
+        _config(config)
     {
     }
 
@@ -54,6 +54,7 @@ private:
             throw std::invalid_argument("Population " + params.node_population + " does not exists");
         }
     }
+
     void _checkNodeSets(const SonataNodePopulationParameters &params)
     {
         auto &nodeSets = params.node_sets;
@@ -130,8 +131,8 @@ private:
 class EdgeChecker
 {
 public:
-    explicit EdgeChecker(const sonataloader::Config &config)
-        : _config(config)
+    explicit EdgeChecker(const sonataloader::Config &config):
+        _config(config)
     {
     }
 
@@ -191,8 +192,8 @@ private:
 class MorphologyChecker
 {
 public:
-    explicit MorphologyChecker(const sl::Config &config)
-        : _config(config)
+    explicit MorphologyChecker(const sl::Config &config):
+        _config(config)
     {
     }
 

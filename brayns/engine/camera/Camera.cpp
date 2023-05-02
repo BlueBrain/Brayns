@@ -26,12 +26,12 @@ namespace
 {
 struct CameraParameters
 {
-    inline static const std::string position = "position";
-    inline static const std::string direction = "direction";
-    inline static const std::string up = "up";
-    inline static const std::string aspect = "aspect";
-    inline static const std::string imageStart = "imageStart";
-    inline static const std::string imageEnd = "imageEnd";
+    static inline const std::string position = "position";
+    static inline const std::string direction = "direction";
+    static inline const std::string up = "up";
+    static inline const std::string aspect = "aspect";
+    static inline const std::string imageStart = "imageStart";
+    static inline const std::string imageEnd = "imageEnd";
 };
 
 class ViewIntegrity

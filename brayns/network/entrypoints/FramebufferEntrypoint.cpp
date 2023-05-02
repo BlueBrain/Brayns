@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-SetStaticFramebufferEntrypoint::SetStaticFramebufferEntrypoint(Engine &engine)
-    : _engine(engine)
+SetStaticFramebufferEntrypoint::SetStaticFramebufferEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 
@@ -50,8 +50,8 @@ void SetStaticFramebufferEntrypoint::onRequest(const Request &request)
     request.reply(EmptyJson());
 }
 
-SetProgressiveFramebufferEntrypoint::SetProgressiveFramebufferEntrypoint(Engine &engine)
-    : _engine(engine)
+SetProgressiveFramebufferEntrypoint::SetProgressiveFramebufferEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 

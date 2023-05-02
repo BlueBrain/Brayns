@@ -83,7 +83,7 @@ public:
     }
 
 private:
-    inline static const std::vector<std::string> channelNames = {"R", "G", "B", "A"};
+    static inline const std::vector<std::string> channelNames = {"R", "G", "B", "A"};
 
 private:
     static std::vector<std::vector<unsigned char>> _allocateChannels(size_t count, size_t resolution)

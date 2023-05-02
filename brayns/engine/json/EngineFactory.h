@@ -55,8 +55,8 @@ public:
     class FactoryEntry final : public IFactoryEntry
     {
     public:
-        explicit FactoryEntry(std::string entryName)
-            : _name(std::move(entryName))
+        explicit FactoryEntry(std::string entryName):
+            _name(std::move(entryName))
         {
         }
 

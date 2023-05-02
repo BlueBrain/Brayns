@@ -37,12 +37,12 @@ struct OsprayCylindricCamera
     float imgPlaneSizeY;
 
 #ifdef __cplusplus
-    OsprayCylindricCamera()
-        : org(0.f)
-        , dirCam(0.f)
-        , dirDu(0.f)
-        , dirDv(0.f)
-        , imgPlaneSizeY(0.f)
+    OsprayCylindricCamera():
+        org(0.f),
+        dirCam(0.f),
+        dirDu(0.f),
+        dirDv(0.f),
+        imgPlaneSizeY(0.f)
     {
     }
 };

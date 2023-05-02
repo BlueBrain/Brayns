@@ -42,11 +42,11 @@ public:
     using Traits = LightTraits<T>;
 
     template<typename Type>
-    explicit Light(Type data)
-        : _handleName(LightTraits<Type>::handleName)
-        , _lightName(LightTraits<Type>::name)
-        , _handle(_handleName)
-        , _data(std::make_unique<Data<Type>>(std::move(data)))
+    explicit Light(Type data):
+        _handleName(LightTraits<Type>::handleName),
+        _lightName(LightTraits<Type>::name),
+        _handle(_handleName),
+        _data(std::make_unique<Data<Type>>(std::move(data)))
     {
         _data->pushTo(_handle);
         _handle.commit();

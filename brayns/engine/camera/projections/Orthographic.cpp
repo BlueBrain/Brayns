@@ -24,7 +24,7 @@ namespace
 {
 struct OrhtographicParameters
 {
-    inline static const std::string height = "height";
+    static inline const std::string height = "height";
 };
 }
 

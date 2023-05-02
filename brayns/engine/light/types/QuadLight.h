@@ -37,8 +37,8 @@ template<>
 class LightTraits<QuadLight>
 {
 public:
-    inline static const std::string handleName = "quad";
-    inline static const std::string name = "quad";
+    static inline const std::string handleName = "quad";
+    static inline const std::string name = "quad";
 
     static Bounds computeBounds(const Matrix4f &matrix, const QuadLight &light);
 

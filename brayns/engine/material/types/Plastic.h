@@ -34,8 +34,8 @@ template<>
 class MaterialTraits<Plastic>
 {
 public:
-    inline static const std::string handleName = "principled";
-    inline static const std::string name = "plastic";
+    static inline const std::string handleName = "principled";
+    static inline const std::string name = "plastic";
 
     static void updateData(ospray::cpp::Material &handle, Plastic &data);
 };

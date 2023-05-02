@@ -22,8 +22,8 @@
 
 namespace brayns
 {
-SetCameraViewEntrypoint::SetCameraViewEntrypoint(Engine &engine)
-    : _engine(engine)
+SetCameraViewEntrypoint::SetCameraViewEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 
@@ -46,8 +46,8 @@ void SetCameraViewEntrypoint::onRequest(const Request &request)
     request.reply(EmptyJson());
 }
 
-GetCameraViewEntrypoint::GetCameraViewEntrypoint(Engine &engine)
-    : _engine(engine)
+GetCameraViewEntrypoint::GetCameraViewEntrypoint(Engine &engine):
+    _engine(engine)
 {
 }
 

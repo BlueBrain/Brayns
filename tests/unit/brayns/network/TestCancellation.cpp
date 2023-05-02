@@ -30,9 +30,9 @@
 class MockRequest
 {
 public:
-    MockRequest(std::string &operation, double &progress)
-        : _operation(operation)
-        , _progress(progress)
+    MockRequest(std::string &operation, double &progress):
+        _operation(operation),
+        _progress(progress)
     {
     }
 

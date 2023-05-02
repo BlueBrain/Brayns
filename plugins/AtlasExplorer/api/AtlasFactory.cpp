@@ -31,8 +31,10 @@ template<typename T>
 class DefaultFactory
 {
 public:
-    static std::shared_ptr<Atlas>
-        create(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data)
+    static std::shared_ptr<Atlas> create(
+        const brayns::Vector3ui &size,
+        const brayns::Vector3f &spacing,
+        const IDataMangler &data)
     {
         return std::make_shared<T>(size, spacing, data);
     }
@@ -61,8 +63,8 @@ AtlasFactory AtlasFactory::createDefault()
     return AtlasFactory(std::move(builder.factories));
 }
 
-AtlasFactory::AtlasFactory(Factories factories)
-    : _factories(std::move(factories))
+AtlasFactory::AtlasFactory(Factories factories):
+    _factories(std::move(factories))
 {
 }
 

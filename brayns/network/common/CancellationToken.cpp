@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-CancellationToken::CancellationToken(INetworkInterface &interface)
-    : _interface(interface)
+CancellationToken::CancellationToken(INetworkInterface &interface):
+    _interface(interface)
 {
 }
 

@@ -23,9 +23,9 @@
 class PlaceholderEngine
 {
 public:
-    PlaceholderEngine()
-        : _parameters(0, nullptr)
-        , _engine(_parameters)
+    PlaceholderEngine():
+        _parameters(0, nullptr),
+        _engine(_parameters)
     {
     }
 

@@ -25,10 +25,10 @@
 
 namespace brayns
 {
-ParsingException::ParsingException(const std::string &message, size_t lineNumber, std::string line)
-    : std::runtime_error(message)
-    , _lineNumber(lineNumber)
-    , _line(std::move(line))
+ParsingException::ParsingException(const std::string &message, size_t lineNumber, std::string line):
+    std::runtime_error(message),
+    _lineNumber(lineNumber),
+    _line(std::move(line))
 {
 }
 

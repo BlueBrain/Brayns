@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetApplicationParametersEntrypoint::GetApplicationParametersEntrypoint(const ApplicationParameters &parameters)
-    : GetEntrypoint(parameters)
+GetApplicationParametersEntrypoint::GetApplicationParametersEntrypoint(const ApplicationParameters &parameters):
+    GetEntrypoint(parameters)
 {
 }
 
@@ -38,8 +38,8 @@ std::string GetApplicationParametersEntrypoint::getDescription() const
     return "Get the current state of the application parameters";
 }
 
-SetApplicationParametersEntrypoint::SetApplicationParametersEntrypoint(ApplicationParameters &parameters)
-    : SetEntrypoint(parameters)
+SetApplicationParametersEntrypoint::SetApplicationParametersEntrypoint(ApplicationParameters &parameters):
+    SetEntrypoint(parameters)
 {
 }
 

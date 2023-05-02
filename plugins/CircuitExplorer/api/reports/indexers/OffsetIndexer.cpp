@@ -99,15 +99,15 @@ private:
 };
 }
 
-OffsetIndexer::OffsetIndexer(std::vector<size_t> offsets)
-    : _offsets(std::move(offsets))
+OffsetIndexer::OffsetIndexer(std::vector<size_t> offsets):
+    _offsets(std::move(offsets))
 {
 }
 
 OffsetIndexer::OffsetIndexer(
     const std::vector<CellCompartments> &structure,
-    const std::vector<CellReportMapping> &mapping)
-    : _offsets(OffsetGenerator::generate(structure, mapping))
+    const std::vector<CellReportMapping> &mapping):
+    _offsets(OffsetGenerator::generate(structure, mapping))
 {
 }
 

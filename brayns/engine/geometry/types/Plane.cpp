@@ -26,7 +26,7 @@ namespace
 {
 struct PlaneParameters
 {
-    inline static const std::string coefficients = "plane.coefficients";
+    static inline const std::string coefficients = "plane.coefficients";
 };
 }
 

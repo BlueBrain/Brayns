@@ -89,8 +89,8 @@ NeuronMorphologyPipeline NeuronMorphologyPipeline::fromParameters(const NeuronMo
     return NeuronMorphologyPipeline(std::move(stageBuilder.stages));
 }
 
-NeuronMorphologyPipeline::NeuronMorphologyPipeline(Stages stages)
-    : _stages(std::move(stages))
+NeuronMorphologyPipeline::NeuronMorphologyPipeline(Stages stages):
+    _stages(std::move(stages))
 {
 }
 

@@ -18,9 +18,9 @@
 
 #include "NeuronMorphology.h"
 
-NeuronMorphology::NeuronMorphology(std::vector<Section> sections, std::optional<Soma> soma)
-    : _sections(std::move(sections))
-    , _soma(std::move(soma))
+NeuronMorphology::NeuronMorphology(std::vector<Section> sections, std::optional<Soma> soma):
+    _sections(std::move(sections)),
+    _soma(std::move(soma))
 {
 }
 

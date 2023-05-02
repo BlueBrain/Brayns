@@ -36,8 +36,8 @@ class AddLightEntrypoint : public Entrypoint<T, ModelInstance>
 public:
     using Request = typename Entrypoint<T, ModelInstance>::Request;
 
-    explicit AddLightEntrypoint(ModelManager &models)
-        : _models(models)
+    explicit AddLightEntrypoint(ModelManager &models):
+        _models(models)
     {
     }
 

@@ -23,11 +23,11 @@ namespace bbploader
 SpikeData::SpikeData(
     std::unique_ptr<brain::SpikeReportReader> report,
     const std::vector<uint64_t> &gids,
-    float spikeInterval)
-    : _report(std::move(report))
-    , _spikeCalculator(spikeInterval)
-    , _interval(spikeInterval)
-    , _mapping(SpikeMappingGenerator::generate(gids))
+    float spikeInterval):
+    _report(std::move(report)),
+    _spikeCalculator(spikeInterval),
+    _interval(spikeInterval),
+    _mapping(SpikeMappingGenerator::generate(gids))
 {
 }
 

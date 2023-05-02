@@ -28,8 +28,8 @@ namespace
 {
 struct SphereParameters
 {
-    inline static const std::string position = "sphere.position";
-    inline static const std::string radius = "sphere.radius";
+    static inline const std::string position = "sphere.position";
+    static inline const std::string radius = "sphere.radius";
 };
 }
 

@@ -110,10 +110,10 @@ private:
 
 namespace brayns
 {
-SocketListener::SocketListener(ClientManager &clients, const EntrypointRegistry &entrypoints, TaskManager &tasks)
-    : _clients(clients)
-    , _entrypoints(entrypoints)
-    , _tasks(tasks)
+SocketListener::SocketListener(ClientManager &clients, const EntrypointRegistry &entrypoints, TaskManager &tasks):
+    _clients(clients),
+    _entrypoints(entrypoints),
+    _tasks(tasks)
 {
 }
 

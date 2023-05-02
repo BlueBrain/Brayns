@@ -26,9 +26,9 @@ namespace
 {
 struct DefaultParameters
 {
-    inline static const std::string diffuseColor = "kd";
-    inline static const std::string shininess = "ns";
-    inline static const std::string opacity = "d";
+    static inline const std::string diffuseColor = "kd";
+    static inline const std::string shininess = "ns";
+    static inline const std::string opacity = "d";
 };
 }
 

@@ -29,8 +29,10 @@
 class AtlasFactory
 {
 public:
-    using Factory = std::shared_ptr<Atlas> (
-            *)(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data);
+    using Factory = std::shared_ptr<Atlas> (*)(
+        const brayns::Vector3ui &size,
+        const brayns::Vector3f &spacing,
+        const IDataMangler &data);
 
     using Factories = std::unordered_map<VoxelType, Factory>;
 

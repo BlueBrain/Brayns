@@ -76,8 +76,8 @@ private:
 LayerDistanceAtlas::LayerDistanceAtlas(
     const brayns::Vector3ui &size,
     const brayns::Vector3f &spacing,
-    const IDataMangler &dataMangler)
-    : Atlas(size, spacing)
+    const IDataMangler &dataMangler):
+    Atlas(size, spacing)
 {
     auto parser = LayerDistanceParser(dataMangler);
     _bounds = std::move(parser.values);

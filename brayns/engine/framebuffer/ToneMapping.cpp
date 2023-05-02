@@ -24,14 +24,14 @@ namespace
 {
 struct ToneMappingParameters
 {
-    inline static const std::string osprayName = "tonemapper";
-    inline static const std::string exposure = "exposure";
-    inline static const std::string contrast = "contrast";
-    inline static const std::string shoulder = "shoulder";
-    inline static const std::string midIn = "midIn";
-    inline static const std::string midOut = "midOut";
-    inline static const std::string hdrMax = "hdrMax";
-    inline static const std::string acesColor = "acesColor";
+    static inline const std::string osprayName = "tonemapper";
+    static inline const std::string exposure = "exposure";
+    static inline const std::string contrast = "contrast";
+    static inline const std::string shoulder = "shoulder";
+    static inline const std::string midIn = "midIn";
+    static inline const std::string midOut = "midOut";
+    static inline const std::string hdrMax = "hdrMax";
+    static inline const std::string acesColor = "acesColor";
 };
 }
 

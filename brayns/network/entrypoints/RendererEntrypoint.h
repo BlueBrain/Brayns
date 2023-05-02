@@ -48,8 +48,8 @@ class SetRendererEntrypoint : public Entrypoint<T, EmptyJson>
 public:
     using Request = typename Entrypoint<T, EmptyJson>::Request;
 
-    explicit SetRendererEntrypoint(Engine &engine)
-        : _engine(engine)
+    explicit SetRendererEntrypoint(Engine &engine):
+        _engine(engine)
     {
     }
 
@@ -94,8 +94,8 @@ class GetRendererEntrypoint : public Entrypoint<EmptyJson, T>
 public:
     using Request = typename Entrypoint<EmptyJson, T>::Request;
 
-    explicit GetRendererEntrypoint(Engine &engine)
-        : _engine(engine)
+    explicit GetRendererEntrypoint(Engine &engine):
+        _engine(engine)
     {
     }
 

@@ -24,13 +24,13 @@ namespace
 {
 struct SpikeConstants
 {
-    inline static constexpr float restValue = 0.f;
-    inline static constexpr float excitedValue = 1.f;
+    static inline constexpr float restValue = 0.f;
+    static inline constexpr float excitedValue = 1.f;
 };
 }
 
-SpikeCalculator::SpikeCalculator(float interval)
-    : _invInterval(interval > 0.f ? 1.f / interval : 0.f)
+SpikeCalculator::SpikeCalculator(float interval):
+    _invInterval(interval > 0.f ? 1.f / interval : 0.f)
 {
 }
 

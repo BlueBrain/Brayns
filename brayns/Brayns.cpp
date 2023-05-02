@@ -87,8 +87,8 @@ public:
 class RateLimiter
 {
 public:
-    explicit RateLimiter(brayns::Duration period)
-        : _period(period)
+    explicit RateLimiter(brayns::Duration period):
+        _period(period)
     {
     }
 
@@ -112,10 +112,10 @@ private:
 
 namespace brayns
 {
-Brayns::Brayns(int argc, const char **argv)
-    : _parametersManager(argc, argv)
-    , _engine(_parametersManager)
-    , _pluginManager(*this)
+Brayns::Brayns(int argc, const char **argv):
+    _parametersManager(argc, argv),
+    _engine(_parametersManager),
+    _pluginManager(*this)
 {
     LoggingStartup::run(_parametersManager);
 

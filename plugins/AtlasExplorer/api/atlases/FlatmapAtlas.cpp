@@ -29,8 +29,8 @@ namespace
 class Extractor
 {
 public:
-    explicit Extractor(const IDataMangler &mangler)
-        : _values(mangler.asLongs())
+    explicit Extractor(const IDataMangler &mangler):
+        _values(mangler.asLongs())
     {
     }
 
@@ -60,8 +60,8 @@ private:
 };
 }
 
-FlatmapAtlas::FlatmapAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data)
-    : Atlas(size, spacing)
+FlatmapAtlas::FlatmapAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &data):
+    Atlas(size, spacing)
 {
     Extractor extractor(data);
     _voxels = extractor.extractCoordinates();

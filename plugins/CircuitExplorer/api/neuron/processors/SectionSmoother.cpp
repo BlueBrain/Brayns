@@ -49,9 +49,9 @@ private:
 class ParentChildrenSmoother
 {
 public:
-    ParentChildrenSmoother(float somaRadiusMultiplier, float sectionRadiusChange)
-        : _somaRadiusMultiplier(somaRadiusMultiplier)
-        , _sectionRadiusChange(sectionRadiusChange)
+    ParentChildrenSmoother(float somaRadiusMultiplier, float sectionRadiusChange):
+        _somaRadiusMultiplier(somaRadiusMultiplier),
+        _sectionRadiusChange(sectionRadiusChange)
     {
         assert(somaRadiusMultiplier > 0.f);
         assert(_sectionRadiusChange >= 0.f && _sectionRadiusChange <= 1.f);

@@ -27,16 +27,16 @@
 
 namespace brayns
 {
-Image::Image(const ImageInfo &info, std::string data)
-    : _info(info)
-    , _data(std::move(data))
+Image::Image(const ImageInfo &info, std::string data):
+    _info(info),
+    _data(std::move(data))
 {
     assert(_info.getSize() == _data.size());
 }
 
-Image::Image(const ImageInfo &info, char fillWith)
-    : _info(info)
-    , _data(info.getSize(), fillWith)
+Image::Image(const ImageInfo &info, char fillWith):
+    _info(info),
+    _data(info.getSize(), fillWith)
 {
 }
 

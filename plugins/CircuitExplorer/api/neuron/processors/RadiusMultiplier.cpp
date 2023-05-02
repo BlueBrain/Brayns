@@ -18,8 +18,8 @@
 
 #include "RadiusMultiplier.h"
 
-RadiusMultiplier::RadiusMultiplier(float radiusMultiplier)
-    : _radiusMultiplier(radiusMultiplier)
+RadiusMultiplier::RadiusMultiplier(float radiusMultiplier):
+    _radiusMultiplier(radiusMultiplier)
 {
 }
 

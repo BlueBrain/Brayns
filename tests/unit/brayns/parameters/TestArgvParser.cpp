@@ -33,8 +33,8 @@ struct ArgCustomType
 class ArgInjector
 {
 public:
-    ArgInjector(brayns::ArgvParser &parser)
-        : _parser(parser)
+    ArgInjector(brayns::ArgvParser &parser):
+        _parser(parser)
     {
     }
 

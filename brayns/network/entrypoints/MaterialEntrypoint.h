@@ -48,8 +48,8 @@ class SetMaterialEntrypoint : public Entrypoint<SetMaterialMessage<MaterialType>
 public:
     using Request = typename Entrypoint<SetMaterialMessage<MaterialType>, EmptyJson>::Request;
 
-    explicit SetMaterialEntrypoint(ModelManager &models)
-        : _models(models)
+    explicit SetMaterialEntrypoint(ModelManager &models):
+        _models(models)
     {
     }
 
@@ -148,8 +148,8 @@ class GetMaterialEntrypoint : public Entrypoint<GetModelMessage, MaterialType>
 public:
     using Request = typename Entrypoint<GetModelMessage, MaterialType>::Request;
 
-    explicit GetMaterialEntrypoint(ModelManager &models)
-        : _models(models)
+    explicit GetMaterialEntrypoint(ModelManager &models):
+        _models(models)
     {
     }
 

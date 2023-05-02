@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-GetLoadersEntrypoint::GetLoadersEntrypoint(const LoaderRegistry &loaders)
-    : _loaders(loaders)
+GetLoadersEntrypoint::GetLoadersEntrypoint(const LoaderRegistry &loaders):
+    _loaders(loaders)
 {
 }
 

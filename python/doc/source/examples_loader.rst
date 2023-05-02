@@ -17,7 +17,7 @@ current simulation frame, the backend doesn't perform any update on this.
 
 Models can be built from different file formats. The support to parse and load
 different files (SONATA, BlueConfig, DTI, ...) is added by plugins
-:ref:``plugins-label``. By default, Brayns only supports mesh loading without
+:ref:`plugins-label`. By default, Brayns only supports mesh loading without
 plugins.
 
 Loader

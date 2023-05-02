@@ -63,9 +63,9 @@ public:
 class ColumnBoundFinder
 {
 public:
-    ColumnBoundFinder(const brayns::Vector3ui &size, const brayns::Vector3f &spacing)
-        : _size(size)
-        , _spacing(spacing)
+    ColumnBoundFinder(const brayns::Vector3ui &size, const brayns::Vector3f &spacing):
+        _size(size),
+        _spacing(spacing)
     {
     }
 
@@ -89,10 +89,11 @@ private:
 class ModelBuilder
 {
 public:
-    explicit ModelBuilder(brayns::Model &model)
-        : _model(model)
+    explicit ModelBuilder(brayns::Model &model):
+        _model(model)
     {
     }
+
     void addComponents(std::vector<brayns::Box> primitives, const std::vector<brayns::Vector4f> &colors)
     {
         auto &components = _model.getComponents();

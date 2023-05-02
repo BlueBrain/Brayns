@@ -55,9 +55,9 @@ public:
 class ModelBuilder
 {
 public:
-    explicit ModelBuilder(brayns::Model &model)
-        : _components(model.getComponents())
-        , _systems(model.getSystems())
+    explicit ModelBuilder(brayns::Model &model):
+        _components(model.getComponents()),
+        _systems(model.getSystems())
     {
     }
 

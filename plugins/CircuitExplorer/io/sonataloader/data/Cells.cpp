@@ -26,19 +26,19 @@ namespace
 {
 struct Attributes
 {
-    inline static const std::string modelType = "model_type";
-    inline static const std::string x = "x";
-    inline static const std::string y = "y";
-    inline static const std::string z = "z";
-    inline static const std::string quatX = "orientation_x";
-    inline static const std::string quatY = "orientation_y";
-    inline static const std::string quatZ = "orientation_z";
-    inline static const std::string quatW = "orientation_w";
-    inline static const std::string layer = "layer";
-    inline static const std::string region = "region";
-    inline static const std::string mtype = "mtype";
-    inline static const std::string etype = "etype";
-    inline static const std::string morphology = "morphology";
+    static inline const std::string modelType = "model_type";
+    static inline const std::string x = "x";
+    static inline const std::string y = "y";
+    static inline const std::string z = "z";
+    static inline const std::string quatX = "orientation_x";
+    static inline const std::string quatY = "orientation_y";
+    static inline const std::string quatZ = "orientation_z";
+    static inline const std::string quatW = "orientation_w";
+    static inline const std::string layer = "layer";
+    static inline const std::string region = "region";
+    static inline const std::string mtype = "mtype";
+    static inline const std::string etype = "etype";
+    static inline const std::string morphology = "morphology";
 };
 
 } // namespace

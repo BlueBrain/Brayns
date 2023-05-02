@@ -25,8 +25,8 @@
 
 namespace brayns
 {
-EnableSimulationEntrypoint::EnableSimulationEntrypoint(ModelManager &models)
-    : _models(models)
+EnableSimulationEntrypoint::EnableSimulationEntrypoint(ModelManager &models):
+    _models(models)
 {
 }
 

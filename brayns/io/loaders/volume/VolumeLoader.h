@@ -33,8 +33,9 @@ public:
     std::vector<std::string> getSupportedExtensions() const final;
     std::string getName() const final;
     std::vector<std::shared_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback) const final;
-    std::vector<std::shared_ptr<Model>> importFromFile(const std::string &filename, const LoaderProgress &callback)
-        const final;
+    std::vector<std::shared_ptr<Model>> importFromFile(
+        const std::string &filename,
+        const LoaderProgress &callback) const final;
 };
 
 /**

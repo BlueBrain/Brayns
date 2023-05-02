@@ -24,19 +24,19 @@ namespace
 {
 struct Hierarchy
 {
-    inline static const std::string dataGroup = "/data";
-    inline static const std::string offsetGroup = "/offsets";
-    inline static const std::string pointDatasetName = "points";
-    inline static const std::string triangleDatasetName = "triangles";
+    static inline const std::string dataGroup = "/data";
+    static inline const std::string offsetGroup = "/offsets";
+    static inline const std::string pointDatasetName = "points";
+    static inline const std::string triangleDatasetName = "triangles";
 };
 
 class DatasetExtractor
 {
 public:
-    explicit DatasetExtractor(const std::string &filePath)
-        : _file(filePath)
-        , _data(_file.getGroup(std::string(Hierarchy::dataGroup)))
-        , _offsets(_file.getGroup(std::string(Hierarchy::offsetGroup)))
+    explicit DatasetExtractor(const std::string &filePath):
+        _file(filePath),
+        _data(_file.getGroup(std::string(Hierarchy::dataGroup))),
+        _offsets(_file.getGroup(std::string(Hierarchy::offsetGroup)))
     {
     }
 

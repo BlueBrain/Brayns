@@ -32,9 +32,9 @@ struct OutputPacket
 class MockWebSocket : public brayns::IWebSocket
 {
 public:
-    MockWebSocket(size_t id = 0, std::vector<brayns::InputPacket> send = {})
-        : _id(id)
-        , _send(std::move(send))
+    MockWebSocket(size_t id = 0, std::vector<brayns::InputPacket> send = {}):
+        _id(id),
+        _send(std::move(send))
     {
     }
 
