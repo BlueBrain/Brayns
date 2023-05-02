@@ -21,27 +21,16 @@
 
 #pragma once
 
-#include <string_view>
-
 #include "ByteConverter.h"
-#include "ByteOrder.h"
 
 namespace brayns
 {
-class ByteParserHelper
-{
-public:
-    static void parse(std::string_view data, char *to, size_t stride);
-};
-
 template<typename T>
 struct ByteParser
 {
-    static void parse(std::string_view data, T &value, ByteOrder order)
+    static void parse(std::string_view data, T &value, std::endian endian)
     {
-        auto bytes = ByteConverter::getBytes(value);
-        ByteParserHelper::parse(data, bytes, sizeof(T));
-        ByteOrderHelper::convertToSystemByteOrder(value, order);
+        value = ByteConverter::convertFromBytes<T>(data, endian);
     }
 };
 } // namespace brayns

@@ -29,7 +29,6 @@
 
 #include <brayns/utils/Log.h>
 
-#include <brayns/utils/binary/ByteOrder.h>
 #include <brayns/utils/parsing/FileStream.h>
 #include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/parsing/ParsingException.h>
@@ -661,9 +660,9 @@ public:
         case Format::Ascii:
             return Parser::extractToken<T>(data);
         case Format::BinaryBigEndian:
-            return Parser::extractChunk<T>(data, ByteOrder::BigEndian);
+            return Parser::extractChunk<T>(data, std::endian::big);
         case Format::BinaryLittleEndian:
-            return Parser::extractChunk<T>(data, ByteOrder::LittleEndian);
+            return Parser::extractChunk<T>(data, std::endian::little);
         default:
             throw std::runtime_error("Invalid format");
         }

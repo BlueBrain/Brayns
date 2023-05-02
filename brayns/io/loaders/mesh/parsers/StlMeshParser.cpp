@@ -23,7 +23,6 @@
 
 #include <array>
 
-#include <brayns/utils/binary/ByteOrder.h>
 #include <brayns/utils/parsing/FileStream.h>
 #include <brayns/utils/parsing/Parser.h>
 #include <brayns/utils/parsing/ParsingException.h>
@@ -274,7 +273,7 @@ private:
         {
             throw std::runtime_error("Expected 4 bytes triangle count");
         }
-        return Parser::extractChunk<uint32_t>(data, ByteOrder::LittleEndian);
+        return Parser::extractChunk<uint32_t>(data, std::endian::little);
     }
 };
 
@@ -296,8 +295,8 @@ public:
     static Facet parse(std::string_view &data)
     {
         Facet facet;
-        Parser::extractChunk(data, facet.normal, ByteOrder::LittleEndian);
-        Parser::extractChunk(data, facet.vertices, ByteOrder::LittleEndian);
+        Parser::extractChunk(data, facet.normal, std::endian::little);
+        Parser::extractChunk(data, facet.vertices, std::endian::little);
         StringExtractor::extract(data, 2);
         return facet;
     }

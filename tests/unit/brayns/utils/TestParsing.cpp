@@ -27,29 +27,29 @@
 TEST_CASE("Chunk extractor")
 {
     std::string_view data;
-    auto order = brayns::ByteOrderHelper::getSystemByteOrder();
+    auto endian = std::endian::native;
 
     data = "\1\2\3\4";
     uint32_t ui = 0;
-    brayns::ChunkExtractor<uint32_t>::extract(data, ui, brayns::ByteOrder::BigEndian);
+    brayns::ChunkExtractor<uint32_t>::extract(data, ui, std::endian::big);
     CHECK_EQ(ui, 0x01020304);
 
     const float ref = 1.23f;
     data = {brayns::ByteConverter::getBytes(ref), sizeof(ref)};
     float f = 0.0f;
-    brayns::ChunkExtractor<float>::extract(data, f, order);
+    brayns::ChunkExtractor<float>::extract(data, f, endian);
     CHECK_EQ(f, ref);
 
     std::vector<int> refs = {1, 2, 3};
     data = {brayns::ByteConverter::getBytes(refs[0]), 3 * sizeof(int)};
     std::vector<int> is;
-    brayns::ChunkExtractor<std::vector<int>>::extract(data, is, order);
+    brayns::ChunkExtractor<std::vector<int>>::extract(data, is, endian);
     CHECK_EQ(is, refs);
 
     brayns::Vector2f refv = {1.2, 2.3};
     data = {brayns::ByteConverter::getBytes(refv[0]), 2 * sizeof(float)};
     brayns::Vector2f v;
-    brayns::ChunkExtractor<brayns::Vector2f>::extract(data, v, order);
+    brayns::ChunkExtractor<brayns::Vector2f>::extract(data, v, endian);
     CHECK_EQ(v, refv);
 }
 
@@ -92,9 +92,9 @@ TEST_CASE("Parser")
 
     int32_t test = 123;
     auto bytes = brayns::ByteConverter::getBytes(test);
-    auto order = brayns::ByteOrderHelper::getSystemByteOrder();
+    auto endian = std::endian::native;
     data = {bytes, sizeof(test)};
-    CHECK_EQ(brayns::Parser::parseBytes<int32_t>(data, order), test);
+    CHECK_EQ(brayns::Parser::parseBytes<int32_t>(data, endian), test);
 
     data = "1 2 3";
     auto ref = brayns::Vector3f(1, 2, 3);
@@ -102,7 +102,7 @@ TEST_CASE("Parser")
 
     bytes = brayns::ByteConverter::getBytes(ref);
     data = {bytes, sizeof(ref)};
-    CHECK_EQ(brayns::Parser::extractChunk<brayns::Vector3f>(data, order), ref);
+    CHECK_EQ(brayns::Parser::extractChunk<brayns::Vector3f>(data, endian), ref);
 }
 
 TEST_CASE("Token extractor")

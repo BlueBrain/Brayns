@@ -22,7 +22,6 @@
 #include "ClientSender.h"
 
 #include <brayns/utils/binary/ByteConverter.h>
-#include <brayns/utils/binary/ByteOrder.h>
 
 namespace
 {
@@ -42,15 +41,7 @@ private:
     static std::string _formatHeader(size_t size)
     {
         auto jsonSize = static_cast<uint32_t>(size);
-        return _formatJsonSize(jsonSize);
-    }
-
-    static std::string _formatJsonSize(uint32_t size)
-    {
-        auto bytes = brayns::ByteConverter::getBytes(size);
-        auto stride = sizeof(size);
-        brayns::ByteOrderHelper::convertFromSystemByteOrder(bytes, brayns::ByteOrder::LittleEndian);
-        return {bytes, stride};
+        return brayns::ByteConverter::convertToBytes(jsonSize, std::endian::little);
     }
 };
 } // namespace

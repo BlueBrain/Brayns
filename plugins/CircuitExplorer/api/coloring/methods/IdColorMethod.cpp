@@ -85,7 +85,7 @@ private:
 
         for (auto &[range, color] : colorMap)
         {
-            auto ids = brayns::Parser::extractRanges<uint64_t>(range);
+            auto ids = brayns::Parser::parseRange<uint64_t>(range);
             tempColorList.push_back({std::move(ids), color});
         }
 
