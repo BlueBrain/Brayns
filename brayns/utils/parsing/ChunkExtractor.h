@@ -34,22 +34,22 @@ namespace brayns
 template<typename T>
 struct ChunkExtractor
 {
-    static void extract(std::string_view &data, T &value, ByteOrder order)
+    static void extract(std::string_view &data, T &value, std::endian endian)
     {
         auto chunk = StringExtractor::extract(data, sizeof(T));
-        ByteParser<T>::parse(chunk, value, order);
+        ByteParser<T>::parse(chunk, value, endian);
     }
 };
 
 template<typename T>
 struct ChunkExtractor<std::vector<T>>
 {
-    static void extract(std::string_view &data, std::vector<T> &values, ByteOrder order)
+    static void extract(std::string_view &data, std::vector<T> &values, std::endian endian)
     {
         while (!data.empty())
         {
             auto &value = values.emplace_back();
-            ChunkExtractor<T>::extract(data, value, order);
+            ChunkExtractor<T>::extract(data, value, endian);
         }
     }
 };
@@ -57,11 +57,11 @@ struct ChunkExtractor<std::vector<T>>
 template<typename T, size_t S>
 struct ChunkExtractor<std::array<T, S>>
 {
-    static void extract(std::string_view &data, std::array<T, S> &values, ByteOrder order)
+    static void extract(std::string_view &data, std::array<T, S> &values, std::endian endian)
     {
         for (auto &value : values)
         {
-            ChunkExtractor<T>::extract(data, value, order);
+            ChunkExtractor<T>::extract(data, value, endian);
         }
     }
 };
@@ -69,11 +69,11 @@ struct ChunkExtractor<std::array<T, S>>
 template<glm::length_t S, typename T>
 struct ChunkExtractor<glm::vec<S, T>>
 {
-    static void extract(std::string_view &data, glm::vec<S, T> &value, ByteOrder order)
+    static void extract(std::string_view &data, glm::vec<S, T> &value, std::endian endian)
     {
         for (glm::length_t i = 0; i < S; ++i)
         {
-            ChunkExtractor<T>::extract(data, value[i], order);
+            ChunkExtractor<T>::extract(data, value[i], endian);
         }
     }
 };
@@ -81,11 +81,11 @@ struct ChunkExtractor<glm::vec<S, T>>
 template<typename T>
 struct ChunkExtractor<glm::qua<T>>
 {
-    static void extract(std::string_view &data, glm::qua<T> &value, ByteOrder order)
+    static void extract(std::string_view &data, glm::qua<T> &value, std::endian endian)
     {
         for (glm::length_t i = 0; i < 4; ++i)
         {
-            ChunkExtractor<T>::extract(data, value[i], order);
+            ChunkExtractor<T>::extract(data, value[i], endian);
         }
     }
 };

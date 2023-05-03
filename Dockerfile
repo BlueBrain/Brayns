@@ -5,7 +5,7 @@
 # See: https://docs.docker.com/engine/userguide/eng-image/multistage-build/#use-multi-stage-builds
 
 # Image where Brayns is built
-FROM debian as builder
+FROM ubuntu:22.04 as builder
 LABEL maintainer="bbp-svc-viz@groupes.epfl.ch"
 ARG DIST_PATH=/app/dist
 
@@ -135,7 +135,7 @@ RUN cd ${BRAYNS_SRC}/build && make -j4 install \
    && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it
-FROM debian
+FROM ubuntu:22.04
 ARG DIST_PATH=/app/dist
 
 RUN apt-get update \

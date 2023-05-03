@@ -21,43 +21,85 @@
 
 #pragma once
 
-#include <cstddef>
+#include <bit>
+#include <cstring>
+#include <stdexcept>
+#include <string>
+#include <string_view>
 
 namespace brayns
 {
 class ByteConverter
 {
 public:
-    static void copyBytes(const char *from, char *to, size_t stride);
-    static void swapBytes(char *bytes, size_t stride);
+    static_assert(
+        std::endian::native == std::endian::big || std::endian::native == std::endian::little,
+        "Unsupported native endian");
 
     template<typename T>
     static const char *getBytes(const T &value)
     {
-        auto address = static_cast<const void *>(&value);
-        return static_cast<const char *>(address);
+        return reinterpret_cast<const char *>(&value);
     }
 
     template<typename T>
     static char *getBytes(T &value)
     {
-        auto address = static_cast<void *>(&value);
-        return static_cast<char *>(address);
+        return reinterpret_cast<char *>(&value);
     }
 
     template<typename T>
-    static void copyBytes(const T &from, T &to)
-    {
-        auto source = getBytes(from);
-        auto destination = getBytes(to);
-        return copyBytes(source, destination, sizeof(T));
-    }
-
-    template<typename T>
-    static void swapBytes(T &value)
+    static T swapBytes(T value)
     {
         auto bytes = getBytes(value);
-        swapBytes(bytes, sizeof(T));
+        auto stride = sizeof(T);
+        for (size_t i = 0; i < stride / 2; ++i)
+        {
+            std::swap(bytes[i], bytes[stride - 1 - i]);
+        }
+        return value;
+    }
+
+    template<typename T>
+    static T convertFromLocalEndian(T value, std::endian endian)
+    {
+        if (std::endian::native == endian)
+        {
+            return value;
+        }
+        return swapBytes(value);
+    }
+
+    template<typename T>
+    static T convertToLocalEndian(T value, std::endian endian)
+    {
+        if (std::endian::native == endian)
+        {
+            return value;
+        }
+        return swapBytes(value);
+    }
+
+    template<typename T>
+    static T convertFromBytes(std::string_view data, std::endian endian)
+    {
+        auto stride = sizeof(T);
+        if (data.size() != stride)
+        {
+            throw std::invalid_argument("Invalid byte count");
+        }
+        auto value = T();
+        std::memcpy(&value, data.data(), stride);
+        return convertToLocalEndian(value, endian);
+    }
+
+    template<typename T>
+    static std::string convertToBytes(T value, std::endian endian)
+    {
+        value = convertFromLocalEndian(value, endian);
+        auto stride = sizeof(T);
+        auto bytes = getBytes(value);
+        return {bytes, stride};
     }
 };
 } // namespace brayns

@@ -35,13 +35,13 @@
 namespace brayns
 {
 template<typename T>
-class RangeExtractor
+class RangeParser
 {
 public:
-    static std::vector<T> extract(std::string_view data)
-    {
-        static_assert(std::is_integral_v<T>, "Only integral ranges allowed");
+    static_assert(std::is_integral_v<T>, "Only integral ranges allowed");
 
+    static std::vector<T> parse(std::string_view data)
+    {
         auto rangeList = _splitRangeList(data);
         auto ranges = _parseRangeList(rangeList);
         auto list = _flattenRangeList(ranges);

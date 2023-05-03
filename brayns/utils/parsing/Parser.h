@@ -25,7 +25,7 @@
 #include <brayns/utils/string/StringParser.h>
 
 #include "ChunkExtractor.h"
-#include "RangeExtractor.h"
+#include "RangeParser.h"
 #include "TokenExtractor.h"
 
 namespace brayns
@@ -62,37 +62,37 @@ public:
     }
 
     template<typename T>
-    static T parseBytes(std::string_view data, ByteOrder order)
+    static T parseBytes(std::string_view data, std::endian endian)
     {
         T value{};
-        parseBytes(data, value, order);
+        parseBytes(data, value, endian);
         return value;
     }
 
     template<typename T>
-    static void parseBytes(std::string_view data, T &value, ByteOrder order)
+    static void parseBytes(std::string_view data, T &value, std::endian endian)
     {
-        ByteParser<T>::parse(data, value, order);
+        ByteParser<T>::parse(data, value, endian);
     }
 
     template<typename T>
-    static T extractChunk(std::string_view &data, ByteOrder order)
+    static T extractChunk(std::string_view &data, std::endian endian)
     {
         T value{};
-        extractChunk(data, value, order);
+        extractChunk(data, value, endian);
         return value;
     }
 
     template<typename T>
-    static void extractChunk(std::string_view &data, T &value, ByteOrder order)
+    static void extractChunk(std::string_view &data, T &value, std::endian endian)
     {
-        ChunkExtractor<T>::extract(data, value, order);
+        ChunkExtractor<T>::extract(data, value, endian);
     }
 
     template<typename T>
-    static std::vector<T> extractRanges(std::string_view data)
+    static std::vector<T> parseRange(std::string_view data)
     {
-        return RangeExtractor<T>::extract(data);
+        return RangeParser<T>::parse(data);
     }
 };
 } // namespace brayns

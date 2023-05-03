@@ -56,7 +56,7 @@ class IndexListExtractor
 public:
     static std::vector<size_t> fromRange(const std::string &range, size_t maxIndex)
     {
-        auto indexList = brayns::Parser::extractRanges<size_t>(range);
+        auto indexList = brayns::Parser::parseRange<size_t>(range);
         if (indexList.back() >= maxIndex)
         {
             throw std::range_error("Range out of bounds: " + range);
