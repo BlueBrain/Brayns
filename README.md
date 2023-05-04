@@ -28,7 +28,7 @@ Brayns is developed, maintained and run on Linux-based operating systems, being 
 
 The following components must be installed on the system where Brayns will be built:
 
-* GCC 9 or higher (Requires C++ 17 support)
+* GCC 12.1 or higher (Requires C++ 20 support)
 * CMake 3.15 or higher
 * Make or Ninja build systems
 * Git
@@ -50,7 +50,7 @@ Brayns uses further dependencies, but if they are not present on the system, it 
 * spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
 * stb (https://github.com/nothings/stb)
 * tinyexr (https://github.com/syoyo/tinyexr/tree/v1.0.1)
-* libsonata 0.1.17 (https://github.com/BlueBrain/libsonata/tree/v0.1.17)
+* libsonata 0.1.19 (https://github.com/BlueBrain/libsonata/tree/v0.1.19)
 * MVDTool 2.4.4 (https://github.com/BlueBrain/MVDTool/tree/v2.4.4)
 * MorphIO 3.3.4 (https://github.com/BlueBrain/MorphIO/tree/v3.3.4)
 * Brion 3.3.9 (https://github.com/BlueBrain/Brion/tree/3.3.9)
