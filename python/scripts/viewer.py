@@ -82,7 +82,7 @@ def convert_to_png(jpeg: bytes) -> bytes:
 
 def on_binary(window: sg.Window, data: bytes) -> None:
     data = convert_to_png(data)
-    image: sg.Image = window[IMAGE] # type: ignore
+    image: sg.Image = window[IMAGE]  # type: ignore
     image.update(data=data)
 
 
@@ -100,7 +100,7 @@ def send_request(
     params = get_params(values)
     result = instance.request(method, params)
     text = json.dumps(result, indent=4)
-    element: sg.Text = window[RESULT] # type: ignore
+    element: sg.Text = window[RESULT]  # type: ignore
     element.update(value=text)
 
 
@@ -115,7 +115,7 @@ def try_send_request(
 
 def process_events(instance: brayns.Instance, window: sg.Window) -> None:
     while True:
-        event, values = window.read(timeout=20) # type: ignore
+        event, values = window.read(timeout=20)  # type: ignore
         if event == sg.WIN_CLOSED:
             return
         image = brayns.Image(accumulate=False, force_download=False)
