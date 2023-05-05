@@ -50,7 +50,7 @@ Brayns uses further dependencies, but if they are not present on the system, it 
 * spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
 * stb (https://github.com/nothings/stb)
 * tinyexr (https://github.com/syoyo/tinyexr/tree/v1.0.1)
-* libsonata 0.1.19 (https://github.com/BlueBrain/libsonata/tree/v0.1.19)
+* libsonata 0.1.20 (https://github.com/BlueBrain/libsonata/tree/v0.1.20)
 * MVDTool 2.4.4 (https://github.com/BlueBrain/MVDTool/tree/v2.4.4)
 * MorphIO 3.3.4 (https://github.com/BlueBrain/MorphIO/tree/v3.3.4)
 * Brion 3.3.9 (https://github.com/BlueBrain/Brion/tree/3.3.9)
