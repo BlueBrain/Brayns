@@ -68,7 +68,7 @@ private:
 
     static std::string _guessExtension(const std::string &folder, const std::string name)
     {
-        const auto extensionList = std::array<std::string, 3>{"swc", "h5", "swc"};
+        const auto extensionList = std::array<std::string, 3>{"asc", "h5", "swc"};
         for (auto &extension : extensionList)
         {
             auto testPath = std::filesystem::path(folder) / std::filesystem::path(name + "." + extension);
