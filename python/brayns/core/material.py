@@ -160,8 +160,7 @@ class GlassMaterial(Material):
 
 @dataclass
 class GhostMaterial(Material):
-    """Ghost material.
-    """
+    """Ghost material."""
 
     @classmethod
     @property
