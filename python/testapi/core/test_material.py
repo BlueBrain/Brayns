@@ -72,11 +72,11 @@ class TestMaterial(SimpleTestCase):
         )
         self.run_tests(material)
 
-    def run_tests(self, material: brayns.Material, renderer: brayns.Renderer = None) -> None:
-
-        if renderer is None:
-            renderer = brayns.ProductionRenderer(16, 3)
-
+    def run_tests(
+        self,
+        material: brayns.Material,
+        renderer: brayns.Renderer = brayns.ProductionRenderer(16, 3),
+    ) -> None:
         model = add_sphere(self)
         brayns.set_material(self.instance, model.id, material)
         name = brayns.get_material_name(self.instance, model.id)

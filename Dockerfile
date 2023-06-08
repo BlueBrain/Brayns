@@ -88,7 +88,6 @@ RUN mkdir ${OPENVKL_SRC} \
    && ninja -j4 install 
 
 # Install OSPRay
-# https://github.com/ospray/ospray/releases
 ARG OSPRAY_TAG=v2.10.1
 ARG OSPRAY_SRC=/app/ospray
 
