@@ -150,6 +150,7 @@ RUN apt-get update \
    libgomp1 \
    libhdf5-103 \
    libssl-dev \
+   netcat \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
