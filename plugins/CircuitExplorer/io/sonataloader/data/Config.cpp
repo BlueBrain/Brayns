@@ -59,7 +59,7 @@ public:
         return it->second;
     }
 
-    static bool isValid(const std::string &path, std::string_view extension)
+    static bool isValid(const std::string &path, const std::string &extension)
     {
         auto pathObject = std::filesystem::path(path);
         if (!std::filesystem::is_directory(pathObject))
@@ -67,7 +67,7 @@ public:
             return false;
         }
 
-        auto testExtension = std::string(".") + std::string(extension);
+        auto testExtension = "." + extension;
         for (auto &item : std::filesystem::directory_iterator(pathObject))
         {
             if (!std::filesystem::is_regular_file(item))

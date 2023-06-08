@@ -35,7 +35,7 @@ The following components must be installed on the system where Brayns will be bu
 * Package config
 * SSL Development files
 * Python 3.9 or higher
-* OSPRay 2.10.0 (https://github.com/ospray/OSPRay/tree/v2.10.0)
+* Custom OSPRay 2.10.1 (https://github.com/BlueBrain/ospray/tree/v2.10.1)
 * zlib
 
 Optionally, to build the core plugins of Brayns, the following components are required.

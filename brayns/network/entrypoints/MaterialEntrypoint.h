@@ -106,6 +106,15 @@ public:
     virtual std::string getDescription() const override;
 };
 
+class SetMaterialGhost : public SetMaterialEntrypoint<Ghost>
+{
+public:
+    explicit SetMaterialGhost(ModelManager &ModelManager);
+
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+};
+
 class SetMaterialGlass : public SetMaterialEntrypoint<Glass>
 {
 public:
@@ -210,6 +219,15 @@ class GetMaterialGlass : public GetMaterialEntrypoint<Glass>
 {
 public:
     explicit GetMaterialGlass(ModelManager &scene);
+
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+};
+
+class GetMaterialGhost : public GetMaterialEntrypoint<Ghost>
+{
+public:
+    explicit GetMaterialGhost(ModelManager &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
