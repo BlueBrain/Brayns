@@ -89,11 +89,11 @@ RUN mkdir ${OPENVKL_SRC} \
 
 # Install OSPRay
 # https://github.com/ospray/ospray/releases
-ARG OSPRAY_TAG=v2.10.0
+ARG OSPRAY_TAG=v2.10.1
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
-   && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
+   && git clone https://github.com/BlueBrain/ospray.git ${OSPRAY_SRC} \
    && cd ${OSPRAY_SRC} \
    && git checkout ${OSPRAY_TAG} \
    && mkdir -p build \
