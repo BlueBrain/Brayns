@@ -78,6 +78,7 @@ from .loader import (
 from .material import (
     CarPaintMaterial,
     EmissiveMaterial,
+    GhostMaterial,
     GlassMaterial,
     Material,
     MatteMaterial,
@@ -192,6 +193,7 @@ __all__ = [
     "get_scene",
     "get_simulation",
     "get_version",
+    "GhostMaterial",
     "GlassMaterial",
     "Image",
     "ImageInfo",

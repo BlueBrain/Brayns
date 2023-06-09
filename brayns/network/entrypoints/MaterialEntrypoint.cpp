@@ -116,6 +116,22 @@ std::string SetMaterialGlass::getDescription() const
            "This material is only usable with the production renderer";
 }
 
+SetMaterialGhost::SetMaterialGhost(ModelManager &models):
+    SetMaterialEntrypoint<Ghost>(models)
+{
+}
+
+std::string SetMaterialGhost::getMethod() const
+{
+    return "set-material-ghost";
+}
+
+std::string SetMaterialGhost::getDescription() const
+{
+    return "Updates the material of the given model to a ghost material. "
+           "The ghost effect is only visible with the interactive renderer.";
+}
+
 SetMaterialMatte::SetMaterialMatte(ModelManager &models):
     SetMaterialEntrypoint<Matte>(models)
 {
@@ -222,6 +238,21 @@ std::string GetMaterialGlass::getMethod() const
 std::string GetMaterialGlass::getDescription() const
 {
     return "Returns the material of the given model as a glass material, if possible";
+}
+
+GetMaterialGhost::GetMaterialGhost(ModelManager &scene):
+    GetMaterialEntrypoint<Ghost>(scene)
+{
+}
+
+std::string GetMaterialGhost::getMethod() const
+{
+    return "get-material-ghost";
+}
+
+std::string GetMaterialGhost::getDescription() const
+{
+    return "Returns the material of the given model as a ghost material, if possible";
 }
 
 GetMaterialMatte::GetMaterialMatte(ModelManager &models):

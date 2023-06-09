@@ -30,6 +30,7 @@ brayns-spack-test:
   needs: ["brayns-spack-build"]
   timeout: 2h
   script:
+    - export BRAYNS_TMP_DIR=$SHMDIR
     - cd ${SPACK_BUILD_DIR}
     - spack build-env ${SPACK_FULL_SPEC} -- ninja tests
 

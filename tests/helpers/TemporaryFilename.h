@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <cstdlib>
+#include <cstring>
 #include <filesystem>
 #include <random>
 #include <string>
@@ -40,10 +42,12 @@ public:
 
     static std::string generateValid(size_t len = 10)
     {
+        auto tmpRoot = _getTmpRoot();
+
         std::string result;
         do
         {
-            result = "/tmp/" + _generate(len);
+            result = tmpRoot + "/" + _generate(len);
         } while (_exists(result));
 
         return result;
@@ -74,5 +78,16 @@ private:
         }
 
         return result;
+    }
+
+    static std::string _getTmpRoot()
+    {
+        auto tmpRoot = std::getenv("BRAYNS_TMP_DIR");
+        if (!tmpRoot || std::strlen(tmpRoot) == 0)
+        {
+            return "/tmp";
+        }
+
+        return std::string(tmpRoot);
     }
 };
