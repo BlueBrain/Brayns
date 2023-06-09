@@ -8,26 +8,7 @@ include(FetchContent)
 set(CMAKE_EXPORT_NO_PACKAGE_REGISTRY ON)
 set(CMAKE_INSTALL_LIBDIR lib)
 
-# =============================================================================
-# libsonata
-# =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT HighFive_FOUND AND NOT TARGET HighFive)
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/highfive")
-        message(STATUS "Downloading highfive from submodules")
-        FetchContent_Declare(
-            HighFive
-            GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git
-            GIT_TAG v2.7.1
-            GIT_SHALLOW ON
-            GIT_SUBMODULES_RECURSE OFF
-            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/HighFive
-        )
-        FetchContent_Populate(HighFive)
-    endif()
-
-    add_library(HighFive INTERFACE)
-    target_include_directories(HighFive SYSTEM INTERFACE HighFive/include)
-endif()
+find_package(Git REQUIRED)
 
 # =============================================================================
 # libsonata
@@ -46,11 +27,26 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT sonata_FOUND AND
         FetchContent_Populate(libsonata)
     endif()
 
+    # MorphIO requires latest version of HighFive. (2.7.1)
+    # libsonata version of HighFive is 2.4.0
+    # We have to use libsonata version of HighFive because libsonata CMakeLists.txt both adds
+    # the dependency and compiles the library.
+    # MorphIO separates this in two CMakeLists, so we can build the library and use libsonata HighFive.
+    # TL;DR WE CANNOT MAKE LIBSONATA USE A DIFFERENT HIGHTFIVE THAN ITS OWN. WE NEED TO UPDATE IT TO BE
+    # VALID FOR MORPHIO AS WELL.
+    message(STATUS "> Updating libsonata's HighFive to v2.7.1")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} checkout v2.7.1
+        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/libsonata/extlib/HighFive
+        RESULT_VARIABLE GIT_SUBMOD_RESULT
+        OUTPUT_QUIET)
+    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+        message(FATAL_ERROR "Could not update libsonata's HighFive dependency")
+    endif()
+
     set(EXTLIB_FROM_SUBMODULES ON CACHE BOOL "" FORCE)
     set(SONATA_TESTS OFF CACHE BOOL "" FORCE)
-
-    # Force C++14 for GCC < 12.2.0
-    set(CMAKE_CXX_STANDARD 14 CACHE STRING "" FORCE)
+    SET(SONATA_CXX_WARNINGS OFF CACHE BOOL "" FORCE)
 
     add_subdirectory(libsonata)
     add_library(sonata::sonata_shared ALIAS sonata_shared)
