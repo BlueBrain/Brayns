@@ -11,14 +11,35 @@ set(CMAKE_INSTALL_LIBDIR lib)
 # =============================================================================
 # libsonata
 # =============================================================================
+if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT HighFive_FOUND AND NOT TARGET HighFive)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/highfive")
+        message(STATUS "Downloading highfive from submodules")
+        FetchContent_Declare(
+            HighFive
+            GIT_REPOSITORY https://github.com/BlueBrain/HighFive.git
+            GIT_TAG v2.7.1
+            GIT_SHALLOW ON
+            GIT_SUBMODULES_RECURSE OFF
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/HighFive
+        )
+        FetchContent_Populate(HighFive)
+    endif()
+
+    add_library(HighFive INTERFACE)
+    target_include_directories(HighFive SYSTEM INTERFACE HighFive/include)
+endif()
+
+# =============================================================================
+# libsonata
+# =============================================================================
 if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libsonata")
         message(STATUS "Downloading libsonata from submodules")
         FetchContent_Declare(
             libsonata
             GIT_REPOSITORY https://github.com/BlueBrain/libsonata.git
-            GIT_TAG v0.1.20
-            GIT_SHALLOW OFF # Required for its own CMakeLists.txt not to fail
+            GIT_TAG v0.1.21
+            GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsonata
         )
@@ -44,7 +65,7 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT MorphIO_FOUND AN
         FetchContent_Declare(
             MorphIO
             GIT_REPOSITORY https://github.com/BlueBrain/MorphIO.git
-            GIT_TAG v3.3.3
+            GIT_TAG v3.3.5
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/MorphIO
@@ -63,11 +84,14 @@ if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT MorphIO_FOUND AN
     add_library(lexertl INTERFACE)
     target_include_directories(lexertl SYSTEM INTERFACE MorphIO/3rdparty/lexertl14/include)
 
+    add_library(ghc_filesystem INTERFACE)
+    target_include_directories(ghc_filesystem SYSTEM INTERFACE MorphIO/3rdparty/ghc_filesystem/include)
+
     # Retrieve version
-    set(MORPHIO_VERSION_STRING "3.3.2")
+    set(MORPHIO_VERSION_STRING "3.3.5")
     set(MorphIO_VERSION_MAJOR 3)
     set(MorphIO_VERSION_MINOR 3)
-    set(MorphIO_VERSION_PATCH 2)
+    set(MorphIO_VERSION_PATCH 5)
 
     # Morphio
     add_subdirectory(MorphIO/src)
