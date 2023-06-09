@@ -82,7 +82,7 @@ private:
 
     static std::string _getTmpRoot()
     {
-        auto tmpRoot = std::getenv("SHMDIR");
+        auto tmpRoot = std::getenv("BRAYNS_TMP_DIR");
         if (!tmpRoot || std::strlen(tmpRoot) == 0)
         {
             return "/tmp";
