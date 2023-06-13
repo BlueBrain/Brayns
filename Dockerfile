@@ -25,7 +25,6 @@ RUN apt-get update \
    zlib1g-dev \
    libbz2-dev \
    python3.9 \
-   gcc-12 \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
