@@ -1,5 +1,16 @@
 # Change Log
 
+## [3.2.0](https://github.com/BlueBrain/Brayns/tree/3.2.0)
+
+**Implemented fixes and enhancements:**
+
+- Update libsonata & MorphIO dependencies [\#1184](https://github.com/BlueBrain/Brayns/pull/1184)
+- Netcat is now part of the Docker image [\#1183](https://github.com/BlueBrain/Brayns/pull/1183)
+- Added Ghost material for Interactive renderer [\#1182](https://github.com/BlueBrain/Brayns/pull/1182)
+- Fix a bug in Cell placement loader [\#1181](https://github.com/BlueBrain/Brayns/pull/1181)
+- Brayns now requires C++20 [\#1178](https://github.com/BlueBrain/Brayns/pull/1178)
+- Upgrade clang-format version [\#1177](https://github.com/BlueBrain/Brayns/pull/1177)
+
 ## [3.1.2](https://github.com/BlueBrain/Brayns/tree/3.1.2)
 
 **Implemented fixes and enhancements:**

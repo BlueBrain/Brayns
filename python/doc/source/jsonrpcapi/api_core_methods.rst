@@ -4622,6 +4622,41 @@ Returns the material of the given model as a emissive material, if possible.
 
 ----
 
+get-material-ghost
+~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a ghost material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "additionalProperties": false
+    }
+
+----
+
 get-material-glass
 ~~~~~~~~~~~~~~~~~~
 
@@ -6458,6 +6493,44 @@ Updates the material of the given model to an emisive material. This material is
                         "minimum": 0
                     }
                 },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "ID of the model to apply the material",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "material",
+            "model_id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always
+null.
+
+----
+
+set-material-ghost
+~~~~~~~~~~~~~~~~~~
+
+Updates the material of the given model to a ghost material. The ghost effect is only visible with the interactive renderer..
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "Ghost",
+                "description": "Material parameters",
+                "type": "object",
                 "additionalProperties": false
             },
             "model_id": {
