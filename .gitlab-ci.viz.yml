@@ -4,7 +4,6 @@ stages:
 
 include:
   - project: viz/ci/gitlabpipelines
-    ref: update_cpp_ubuntu_version
     file: index.yml
 
 ubuntu-clangformat-check:
