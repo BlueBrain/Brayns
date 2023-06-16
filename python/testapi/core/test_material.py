@@ -40,7 +40,7 @@ class TestMaterial(SimpleTestCase):
 
     def test_ghost(self) -> None:
         material = brayns.GhostMaterial()
-        self.run_tests(material, brayns.InteractiveRenderer(16, 3))
+        self.run_tests(material)
 
     def test_glass(self) -> None:
         material = brayns.GlassMaterial(
@@ -72,11 +72,7 @@ class TestMaterial(SimpleTestCase):
         )
         self.run_tests(material)
 
-    def run_tests(
-        self,
-        material: brayns.Material,
-        renderer: brayns.Renderer = brayns.ProductionRenderer(16, 3),
-    ) -> None:
+    def run_tests(self, material: brayns.Material) -> None:
         model = add_sphere(self)
         brayns.set_material(self.instance, model.id, material)
         name = brayns.get_material_name(self.instance, model.id)
@@ -84,5 +80,5 @@ class TestMaterial(SimpleTestCase):
         retreived = brayns.get_material(self.instance, model.id, type(material))
         self.assertEqual(material, retreived)
         filename = f"{material.name}_material"
-        settings = RenderSettings(renderer=renderer)
+        settings = RenderSettings(renderer=brayns.ProductionRenderer(16, 3))
         render_and_validate(self, filename, settings)
