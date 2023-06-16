@@ -23,6 +23,7 @@
 #include <brayns/engine/geometry/types/Sphere.h>
 #include <brayns/engine/material/types/CarPaint.h>
 #include <brayns/engine/material/types/Emissive.h>
+#include <brayns/engine/material/types/Ghost.h>
 #include <brayns/engine/material/types/Glass.h>
 #include <brayns/engine/material/types/Matte.h>
 #include <brayns/engine/material/types/Metal.h>
@@ -98,6 +99,10 @@ TEST_CASE("Material types")
     SUBCASE("Emissive")
     {
         MaterialTypeTester::test(brayns::Emissive{brayns::Vector3f(0.f, 1.f, 0.f)}, "test_material_emissive.png");
+    }
+    SUBCASE("Ghost")
+    {
+        MaterialTypeTester::test(brayns::Ghost(), "test_material_ghost.png");
     }
     SUBCASE("Glass")
     {

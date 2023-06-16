@@ -4,7 +4,6 @@ stages:
 
 include:
   - project: viz/ci/gitlabpipelines
-    ref: update_cpp_ubuntu_version
     file: index.yml
 
 ubuntu-clangformat-check:
@@ -97,7 +96,7 @@ ubuntu-clangformat-check:
 
     # Install OSPRay
     # https://github.com/ospray/ospray/releases
-    - OSPRAY_TAG=v2.10.1
+    - OSPRAY_TAG=v2.10.4
     - OSPRAY_SRC=/app/ospray
 
     - mkdir -p ${OSPRAY_SRC}
