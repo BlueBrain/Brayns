@@ -25,13 +25,10 @@
 #include <brayns/utils/Log.h>
 
 #include "camera/CylindricAdapter.h"
-#include "camera/ospray/OsprayCylindricCamera.h"
 #include "network/entrypoints/CylindricCameraEntrypoint.h"
 
 CylindricCameraPlugin::CylindricCameraPlugin(brayns::PluginAPI &api)
 {
-    ospray::Camera::registerType<OsprayCylindricCamera>(brayns::ProjectionTraits<Cylindric>::name.c_str());
-
     auto &engine = api.getEngine();
     auto &factories = engine.getFactories();
     auto &cameras = factories.cameras;
