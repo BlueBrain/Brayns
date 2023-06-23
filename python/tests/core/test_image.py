@@ -37,7 +37,7 @@ class TestImage(unittest.TestCase):
             force_download=False,
             jpeg_quality=60,
         )
-        test = image.download(instance, brayns.ImageFormat.JPEG)
+        test = image.download(instance, brayns.ImageFormat.JPEG, render=False)
         self.assertEqual(
             instance.params,
             {
@@ -46,6 +46,7 @@ class TestImage(unittest.TestCase):
                 "accumulate": False,
                 "format": "jpg",
                 "jpeg_quality": 60,
+                "render": False,
             },
         )
         self.assertEqual(test.accumulation, 1)
@@ -67,6 +68,7 @@ class TestImage(unittest.TestCase):
                 "send": False,
                 "force": False,
                 "accumulate": True,
+                "render": True,
             },
         )
         self.assertEqual(test.accumulation, 2)

@@ -81,8 +81,8 @@ class Image:
     force_download: bool = True
     jpeg_quality: int = 100
 
-    def save(self, instance: Instance, path: str) -> ImageInfo:
-        """Try render image and save it under given path (if downloaded).
+    def save(self, instance: Instance, path: str, render: bool = True) -> ImageInfo:
+        """Try to render an image and save it if rendered.
 
         :param instance: Instance.
         :type instance: Instance
@@ -92,7 +92,7 @@ class Image:
         :rtype: ImageInfo
         """
         format = parse_image_format(path)
-        image = self.download(instance, format)
+        image = self.download(instance, format, render)
         if not image.data:
             return image
         with open(path, "wb") as file:
@@ -100,22 +100,27 @@ class Image:
         return image
 
     def download(
-        self, instance: Instance, format: ImageFormat = ImageFormat.PNG
+        self,
+        instance: Instance,
+        format: ImageFormat = ImageFormat.PNG,
+        render: bool = True,
     ) -> ImageInfo:
-        """Try render image and download it at given format.
+        """Try to render and download an image.
 
         :param instance: Instance.
         :type instance: Instance
         :param format: Image encoding format, defaults to ImageFormat.PNG
         :type format: ImageFormat, optional
+        :param render: Render image(s) if needed, defaults to True
+        :type format: bool, optional
         :return: Render status and image data.
         :rtype: ImageInfo
         """
-        params = _serialize_image(self, format=format)
+        params = _serialize_image(self, format=format, render=render)
         return _request(instance, params)
 
     def render(self, instance: Instance) -> ImageInfo:
-        """Try render image without downloading it.
+        """Try to render an image without downloading it.
 
         :param instance: Instance.
         :type instance: Instance
@@ -132,12 +137,16 @@ def _request(instance: Instance, params: dict[str, Any]) -> ImageInfo:
 
 
 def _serialize_image(
-    image: Image, send: bool = True, format: ImageFormat = ImageFormat.PNG
+    image: Image,
+    send: bool = True,
+    format: ImageFormat = ImageFormat.PNG,
+    render: bool = True,
 ) -> dict[str, Any]:
     params: dict[str, Any] = {
         "send": send,
         "force": send and image.force_download,
         "accumulate": image.accumulate,
+        "render": render,
     }
     if send:
         params["format"] = format.value

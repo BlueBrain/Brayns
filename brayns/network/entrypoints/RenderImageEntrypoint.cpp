@@ -63,18 +63,20 @@ class RenderHelper
 public:
     static bool render(brayns::Engine &engine, const brayns::RenderImageParams &params)
     {
+        if (!params.render)
+        {
+            return false;
+        }
         if (!params.accumulate)
         {
             return render(engine);
         }
-        if (!render(engine))
-        {
-            return false;
-        }
+        auto frameCount = 0;
         while (render(engine))
         {
+            ++frameCount;
         }
-        return true;
+        return frameCount > 0;
     }
 
     static bool render(brayns::Engine &engine)
@@ -118,6 +120,10 @@ public:
     static std::string serialize(brayns::Engine &engine, const brayns::RenderImageEntrypoint::Params &params)
     {
         auto &framebuffer = engine.getFramebuffer();
+        if (!framebuffer.getHandle())
+        {
+            return {};
+        }
         auto image = framebuffer.getImage();
         auto format = params.format;
         auto quality = params.jpeg_quality;
