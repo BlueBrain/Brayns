@@ -32,6 +32,7 @@ struct RenderImageParams
     bool accumulate = false;
     std::string format;
     int jpeg_quality = 0;
+    bool render = false;
 };
 
 template<>
@@ -77,6 +78,13 @@ struct JsonAdapter<RenderImageParams> : ObjectAdapter<RenderImageParams>
             .minimum(0)
             .maximum(100)
             .defaultValue(100);
+        builder
+            .getset(
+                "render",
+                [](auto &object) { return object.render; },
+                [](auto &object, auto value) { object.render = value; })
+            .description("Disable render if set to false (download only)")
+            .defaultValue(true);
         return builder.build();
     }
 };

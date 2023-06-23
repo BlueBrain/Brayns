@@ -119,6 +119,19 @@ class TestImage(SimpleTestCase):
         test = image.download(self.instance)
         self.assertTrue(test.data)
 
+    def test_no_render(self) -> None:
+        self._prepare_render()
+        image = brayns.Image(accumulate=False)
+        test = image.download(self.instance, render=False)
+        self.assertFalse(test.data)
+        self.assertEqual(test.accumulation, 0)
+        test = image.render(self.instance)
+        self.assertFalse(test.data)
+        self.assertEqual(test.accumulation, 1)
+        test = image.download(self.instance, render=False)
+        self.assertTrue(test.data)
+        self.assertEqual(test.accumulation, 1)
+
     def _prepare_render(self) -> None:
         add_sphere(self)
         prepare_lights(self.instance)
