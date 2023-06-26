@@ -13,35 +13,18 @@ find_package(Git REQUIRED)
 # =============================================================================
 # libsonata
 # =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libsonata")
         message(STATUS "Downloading libsonata from submodules")
         FetchContent_Declare(
             libsonata
             GIT_REPOSITORY https://github.com/BlueBrain/libsonata.git
-            GIT_TAG v0.1.21
+            GIT_TAG v0.1.22
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libsonata
         )
         FetchContent_Populate(libsonata)
-    endif()
-
-    # MorphIO requires latest version of HighFive. (2.7.1)
-    # libsonata version of HighFive is 2.4.0
-    # We have to use libsonata version of HighFive because libsonata CMakeLists.txt both adds
-    # the dependency and compiles the library.
-    # MorphIO separates this in two CMakeLists, so we can build the library and use libsonata HighFive.
-    # TL;DR WE CANNOT MAKE LIBSONATA USE A DIFFERENT HIGHTFIVE THAN ITS OWN. WE NEED TO UPDATE IT TO BE
-    # VALID FOR MORPHIO AS WELL.
-    message(STATUS "> Updating libsonata's HighFive to v2.7.1")
-    execute_process(
-        COMMAND ${GIT_EXECUTABLE} checkout v2.7.1
-        WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/libsonata/extlib/HighFive
-        RESULT_VARIABLE GIT_SUBMOD_RESULT
-        OUTPUT_QUIET)
-    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-        message(FATAL_ERROR "Could not update libsonata's HighFive dependency")
     endif()
 
     set(EXTLIB_FROM_SUBMODULES ON CACHE BOOL "" FORCE)
@@ -56,7 +39,7 @@ endif()
 # =============================================================================
 # MorphIO
 # =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/MorphIO")
         message(STATUS "Downloading MorphIO from submodules")
         FetchContent_Declare(
@@ -101,7 +84,7 @@ endif()
 # =============================================================================
 # MVDTool
 # =============================================================================
-if(BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED AND NOT MVDTool_FOUND AND NOT TARGET MVDTool)
+if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT MVDTool_FOUND AND NOT TARGET MVDTool)
     find_package(Boost 1.41 QUIET REQUIRED COMPONENTS system)
 
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/MVDTool")
@@ -138,7 +121,7 @@ if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED) AND NOT Brion_FOUND)
         FetchContent_Declare(
             Brion
             GIT_REPOSITORY https://github.com/BlueBrain/Brion.git
-            GIT_TAG 3.3.9
+            GIT_TAG 3.3.14
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE OFF
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Brion
