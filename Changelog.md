@@ -1,5 +1,13 @@
 # Change Log
 
+## [3.2.1](https://github.com/BlueBrain/Brayns/tree/3.2.1)
+
+**Implemented fixes and enhancements:**
+
+- Bump libsonata and Brion dependencies [\#1189](https://github.com/BlueBrain/Brayns/pull/1189)
+- Migrate cylindric camera to OSPRay [\#1188](https://github.com/BlueBrain/Brayns/pull/1188)
+- Added flag to download only in render-image [\#1187](https://github.com/BlueBrain/Brayns/pull/1187)
+
 ## [3.2.0](https://github.com/BlueBrain/Brayns/tree/3.2.0)
 
 **Implemented fixes and enhancements:**
