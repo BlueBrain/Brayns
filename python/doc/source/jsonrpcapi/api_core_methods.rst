@@ -6026,6 +6026,11 @@ Render an image of the current context and retreive it according to given params
                 "minimum": 0,
                 "maximum": 100
             },
+            "render": {
+                "description": "Disable render if set to false (download only)",
+                "type": "boolean",
+                "default": true
+            },
             "send": {
                 "description": "Send image once rendered",
                 "type": "boolean",
