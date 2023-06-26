@@ -96,7 +96,7 @@ ubuntu-clangformat-check:
 
     # Install OSPRay
     # https://github.com/ospray/ospray/releases
-    - OSPRAY_TAG=v2.10.4
+    - OSPRAY_TAG=v2.10.5
     - OSPRAY_SRC=/app/ospray
 
     - mkdir -p ${OSPRAY_SRC}

@@ -26,10 +26,6 @@ if(BRAYNS_ATLASEXPLORER_ENABLED)
     find_package(BZip2 REQUIRED)
 endif()
 
-if(BRAYNS_CYLINDRICCAMERA_ENABLED)
-    find_package(rkcommon REQUIRED)
-endif()
-
 add_subdirectory(deps)
 
 if(BRAYNS_CIRCUITEXPLORER_ENABLED)

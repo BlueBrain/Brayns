@@ -35,7 +35,7 @@ The following components must be installed on the system where Brayns will be bu
 * Package config
 * SSL Development files
 * Python 3.9 or higher
-* Custom OSPRay 2.10.4 (https://github.com/BlueBrain/ospray/tree/v2.10.4)
+* Custom OSPRay 2.10.5 (https://github.com/BlueBrain/ospray/tree/v2.10.5)
 * zlib
 
 Optionally, to build the core plugins of Brayns, the following components are required.
@@ -50,10 +50,10 @@ Brayns uses further dependencies, but if they are not present on the system, it 
 * spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
 * stb (https://github.com/nothings/stb)
 * tinyexr (https://github.com/syoyo/tinyexr/tree/v1.0.1)
-* libsonata 0.1.20 (https://github.com/BlueBrain/libsonata/tree/v0.1.20)
+* libsonata 0.1.22 (https://github.com/BlueBrain/libsonata/tree/v0.1.22)
 * MVDTool 2.4.4 (https://github.com/BlueBrain/MVDTool/tree/v2.4.4)
-* MorphIO 3.3.4 (https://github.com/BlueBrain/MorphIO/tree/v3.3.4)
-* Brion 3.3.9 (https://github.com/BlueBrain/Brion/tree/3.3.9)
+* MorphIO 3.3.5 (https://github.com/BlueBrain/MorphIO/tree/v3.3.5)
+* Brion 3.3.14 (https://github.com/BlueBrain/Brion/tree/3.3.14)
 
 ### Build command
 
