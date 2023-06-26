@@ -29,12 +29,9 @@ RUN apt-get update \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Get ISPC
-# https://ispc.github.io/downloads.html
-
 ARG ISPC_VERSION=1.18.0
 ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
 ARG ISPC_PATH=/app/ispc-v1.18.0-linux
-
 RUN mkdir -p ${ISPC_PATH} \
    && wget https://github.com/ispc/ispc/releases/download/v1.18.0/${ISPC_DIR}.tar.gz \
    && tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1 \
@@ -52,7 +49,6 @@ RUN wget https://github.com/oneapi-src/oneTBB/releases/download/v${ONETBB_VERSIO
    && tar zxvf ${ONETBB_FILE} -C ${DIST_PATH} --strip-components=1
 
 # Install embree
-# https://github.com/embree/embree/releases
 ARG EMBREE_VERSION=3.13.3
 ARG EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
 RUN wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE} \
@@ -88,7 +84,7 @@ RUN mkdir ${OPENVKL_SRC} \
    && ninja -j4 install 
 
 # Install OSPRay
-ARG OSPRAY_TAG=v2.10.4
+ARG OSPRAY_TAG=v2.10.5
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
