@@ -18,6 +18,8 @@
 
 #include "NeuronGeometryBuilder.h"
 
+#include <unordered_map>
+
 namespace
 {
 struct PrimitiveAllocationSize
@@ -52,42 +54,21 @@ struct PrimitiveAllocationSize
     }
 };
 
-struct NeuronSectionMappingGenerator
-{
-    static void generate(NeuronGeometry &dst, NeuronSection section, size_t start, size_t end)
-    {
-        auto &sectionRanges = dst.sectionMapping;
-        auto &sectionRange = sectionRanges.emplace_back();
-        sectionRange.type = section;
-        sectionRange.begin = start;
-        sectionRange.end = end;
-    }
-};
-
-struct NeuronGeometryAppender
-{
-    static void append(NeuronGeometry &dst, int32_t section, brayns::Capsule geometry)
-    {
-        auto &geometryBuffer = dst.geometry;
-        auto &sectionMapping = dst.sectionSegmentMapping;
-
-        auto idx = geometryBuffer.size();
-        geometryBuffer.push_back(std::move(geometry));
-        sectionMapping[section].push_back(idx);
-    }
-};
-
 struct SomaBuilder
 {
     static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
     {
+        auto &geometry = dst.geometry;
+        auto &sectionSegments = dst.sectionSegmentMapping;
+        auto &sectionTypes = dst.sectionTypeMapping;
+
         const auto &sections = morphology.sections();
         const auto &soma = morphology.soma();
 
         const auto &somaCenter = soma.center;
         const auto somaRadius = soma.radius;
         auto somaSphere = brayns::CapsuleFactory::sphere(somaCenter, somaRadius);
-        NeuronGeometryAppender::append(dst, -1, std::move(somaSphere));
+        geometry.push_back(somaSphere);
 
         const auto somaChildren = morphology.sectionChildrenIndices(-1);
         for (const auto childIndex : somaChildren)
@@ -102,12 +83,12 @@ struct SomaBuilder
             const auto &samplePos = childFirstSample.position;
             const auto sampleRadius = childFirstSample.radius;
             auto somaCone = brayns::CapsuleFactory::cone(somaCenter, somaRadius, samplePos, sampleRadius);
-            NeuronGeometryAppender::append(dst, -1, std::move(somaCone));
+            geometry.push_back(somaCone);
         }
 
-        auto &geometry = dst.geometry;
         auto end = geometry.size();
-        NeuronSectionMappingGenerator::generate(dst, NeuronSection::Soma, 0, end);
+        sectionSegments.push_back({-1, 0, end});
+        sectionTypes.push_back({NeuronSection::Soma, 0, end});
     }
 };
 
@@ -115,9 +96,10 @@ struct NeuriteBuilder
 {
     static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
     {
-        const auto &sections = morphology.sections();
+        auto &sections = morphology.sections();
 
         auto &geometry = dst.geometry;
+        auto &sectionSegments = dst.sectionSegmentMapping;
 
         // Sort sections by section type
         std::unordered_map<NeuronSection, std::vector<const NeuronMorphology::Section *>> sortedSections;
@@ -129,15 +111,15 @@ struct NeuriteBuilder
         }
 
         // Add section geometry, grouped by section type
-        for (const auto &[sectionType, sectionPointers] : sortedSections)
+        for (auto &[sectionType, sectionPointers] : sortedSections)
         {
-            const auto sectionIndexBegin = geometry.size();
+            auto sectionTypeIndexBegin = geometry.size();
 
             // Add dendrites and axon
-            for (const auto sectionPtr : sectionPointers)
+            for (auto sectionPtr : sectionPointers)
             {
-                const auto &section = *sectionPtr;
-                const auto &samples = section.samples;
+                auto &section = *sectionPtr;
+                auto &samples = section.samples;
 
                 if (samples.empty())
                 {
@@ -146,23 +128,27 @@ struct NeuriteBuilder
 
                 for (size_t i = 1; i < samples.size(); ++i)
                 {
-                    const auto &s1 = samples[i - 1];
-                    const auto &p1 = s1.position;
-                    const auto r1 = s1.radius;
+                    auto &s1 = samples[i - 1];
+                    auto &p1 = s1.position;
+                    auto r1 = s1.radius;
 
-                    const auto &s2 = samples[i];
-                    const auto &p2 = s2.position;
-                    const auto r2 = s2.radius;
+                    auto &s2 = samples[i];
+                    auto &p2 = s2.position;
+                    auto r2 = s2.radius;
 
                     auto segmentGeometry = brayns::CapsuleFactory::cone(p1, r1, p2, r2);
-                    NeuronGeometryAppender::append(dst, section.id, std::move(segmentGeometry));
+                    geometry.push_back(segmentGeometry);
                 }
+
+                sectionSegments.push_back({
+                    section.id,
+                })
             }
 
             const auto sectionIndexEnd = geometry.size();
             if (sectionIndexEnd - sectionIndexBegin > 0)
             {
-                NeuronSectionMappingGenerator::generate(dst, sectionType, sectionIndexBegin, sectionIndexEnd);
+                NeuronSectionTypeMappingGenerator::generate(dst, sectionType, sectionIndexBegin, sectionIndexEnd);
             }
         }
     }
