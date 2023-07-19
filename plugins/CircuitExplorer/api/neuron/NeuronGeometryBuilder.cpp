@@ -22,8 +22,9 @@
 
 namespace
 {
-struct PrimitiveAllocationSize
+class PrimitiveAllocationSize
 {
+public:
     static size_t compute(const NeuronMorphology &morphology)
     {
         size_t result = 0;
@@ -54,8 +55,9 @@ struct PrimitiveAllocationSize
     }
 };
 
-struct SomaBuilder
+class SomaBuilder
 {
+public:
     static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
     {
         auto &geometry = dst.geometry;
@@ -92,14 +94,16 @@ struct SomaBuilder
     }
 };
 
-struct NeuriteBuilder
+class NeuriteBuilder
 {
+public:
     static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
     {
         auto &sections = morphology.sections();
 
         auto &geometry = dst.geometry;
         auto &sectionSegments = dst.sectionSegmentMapping;
+        auto &sectionTypes = dst.sectionTypeMapping;
 
         // Sort sections by section type
         std::unordered_map<NeuronSection, std::vector<const NeuronMorphology::Section *>> sortedSections;
@@ -126,6 +130,8 @@ struct NeuriteBuilder
                     continue;
                 }
 
+                auto sectionSegmentBegin = geometry.size();
+
                 for (size_t i = 1; i < samples.size(); ++i)
                 {
                     auto &s1 = samples[i - 1];
@@ -140,32 +146,37 @@ struct NeuriteBuilder
                     geometry.push_back(segmentGeometry);
                 }
 
-                sectionSegments.push_back({
-                    section.id,
-                })
+                auto sectionSegmentEnd = geometry.size();
+                sectionSegments.push_back({section.id, sectionSegmentBegin, sectionSegmentEnd});
             }
 
-            const auto sectionIndexEnd = geometry.size();
-            if (sectionIndexEnd - sectionIndexBegin > 0)
+            auto sectionTypeIndexEnd = geometry.size();
+            if (sectionTypeIndexEnd - sectionTypeIndexBegin > 0)
             {
-                NeuronSectionTypeMappingGenerator::generate(dst, sectionType, sectionIndexBegin, sectionIndexEnd);
+                sectionTypes.push_back({sectionType, sectionTypeIndexBegin, sectionTypeIndexEnd});
             }
         }
     }
 };
 
-struct NeuronBuilder
+class NeuronBuilder
 {
+public:
     static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
     {
+        auto hasSoma = morphology.hasSoma();
         auto numPrimitives = PrimitiveAllocationSize::compute(morphology);
+        auto numSections = morphology.sections().size() + (hasSoma ? 1 : 0);
+
         auto &geometry = dst.geometry;
-        auto &sectionRanges = dst.sectionMapping;
+        auto &sectionTypes = dst.sectionTypeMapping;
+        auto &sectionSegments = dst.sectionSegmentMapping;
 
         geometry.reserve(numPrimitives);
-        sectionRanges.reserve(4);
+        sectionTypes.reserve(4);
+        sectionSegments.reserve(numSections);
 
-        if (morphology.hasSoma())
+        if (hasSoma)
         {
             SomaBuilder::build(morphology, dst);
         }

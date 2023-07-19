@@ -58,7 +58,7 @@ private:
         const CellReportMapping &cellReportMapping)
     {
         auto size = cellStructure.numItems;
-        auto &compartmentMap = cellStructure.sectionSegments;
+        auto &sectionsSegments = cellStructure.sectionSegments;
 
         auto offset = cellReportMapping.globalOffset;
         auto &localOffsets = cellReportMapping.offsets;
@@ -66,31 +66,31 @@ private:
 
         std::vector<uint64_t> localResult(size, offset);
 
-        for (auto &[sectionId, segments] : compartmentMap)
+        for (auto &section : sectionsSegments)
         {
             // No section level information (soma report, spike simulation, etc.) or dealing with soma
-            if (sectionId < 0 || localOffsets.empty() || static_cast<size_t>(sectionId) >= localOffsets.size())
+            if (section.sectionId < 0 || localOffsets.empty()
+                || static_cast<size_t>(section.sectionId) >= localOffsets.size())
             {
                 continue;
             }
 
-            auto numCompartments = compartments[sectionId];
+            auto numCompartments = compartments[section.sectionId];
             if (numCompartments == 0)
             {
                 continue;
             }
 
-            auto numSegments = segments.size();
+            auto numSegments = section.end - section.being;
             auto step = static_cast<float>(numCompartments) / static_cast<float>(numSegments);
-            auto sectionOffset = localOffsets[sectionId];
+            auto sectionOffset = localOffsets[section.sectionId];
 
-            for (size_t i = 0; i < segments.size(); ++i)
+            for (size_t i = 0; i < numSegments; ++i)
             {
                 auto index = static_cast<float>(i);
                 auto compartment = static_cast<size_t>(step * index);
                 auto finalOffset = offset + sectionOffset + compartment;
-                auto segmentIndex = segments[i];
-                localResult[segmentIndex] = finalOffset;
+                localResult[section.being + i] = finalOffset;
             }
         }
 

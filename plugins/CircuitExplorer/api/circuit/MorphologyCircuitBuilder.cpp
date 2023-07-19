@@ -156,7 +156,7 @@ public:
         _systems.setInspectSystem<MorphologyInspectSystem>();
     }
 
-    void addNeuronSections(std::vector<std::vector<NeuronSectionMapping>> sections)
+    void addNeuronSections(std::vector<std::vector<SectionTypeMapping>> sections)
     {
         _components.add<NeuronSectionList>(std::move(sections));
     }
@@ -212,8 +212,8 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::build(
     auto morphologyPathMap = MorphologyMapBuilder::build(morphPaths);
     auto morphologies = ParallelMorphologyLoader::load(morphologyPathMap, morphParams, positions, rotations, updater);
 
-    auto mappings = std::vector<std::vector<NeuronSectionMapping>>();
-    mappings.reserve(morphologies.size());
+    auto sectionTypeMappings = std::vector<std::vector<SectionTypeMapping>>();
+    sectionTypeMappings.reserve(morphologies.size());
 
     auto compartments = std::vector<CellCompartments>();
     compartments.reserve(morphologies.size());
@@ -223,19 +223,19 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::build(
 
     for (auto &morphology : morphologies)
     {
-        auto &sectionMapping = morphology.sectionMapping;
-        auto &compartmentMapping = morphology.sectionSegmentMapping;
+        auto &sectionTypeMapping = morphology.sectionTypeMapping;
+        auto &sectionSegmentMapping = morphology.sectionSegmentMapping;
         auto &geometry = morphology.geometry;
 
-        mappings.push_back(std::move(sectionMapping));
-        compartments.push_back({geometry.size(), std::move(compartmentMapping)});
+        sectionTypeMappings.push_back(std::move(sectionTypeMapping));
+        compartments.push_back({geometry.size(), std::move(sectionSegmentMapping)});
         geometries.push_back(std::move(geometry));
     }
 
     auto builder = ModelBuilder(model);
     builder.addIds(std::move(context.ids));
     builder.addGeometry(std::move(geometries));
-    builder.addNeuronSections(std::move(mappings));
+    builder.addNeuronSections(std::move(sectionTypeMappings));
     builder.addColoring(std::move(context.colorData));
     builder.addDefaultColor();
 

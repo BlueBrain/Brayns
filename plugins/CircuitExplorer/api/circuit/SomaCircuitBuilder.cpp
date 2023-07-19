@@ -112,7 +112,7 @@ std::vector<CellCompartments> SomaCircuitBuilder::build(brayns::Model &model, Co
     for (auto &position : positions)
     {
         geometry.push_back({position, radius});
-        compartments.push_back({1, {{-1, std::vector<uint64_t>{0ul}}}});
+        compartments.push_back({1, {{-1, 0, 1}}});
     }
 
     auto builder = ModelBuilder(model);
