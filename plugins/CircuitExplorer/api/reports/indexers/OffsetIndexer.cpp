@@ -81,7 +81,7 @@ private:
                 continue;
             }
 
-            auto numSegments = section.end - section.being;
+            auto numSegments = section.end - section.begin;
             auto step = static_cast<float>(numCompartments) / static_cast<float>(numSegments);
             auto sectionOffset = localOffsets[section.sectionId];
 
@@ -90,7 +90,7 @@ private:
                 auto index = static_cast<float>(i);
                 auto compartment = static_cast<size_t>(step * index);
                 auto finalOffset = offset + sectionOffset + compartment;
-                localResult[section.being + i] = finalOffset;
+                localResult[section.begin + i] = finalOffset;
             }
         }
 

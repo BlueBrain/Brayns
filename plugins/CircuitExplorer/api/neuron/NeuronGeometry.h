@@ -36,7 +36,7 @@ struct SectionTypeMapping
 struct SectionSegmentMapping
 {
     int32_t sectionId;
-    size_t being;
+    size_t begin;
     size_t end;
 };
 
