@@ -68,9 +68,9 @@ public:
         _systems.setDataSystem<brayns::GeometryDataSystem>();
     }
 
-    void addSections(std::vector<NeuronSectionMapping> mapping)
+    void addSections(std::vector<SectionTypeMapping> sectionTypeMapping)
     {
-        _components.add<NeuronSectionList>(std::move(mapping));
+        _components.add<NeuronSectionList>(std::move(sectionTypeMapping));
     }
 
     void addColoring()
@@ -135,12 +135,12 @@ std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     auto neuronBuilder = NeuronGeometryBuilder(morphology);
     auto neuronGeometry = neuronBuilder.instantiate({}, {});
     auto &primitives = neuronGeometry.geometry;
-    auto &sectionMapping = neuronGeometry.sectionMapping;
+    auto &sectionTypeMapping = neuronGeometry.sectionTypeMapping;
 
     auto model = std::make_shared<brayns::Model>(ModelType::morphology);
     auto builder = ModelBuilder(*model);
     builder.addGeometry(std::move(primitives));
-    builder.addSections(std::move(sectionMapping));
+    builder.addSections(std::move(sectionTypeMapping));
     builder.addColoring();
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());

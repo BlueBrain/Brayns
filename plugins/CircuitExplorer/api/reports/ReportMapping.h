@@ -23,13 +23,15 @@
 #include <unordered_map>
 #include <vector>
 
+#include <api/neuron/NeuronGeometry.h>
+
 /**
  * @brief The CellCompartments represents the internal structure of an element onto which simulation will be mapped
  */
 struct CellCompartments
 {
     size_t numItems{};
-    std::unordered_map<int32_t, std::vector<size_t>> sectionSegments;
+    std::vector<SectionSegmentMapping> sectionSegments;
 };
 
 /**

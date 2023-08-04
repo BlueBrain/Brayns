@@ -24,12 +24,18 @@
 
 #include "NeuronSection.h"
 
-#include <unordered_map>
 #include <vector>
 
-struct NeuronSectionMapping
+struct SectionTypeMapping
 {
     NeuronSection type;
+    size_t begin;
+    size_t end;
+};
+
+struct SectionSegmentMapping
+{
+    int32_t sectionId;
     size_t begin;
     size_t end;
 };
@@ -37,6 +43,6 @@ struct NeuronSectionMapping
 struct NeuronGeometry
 {
     std::vector<brayns::Capsule> geometry;
-    std::vector<NeuronSectionMapping> sectionMapping;
-    std::unordered_map<int32_t, std::vector<size_t>> sectionSegmentMapping;
+    std::vector<SectionTypeMapping> sectionTypeMapping;
+    std::vector<SectionSegmentMapping> sectionSegmentMapping;
 };

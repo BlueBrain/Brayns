@@ -106,7 +106,7 @@ private:
 
     static std::vector<uint8_t> _buildIndexBuffer(
         const std::vector<brayns::Geometry> &geometries,
-        const std::vector<std::vector<NeuronSectionMapping>> &sections,
+        const std::vector<std::vector<SectionTypeMapping>> &sections,
         const std::vector<IndexedSection> &sectionIndices)
     {
         auto indices = std::vector<uint8_t>(_countPrimitives(geometries));
@@ -142,9 +142,9 @@ private:
         return totalPrimitives;
     }
 
-    static const NeuronSectionMapping &_getMappingForSection(
+    static const SectionTypeMapping &_getMappingForSection(
         NeuronSection section,
-        const std::vector<NeuronSectionMapping> &mapping)
+        const std::vector<SectionTypeMapping> &mapping)
     {
         auto it = std::find_if(
             mapping.begin(),
