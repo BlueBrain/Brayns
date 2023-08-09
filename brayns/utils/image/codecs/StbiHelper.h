@@ -22,6 +22,9 @@
 #pragma once
 
 #include <brayns/utils/image/Image.h>
+#include <brayns/utils/image/ImageMetadata.h>
+
+#include <optional>
 
 namespace brayns
 {
@@ -52,9 +55,10 @@ public:
      * The resulting PNG data can be written directly to the file.
      *
      * @param image Image to encode.
+     * @param metadata Metadata to embed into the image.
      * @return std::string Image PNG data.
      */
-    static std::string encodePng(const Image &image);
+    static std::string encodePng(const Image &image, const std::optional<ImageMetadata> &metadata);
 
     /**
      * @brief Encode an image as JPEG.
@@ -64,8 +68,10 @@ public:
      * Alpha channel is discared.
      *
      * @param image Image to encode.
+     * @param quality Image compression quality (0 = uncompressed, 100 = max compression).
+     * @param metadata Metadata to embed into the image.
      * @return std::string Image JPEG data.
      */
-    static std::string encodeJpeg(const Image &image, int quality);
+    static std::string encodeJpeg(const Image &image, int quality, const std::optional<ImageMetadata> &metadata);
 };
 } // namespace brayns

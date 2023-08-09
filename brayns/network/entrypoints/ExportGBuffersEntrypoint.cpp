@@ -89,7 +89,7 @@ public:
 
             if (channels.size() == 1)
             {
-                return codec.encode(frameBuffer.getImage(channels.front()), 0);
+                return codec.encode(frameBuffer.getImage(channels.front()), 0, std::nullopt);
             }
 
             auto frames = _buildFrameList(frameBuffer, channels);

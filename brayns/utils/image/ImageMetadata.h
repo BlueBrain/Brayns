@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2023 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,25 +18,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PngCodec.h"
+#pragma once
 
-#include "StbiHelper.h"
+#include <string>
+#include <vector>
 
 namespace brayns
 {
-std::string PngCodec::getFormat() const
+struct ImageMetadata
 {
-    return "png";
-}
+    /**
+     * @brief Image title.
+     */
+    std::string title;
 
-std::string PngCodec::encode(const Image &image, int quality, const std::optional<ImageMetadata> &metadata) const
-{
-    (void)quality;
-    return StbiHelper::encodePng(image, metadata);
-}
+    /**
+     * @brief Image description.
+     */
+    std::string description;
 
-Image PngCodec::decode(const void *data, size_t size) const
-{
-    return StbiHelper::decode(data, size);
+    /**
+     * @brief List of places (publications, websites, panels, etc.) where the image is used.
+     */
+    std::vector<std::string> whereUsed;
+
+    /**
+     * @brief List of keywords that describe the image contents.
+     */
+    std::vector<std::string> keywords;
+};
 }
-} // namespace brayns

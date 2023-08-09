@@ -30,10 +30,10 @@ std::string JpegCodec::getFormat() const
     return "jpg";
 }
 
-std::string JpegCodec::encode(const Image &image, int quality) const
+std::string JpegCodec::encode(const Image &image, int quality, const std::optional<ImageMetadata> &metadata) const
 {
     quality = std::max(100 - std::max(quality, 0), 0);
-    return StbiHelper::encodeJpeg(image, quality);
+    return StbiHelper::encodeJpeg(image, quality, metadata);
 }
 
 Image JpegCodec::decode(const void *data, size_t size) const

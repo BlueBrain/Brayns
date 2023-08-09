@@ -129,7 +129,7 @@ from .simulation import (
     get_simulation,
     set_simulation_frame,
 )
-from .snapshot import Snapshot
+from .snapshot import ImageMetadata, Snapshot
 from .version import Version, VersionError, check_version, get_version
 from .view import (
     View,
@@ -197,6 +197,7 @@ __all__ = [
     "GlassMaterial",
     "Image",
     "ImageInfo",
+    "ImageMetadata",
     "instantiate_model",
     "InteractiveRenderer",
     "Light",

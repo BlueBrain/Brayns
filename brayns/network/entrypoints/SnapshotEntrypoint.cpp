@@ -65,11 +65,15 @@ public:
 class ImageHelper
 {
 public:
-    static void save(const brayns::Image &image, const std::string &path, int quality)
+    static void save(
+        const brayns::Image &image,
+        const std::string &path,
+        int quality,
+        const std::optional<brayns::ImageMetadata> &metadata)
     {
         try
         {
-            brayns::ImageEncoder::save(image, path, quality);
+            brayns::ImageEncoder::save(image, path, quality, metadata);
         }
         catch (const std::exception &e)
         {
@@ -78,13 +82,17 @@ public:
         }
     }
 
-    static std::string encode(const brayns::Image &image, const std::string &extension, int quality)
+    static std::string encode(
+        const brayns::Image &image,
+        const std::string &extension,
+        int quality,
+        const std::optional<brayns::ImageMetadata> &metadata)
     {
         const auto lower = brayns::StringCase::toLower(extension);
         const auto format = brayns::ImageFormat::fromExtension(lower);
         try
         {
-            return brayns::ImageEncoder::encode(image, format, quality);
+            return brayns::ImageEncoder::encode(image, format, quality, metadata);
         }
         catch (const std::exception &e)
         {
@@ -105,16 +113,17 @@ public:
         auto &path = params.file_path;
         auto &settings = params.image_settings;
         auto quality = settings.getQuality();
+        auto &metadata = params.metadata;
         auto format = settings.getFormat();
         auto image = framebuffer.getImage();
         if (path.empty())
         {
-            auto data = ImageHelper::encode(image, format, quality);
+            auto data = ImageHelper::encode(image, format, quality, metadata);
             auto result = _formatResult(data.size());
             request.reply(result, data);
             return;
         }
-        ImageHelper::save(image, path, quality);
+        ImageHelper::save(image, path, quality, metadata);
         auto result = _formatResult(0);
         request.reply(result);
     }
