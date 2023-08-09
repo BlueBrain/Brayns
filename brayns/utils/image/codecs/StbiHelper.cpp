@@ -22,7 +22,6 @@
 #include "StbiHelper.h"
 
 #include <array>
-#include <bit>
 #include <cassert>
 #include <stdexcept>
 
@@ -32,7 +31,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-#include <brayns/utils/binary/ByteParser.h>
+#include <brayns/utils/parsing/Parser.h>
 
 #pragma GCC diagnostic pop
 
@@ -148,7 +147,7 @@ private:
 
             auto idByte1 = marker[0];
             auto idByte2 = marker[1];
-            uint16_t size = (static_cast<uint16_t>(marker[2]) << 1) | marker[3];
+            auto size = Parser::parseBytes<uint16_t>({image.data() + index + 2, 2}, std::endian::big);
 
             if (idByte1 == 0xFF && idByte2 == 0xC0)
             {
