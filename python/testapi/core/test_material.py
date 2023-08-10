@@ -20,7 +20,7 @@
 
 import brayns
 from testapi.loading import add_sphere
-from testapi.render import RenderSettings, render_and_validate, render_and_save
+from testapi.render import RenderSettings, render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -80,15 +80,7 @@ class TestMaterial(SimpleTestCase):
             anisotropy=1,
             anisotropy_rotation=0.9,
         )
-        model = add_sphere(self)
-        brayns.set_material(self.instance, model.id, material)
-        name = brayns.get_material_name(self.instance, model.id)
-        self.assertEqual(name, material.name)
-        retreived = brayns.get_material(self.instance, model.id, type(material))
-        self.assertEqual(material, retreived)
-        filename = f"{material.name}_material"
-        settings = RenderSettings(renderer=brayns.ProductionRenderer(16, 3))
-        render_and_save(self, filename, settings)
+        self.run_tests(material)
 
     def run_tests(self, material: brayns.Material) -> None:
         model = add_sphere(self)
