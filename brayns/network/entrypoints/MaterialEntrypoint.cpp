@@ -180,6 +180,22 @@ std::string SetMaterialPlastic::getDescription() const
            "This material is only usable with the production renderer";
 }
 
+SetMaterialPrincipled::SetMaterialPrincipled(ModelManager &models):
+    SetMaterialEntrypoint<Principled>(models)
+{
+}
+
+std::string SetMaterialPrincipled::getMethod() const
+{
+    return "set-material-principled";
+}
+
+std::string SetMaterialPrincipled::getDescription() const
+{
+    return "Updates the material of the given model to a principled material. "
+           "This material is only usable with the production renderer";
+}
+
 GetMaterialCarPaint::GetMaterialCarPaint(ModelManager &models):
     GetMaterialEntrypoint<CarPaint>(models)
 {
@@ -298,5 +314,20 @@ std::string GetMaterialPlastic::getMethod() const
 std::string GetMaterialPlastic::getDescription() const
 {
     return "Returns the material of the given model as a plastic material, if possible";
+}
+
+GetMaterialPrincipled::GetMaterialPrincipled(ModelManager &models):
+    GetMaterialEntrypoint<Principled>(models)
+{
+}
+
+std::string GetMaterialPrincipled::getMethod() const
+{
+    return "get-material-principled";
+}
+
+std::string GetMaterialPrincipled::getDescription() const
+{
+    return "Returns the material of the given model as a principled material, if possible";
 }
 }
