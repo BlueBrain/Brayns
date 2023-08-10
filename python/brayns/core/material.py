@@ -365,7 +365,7 @@ class PrincipledMaterial(Material):
     back_light: float = 0
     coat: float = 0
     coat_ior: float = 1.5
-    coat_color: float = Color3(1, 1, 1)
+    coat_color: Color3 = Color3(1, 1, 1)
     coat_thickness: float = 1
     coat_roughness: float = 0
     sheen: float = 0
