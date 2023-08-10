@@ -32,6 +32,26 @@ from .view import serialize_view
 
 
 @dataclass
+class ImageMetadata:
+    """Metadata information that will be embeded into the image.
+
+    :param title: Image title.
+    :type title: str
+    :param description: Image description.
+    :type description: str
+    :param where_used: List of places where the image is used.
+    :type where_used: list[str]
+    :param keywords: List of keywords that describe the image content.
+    :type keywords: list[str]
+    """
+
+    title: str
+    description: str
+    where_used: list[str]
+    keywords: list[str]
+
+
+@dataclass
 class Snapshot:
     """Helper class to take a snapshot of an instance with custom settings.
 
@@ -50,6 +70,8 @@ class Snapshot:
     :type frame: int | None, optional
     :param jpeg_quality: JPEG quality if format is JPEG, defaults to 100%.
     :type jpeg_quality: int, optional
+    :param metadata: Metadata information to embed into the image.
+    :type metadata: ImageMetadata | None, optional
     """
 
     resolution: Resolution | None = None
@@ -57,6 +79,7 @@ class Snapshot:
     renderer: Renderer | None = None
     frame: int | None = None
     jpeg_quality: int = 100
+    metadata: ImageMetadata | None = None
 
     def save(self, instance: Instance, path: str) -> None:
         """Download and save the snapshot locally under given file.
@@ -164,6 +187,8 @@ def _serialize_snapshot(
         message["renderer"] = snapshot.renderer.get_properties_with_name()
     if snapshot.frame is not None:
         message["simulation_frame"] = snapshot.frame
+    if snapshot.metadata is not None:
+        message["metadata"] = _serialize_image_metadata(snapshot.metadata)
     return message
 
 
@@ -178,6 +203,15 @@ def _serialize_image_settings(
     if snapshot.resolution is not None:
         message["size"] = list(snapshot.resolution)
     return message
+
+
+def _serialize_image_metadata(metadata: ImageMetadata) -> dict[str, Any]:
+    return {
+        "title": metadata.title,
+        "description": metadata.description,
+        "where_used": metadata.where_used,
+        "keywords": metadata.keywords,
+    }
 
 
 def _task(instance: Instance, params: dict[str, Any]) -> JsonRpcFuture:

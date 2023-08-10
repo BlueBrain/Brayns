@@ -28,17 +28,25 @@
 
 namespace brayns
 {
-void ImageEncoder::save(const Image &image, const std::string &filename, int quality)
+void ImageEncoder::save(
+    const Image &image,
+    const std::string &filename,
+    int quality,
+    const std::optional<ImageMetadata> &metadata)
 {
     auto format = ImageFormat::fromFilename(filename);
-    auto data = encode(image, format, quality);
+    auto data = encode(image, format, quality, metadata);
     FileWriter::write(data, filename);
 }
 
-std::string ImageEncoder::encode(const Image &image, const std::string &format, int quality)
+std::string ImageEncoder::encode(
+    const Image &image,
+    const std::string &format,
+    int quality,
+    const std::optional<ImageMetadata> &metadata)
 {
     auto &codec = ImageCodecRegistry::getCodec(format);
-    auto data = codec.encode(image, quality);
+    auto data = codec.encode(image, quality, metadata);
     if (data.empty())
     {
         throw std::runtime_error("Failed to encode to '" + format + "'");

@@ -44,9 +44,13 @@ public:
      *
      * @param image Image to encode.
      * @param quality Image quality (100 = better, 0 = smaller).
+     * @param metadata Metadata to embed into the image.
      * @return std::string JPEG data that can be saved directly.
      */
-    virtual std::string encode(const Image &image, int quality) const override;
+    virtual std::string encode(
+        const Image &image,
+        int quality,
+        const std::optional<ImageMetadata> &metadata) const override;
 
     /**
      * @brief Decode raw JPEG data.

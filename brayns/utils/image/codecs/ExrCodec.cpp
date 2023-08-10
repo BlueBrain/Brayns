@@ -347,9 +347,10 @@ std::string ExrCodec::getFormat() const
     return "exr";
 }
 
-std::string ExrCodec::encode(const Image &image, int quality) const
+std::string ExrCodec::encode(const Image &image, int quality, const std::optional<ImageMetadata> &metadata) const
 {
     (void)quality;
+    (void)metadata;
     return TinyExrEconderHelper::encode(image);
 }
 

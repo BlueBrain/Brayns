@@ -21,7 +21,9 @@
 
 #include "StbiHelper.h"
 
+#include <array>
 #include <cassert>
+#include <stdexcept>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -29,11 +31,228 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#include <brayns/utils/parsing/Parser.h>
+
 #pragma GCC diagnostic pop
 
 namespace
 {
 using namespace brayns;
+
+class XmpXmlMetadataBuilder
+{
+public:
+    static std::string build(const ImageMetadata &metadata)
+    {
+        auto xmlTitle = "<bbp:Title>" + metadata.title + "</bbp:Title>";
+        auto xmlDescr = "<bbp:Description>" + metadata.description + "</bbp:Description>";
+        auto xmlWhereUsed = "<bbp:WhereUsed>" + _serializeList(metadata.whereUsed) + "</bbp:WhereUsed>";
+        auto xmlKeywords = "<bbp:Keywords>" + _serializeList(metadata.keywords) + "</bbp:Keywords>";
+        return xmlTitle + xmlDescr + xmlWhereUsed + xmlKeywords;
+    }
+
+private:
+    static std::string _serializeList(const std::vector<std::string> &list)
+    {
+        std::string result = "<rdf:Bag>";
+        for (auto &item : list)
+        {
+            result += "<rdf:li>" + item + "</rdf:li>";
+        }
+        result += "</rdf:Bag>";
+
+        return result;
+    }
+};
+
+template<typename T>
+concept Number = std::is_integral_v<T> || std::is_same_v<uint8_t, T>;
+
+template<typename T>
+concept String = std::is_same_v<std::string, T> || std::is_same_v<std::string_view, T>;
+
+class ByteSerializer
+{
+public:
+    static void serialize(Number auto element, std::string &buffer)
+    {
+        // Both Jpeg and Png are stored as big endian
+        auto endianCorrectElement = ByteConverter::convertFromLocalEndian(element, std::endian::big);
+        auto castedElement = ByteConverter::getBytes(endianCorrectElement);
+        buffer.insert(buffer.end(), castedElement, castedElement + sizeof(element));
+    }
+
+    static void serialize(const String auto &string, std::string &buffer)
+    {
+        buffer += string;
+    }
+};
+
+class JpegXmpMarkerEncoder
+{
+public:
+    static std::string encode(const ImageMetadata &metadata)
+    {
+        constexpr uint16_t maxPacketSize = 65503;
+
+        constexpr uint16_t identifier = 0xFFE1;
+        constexpr std::string_view namespaceName = "http://ns.adobe.com/xap/1.0/";
+        auto packet = XmpXmlMetadataBuilder::build(metadata);
+
+        if (packet.size() > maxPacketSize)
+        {
+            throw std::invalid_argument("Jpeg Xmp metadata lenght cannot exceed " + std::to_string(maxPacketSize));
+        }
+
+        uint16_t length = static_cast<uint16_t>(2 + namespaceName.size() + 1 + packet.size() + 1);
+
+        std::string result;
+        result.reserve(2 + length);
+
+        ByteSerializer::serialize(identifier, result);
+        ByteSerializer::serialize(length, result);
+        ByteSerializer::serialize(namespaceName, result);
+        ByteSerializer::serialize(static_cast<uint8_t>(0), result); // null terminator
+        ByteSerializer::serialize(packet, result);
+        ByteSerializer::serialize(static_cast<uint8_t>(0), result); // null terminator
+
+        return result;
+    }
+};
+
+class JpegXmpMarkerInserter
+{
+public:
+    static void insertInto(const std::string &marker, std::string &image)
+    {
+        // The marker must be inserterd before the SOF marker
+        auto insertIndex = _searchSofMarker(image);
+        image.insert(insertIndex, marker);
+    }
+
+private:
+    static size_t _searchSofMarker(const std::string &image)
+    {
+        auto bytes = reinterpret_cast<const uint8_t *>(image.data());
+        size_t index = 2; // Skip SOI marker bytes
+
+        while (index < image.size())
+        {
+            if (index + 4 >= image.size())
+            {
+                throw std::invalid_argument("Incomplete marker at end of file");
+            }
+
+            auto marker = bytes + index;
+
+            auto idByte1 = marker[0];
+            auto idByte2 = marker[1];
+            auto size = Parser::parseBytes<uint16_t>({image.data() + index + 2, 2}, std::endian::big);
+
+            if (idByte1 == 0xFF && idByte2 == 0xC0)
+            {
+                return index;
+            }
+
+            index += 2 + size;
+        }
+
+        throw std::invalid_argument("Could not find SOF marker");
+    }
+};
+
+// https://www.w3.org/TR/PNG-Structure.html#CRC-algorithm
+class CrcTableCalculator
+{
+public:
+    static constexpr std::array<uint32_t, 256> makeCrcTable()
+    {
+        auto table = std::array<uint32_t, 256>();
+
+        for (uint32_t n = 0; n < 256; ++n)
+        {
+            auto c = n;
+            for (size_t k = 0; k < 8; ++k)
+            {
+                if (c & 1)
+                {
+                    c = 0xedb88320L ^ (c >> 1);
+                    continue;
+                }
+                c = c >> 1;
+            }
+
+            table[n] = c;
+        }
+
+        return table;
+    }
+};
+
+class PngCrcCalculator
+{
+public:
+    static uint32_t crc(char *buf, size_t len)
+    {
+        return _updateCrc(0xffffffffL, buf, len) ^ 0xffffffffL;
+    }
+
+private:
+    static uint32_t _updateCrc(uint32_t crc, char *buf, size_t len)
+    {
+        for (size_t n = 0; n < len; ++n)
+        {
+            crc = _crcTable[(crc ^ buf[n]) & 0xff] ^ (crc >> 8);
+        }
+        return crc;
+    }
+
+private:
+    static constexpr std::array<uint32_t, 256> _crcTable = CrcTableCalculator::makeCrcTable();
+};
+
+class PngXmpChunkEncoder
+{
+public:
+    static std::string encode(const ImageMetadata &metadata)
+    {
+        const std::string_view chunkType = "iTXt";
+        constexpr std::string_view keyword = "XML:com.adobe.xmp";
+
+        auto chunkText = XmpXmlMetadataBuilder::build(metadata);
+
+        auto size = keyword.size() + 5 + chunkText.size();
+        auto realSize = size + 4 + chunkType.size() + 4;
+
+        std::string result;
+        result.reserve(realSize);
+
+        ByteSerializer::serialize(static_cast<uint32_t>(size), result);
+        ByteSerializer::serialize(chunkType, result);
+        ByteSerializer::serialize(keyword, result);
+        ByteSerializer::serialize(static_cast<uint8_t>(0), result); // null separator
+        ByteSerializer::serialize(static_cast<uint8_t>(0), result); // compression flag
+        ByteSerializer::serialize(static_cast<uint8_t>(0), result); // compression method
+        ByteSerializer::serialize(static_cast<uint8_t>(0), result); // null separator
+        ByteSerializer::serialize(static_cast<uint8_t>(0), result); // null separator
+        ByteSerializer::serialize(chunkText, result);
+
+        auto crc = PngCrcCalculator::crc(result.data() + 4, result.size() - 4);
+        ByteSerializer::serialize(crc, result);
+
+        return result;
+    }
+};
+
+class PngXmpChunkInserter
+{
+public:
+    static void insertInto(const std::string &chunk, std::string &image)
+    {
+        // Last 12 bytes are the end of image chunk.
+        image.insert(image.size() - 12, chunk);
+    }
+};
 
 class StbiDecoder
 {
@@ -85,7 +304,7 @@ public:
 class StbiPngEncoder
 {
 public:
-    static std::string encode(const Image &image)
+    static std::string encode(const Image &image, const std::optional<ImageMetadata> &metadata)
     {
         std::string context;
         auto width = int(image.getWidth());
@@ -98,14 +317,27 @@ public:
         {
             return {};
         }
+
+        if (metadata)
+        {
+            _embedMetadata(*metadata, context);
+        }
+
         return context;
+    }
+
+private:
+    static void _embedMetadata(const ImageMetadata &metadata, std::string &image)
+    {
+        auto chunk = PngXmpChunkEncoder::encode(metadata);
+        PngXmpChunkInserter::insertInto(chunk, image);
     }
 };
 
 class StbiJpegEncoder
 {
 public:
-    static std::string encode(const Image &image, int quality)
+    static std::string encode(const Image &image, int quality, const std::optional<ImageMetadata> &metadata)
     {
         std::string context;
         auto width = int(image.getWidth());
@@ -119,7 +351,20 @@ public:
         {
             return {};
         }
+
+        if (metadata)
+        {
+            _embedMetadata(*metadata, context);
+        }
+
         return context;
+    }
+
+private:
+    static void _embedMetadata(const brayns::ImageMetadata &metadata, std::string &image)
+    {
+        auto marker = JpegXmpMarkerEncoder::encode(metadata);
+        JpegXmpMarkerInserter::insertInto(marker, image);
     }
 };
 } // namespace
@@ -131,13 +376,13 @@ Image StbiHelper::decode(const void *data, size_t size)
     return StbiDecoder::decode(data, size);
 }
 
-std::string StbiHelper::encodePng(const Image &image)
+std::string StbiHelper::encodePng(const Image &image, const std::optional<ImageMetadata> &metadata)
 {
-    return StbiPngEncoder::encode(image);
+    return StbiPngEncoder::encode(image, metadata);
 }
 
-std::string StbiHelper::encodeJpeg(const Image &image, int quality)
+std::string StbiHelper::encodeJpeg(const Image &image, int quality, const std::optional<ImageMetadata> &metadata)
 {
-    return StbiJpegEncoder::encode(image, quality);
+    return StbiJpegEncoder::encode(image, quality, metadata);
 }
 } // namespace brayns

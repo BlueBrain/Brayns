@@ -21,10 +21,12 @@
 
 #pragma once
 
+#include <optional>
 #include <stdexcept>
 #include <string>
 
 #include "Image.h"
+#include "ImageMetadata.h"
 
 namespace brayns
 {
@@ -41,9 +43,14 @@ public:
      * @param image Image to save.
      * @param filename Path of the output file.
      * @param quality Image quality if compressed.
+     * @param metadata Metadata to embed into the image.
      * @throw std::runtime_error Invalid format, path or image.
      */
-    static void save(const Image &image, const std::string &filename, int quality = 0);
+    static void save(
+        const Image &image,
+        const std::string &filename,
+        int quality = 0,
+        const std::optional<ImageMetadata> &metadata = std::nullopt);
 
     /**
      * @brief Encode the image with given format.
@@ -51,9 +58,14 @@ public:
      * @param image Image to encode.
      * @param format Encoding format.
      * @param quality Image quality if compressed.
+     * @param metadata Metadata to embed into the image.
      * @return std::string Encoded image.
      * @throw std::runtime_error Invalid format or image.
      */
-    static std::string encode(const Image &image, const std::string &format, int quality = 0);
+    static std::string encode(
+        const Image &image,
+        const std::string &format,
+        int quality = 0,
+        const std::optional<ImageMetadata> &metadata = std::nullopt);
 };
 } // namespace brayns

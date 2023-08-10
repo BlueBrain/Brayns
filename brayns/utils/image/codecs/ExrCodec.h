@@ -49,10 +49,11 @@ public:
      * @brief Encode an image as a single-frame Exr.
      *
      * @param image Image to encode.
-     * @param quality ignored for exr.
+     * @param quality Ignored for exr.
+     * @param metadata Ignored for exr.
      * @return std::string EXR data that can be saved directly.
      */
-    std::string encode(const Image &image, int quality) const override;
+    std::string encode(const Image &image, int quality, const std::optional<ImageMetadata> &metadata) const override;
 
     /**
      * @brief Encode a group of images as a multi-frame Exr.

@@ -25,6 +25,7 @@
 
 #include <brayns/engine/json/adapters/EngineObjectDataAdapter.h>
 #include <brayns/engine/json/adapters/ViewAdapter.h>
+#include <brayns/network/adapters/ImageMetadataAdapter.h>
 #include <brayns/network/messages/ImageSettingsMessage.h>
 
 namespace brayns
@@ -37,6 +38,7 @@ struct SnapshotParams
     EngineObjectData renderer;
     uint32_t simulation_frame;
     std::string file_path;
+    std::optional<ImageMetadata> metadata;
 };
 
 template<>
@@ -86,6 +88,13 @@ struct JsonAdapter<SnapshotParams> : ObjectAdapter<SnapshotParams>
                 [](auto &object) -> auto & { return object.file_path; },
                 [](auto &object, auto value) { object.file_path = std::move(value); })
             .description("Path to save image, raw encoded data will be returned if empty")
+            .required(false);
+        builder
+            .getset(
+                "metadata",
+                [](auto &object) -> auto & { return object.metadata; },
+                [](auto &object, auto value) { object.metadata = std::move(value); })
+            .description("Metadata information to embed into the image")
             .required(false);
         return builder.build();
     }

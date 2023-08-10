@@ -21,10 +21,12 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
 #include "Image.h"
+#include "ImageMetadata.h"
 
 namespace brayns
 {
@@ -51,9 +53,10 @@ public:
      *
      * @param image Image to encode.
      * @param quality Quality of the encoding if required (JPEG).
+     * @param metadata Metadata to embed in the image.
      * @return std::string Encoded image data.
      */
-    virtual std::string encode(const Image &image, int quality) const = 0;
+    virtual std::string encode(const Image &image, int quality, const std::optional<ImageMetadata> &metadata) const = 0;
 
     /**
      * @brief Decode the given bytes.
