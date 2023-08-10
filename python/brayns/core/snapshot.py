@@ -34,7 +34,7 @@ from .view import serialize_view
 @dataclass
 class ImageMetadata:
     """Metadata information that will be embeded into the image.
-    
+
     :param title: Image title.
     :type title: str
     :param description: Image description.
@@ -210,7 +210,7 @@ def _serialize_image_metadata(metadata: ImageMetadata) -> dict[str, Any]:
         "title": metadata.title,
         "description": metadata.description,
         "where_used": metadata.where_used,
-        "keywords": metadata.keywords
+        "keywords": metadata.keywords,
     }
 
 
