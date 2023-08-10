@@ -189,7 +189,7 @@ struct JsonAdapter<Principled> : ObjectAdapter<Principled>
 
         builder
             .getset(
-                "edgeColor",
+                "edge_color",
                 [](auto &object) { return object.edgeColor; },
                 [](auto &object, auto value) { object.edgeColor = value; })
             .description("Edge tint for metallic surfaces")
@@ -240,14 +240,14 @@ struct JsonAdapter<Principled> : ObjectAdapter<Principled>
             .required(false);
         builder
             .getset(
-                "transmissionColor",
+                "transmission_color",
                 [](auto &object) { return object.transmissionColor; },
                 [](auto &object, auto value) { object.transmissionColor = value; })
             .description("Transmission attenuation color")
             .required(false);
         builder
             .getset(
-                "transmissionDepth",
+                "transmission_depth",
                 [](auto &object) { return object.transmissionDepth; },
                 [](auto &object, auto value) { object.transmissionDepth = value; })
             .description("Distance from surface at which the color will equal transmission color")
@@ -270,7 +270,7 @@ struct JsonAdapter<Principled> : ObjectAdapter<Principled>
             .required(false);
         builder
             .getset(
-                "anisotropyRotation",
+                "anisotropy_rotation",
                 [](auto &object) { return object.anisotropyRotation; },
                 [](auto &object, auto value) { object.anisotropyRotation = value; })
             .description("Rotation of the specular anisotropy reflection effect")
@@ -293,7 +293,7 @@ struct JsonAdapter<Principled> : ObjectAdapter<Principled>
             .required(false);
         builder
             .getset(
-                "backLight",
+                "back_light",
                 [](auto &object) { return object.backLight; },
                 [](auto &object, auto value) { object.backLight = value; })
             .description("For thin objects, weight of reflection and transmission (1 = 50/50, 2 = only transmission)")
@@ -311,28 +311,28 @@ struct JsonAdapter<Principled> : ObjectAdapter<Principled>
             .required(false);
         builder
             .getset(
-                "coatIor",
+                "coat_ior",
                 [](auto &object) { return object.coatIor; },
                 [](auto &object, auto value) { object.coatIor = value; })
             .description("Clear coat index of refraction")
             .required(false);
         builder
             .getset(
-                "coatColor",
+                "coat_color",
                 [](auto &object) { return object.coatColor; },
                 [](auto &object, auto value) { object.coatColor = value; })
             .description("Clear coat color")
             .required(false);
         builder
             .getset(
-                "coatThickness",
+                "coat_thickness",
                 [](auto &object) { return object.coatThickness; },
                 [](auto &object, auto value) { object.coatThickness = value; })
             .description("Clear coat thickness")
             .required(false);
         builder
             .getset(
-                "coatRoughness",
+                "coat_roughness",
                 [](auto &object) { return object.coatRoughness; },
                 [](auto &object, auto value) { object.coatRoughness = value; })
             .description("Clear coat diffuse/specular reflection roughness")
@@ -346,21 +346,21 @@ struct JsonAdapter<Principled> : ObjectAdapter<Principled>
             .required(false);
         builder
             .getset(
-                "sheenColor",
+                "sheen_color",
                 [](auto &object) { return object.sheenColor; },
                 [](auto &object, auto value) { object.sheenColor = value; })
             .description("Sheen color")
             .required(false);
         builder
             .getset(
-                "sheenTint",
+                "sheen_tint",
                 [](auto &object) { return object.sheenTint; },
                 [](auto &object, auto value) { object.sheenTint = value; })
             .description("Strenght of sheen color (0 = white, 1 = sheen color)")
             .required(false);
         builder
             .getset(
-                "sheenRoughness",
+                "sheen_roughness",
                 [](auto &object) { return object.sheenRoughness; },
                 [](auto &object, auto value) { object.sheenRoughness = value; })
             .description("Sheen diffuse/specular reflection roughness")

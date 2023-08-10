@@ -116,3 +116,61 @@ class TestMaterial(unittest.TestCase):
         test = brayns.PlasticMaterial()
         test.update_properties({"opacity": 0.5})
         self.assertEqual(test.opacity, 0.5)
+
+    def test_principled(self) -> None:
+        self.assertEqual(brayns.PrincipledMaterial.name, "principled")
+        test = brayns.PrincipledMaterial(
+            edge_color=brayns.Color3(1, 0, 1),
+            metallic=0.5,
+            diffuse=0.6,
+            specular=0.7,
+            ior=1.78,
+            transmission=0.3,
+            transmission_color=brayns.Color3(0, 1, 1),
+            transmission_depth=10,
+            roughness=0.7,
+            anisotropy=1,
+            anisotropy_rotation=0.45,
+            thin=True,
+            thickness=58,
+            back_light=1.5,
+            coat=0.89,
+            coat_ior=1.7,
+            coat_color=brayns.Color3(1, 1, 0),
+            coat_thickness=63,
+            coat_roughness=0.25,
+            sheen=0.1,
+            sheen_color=brayns.Color3(0, 0, 0),
+            sheen_tint=11,
+            sheen_roughness=1,
+        )
+        self.assertEqual(
+            test.get_properties(),
+            {
+                "edge_color": [1, 0, 1],
+                "metallic": 0.5,
+                "diffuse": 0.6,
+                "specular": 0.7,
+                "ior": 1.78,
+                "transmission": 0.3,
+                "transmission_color": [0, 1, 1],
+                "transmission_depth": 10,
+                "roughness": 0.7,
+                "anisotropy": 1,
+                "anisotropy_rotation": 0.45,
+                "thin": True,
+                "thickness": 58,
+                "back_light": 1.5,
+                "coat": 0.89,
+                "coat_ior": 1.7,
+                "coat_color": [1, 1, 0],
+                "coat_thickness": 63,
+                "coat_roughness": 0.25,
+                "sheen": 0.1,
+                "sheen_color": [0, 0, 0],
+                "sheen_tint": 11,
+                "sheen_roughness": 1,
+            },
+        )
+        test.update_properties({"thin": False})
+        self.assertEqual(test.thin, False)
