@@ -29,6 +29,7 @@
 #include <brayns/engine/material/types/Metal.h>
 #include <brayns/engine/material/types/Phong.h>
 #include <brayns/engine/material/types/Plastic.h>
+#include <brayns/engine/material/types/Principled.h>
 #include <brayns/engine/renderer/types/Production.h>
 
 #include <tests/helpers/BraynsTestUtils.h>
@@ -123,5 +124,15 @@ TEST_CASE("Material types")
     SUBCASE("Plastic")
     {
         MaterialTypeTester::test(brayns::Plastic(), "test_material_plastic.png");
+    }
+    SUBCASE("Principled")
+    {
+        auto polishedBallMaterial = brayns::Principled{
+            .edgeColor = brayns::Vector3f(.8f),
+            .metallic = .9f,
+            .roughness = .6f,
+            .anisotropy = 1.f,
+            .anisotropyRotation = .9f};
+        MaterialTypeTester::test(polishedBallMaterial, "test_material_principled.png");
     }
 }

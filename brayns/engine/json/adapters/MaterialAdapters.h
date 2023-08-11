@@ -28,6 +28,7 @@
 #include <brayns/engine/material/types/Metal.h>
 #include <brayns/engine/material/types/Phong.h>
 #include <brayns/engine/material/types/Plastic.h>
+#include <brayns/engine/material/types/Principled.h>
 
 #include <brayns/json/Json.h>
 
@@ -175,6 +176,196 @@ struct JsonAdapter<Plastic> : ObjectAdapter<Plastic>
             .minimum(0)
             .maximum(1)
             .required(false);
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonAdapter<Principled> : ObjectAdapter<Principled>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("Principled");
+
+        builder
+            .getset(
+                "edge_color",
+                [](auto &object) { return object.edgeColor; },
+                [](auto &object, auto value) { object.edgeColor = value; })
+            .description("Edge tint for metallic surfaces")
+            .required(false);
+        builder
+            .getset(
+                "metallic",
+                [](auto &object) { return object.metallic; },
+                [](auto &object, auto value) { object.metallic = value; })
+            .description("Alpha parameter between dielectric and metallic")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+        builder
+            .getset(
+                "diffuse",
+                [](auto &object) { return object.diffuse; },
+                [](auto &object, auto value) { object.diffuse = value; })
+            .description("Diffuse reflection weight")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+        builder
+            .getset(
+                "specular",
+                [](auto &object) { return object.specular; },
+                [](auto &object, auto value) { object.specular = value; })
+            .description("Specular reflection/transmission weight")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+        builder
+            .getset(
+                "ior",
+                [](auto &object) { return object.ior; },
+                [](auto &object, auto value) { object.ior = value; })
+            .description("Dielectric index of refraction")
+            .minimum(1)
+            .required(false);
+        builder
+            .getset(
+                "transmission",
+                [](auto &object) { return object.transmission; },
+                [](auto &object, auto value) { object.transmission = value; })
+            .description("Specular transmission weight")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+        builder
+            .getset(
+                "transmission_color",
+                [](auto &object) { return object.transmissionColor; },
+                [](auto &object, auto value) { object.transmissionColor = value; })
+            .description("Transmission attenuation color")
+            .required(false);
+        builder
+            .getset(
+                "transmission_depth",
+                [](auto &object) { return object.transmissionDepth; },
+                [](auto &object, auto value) { object.transmissionDepth = value; })
+            .description("Distance from surface at which the color will equal transmission color")
+            .required(false);
+        builder
+            .getset(
+                "roughness",
+                [](auto &object) { return object.roughness; },
+                [](auto &object, auto value) { object.roughness = value; })
+            .description("Diffuse and specular reflection roughness")
+            .required(false);
+        builder
+            .getset(
+                "anisotropy",
+                [](auto &object) { return object.anisotropy; },
+                [](auto &object, auto value) { object.anisotropy = value; })
+            .description("Specular anisotropy reflection weight (Specular highlights depends on surface type/shape)")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+        builder
+            .getset(
+                "anisotropy_rotation",
+                [](auto &object) { return object.anisotropyRotation; },
+                [](auto &object, auto value) { object.anisotropyRotation = value; })
+            .description("Rotation of the specular anisotropy reflection effect")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+        builder
+            .getset(
+                "thin",
+                [](auto &object) { return object.thin; },
+                [](auto &object, auto value) { object.thin = value; })
+            .description("Specified wether the object is solid or thin (hollow)")
+            .required(false);
+        builder
+            .getset(
+                "thickness",
+                [](auto &object) { return object.thickness; },
+                [](auto &object, auto value) { object.thickness = value; })
+            .description("Thickness of the object if thin = true")
+            .required(false);
+        builder
+            .getset(
+                "back_light",
+                [](auto &object) { return object.backLight; },
+                [](auto &object, auto value) { object.backLight = value; })
+            .description("For thin objects, weight of reflection and transmission (1 = 50/50, 2 = only transmission)")
+            .minimum(0)
+            .maximum(2)
+            .required(false);
+        builder
+            .getset(
+                "coat",
+                [](auto &object) { return object.coat; },
+                [](auto &object, auto value) { object.coat = value; })
+            .description("Clear coat weight (thin lacquered/glossy layer on top of the surface)")
+            .minimum(0)
+            .maximum(1)
+            .required(false);
+        builder
+            .getset(
+                "coat_ior",
+                [](auto &object) { return object.coatIor; },
+                [](auto &object, auto value) { object.coatIor = value; })
+            .description("Clear coat index of refraction")
+            .required(false);
+        builder
+            .getset(
+                "coat_color",
+                [](auto &object) { return object.coatColor; },
+                [](auto &object, auto value) { object.coatColor = value; })
+            .description("Clear coat color")
+            .required(false);
+        builder
+            .getset(
+                "coat_thickness",
+                [](auto &object) { return object.coatThickness; },
+                [](auto &object, auto value) { object.coatThickness = value; })
+            .description("Clear coat thickness")
+            .required(false);
+        builder
+            .getset(
+                "coat_roughness",
+                [](auto &object) { return object.coatRoughness; },
+                [](auto &object, auto value) { object.coatRoughness = value; })
+            .description("Clear coat diffuse/specular reflection roughness")
+            .required(false);
+        builder
+            .getset(
+                "sheen",
+                [](auto &object) { return object.sheen; },
+                [](auto &object, auto value) { object.sheen = value; })
+            .description("Sheen effect weight (fabric-like effect such as satin or velvet)")
+            .required(false);
+        builder
+            .getset(
+                "sheen_color",
+                [](auto &object) { return object.sheenColor; },
+                [](auto &object, auto value) { object.sheenColor = value; })
+            .description("Sheen color")
+            .required(false);
+        builder
+            .getset(
+                "sheen_tint",
+                [](auto &object) { return object.sheenTint; },
+                [](auto &object, auto value) { object.sheenTint = value; })
+            .description("Strenght of sheen color (0 = white, 1 = sheen color)")
+            .required(false);
+        builder
+            .getset(
+                "sheen_roughness",
+                [](auto &object) { return object.sheenRoughness; },
+                [](auto &object, auto value) { object.sheenRoughness = value; })
+            .description("Sheen diffuse/specular reflection roughness")
+            .required(false);
+
         return builder.build();
     }
 };

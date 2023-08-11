@@ -151,6 +151,15 @@ public:
     virtual std::string getDescription() const override;
 };
 
+class SetMaterialPrincipled : public SetMaterialEntrypoint<Principled>
+{
+public:
+    explicit SetMaterialPrincipled(ModelManager &ModelManager);
+
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+};
+
 template<typename MaterialType>
 class GetMaterialEntrypoint : public Entrypoint<GetModelMessage, MaterialType>
 {
@@ -255,6 +264,15 @@ class GetMaterialPlastic : public GetMaterialEntrypoint<Plastic>
 {
 public:
     explicit GetMaterialPlastic(ModelManager &scene);
+
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+};
+
+class GetMaterialPrincipled : public GetMaterialEntrypoint<Principled>
+{
+public:
+    explicit GetMaterialPrincipled(ModelManager &scene);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;

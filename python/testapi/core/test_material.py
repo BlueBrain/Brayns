@@ -72,6 +72,16 @@ class TestMaterial(SimpleTestCase):
         )
         self.run_tests(material)
 
+    def test_principled(self) -> None:
+        material = brayns.PrincipledMaterial(
+            edge_color=brayns.Color3(0.8, 0.8, 0.8),
+            metallic=0.8,
+            roughness=0.6,
+            anisotropy=1,
+            anisotropy_rotation=0.9,
+        )
+        self.run_tests(material)
+
     def run_tests(self, material: brayns.Material) -> None:
         model = add_sphere(self)
         brayns.set_material(self.instance, model.id, material)

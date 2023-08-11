@@ -131,6 +131,7 @@ public:
         builder.add<brayns::GetMaterialMetal>(models);
         builder.add<brayns::GetMaterialPhong>(models);
         builder.add<brayns::GetMaterialPlastic>(models);
+        builder.add<brayns::GetMaterialPrincipled>(models);
         builder.add<brayns::GetMaterialType>(models);
         builder.add<brayns::GetModelEntrypoint>(models);
         builder.add<brayns::GetRendererInteractiveEntrypoint>(engine);
@@ -160,6 +161,7 @@ public:
         builder.add<brayns::SetMaterialMetal>(models);
         builder.add<brayns::SetMaterialPhong>(models);
         builder.add<brayns::SetMaterialPlastic>(models);
+        builder.add<brayns::SetMaterialPrincipled>(models);
         builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
         builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);

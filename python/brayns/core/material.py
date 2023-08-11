@@ -297,6 +297,147 @@ class PlasticMaterial(Material):
         self.opacity = message["opacity"]
 
 
+@dataclass
+class PrincipledMaterial(Material):
+    """Principled material.
+
+    :param edge_color: Surface edge tint for metallic surfaces.
+    :type edge_color: float, optional
+    :param metallic: Alpha parameter between dielectric and metallic.
+    :type metallic: float, optional
+    :param diffuse: Diffuse reflection weight.
+    :type diffuse: float, optional
+    :param specular: Specular reflection/transmission weight.
+    :type specular: float, optional
+    :param ior: Dielectric index of refraction.
+    :type ior: float, optional
+    :param transmission: Specular transmission weight.
+    :type transmission: float, optional
+    :param transmission_color: Transmission attenuation color.
+    :type transmission_color: Color3, optional
+    :param transmission_depth: Surface distance for pure transmission color.
+    :type transmission_depth: float, optional
+    :param roughness: Diffuse and specular reflection roughness.
+    :type roughness: float, optional
+    :param anisotropy: Specular anisotropy reflection weight.
+    :type anisotropy: float, optional
+    :param anisotropy_rotation: Rotation of the specular anisotropy reflection.
+    :type anisotropy_rotation: float, optional
+    :param thin: Specified wether the object is solid or thin (hollow).
+    :type thin: bool, optional
+    :param thickness: Thickness of the object if thin = True.
+    :type thickness: float, optional
+    :param back_light: Weight of reflection and transmission if thin = True.
+    :type back_light: float, optional
+    :param coat: Clear coat weight.
+    :type coat: float, optional
+    :param coat_ior: Clear coat index of refraction.
+    :type coat_ior: float, optional
+    :param coat_color: Clear coat color.
+    :type coat_color: Color3, optional
+    :param coat_thickness: Clear coat thickness.
+    :type coat_thickness: float, optional
+    :param coat_roughness: Clear coat diffuse/specular reflection roughness.
+    :type coat_roughness: float, optional
+    :param sheen: Sheen effect weight.
+    :type sheen: float, optional
+    :param sheen_color: Sheen color.
+    :type sheen_color: Color3, optional
+    :param sheen_tint: Alpha from white to sheen color for sheen effect.
+    :type sheen_tint: float, optional
+    :param sheen_roughness: Sheen diffuse/specular reflection roughness.
+    :type sheen_roughness: float, optional
+    """
+
+    edge_color: Color3 = Color3(1, 1, 1)
+    metallic: float = 0
+    diffuse: float = 1
+    specular: float = 1
+    ior: float = 1
+    transmission: float = 0
+    transmission_color: Color3 = Color3(1, 1, 1)
+    transmission_depth: float = 1
+    roughness: float = 1
+    anisotropy: float = 0
+    anisotropy_rotation: float = 0
+    thin: bool = False
+    thickness: float = 1
+    back_light: float = 0
+    coat: float = 0
+    coat_ior: float = 1.5
+    coat_color: Color3 = Color3(1, 1, 1)
+    coat_thickness: float = 1
+    coat_roughness: float = 0
+    sheen: float = 0
+    sheen_color: Color3 = Color3(1, 1, 1)
+    sheen_tint: float = 0
+    sheen_roughness: float = 0.2
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """Get the material name.
+
+        :return: Material name
+        :rtype: str
+        """
+        return "principled"
+
+    def get_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            "edge_color": list(self.edge_color),
+            "metallic": self.metallic,
+            "diffuse": self.diffuse,
+            "specular": self.specular,
+            "ior": self.ior,
+            "transmission": self.transmission,
+            "transmission_color": list(self.transmission_color),
+            "transmission_depth": self.transmission_depth,
+            "roughness": self.roughness,
+            "anisotropy": self.anisotropy,
+            "anisotropy_rotation": self.anisotropy_rotation,
+            "thin": self.thin,
+            "thickness": self.thickness,
+            "back_light": self.back_light,
+            "coat": self.coat,
+            "coat_ior": self.coat_ior,
+            "coat_color": list(self.coat_color),
+            "coat_thickness": self.coat_thickness,
+            "coat_roughness": self.coat_roughness,
+            "sheen": self.sheen,
+            "sheen_color": list(self.sheen_color),
+            "sheen_tint": self.sheen_tint,
+            "sheen_roughness": self.sheen_roughness,
+        }
+
+    def update_properties(self, message: dict[str, Any]) -> None:
+        """Low level API to deserialize from JSON."""
+        self.edge_color = Color3.unpack(message["edge_color"])
+        self.metallic = message["metallic"]
+        self.diffuse = message["diffuse"]
+        self.specular = message["specular"]
+        self.ior = message["ior"]
+        self.transmission = message["transmission"]
+        self.transmission_color = Color3.unpack(message["transmission_color"])
+        self.transmission_depth = message["transmission_depth"]
+        self.roughness = message["roughness"]
+        self.anisotropy = message["anisotropy"]
+        self.anisotropy_rotation = message["anisotropy_rotation"]
+        self.thin = message["thin"]
+        self.thickness = message["thickness"]
+        self.back_light = message["back_light"]
+        self.coat = message["coat"]
+        self.coat_ior = message["coat_ior"]
+        self.coat_color = Color3.unpack(message["coat_color"])
+        self.coat_thickness = message["coat_thickness"]
+        self.coat_roughness = message["coat_roughness"]
+        self.sheen = message["sheen"]
+        self.sheen_color = Color3.unpack(message["sheen_color"])
+        self.sheen_tint = message["sheen_tint"]
+        self.sheen_roughness = message["sheen_roughness"]
+
+
 def get_material_name(instance: Instance, model_id: int) -> str:
     """Get the name of the material applied on the given model.
 
