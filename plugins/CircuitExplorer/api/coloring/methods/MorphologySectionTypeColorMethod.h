@@ -20,26 +20,15 @@
 
 #pragma once
 
-#include <api/neuron/NeuronGeometry.h>
-
-#include <vector>
+#include <brayns/engine/systems/GenericColorSystem.h>
 
 /**
- * @brief Holds indices into the geometry on a per neuron basis for morphology-loaded circuits
+ * @brief Color neuron and astrocyte morphologies based on their section types (soma, axon, dendrites)
  */
-struct NeuronSectionList
+class MorphologySectionTypeColorMethod : public brayns::IColorMethod
 {
-    NeuronSectionList() = default;
-
-    explicit NeuronSectionList(std::vector<SectionTypeMapping> mapping)
-    {
-        mappings.push_back(std::move(mapping));
-    }
-
-    explicit NeuronSectionList(std::vector<std::vector<SectionTypeMapping>> mappings):
-        mappings(std::move(mappings))
-    {
-    }
-
-    std::vector<std::vector<SectionTypeMapping>> mappings;
+public:
+    std::string getName() const override;
+    std::vector<std::string> getValues(brayns::Components &components) const override;
+    void apply(brayns::Components &components, const brayns::ColorMethodInput &input) const override;
 };

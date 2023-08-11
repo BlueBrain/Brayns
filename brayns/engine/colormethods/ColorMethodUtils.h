@@ -20,19 +20,22 @@
 
 #pragma once
 
-#include <brayns/engine/systems/GenericColorSystem.h>
+#include <brayns/engine/model/Components.h>
+#include <brayns/utils/MathTypes.h>
 
+#include <vector>
+
+namespace brayns
+{
 /**
- * @brief Color individual neuron and astrocyte morphologies sections.
+ * Common utilities used across brayns when dealing with color components and color methods.
  */
-class MorphologySectionColorMethod : public brayns::IColorMethod
+
+class ColorListComponentUtils
 {
 public:
-    MorphologySectionColorMethod(size_t primitiveCount);
-    std::string getName() const override;
-    std::vector<std::string> getValues(brayns::Components &components) const override;
-    void apply(brayns::Components &components, const brayns::ColorMethodInput &input) const override;
-
-private:
-    size_t _primitiveCount;
+    static std::vector<brayns::Vector4f> &createAndInit(brayns::Components &components, size_t length);
+    static void apply(brayns::Components &components);
+    static void apply(brayns::Components &components, const std::vector<brayns::Vector4f> &colors);
 };
+}

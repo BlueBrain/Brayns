@@ -20,19 +20,26 @@
 
 #pragma once
 
-#include <brayns/engine/systems/GenericColorSystem.h>
+#include <api/neuron/NeuronGeometry.h>
+
+#include <vector>
 
 /**
- * @brief Color individual neuron and astrocyte morphologies sections.
+ * @brief Holds indices into the geometry on a per neuron basis for morphology-loaded circuits
  */
-class MorphologySectionColorMethod : public brayns::IColorMethod
+struct NeuronSectionType
 {
-public:
-    MorphologySectionColorMethod(size_t primitiveCount);
-    std::string getName() const override;
-    std::vector<std::string> getValues(brayns::Components &components) const override;
-    void apply(brayns::Components &components, const brayns::ColorMethodInput &input) const override;
+    NeuronSectionType() = default;
 
-private:
-    size_t _primitiveCount;
+    explicit NeuronSectionType(std::vector<SectionTypeMapping> mapping)
+    {
+        mappings.push_back(std::move(mapping));
+    }
+
+    explicit NeuronSectionType(std::vector<std::vector<SectionTypeMapping>> mappings):
+        mappings(std::move(mappings))
+    {
+    }
+
+    std::vector<std::vector<SectionTypeMapping>> mappings;
 };

@@ -20,164 +20,33 @@
 
 #include "MorphologySectionColorMethod.h"
 
-#include <brayns/engine/common/ExtractColor.h>
-#include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/components/GeometryViews.h>
+#include <brayns/engine/colormethods/ColorMethodUtils.h>
 
-#include <api/coloring/handlers/ComposedColorHandler.h>
-#include <components/ColorHandler.h>
-#include <components/NeuronSectionList.h>
+#include <components/NeuronSectionGeometryMap.h>
 
-#include <algorithm>
+#include <cassert>
 
-#include <spdlog/fmt/fmt.h>
-
-namespace
+MorphologySectionColorMethod::MorphologySectionColorMethod(size_t primitiveCount):
+    _primitiveCount(primitiveCount)
 {
-struct SectionColor
-{
-    NeuronSection section;
-    brayns::Vector4f color;
-};
-
-class SectionPainter
-{
-public:
-    static void paint(brayns::Components &components, const std::vector<SectionColor> &sectionColors)
-    {
-        auto &views = components.get<brayns::GeometryViews>();
-        auto &geometries = components.get<brayns::Geometries>();
-        auto &painter = *components.get<ColorHandler>().handler;
-        auto &colorMap = _buildColorMap(components, sectionColors);
-        painter.colorByColormap(colorMap, geometries, views);
-    }
-
-private:
-    static brayns::ColorMap &_buildColorMap(
-        brayns::Components &components,
-        const std::vector<SectionColor> &sectionColors)
-    {
-        auto sectionIndices = _indexSectionColors(sectionColors);
-
-        auto &colorMap = brayns::ExtractColor::extractMap(components);
-
-        colorMap.colors = _buildColorBuffer(sectionColors);
-
-        auto &geometries = components.get<brayns::Geometries>().elements;
-        auto &sections = components.get<NeuronSectionList>().mappings;
-        colorMap.indices = _buildIndexBuffer(geometries, sections, sectionIndices);
-
-        return colorMap;
-    }
-
-    struct IndexedSection
-    {
-        uint8_t index;
-        NeuronSection section;
-    };
-
-    static std::vector<IndexedSection> _indexSectionColors(const std::vector<SectionColor> &sectionColor)
-    {
-        auto sectionIndices = std::vector<IndexedSection>();
-        sectionIndices.reserve(sectionColor.size());
-
-        for (size_t i = 0; i < sectionColor.size(); ++i)
-        {
-            auto index = static_cast<uint8_t>(i);
-            auto section = sectionColor[i].section;
-            sectionIndices.push_back({index, section});
-        }
-
-        return sectionIndices;
-    }
-
-    static std::vector<brayns::Vector4f> _buildColorBuffer(const std::vector<SectionColor> &sectionColors)
-    {
-        auto result = std::vector<brayns::Vector4f>();
-        result.reserve(sectionColors.size());
-
-        for (auto &section : sectionColors)
-        {
-            result.push_back(section.color);
-        }
-
-        return result;
-    }
-
-    static std::vector<uint8_t> _buildIndexBuffer(
-        const std::vector<brayns::Geometry> &geometries,
-        const std::vector<std::vector<SectionTypeMapping>> &sections,
-        const std::vector<IndexedSection> &sectionIndices)
-    {
-        auto indices = std::vector<uint8_t>(_countPrimitives(geometries));
-
-        auto elementIndexBegin = 0ul;
-
-        for (size_t i = 0; i < geometries.size(); ++i)
-        {
-            for (auto &entry : sectionIndices)
-            {
-                auto &mapping = _getMappingForSection(entry.section, sections[i]);
-
-                auto start = indices.begin() + elementIndexBegin + mapping.begin;
-                auto end = indices.begin() + elementIndexBegin + mapping.end;
-                std::fill(start, end, entry.index);
-            }
-
-            elementIndexBegin += geometries[i].numPrimitives();
-        }
-
-        return indices;
-    }
-
-    static size_t _countPrimitives(const std::vector<brayns::Geometry> &geometries)
-    {
-        auto totalPrimitives = 0ul;
-
-        for (auto &geometry : geometries)
-        {
-            totalPrimitives += geometry.numPrimitives();
-        }
-
-        return totalPrimitives;
-    }
-
-    static const SectionTypeMapping &_getMappingForSection(
-        NeuronSection section,
-        const std::vector<SectionTypeMapping> &mapping)
-    {
-        auto it = std::find_if(
-            mapping.begin(),
-            mapping.end(),
-            [&](auto &sectionMapping) { return sectionMapping.type == section; });
-
-        if (it == mapping.end())
-        {
-            auto name = brayns::EnumInfo::getName(section);
-            throw std::invalid_argument(fmt::format("Neuron section '{}' not present in geometry", name));
-        }
-
-        return *it;
-    }
-};
+    assert(_primitiveCount > 0);
 }
 
 std::string MorphologySectionColorMethod::getName() const
 {
-    return "morphology section";
+    return "morphology section geometry";
 }
 
 std::vector<std::string> MorphologySectionColorMethod::getValues(brayns::Components &components) const
 {
-    auto &sections = components.get<NeuronSectionList>().mappings;
-    auto &element = sections.front();
+    auto &sectionGeometryMapping = components.get<NeuronSectionGeometryMap>().mapping;
 
     auto result = std::vector<std::string>();
-    result.reserve(element.size());
+    result.reserve(sectionGeometryMapping.size());
 
-    for (auto &entry : element)
+    for (auto &section : sectionGeometryMapping)
     {
-        result.push_back(brayns::EnumInfo::getName(entry.type));
+        result.push_back(std::to_string(section.sectionId));
     }
 
     std::sort(result.begin(), result.end());
@@ -186,14 +55,27 @@ std::vector<std::string> MorphologySectionColorMethod::getValues(brayns::Compone
 
 void MorphologySectionColorMethod::apply(brayns::Components &components, const brayns::ColorMethodInput &input) const
 {
-    std::vector<SectionColor> sectionColorMap;
-    sectionColorMap.reserve(input.size());
+    auto &sectionGeometryMapping = components.get<NeuronSectionGeometryMap>().mapping;
+    auto &colors = brayns::ColorListComponentUtils::createAndInit(components, _primitiveCount);
 
-    for (auto &[name, color] : input)
+    for (auto &section : sectionGeometryMapping)
     {
-        auto section = brayns::EnumInfo::getValue<NeuronSection>(name);
-        sectionColorMap.push_back({section, color});
+        auto it = input.find(std::to_string(section.sectionId));
+        if (it == input.end())
+        {
+            continue;
+        }
+
+        auto begin = colors.begin();
+        auto end = colors.begin();
+
+        std::advance(begin, section.begin);
+        std::advance(end, section.end);
+
+        auto &color = it->second;
+
+        std::fill(begin, end, color);
     }
 
-    SectionPainter::paint(components, sectionColorMap);
+    brayns::ColorListComponentUtils::apply(components, colors);
 }

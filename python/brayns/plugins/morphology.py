@@ -80,6 +80,13 @@ def serialize_morphology(morphology: Morphology) -> dict[str, Any]:
     }
 
 
+class MorphologyColorMethod:
+    """Available coloring methods for morphologies."""
+
+    MORPHOLOGY_SECTION: ClassVar[str] = "morphology section"
+    MORPHOLOGY_SECTION_GEOMETRY: ClassVar[str] = "morphology section geometry"
+
+
 @dataclass
 class MorphologyLoader(Loader):
     """Loader for morphology files.
