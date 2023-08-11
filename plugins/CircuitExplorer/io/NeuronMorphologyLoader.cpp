@@ -31,11 +31,13 @@
 #include <api/ModelType.h>
 #include <api/coloring/handlers/ComposedColorHandler.h>
 #include <api/coloring/methods/MorphologySectionColorMethod.h>
+#include <api/coloring/methods/MorphologySectionTypeColorMethod.h>
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
 #include <components/ColorHandler.h>
-#include <components/NeuronSectionList.h>
+#include <components/NeuronSectionGeometryMap.h>
+#include <components/NeuronSectionType.h>
 #include <io/NeuronMorphologyLoaderParameters.h>
 
 namespace
@@ -68,18 +70,22 @@ public:
         _systems.setDataSystem<brayns::GeometryDataSystem>();
     }
 
-    void addSections(std::vector<SectionTypeMapping> sectionTypeMapping)
+    void addSections(
+        std::vector<SectionTypeMapping> sectionTypeMapping,
+        std::vector<SectionSegmentMapping> sectionGeometryMapping)
     {
-        _components.add<NeuronSectionList>(std::move(sectionTypeMapping));
+        _components.add<NeuronSectionType>(std::move(sectionTypeMapping));
+        _components.add<NeuronSectionGeometryMap>(std::move(sectionGeometryMapping));
     }
 
-    void addColoring()
+    void addColoring(size_t primitiveCount)
     {
         _components.add<ColorHandler>(std::make_unique<ComposedColorHandler>());
 
         auto methods = brayns::ColorMethodList();
         methods.push_back(std::make_unique<brayns::SolidColorMethod>());
-        methods.push_back(std::make_unique<MorphologySectionColorMethod>());
+        methods.push_back(std::make_unique<MorphologySectionColorMethod>(primitiveCount));
+        methods.push_back(std::make_unique<MorphologySectionTypeColorMethod>());
         _systems.setColorSystem<brayns::GenericColorSystem>(std::move(methods));
     }
 
@@ -136,12 +142,13 @@ std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     auto neuronGeometry = neuronBuilder.instantiate({}, {});
     auto &primitives = neuronGeometry.geometry;
     auto &sectionTypeMapping = neuronGeometry.sectionTypeMapping;
+    auto &sectionGeometryMapping = neuronGeometry.sectionSegmentMapping;
 
     auto model = std::make_shared<brayns::Model>(ModelType::morphology);
     auto builder = ModelBuilder(*model);
+    builder.addColoring(primitives.size());
     builder.addGeometry(std::move(primitives));
-    builder.addSections(std::move(sectionTypeMapping));
-    builder.addColoring();
+    builder.addSections(std::move(sectionTypeMapping), std::move(sectionGeometryMapping));
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());
 

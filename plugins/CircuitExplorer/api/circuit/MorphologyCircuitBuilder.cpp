@@ -31,14 +31,14 @@
 #include <api/coloring/handlers/ComposedColorHandler.h>
 #include <api/coloring/methods/BrainDatasetColorMethod.h>
 #include <api/coloring/methods/IdColorMethod.h>
-#include <api/coloring/methods/MorphologySectionColorMethod.h>
+#include <api/coloring/methods/MorphologySectionTypeColorMethod.h>
 #include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
 #include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
 #include <components/ColorHandler.h>
-#include <components/NeuronSectionList.h>
+#include <components/NeuronSectionType.h>
 #include <systems/NeuronInspectSystem.h>
 
 #include <deque>
@@ -158,7 +158,7 @@ public:
 
     void addNeuronSections(std::vector<std::vector<SectionTypeMapping>> sections)
     {
-        _components.add<NeuronSectionList>(std::move(sections));
+        _components.add<NeuronSectionType>(std::move(sections));
     }
 
     void addColoring(std::unique_ptr<IBrainColorData> data)
@@ -169,7 +169,7 @@ public:
 
         colorMethods.push_back(std::make_unique<brayns::SolidColorMethod>());
         colorMethods.push_back(std::make_unique<IdColorMethod>());
-        colorMethods.push_back(std::make_unique<MorphologySectionColorMethod>());
+        colorMethods.push_back(std::make_unique<MorphologySectionTypeColorMethod>());
         for (auto method : availableMethods)
         {
             colorMethods.push_back(std::make_unique<BrainDatasetColorMethod>(method));

@@ -20,10 +20,7 @@
 
 #include "PrimitiveColorMethod.h"
 
-#include <brayns/engine/components/ColorList.h>
-#include <brayns/engine/components/ColorSolid.h>
-#include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/components/GeometryViews.h>
+#include "ColorMethodUtils.h"
 
 #include <brayns/utils/parsing/Parser.h>
 
@@ -31,26 +28,6 @@
 
 namespace
 {
-class ColorListExtractor
-{
-public:
-    static std::vector<brayns::Vector4f> &fromComponents(brayns::Components &components, size_t length)
-    {
-        auto &colorList = components.getOrAdd<brayns::ColorList>();
-        auto &colors = colorList.elements;
-
-        auto solidColor = components.find<brayns::ColorSolid>();
-        if (solidColor)
-        {
-            colors.resize(length, solidColor->color);
-            return colors;
-        }
-
-        colors.resize(length, brayns::Vector4f(1.f));
-        return colors;
-    }
-};
-
 class IndexListExtractor
 {
 public:
@@ -62,18 +39,6 @@ public:
             throw std::range_error("Range out of bounds: " + range);
         }
         return indexList;
-    }
-};
-
-class Painter
-{
-public:
-    static void apply(const std::vector<brayns::Vector4f> &colors, brayns::Components &components)
-    {
-        auto &views = components.get<brayns::GeometryViews>();
-        auto &view = views.elements.front();
-        view.setColorPerPrimitive(ospray::cpp::SharedData(colors));
-        views.modified = true;
     }
 };
 }
@@ -100,7 +65,7 @@ std::vector<std::string> PrimitiveColorMethod::getValues(Components &components)
 
 void PrimitiveColorMethod::apply(Components &components, const ColorMethodInput &input) const
 {
-    auto &colors = ColorListExtractor::fromComponents(components, _primitiveCount);
+    auto &colors = ColorListComponentUtils::createAndInit(components, _primitiveCount);
 
     for (auto &[range, color] : input)
     {
@@ -111,6 +76,6 @@ void PrimitiveColorMethod::apply(Components &components, const ColorMethodInput 
         }
     }
 
-    Painter::apply(colors, components);
+    ColorListComponentUtils::apply(components, colors);
 }
 }

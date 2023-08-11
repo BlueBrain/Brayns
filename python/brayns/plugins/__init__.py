@@ -42,7 +42,12 @@ from .cell_placement import CellPlacementLoader
 from .circuit import CircuitColorMethod, get_circuit_ids, set_circuit_thickness
 from .cylindric_camera import CylindricProjection
 from .dti import DtiLoader
-from .morphology import GeometryType, Morphology, MorphologyLoader
+from .morphology import (
+    GeometryType,
+    Morphology,
+    MorphologyColorMethod,
+    MorphologyLoader,
+)
 from .nrrd import NrrdLoader, VoxelType
 from .protein import ProteinColorScheme, ProteinLoader
 from .sonata import (
@@ -78,6 +83,7 @@ __all__ = [
     "get_atlas_usecases",
     "get_circuit_ids",
     "Morphology",
+    "MorphologyColorMethod",
     "MorphologyLoader",
     "NrrdLoader",
     "ProteinColorScheme",
