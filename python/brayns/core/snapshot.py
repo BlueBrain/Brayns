@@ -39,15 +39,15 @@ class ImageMetadata:
     :type title: str
     :param description: Image description.
     :type description: str
-    :param where_used: List of places where the image is used.
-    :type where_used: list[str]
+    :param where_used: Event for which the image was created.
+    :type where_used: str
     :param keywords: List of keywords that describe the image content.
     :type keywords: list[str]
     """
 
     title: str
     description: str
-    where_used: list[str]
+    where_used: str
     keywords: list[str]
 
 

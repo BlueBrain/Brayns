@@ -38,9 +38,9 @@ struct ImageMetadata
     std::string description;
 
     /**
-     * @brief List of places (publications, websites, panels, etc.) where the image is used.
+     * @brief Event (publication, website, panel, etc.) for what the image was created.
      */
-    std::vector<std::string> whereUsed;
+    std::string whereUsed;
 
     /**
      * @brief List of keywords that describe the image contents.
