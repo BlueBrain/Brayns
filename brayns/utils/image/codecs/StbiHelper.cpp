@@ -44,17 +44,30 @@ class XmpXmlMetadataBuilder
 public:
     static std::string build(const ImageMetadata &metadata)
     {
-        auto xmlTitle = "<bbp:Title>" + metadata.title + "</bbp:Title>";
-        auto xmlDescr = "<bbp:Description>" + metadata.description + "</bbp:Description>";
-        auto xmlWhereUsed = "<bbp:WhereUsed>" + _serializeList(metadata.whereUsed) + "</bbp:WhereUsed>";
-        auto xmlKeywords = "<bbp:Keywords>" + _serializeList(metadata.keywords) + "</bbp:Keywords>";
+        auto xmlTitle = "<photoshop:Headline>" + metadata.title + "</photoshop:Headline>";
+        auto xmlDescr = "<dc:description>" + metadata.description + "</dc:description>";
+        auto xmlWhereUsed = "<Iptc4xmpExt:Event>" + metadata.whereUsed + "</Iptc4xmpExt:Event>";
+        auto xmlKeywords = "<dc:subject>" + _serializeList(metadata.keywords) + "</dc:subject>";
         return xmlTitle + xmlDescr + xmlWhereUsed + xmlKeywords;
     }
 
 private:
     static std::string _serializeList(const std::vector<std::string> &list)
     {
-        std::string result = "<rdf:Bag>";
+        constexpr auto bagSchemaSize = std::char_traits<char>::length("<rdf:Bag></rdf:Bag>");
+        constexpr auto itemSchemaSize = std::char_traits<char>::length("<rdf:li></rdf:li>");
+
+        std::size_t itemsSize = 0;
+        for (auto &item : list)
+        {
+            itemsSize += item.size();
+        }
+
+        std::size_t resultSize = bagSchemaSize + itemsSize + itemSchemaSize * list.size();
+        std::string result;
+        result.reserve(resultSize);
+
+        result += "<rdf:Bag>";
         for (auto &item : list)
         {
             result += "<rdf:li>" + item + "</rdf:li>";

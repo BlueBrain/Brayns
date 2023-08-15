@@ -69,7 +69,7 @@ public:
         auto image = brayns::ImageDecoder::load(path);
         auto extension = std::filesystem::path(path).extension().string();
 
-        auto metadata = brayns::ImageMetadata{"A title", "A description", {"A place"}, {"a_keyword"}};
+        auto metadata = brayns::ImageMetadata{"A title", "A description", "A place", {"a_keyword"}};
 
         auto dst = TemporaryFilename::generateValid() + extension;
         CHECK_NOTHROW(brayns::ImageEncoder::save(image, dst, 0, metadata));

@@ -71,7 +71,7 @@ class TestSnapshot(unittest.TestCase):
         metadata = brayns.ImageMetadata(
             title="A title",
             description="A description",
-            where_used=["A place"],
+            where_used="A place",
             keywords=["key1, key2"],
         )
         return brayns.Snapshot(
@@ -97,7 +97,7 @@ class TestSnapshot(unittest.TestCase):
             "metadata": {
                 "title": "A title",
                 "description": "A description",
-                "where_used": ["A place"],
+                "where_used": "A place",
                 "keywords": ["key1, key2"],
             },
         }

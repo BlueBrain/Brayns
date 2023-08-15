@@ -49,7 +49,7 @@ struct JsonAdapter<ImageMetadata> : ObjectAdapter<ImageMetadata>
                 "where_used",
                 [](auto &object) -> auto & { return object.whereUsed; },
                 [](auto &object, auto value) { object.whereUsed = std::move(value); })
-            .description("List of places (Papers, websites, posters, etc.) where the image is used");
+            .description("Event (publication, website, panel, etc.) for what the image was created");
         builder
             .getset(
                 "keywords",
