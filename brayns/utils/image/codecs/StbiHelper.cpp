@@ -54,8 +54,8 @@ public:
 private:
     static std::string _serializeList(const std::vector<std::string> &list)
     {
-        constexpr std::size_t bagSchemaSize = 19; // <rdf:Bag></rdf:Bag>
-        constexpr std::size_t itemSchemaSize = 17; // <rdf:li></rdf:li>
+        constexpr auto bagSchemaSize = std::char_traits<char>::length("<rdf:Bag></rdf:Bag>");
+        constexpr auto itemSchemaSize = std::char_traits<char>::length("<rdf:li></rdf:li>");
 
         std::size_t itemsSize = 0;
         for (auto &item : list)
