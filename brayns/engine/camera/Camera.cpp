@@ -44,15 +44,15 @@ public:
             throw std::invalid_argument("View position cannot be equal to view target");
         }
 
-        if (glm::length2(view.up) == 0)
+        if (brayns::math::dot(view.up, view.up) == 0)
         {
             throw std::invalid_argument("View up cannot be zero length");
         }
 
-        auto direction = glm::normalize(view.target - view.position);
-        auto up = glm::normalize(view.up);
-        auto dot = glm::dot(direction, up);
-        if (glm::abs(dot) == 1.f)
+        auto direction = brayns::math::normalize(view.target - view.position);
+        auto up = brayns::math::normalize(view.up);
+        auto dot = brayns::math::dot(direction, up);
+        if (brayns::math::abs(dot) == 1.f)
         {
             throw std::invalid_argument("View direction and up cannot be aligned");
         }
@@ -154,9 +154,9 @@ void Camera::_updateView()
     auto &position = _view.position;
     auto &target = _view.target;
     auto &up = _view.up;
-    auto forward = glm::normalize(target - position);
-    auto strafe = glm::cross(forward, up);
-    auto realUp = glm::cross(strafe, forward);
+    auto forward = math::normalize(target - position);
+    auto strafe = math::cross(forward, up);
+    auto realUp = math::cross(strafe, forward);
 
     _handle.setParam(CameraParameters::position, position);
     _handle.setParam(CameraParameters::direction, forward);

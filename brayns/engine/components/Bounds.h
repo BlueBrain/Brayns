@@ -92,7 +92,6 @@ public:
     Vector3f dimensions() const noexcept;
 
 private:
-    Vector3f _min{std::numeric_limits<float>::max()};
-    Vector3f _max{std::numeric_limits<float>::lowest()};
+    math::box3f _bounds;
 };
 }

@@ -19,7 +19,7 @@ target_include_directories(braynsUtils PUBLIC
 )
 
 target_link_libraries(braynsUtils PUBLIC
-    glm
+    rkcommon::rkcommon
     spdlog::spdlog
 )
 

@@ -34,7 +34,7 @@ struct Transform
     Quaternion rotation{1, 0, 0, 0};
     Vector3f scale{1.f};
 
-    Matrix4f toMatrix() const noexcept;
+    TransformMatrix toMatrix() const noexcept;
     bool operator==(const Transform &other) const noexcept;
     bool operator!=(const Transform &other) const noexcept;
 };

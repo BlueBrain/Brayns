@@ -38,7 +38,7 @@ public:
     virtual void pushTo(ospray::cpp::Geometry &handle) = 0;
     virtual std::unique_ptr<IGeometryData> clone() const noexcept = 0;
     virtual size_t numPrimitives() const noexcept = 0;
-    virtual Bounds computeBounds(const Matrix4f &matrix) const noexcept = 0;
+    virtual Bounds computeBounds(const TransformMatrix &matrix) const noexcept = 0;
 };
 
 template<typename DataType>
@@ -67,7 +67,7 @@ public:
         return primitives.size();
     }
 
-    Bounds computeBounds(const Matrix4f &matrix) const noexcept override
+    Bounds computeBounds(const TransformMatrix &matrix) const noexcept override
     {
         Bounds result;
         for (auto &primitive : primitives)

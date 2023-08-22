@@ -64,7 +64,7 @@ public:
     virtual ~ISpatialDataWrapper() = default;
     virtual void pushTo(OsprayHandle &handle) = 0;
     virtual std::unique_ptr<ISpatialDataWrapper> clone() const noexcept = 0;
-    virtual Bounds computeBounds(const Matrix4f &matrix) const noexcept = 0;
+    virtual Bounds computeBounds(const TransformMatrix &matrix) const noexcept = 0;
 };
 
 template<typename DataType, typename OsprayHandle, template<typename> typename Traits>
@@ -88,7 +88,7 @@ public:
         return std::make_unique<SpatialDataWrapper<Type, OsprayHandle, Traits>>(data);
     }
 
-    Bounds computeBounds(const Matrix4f &matrix) const noexcept override
+    Bounds computeBounds(const TransformMatrix &matrix) const noexcept override
     {
         return Traits<Type>::computeBounds(matrix, data);
     };
