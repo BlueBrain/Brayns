@@ -21,30 +21,10 @@
 
 #include "ModelInstance.h"
 
-#include <ospray/SDK/common/OSPCommon.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {
-class MatrixConverter
-{
-public:
-    static auto glmToOspray(const brayns::Matrix4f &transform) noexcept
-    {
-        const auto &strafe = transform[0];
-        const auto &up = transform[1];
-        const auto &forward = transform[2];
-        const auto &position = transform[3];
-
-        rkcommon::math::affine3f result;
-        result.l.vx = rkcommon::math::vec3f(strafe.x, strafe.y, strafe.z);
-        result.l.vy = rkcommon::math::vec3f(up.x, up.y, up.z);
-        result.l.vz = rkcommon::math::vec3f(forward.x, forward.y, forward.z);
-        result.p = rkcommon::math::vec3f(position.x, position.y, position.z);
-
-        return result;
-    }
-};
-
 struct InstanceParameters
 {
     static inline const std::string transform = "transform";
@@ -148,7 +128,7 @@ bool ModelInstance::commit()
     return true;
 }
 
-Matrix4f ModelInstance::_getFullTransform() const noexcept
+TransformMatrix ModelInstance::_getFullTransform() const noexcept
 {
     auto matrix = _transform.toMatrix();
 
@@ -165,7 +145,6 @@ Matrix4f ModelInstance::_getFullTransform() const noexcept
 void ModelInstance::_updateTransform()
 {
     auto matrix = _getFullTransform();
-    auto affine = MatrixConverter::glmToOspray(matrix);
-    _handle.setParam(InstanceParameters::transform, affine);
+    _handle.setParam(InstanceParameters::transform, matrix.affine);
 }
 }

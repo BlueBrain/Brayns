@@ -38,7 +38,7 @@ public:
     static inline const std::string handleName = "distant";
     static inline const std::string name = "directional";
 
-    static Bounds computeBounds(const Matrix4f &matrix, const DirectionalLight &data)
+    static Bounds computeBounds(const TransformMatrix &matrix, const DirectionalLight &data)
     {
         (void)matrix;
         (void)data;

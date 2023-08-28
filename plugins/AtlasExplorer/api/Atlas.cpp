@@ -32,10 +32,15 @@ public:
         auto localFrame = index % frameSize;
         auto y = localFrame / size.x;
         auto x = localFrame % size.x;
-        return brayns::Vector3ui(x, y, z);
+
+        assert(
+            x <= std::numeric_limits<uint32_t>::max() && y <= std::numeric_limits<uint32_t>::max()
+            && z <= std::numeric_limits<uint32_t>::max());
+
+        return brayns::Vector3ui(static_cast<uint32_t>(x), static_cast<uint32_t>(y), static_cast<uint32_t>(z));
     }
 
-    static size_t cartesianToLineal(const brayns::Vector3ui &size, const brayns::Vector3ui &coordinates)
+    static std::size_t cartesianToLineal(const brayns::Vector3ui &size, const brayns::Vector3ui &coordinates)
     {
         auto framePos = coordinates.y * size.x + coordinates.x;
         return size.x * size.y * coordinates.z + framePos;
@@ -73,9 +78,9 @@ const brayns::Vector3f &Atlas::getSpacing() const noexcept
     return _spacing;
 }
 
-size_t Atlas::getVoxelCount() const noexcept
+std::size_t Atlas::getVoxelCount() const noexcept
 {
-    return glm::compMul(_size);
+    return brayns::math::reduce_mul(_size);
 }
 
 brayns::Bounds Atlas::getVoxelBounds(const brayns::Vector3ui &coordinates) const noexcept
@@ -83,7 +88,7 @@ brayns::Bounds Atlas::getVoxelBounds(const brayns::Vector3ui &coordinates) const
     return VoxelBounds::compute(coordinates, _spacing);
 }
 
-brayns::Bounds Atlas::getVoxelBounds(size_t linealIndex) const noexcept
+brayns::Bounds Atlas::getVoxelBounds(std::size_t linealIndex) const noexcept
 {
     auto coordinates = VoxelCoordinates::linealToCartesian(_size, linealIndex);
     return VoxelBounds::compute(coordinates, _spacing);
@@ -95,7 +100,7 @@ bool Atlas::isValidVoxel(const brayns::Vector3ui &coordinates) const noexcept
     return isValidVoxel(linealIndex);
 }
 
-bool Atlas::_isValidIndex(size_t index) const noexcept
+bool Atlas::_isValidIndex(std::size_t index) const noexcept
 {
-    return index < static_cast<size_t>(glm::compMul(_size));
+    return index < static_cast<std::size_t>(brayns::math::reduce_mul(_size));
 }

@@ -55,7 +55,7 @@ public:
             auto position = synapse.getPostsynapticSurfacePosition();
             auto gid = synapse.getPresynapticGID();
             auto &buffer = synapseGeometry[gid];
-            buffer.push_back({position, 2.f});
+            buffer.push_back({{position.x, position.y, position.z}, 2.f});
         }
         return synapseGeometry;
     }
@@ -77,7 +77,7 @@ public:
             auto position = synapse.getPresynapticSurfacePosition();
             auto gid = synapse.getPostsynapticGID();
             auto &buffer = synapseGeometry[gid];
-            buffer.push_back({position, 2.f});
+            buffer.push_back({{position.x, position.y, position.z}, 2.f});
         }
         return synapseGeometry;
     }

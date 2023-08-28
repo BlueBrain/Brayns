@@ -39,14 +39,14 @@ float SpikeCalculator::compute(float spikeTime, float currentTime) const noexcep
     // Spike in the future - start growth
     if (spikeTime > currentTime)
     {
-        auto alpha = glm::clamp((spikeTime - currentTime) * _invInterval, 0.f, 1.f);
+        auto alpha = brayns::math::clamp((spikeTime - currentTime) * _invInterval, 0.f, 1.f);
         return SpikeConstants::restValue * alpha + SpikeConstants::excitedValue * (1.0f - alpha);
     }
 
     // Spike in the past - start fading
     if (spikeTime < currentTime)
     {
-        auto alpha = glm::clamp((currentTime - spikeTime) * _invInterval, 0.f, 1.f);
+        auto alpha = brayns::math::clamp((currentTime - spikeTime) * _invInterval, 0.f, 1.f);
         return SpikeConstants::restValue * alpha + SpikeConstants::excitedValue * (1.0f - alpha);
     }
 

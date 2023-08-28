@@ -75,9 +75,9 @@ private:
         auto &pivotPos = pivot.position;
         auto &startPos = start.position;
         auto &endPos = end.position;
-        auto v1 = glm::normalize(startPos - pivotPos);
-        auto v2 = glm::normalize(endPos - startPos);
-        return glm::dot(v1, v2) >= _treshold;
+        auto v1 = brayns::math::normalize(startPos - pivotPos);
+        auto v2 = brayns::math::normalize(endPos - startPos);
+        return brayns::math::dot(v1, v2) >= _treshold;
     }
 
 private:

@@ -20,6 +20,7 @@
 
 #include <doctest/doctest.h>
 
+#include <brayns/engine/components/Transform.h>
 #include <brayns/engine/model/SystemsView.h>
 
 namespace
@@ -27,10 +28,10 @@ namespace
 class MockBoundsSystem : public brayns::BoundsSystem
 {
 public:
-    brayns::Bounds compute(const brayns::Matrix4f &matrix, brayns::Components &components) override
+    brayns::Bounds compute(const brayns::TransformMatrix &matrix, brayns::Components &components) override
     {
-        auto &vector = components.add<brayns::Vector4f>(0.f, 0.f, 0.f, 1.f);
-        vector = matrix * vector;
+        auto &vector = components.add<brayns::Vector3f>(0.f, 0.f, 0.f);
+        vector = matrix.transformPoint(vector);
         return brayns::Bounds();
     }
 };
@@ -104,7 +105,7 @@ TEST_CASE("Systems")
         auto systems = brayns::Systems();
         systems.setBoundsSystem<MockBoundsSystem>();
         auto view = brayns::SystemsView(systems, components);
-        auto matrix = glm::translate(brayns::Vector3f(0.f, 0.f, 100.f));
+        auto matrix = brayns::Transform{.translation = brayns::Vector3f(0.f, 0.f, 100.f)}.toMatrix();
 
         CHECK(!components.has<brayns::Vector4f>());
 

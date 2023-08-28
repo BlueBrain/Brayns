@@ -93,7 +93,7 @@ Vector4f ColorRamp::getColorForValue(const float value) const
     const auto &color1 = _colors[colorIndex];
     const auto &color2 = _colors[nextColorIndex];
 
-    return glm::mix(color1, color2, remainder);
+    return math::lerp(remainder, color1, color2);
 }
 
 bool ColorRamp::isModified() const noexcept

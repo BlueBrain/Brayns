@@ -24,8 +24,13 @@
 
 namespace brayns
 {
+Bounds::Bounds(const AxisAlignedBounds &box):
+    box(box)
+{
+}
+
 Bounds::Bounds(const Vector3f &minB, const Vector3f &maxB):
-    _bounds(minB, maxB)
+    box(minB, maxB)
 {
     if (math::min(minB, maxB) != minB)
     {
@@ -35,41 +40,41 @@ Bounds::Bounds(const Vector3f &minB, const Vector3f &maxB):
 
 void Bounds::expand(const Vector3f &point) noexcept
 {
-    _bounds.extend(point);
+    box.extend(point);
 }
 
 void Bounds::expand(const Bounds &bounds) noexcept
 {
-    _bounds.extend(bounds._bounds);
+    box.extend(bounds.box);
 }
 
 bool Bounds::intersects(const Vector3f &point) const noexcept
 {
-    return _bounds.contains(point);
+    return box.contains(point);
 }
 
 bool Bounds::intersects(const Bounds &other) const noexcept
 {
-    return math::touchingOrOverlapping(_bounds, other._bounds);
+    return math::touchingOrOverlapping(box, other.box);
 }
 
 const Vector3f &Bounds::getMin() const noexcept
 {
-    return _bounds.lower;
+    return box.lower;
 }
 
 const Vector3f &Bounds::getMax() const noexcept
 {
-    return _bounds.upper;
+    return box.upper;
 }
 
 Vector3f Bounds::center() const noexcept
 {
-    return _bounds.center();
+    return box.center();
 }
 
 Vector3f Bounds::dimensions() const noexcept
 {
-    return _bounds.size();
+    return box.size();
 }
 }

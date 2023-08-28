@@ -30,6 +30,6 @@ class BoundsSystem
 public:
     virtual ~BoundsSystem() = default;
 
-    virtual Bounds compute(const Matrix4f &matrix, Components &components) = 0;
+    virtual Bounds compute(const TransformMatrix &matrix, Components &components) = 0;
 };
 }

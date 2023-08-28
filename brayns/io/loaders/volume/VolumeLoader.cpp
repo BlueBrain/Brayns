@@ -145,7 +145,7 @@ public:
 private:
     static void _checkDataSize(size_t dataSize, const brayns::RawVolumeLoaderParameters &params)
     {
-        auto linealSize = glm::compMul(params.dimensions);
+        auto linealSize = brayns::math::reduce_mul(params.dimensions);
         if (linealSize == 0)
         {
             throw std::invalid_argument("Volume dimensions are empty");

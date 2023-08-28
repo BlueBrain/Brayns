@@ -20,7 +20,7 @@
 
 #include "QuadLight.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {
@@ -36,13 +36,13 @@ struct QuadLightParameters
 
 namespace brayns
 {
-Bounds LightTraits<QuadLight>::computeBounds(const Matrix4f &matrix, const QuadLight &light)
+Bounds LightTraits<QuadLight>::computeBounds(const TransformMatrix &matrix, const QuadLight &light)
 {
     Bounds bounds;
-    bounds.expand(matrix * Vector4f(light.position, 1.f));
-    bounds.expand(matrix * Vector4f(light.position + light.edge1, 1.f));
-    bounds.expand(matrix * Vector4f(light.position + light.edge2, 1.f));
-    bounds.expand(matrix * Vector4f(light.position + light.edge1 + light.edge2, 1.f));
+    bounds.expand(matrix.transformPoint(light.position));
+    bounds.expand(matrix.transformPoint(light.position + light.edge1));
+    bounds.expand(matrix.transformPoint(light.position + light.edge2));
+    bounds.expand(matrix.transformPoint(light.position + light.edge1 + light.edge2));
     return bounds;
 }
 

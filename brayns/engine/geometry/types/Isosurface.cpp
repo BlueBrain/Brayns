@@ -33,7 +33,7 @@ struct IsosurfaceParameters
 
 namespace brayns
 {
-Bounds GeometryTraits<Isosurface>::computeBounds(const Matrix4f &matrix, const Isosurface &data)
+Bounds GeometryTraits<Isosurface>::computeBounds(const TransformMatrix &matrix, const Isosurface &data)
 {
     auto &volume = data.volume;
     return volume.computeBounds(matrix);

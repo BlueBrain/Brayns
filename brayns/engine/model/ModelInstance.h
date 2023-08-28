@@ -134,7 +134,7 @@ private:
      * by this instance's transform
      * @return Matrix4f
      */
-    Matrix4f _getFullTransform() const noexcept;
+    TransformMatrix _getFullTransform() const noexcept;
 
     /**
      * @brief Updates the transformation of this instance on the Ospray side.

@@ -39,7 +39,7 @@ public:
     static inline const std::string handleName = "box";
     static inline const std::string name = "box";
 
-    static Bounds computeBounds(const Matrix4f &matrix, const Box &data);
+    static Bounds computeBounds(const TransformMatrix &matrix, const Box &data);
     static void updateData(ospray::cpp::Geometry &handle, std::vector<Box> &data);
 };
 

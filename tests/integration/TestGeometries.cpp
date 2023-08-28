@@ -65,7 +65,7 @@ TEST_CASE("Geometry types")
         auto min = brayns::Vector3f(-1.f);
         auto max = brayns::Vector3f(1.f);
         auto transform = brayns::Transform();
-        transform.rotation = glm::quat_cast(glm::rotate(glm::radians(20.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+        transform.rotation = brayns::Quaternion(brayns::math::deg2rad(20.f), brayns::Vector3f(0.f, 1.f, 0.f));
         GeometryTypeTester::testType(brayns::Box{min, max}, "test_geometry_box.png", transform);
     }
     SUBCASE("Capsule")
@@ -81,10 +81,10 @@ TEST_CASE("Geometry types")
         auto equation = brayns::Vector4f(0.f, 0.f, -1.f, 0.f);
 
         auto transform1 = brayns::Transform();
-        transform1.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+        transform1.rotation = brayns::Quaternion(brayns::math::deg2rad(-45.f), brayns::Vector3f(0.f, 1.f, 0.f));
 
         auto transform2 = brayns::Transform();
-        transform2.rotation = glm::quat_cast(glm::rotate(glm::radians(45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+        transform2.rotation = brayns::Quaternion(brayns::math::deg2rad(45.f), brayns::Vector3f(0.f, 1.f, 0.f));
 
         auto utils = BraynsTestUtils();
         utils.addDefaultLights();

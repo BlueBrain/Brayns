@@ -47,7 +47,7 @@ public:
     }
 
 private:
-    static std::shared_ptr<brayns::Model> _create(const LayerDistanceAtlas &atlas, glm::length_t index)
+    static std::shared_ptr<brayns::Model> _create(const LayerDistanceAtlas &atlas, std::size_t index)
     {
         _checkValidData(atlas, index);
 
@@ -72,7 +72,7 @@ private:
         return model;
     }
 
-    static std::vector<uint8_t> _createVoxels(const LayerDistanceAtlas &atlas, glm::length_t index)
+    static std::vector<uint8_t> _createVoxels(const LayerDistanceAtlas &atlas, std::size_t index)
     {
         auto size = atlas.getVoxelCount();
         auto values = std::vector<uint8_t>(size * sizeof(float));
@@ -87,7 +87,7 @@ private:
         return values;
     }
 
-    static brayns::ColorRamp _createColorRamp(const LayerDistanceAtlas &atlas, glm::length_t index)
+    static brayns::ColorRamp _createColorRamp(const LayerDistanceAtlas &atlas, std::size_t index)
     {
         auto colors = std::vector<brayns::Vector4f>{
             brayns::Vector4f(1.f, 0.f, 0.f, 1.f),
@@ -104,7 +104,7 @@ private:
         return colorRamp;
     }
 
-    static void _checkValidData(const LayerDistanceAtlas &atlas, glm::length_t index)
+    static void _checkValidData(const LayerDistanceAtlas &atlas, std::size_t index)
     {
         auto min = atlas.getLowerLimits()[index];
         auto max = atlas.getHigherLimits()[index];

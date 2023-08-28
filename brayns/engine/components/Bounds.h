@@ -33,6 +33,11 @@ public:
     Bounds() = default;
 
     /**
+     * @brief Initializes bounds from a box3f math type.
+     */
+    Bounds(const math::box3f &box);
+
+    /**
      * @brief Initializes bounds with pre-defined boundaries.
      * @param minB
      * @param maxB
@@ -91,7 +96,6 @@ public:
      */
     Vector3f dimensions() const noexcept;
 
-private:
-    math::box3f _bounds;
+    AxisAlignedBounds box;
 };
 }

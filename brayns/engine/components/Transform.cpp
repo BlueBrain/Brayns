@@ -24,9 +24,7 @@ namespace brayns
 {
 TransformMatrix Transform::toMatrix() const noexcept
 {
-    auto rotationMatrix = RotationMatrix(rotation);
-    auto matrix = TransformMatrix(rotationMatrix, translation);
-    return matrix.scale(scale);
+    return TransformMatrix(translation, rotation, scale);
 }
 
 bool Transform::operator==(const Transform &other) const noexcept

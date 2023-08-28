@@ -37,7 +37,7 @@ public:
     static inline const std::string handleName = "ambient";
     static inline const std::string name = "ambient";
 
-    static Bounds computeBounds(const Matrix4f &matrix, const AmbientLight &light)
+    static Bounds computeBounds(const TransformMatrix &matrix, const AmbientLight &light)
     {
         (void)matrix;
         (void)light;

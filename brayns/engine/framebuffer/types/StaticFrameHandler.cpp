@@ -230,7 +230,7 @@ bool StaticFrameHandler::commit()
 
 void StaticFrameHandler::setFrameSize(const Vector2ui &frameSize)
 {
-    if (glm::compMul(frameSize) == 0 || glm::compMin(frameSize) < 64)
+    if (math::reduce_mul(frameSize) == 0 || math::reduce_min(frameSize) < 64)
     {
         throw std::invalid_argument("Frame size must be greather than or equal to 64x64");
     }

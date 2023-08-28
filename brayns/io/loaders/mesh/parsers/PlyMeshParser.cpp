@@ -1147,8 +1147,9 @@ public:
         vertices.reserve(3 * indices.size());
         for (const auto &triangle : indices)
         {
-            for (auto index : triangle)
+            for (std::size_t i = 0; i < 3; ++i)
             {
+                auto index = triangle[i];
                 auto x = VectorHelper::get(mesh.xs, index);
                 auto y = VectorHelper::get(mesh.ys, index);
                 auto z = VectorHelper::get(mesh.zs, index);
@@ -1172,8 +1173,9 @@ public:
         normals.reserve(3 * indices.size());
         for (const auto &triangle : indices)
         {
-            for (auto index : triangle)
+            for (std::size_t i = 0; i < 3; ++i)
             {
+                auto index = triangle[i];
                 auto x = VectorHelper::get(mesh.nxs, index);
                 auto y = VectorHelper::get(mesh.nys, index);
                 auto z = VectorHelper::get(mesh.nzs, index);
@@ -1197,8 +1199,9 @@ public:
         colors.reserve(3 * indices.size());
         for (const auto &triangle : indices)
         {
-            for (auto index : triangle)
+            for (std::size_t i = 0; i < 3; ++i)
             {
+                auto index = triangle[i];
                 auto r = VectorHelper::get(mesh.rs, index);
                 auto g = VectorHelper::get(mesh.gs, index);
                 auto b = VectorHelper::get(mesh.bs, index);
@@ -1254,8 +1257,9 @@ private:
         textures.reserve(3 * indices.size());
         for (const auto &triangle : indices)
         {
-            for (auto index : triangle)
+            for (std::size_t i = 0; i < 3; ++i)
             {
+                auto index = triangle[i];
                 auto x = VectorHelper::get(mesh.txs, index);
                 auto y = VectorHelper::get(mesh.tys, index);
                 textures.emplace_back(x, y);

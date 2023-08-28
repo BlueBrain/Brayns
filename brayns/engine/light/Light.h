@@ -84,7 +84,7 @@ public:
      * @param matrix transformation to apply to the light spatial data.
      * @return Bounds axis-aligned bounding box of the light
      */
-    Bounds computeBounds(const Matrix4f &matrix) const noexcept;
+    Bounds computeBounds(const TransformMatrix &matrix) const noexcept;
 
 private:
     std::string _handleName;

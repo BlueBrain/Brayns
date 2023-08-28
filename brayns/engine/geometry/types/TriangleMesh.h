@@ -47,7 +47,7 @@ public:
     static inline const std::string handleName = "mesh";
     static inline const std::string name = "mesh";
 
-    static Bounds computeBounds(const Matrix4f &matrix, const TriangleMesh &data);
+    static Bounds computeBounds(const TransformMatrix &matrix, const TriangleMesh &data);
     static void updateData(ospray::cpp::Geometry &handle, std::vector<TriangleMesh> &data);
 };
 }

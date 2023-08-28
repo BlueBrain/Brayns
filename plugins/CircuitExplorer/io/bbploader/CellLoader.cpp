@@ -30,6 +30,42 @@
 
 namespace
 {
+class GlmToRkCommonConverter
+{
+public:
+    template<glm::length_t Size, typename Type>
+    static std::vector<brayns::math::vec_t<Type, Size>> convert(const std::vector<glm::vec<Size, Type>> &input)
+    {
+        auto result = std::vector<brayns::math::vec_t<Type, Size>>();
+        result.reserve(input.size());
+
+        for (auto &inputVec : input)
+        {
+            auto resultVec = result.emplace_back();
+            for (glm::length_t i = 0; i < Size; ++i)
+            {
+                resultVec[i] = inputVec[i];
+            }
+        }
+
+        return result;
+    }
+
+    template<typename Type>
+    static std::vector<brayns::math::QuaternionT<Type>> convert(const std::vector<glm::qua<Type>> &input)
+    {
+        auto result = std::vector<brayns::math::QuaternionT<Type>>();
+        result.reserve(input.size());
+
+        for (auto &inputQuat : input)
+        {
+            result.emplace_back(inputQuat.x, inputQuat.y, inputQuat.z, inputQuat.w);
+        }
+
+        return result;
+    }
+};
+
 class SomaImporter
 {
 public:
@@ -42,7 +78,7 @@ public:
         auto &gids = context.gids;
         auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
 
-        auto positions = circuit.getPositions(gids);
+        auto positions = GlmToRkCommonConverter::convert(circuit.getPositions(gids));
 
         auto &params = context.loadParameters;
         auto &morphParams = params.neuron_morphology_parameters;
@@ -73,8 +109,8 @@ public:
         auto &gids = context.gids;
         auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
         auto morphPaths = _getMorphologyPaths(circuit, gids);
-        auto positions = circuit.getPositions(gids);
-        auto rotations = circuit.getRotations(gids);
+        auto positions = GlmToRkCommonConverter::convert(circuit.getPositions(gids));
+        auto rotations = GlmToRkCommonConverter::convert(circuit.getRotations(gids));
         auto &params = context.loadParameters;
         auto &morphParams = params.neuron_morphology_parameters;
 

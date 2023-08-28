@@ -57,7 +57,7 @@ const ospray::cpp::Light &Light::getHandle() const noexcept
     return _handle;
 }
 
-Bounds Light::computeBounds(const Matrix4f &matrix) const noexcept
+Bounds Light::computeBounds(const TransformMatrix &matrix) const noexcept
 {
     return _data->computeBounds(matrix);
 }

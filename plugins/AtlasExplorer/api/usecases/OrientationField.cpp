@@ -20,12 +20,12 @@
 
 #include "OrientationField.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Capsule.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GeometryDataSystem.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 #include <api/ModelType.h>
 #include <api/atlases/OrientationAtlas.h>
@@ -60,7 +60,7 @@ public:
             for (auto &axis : result)
             {
                 // * 0.5f so that the axis length does not invade surronding voxels
-                auto vector = (quaternion * axis.axis) * length * 0.5f;
+                auto vector = brayns::math::xfmNormal(quaternion, axis.axis) * length * 0.5f;
                 auto &buffer = axis.geometry;
                 buffer[i] = brayns::CapsuleFactory::cylinder(voxelCenter, voxelCenter + vector, radius);
             }
@@ -77,7 +77,7 @@ private:
         result.reserve(quaternionCount);
         for (size_t i = 0; i < quaternionCount; ++i)
         {
-            if (glm::length2(atlas[i]) == 0.f)
+            if (brayns::math::dot(atlas[i], atlas[i]) == 0.f)
             {
                 continue;
             }
@@ -88,7 +88,7 @@ private:
 
     static std::tuple<float, float> _getGeometrySizes(const brayns::Vector3f &spacing)
     {
-        auto length = glm::compMin(spacing);
+        auto length = brayns::math::reduce_min(spacing);
         auto radius = length * 0.05f;
         return std::make_tuple(length, radius);
     }
@@ -98,7 +98,7 @@ private:
         auto result = std::array<GizmoAxis, 3>();
         for (size_t i = 0; i < 3; ++i)
         {
-            result[i].axis[static_cast<glm::length_t>(i)] = 1.f;
+            result[i].axis[i] = 1.f;
             result[i].geometry.resize(validQuaternionCount);
         }
         return result;

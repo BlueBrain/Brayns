@@ -27,8 +27,8 @@ class FrameSizeScaler
 public:
     static brayns::Vector2ui safeScale(const brayns::Vector2ui &frameSize, uint32_t scale)
     {
-        auto safeScale = glm::max(frameSize / brayns::Vector2ui(64), brayns::Vector2ui(1));
-        auto applyScale = glm::min(scale, glm::compMin(safeScale));
+        auto safeScale = brayns::math::max(frameSize / brayns::Vector2ui(64), brayns::Vector2ui(1));
+        auto applyScale = brayns::math::min(scale, brayns::math::reduce_min(safeScale));
         return frameSize / applyScale;
     }
 };

@@ -21,7 +21,7 @@
 #include "OutlineShell.h"
 
 #include <brayns/engine/colormethods/SolidColorMethod.h>
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Isosurface.h>

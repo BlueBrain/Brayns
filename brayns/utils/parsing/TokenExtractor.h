@@ -67,12 +67,13 @@ struct TokenExtractor<std::array<T, S>>
     }
 };
 
-template<glm::length_t S, typename T>
-struct TokenExtractor<glm::vec<S, T>>
+template<typename T, int S>
+struct TokenExtractor<math::vec_t<T, S>>
 {
-    static void extract(std::string_view &data, glm::vec<S, T> &value)
+    static void extract(std::string_view &data, math::vec_t<T, S> &value)
     {
-        for (glm::length_t i = 0; i < S; ++i)
+        constexpr auto limit = static_cast<std::size_t>(S);
+        for (std::size_t i = 0; i < limit; ++i)
         {
             TokenExtractor<T>::extract(data, value[i]);
         }
@@ -80,13 +81,14 @@ struct TokenExtractor<glm::vec<S, T>>
 };
 
 template<typename T>
-struct TokenExtractor<glm::qua<T>>
+struct TokenExtractor<math::QuaternionT<T>>
 {
-    static void extract(std::string_view &data, glm::qua<T> &value)
+    static void extract(std::string_view &data, math::QuaternionT<T> &value)
     {
-        for (glm::length_t i = 0; i < 4; ++i)
+        auto components = &value.i;
+        for (std::size_t i = 0; i < 4; ++i)
         {
-            TokenExtractor<T>::extract(data, value[i]);
+            TokenExtractor<T>::extract(data, components[i]);
         }
     }
 };

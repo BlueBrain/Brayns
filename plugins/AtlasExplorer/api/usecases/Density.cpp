@@ -61,7 +61,8 @@ std::shared_ptr<brayns::Model> Density::run(const Atlas &atlas, const brayns::Js
     volumes.elements.emplace_back(std::move(densityVolume));
 
     auto &colorRamp = components.add<brayns::ColorRamp>();
-    colorRamp.setValuesRange({scalarAtlas.getMinValue(), scalarAtlas.getMaxValue()});
+    colorRamp.setValuesRange(
+        {static_cast<float>(scalarAtlas.getMinValue()), static_cast<float>(scalarAtlas.getMaxValue())});
 
     auto &systems = model->getSystems();
     systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Volumes>>();

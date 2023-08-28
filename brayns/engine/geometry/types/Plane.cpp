@@ -32,7 +32,7 @@ struct PlaneParameters
 
 namespace brayns
 {
-Bounds GeometryTraits<Plane>::computeBounds(const Matrix4f &matrix, const Plane &data)
+Bounds GeometryTraits<Plane>::computeBounds(const TransformMatrix &matrix, const Plane &data)
 {
     // NOOP Planes are infinite.
     (void)matrix;

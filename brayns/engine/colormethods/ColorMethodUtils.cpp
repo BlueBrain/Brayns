@@ -24,6 +24,8 @@
 #include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/GeometryViews.h>
 
+#include <ospray/ospray_cpp/ext/rkcommon.h>
+
 namespace brayns
 {
 std::vector<brayns::Vector4f> &ColorListComponentUtils::createAndInit(brayns::Components &components, size_t length)
