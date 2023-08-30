@@ -58,8 +58,6 @@ using AxisAlignedBounds = math::box3f;
 /**
  * Matrix definitions
  */
-using RotationMatrix = math::LinearSpace3f;
-
 class TransformMatrix
 {
 public:

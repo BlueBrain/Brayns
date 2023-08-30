@@ -107,12 +107,12 @@ TEST_CASE("Systems")
         auto view = brayns::SystemsView(systems, components);
         auto matrix = brayns::Transform{.translation = brayns::Vector3f(0.f, 0.f, 100.f)}.toMatrix();
 
-        CHECK(!components.has<brayns::Vector4f>());
+        CHECK(!components.has<brayns::Vector3f>());
 
         view.computeBounds(matrix);
 
-        CHECK(components.has<brayns::Vector4f>());
-        CHECK(components.get<brayns::Vector4f>() == brayns::Vector4f(0.f, 0.f, 100.f, 1.f));
+        CHECK(components.has<brayns::Vector3f>());
+        CHECK(components.get<brayns::Vector3f>() == brayns::Vector3f(0.f, 0.f, 100.f));
     }
     SUBCASE("Color system")
     {
