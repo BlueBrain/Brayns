@@ -30,12 +30,12 @@ public:
     /**
      * @brief Default initializes min to {max float} and max to {lowest float} in anticipation of the use of expand().
      */
-    Bounds() = default;
+    Bounds();
 
     /**
-     * @brief Initializes bounds from a box3f math type.
+     * @brief Initializes bounds from a AxisAlignedBounds math type.
      */
-    Bounds(const math::box3f &box);
+    Bounds(const AxisAlignedBounds &box);
 
     /**
      * @brief Initializes bounds with pre-defined boundaries.

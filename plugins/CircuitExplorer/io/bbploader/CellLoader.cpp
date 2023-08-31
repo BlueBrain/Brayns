@@ -33,28 +33,22 @@ namespace
 class GlmToRkCommonConverter
 {
 public:
-    template<glm::length_t Size, typename Type>
-    static std::vector<brayns::math::vec_t<Type, Size>> convert(const std::vector<glm::vec<Size, Type>> &input)
+    static std::vector<brayns::Vector3f> convert(const std::vector<glm::vec3> &input)
     {
-        auto result = std::vector<brayns::math::vec_t<Type, Size>>();
+        auto result = std::vector<brayns::Vector3f>();
         result.reserve(input.size());
 
         for (auto &inputVec : input)
         {
-            auto resultVec = result.emplace_back();
-            for (glm::length_t i = 0; i < Size; ++i)
-            {
-                resultVec[i] = inputVec[i];
-            }
+            result.emplace_back(inputVec.x, inputVec.y, inputVec.z);
         }
 
         return result;
     }
 
-    template<typename Type>
-    static std::vector<brayns::math::QuaternionT<Type>> convert(const std::vector<glm::qua<Type>> &input)
+    static std::vector<brayns::Quaternion> convert(const std::vector<glm::quat> &input)
     {
-        auto result = std::vector<brayns::math::QuaternionT<Type>>();
+        auto result = std::vector<brayns::Quaternion>();
         result.reserve(input.size());
 
         for (auto &inputQuat : input)

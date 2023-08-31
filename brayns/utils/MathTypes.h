@@ -20,6 +20,7 @@
 
 #pragma once
 
+#define RKCOMMON_NO_SIMD
 #include <rkcommon/math/AffineSpace.h>
 #include <rkcommon/math/Quaternion.h>
 #include <rkcommon/math/vec.h>

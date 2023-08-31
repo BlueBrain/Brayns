@@ -24,6 +24,11 @@
 
 namespace brayns
 {
+Bounds::Bounds():
+    box(Vector3f(std::numeric_limits<float>::max()), Vector3f(std::numeric_limits<float>::lowest()))
+{
+}
+
 Bounds::Bounds(const AxisAlignedBounds &box):
     box(box)
 {
