@@ -81,10 +81,10 @@ TEST_CASE("Geometry types")
         auto equation = brayns::Vector4f(0.f, 0.f, -1.f, 0.f);
 
         auto transform1 = brayns::Transform();
-        transform1.rotation = brayns::Quaternion(brayns::math::deg2rad(-45.f), 0.f, 0.f);
+        transform1.rotation = brayns::Quaternion(brayns::math::deg2rad(-40.f), 0.f, 0.f);
 
         auto transform2 = brayns::Transform();
-        transform2.rotation = brayns::Quaternion(brayns::math::deg2rad(45.f), 0.f, 0.f);
+        transform2.rotation = brayns::Quaternion(brayns::math::deg2rad(40.f), 0.f, 0.f);
 
         auto utils = BraynsTestUtils();
         utils.addDefaultLights();
