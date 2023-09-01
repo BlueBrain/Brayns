@@ -26,8 +26,6 @@ if(NOT Poco_FOUND)
         FetchContent_Populate(poco)
     endif()
 
-    # Both Poco and GLM create "uninstall" targets. But GLM checks wether the
-    # target exists before or not, whereas POCO doesn't give a damn.
     set(ENABLE_REDIS OFF CACHE BOOL "Enable Redis")
     set(ENABLE_ENCODINGS OFF CACHE BOOL "Enable Encodings")
     set(ENABLE_APACHECONNECTOR OFF CACHE BOOL "Enable Apache")

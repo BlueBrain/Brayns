@@ -45,7 +45,6 @@ Optionally, to build the core plugins of Brayns, the following components are re
 
 Brayns uses further dependencies, but if they are not present on the system, it will download them by itself during build.
 
-* glm 0.9.9.8 (https://github.com/g-truc/glm/tree/0.9.9.8)
 * Poco libraries 1.12.4 (https://github.com/pocoproject/poco/tree/poco-1.12.4-release)
 * spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
 * stb (https://github.com/nothings/stb)

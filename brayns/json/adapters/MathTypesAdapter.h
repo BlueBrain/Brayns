@@ -30,9 +30,9 @@
 namespace brayns
 {
 /**
- * @brief Helper class to serialize GLM types to fixed-size JSON array.
+ * @brief Helper class to serialize math types to fixed-size JSON array.
  *
- * @tparam T GLM vector type.
+ * @tparam T math vector type.
  */
 template<typename T>
 struct MathVectorAdapter
@@ -80,10 +80,10 @@ struct MathVectorAdapter
 };
 
 /**
- * @brief JSON handling for glm::vec<S, T>.
+ * @brief JSON handling for math::vec_t<T, S>.
  *
- * @tparam S Component count.
  * @tparam T Component type.
+ * @tparam S Component count.
  */
 template<typename T, int S>
 struct JsonAdapter<math::vec_t<T, S>> : MathVectorAdapter<math::vec_t<T, S>>
@@ -91,7 +91,7 @@ struct JsonAdapter<math::vec_t<T, S>> : MathVectorAdapter<math::vec_t<T, S>>
 };
 
 /**
- * @brief JSON handling for glm::qua<T>.
+ * @brief JSON handling for math::QuaternionT<T>.
  *
  * @tparam T Component type.
  */

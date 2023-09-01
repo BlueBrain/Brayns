@@ -20,7 +20,6 @@
 
 #include "StreamlineComponentBuilder.h"
 
-#include <ospray/ospray_cpp/ext/rkcommon.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Capsule.h>
@@ -29,6 +28,8 @@
 
 #include <api/StreamlineColorGenerator.h>
 #include <components/StreamlineColors.h>
+
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {
