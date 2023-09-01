@@ -88,7 +88,7 @@ public:
 
     AxisAlignedBounds transformBounds(const AxisAlignedBounds &box) const
     {
-        return {math::xfmBounds(affine, box)};
+        return math::xfmBounds(affine, box);
     }
 
     TransformMatrix &operator*=(const TransformMatrix &rhs)
