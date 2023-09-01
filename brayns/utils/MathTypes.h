@@ -20,6 +20,8 @@
 
 #pragma once
 
+// Rkcommon simd math code has big precission issues
+// And previous math lib (glm) was being used without simd anyway
 #define RKCOMMON_NO_SIMD
 #include <rkcommon/math/AffineSpace.h>
 #include <rkcommon/math/Quaternion.h>
