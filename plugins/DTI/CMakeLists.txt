@@ -12,7 +12,7 @@ add_library(braynsDTI SHARED ${BRAYNSDTI_SOURCES} ${BRAYNSDTI_HEADERS})
 target_include_directories(braynsDTI PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>"
     "$<INSTALL_INTERFACE:include>")
-target_link_libraries(braynsDTI PRIVATE Brion Brain braynsPluginAPI braynsEngine braynsNetwork)
+target_link_libraries(braynsDTI PRIVATE glm Brion Brain braynsPluginAPI braynsEngine braynsNetwork)
 
 set_target_properties(braynsDTI
     PROPERTIES
