@@ -75,7 +75,7 @@ public:
     }
 
     template<typename T, int S>
-    static void extractMathVetor(const std::vector<ArgvValue> &values, math::vec_t<T, S> &result)
+    static void extractMathVector(const std::vector<ArgvValue> &values, math::vec_t<T, S> &result)
     {
         constexpr auto limit = static_cast<std::size_t>(S);
         for (std::size_t i = 0; i < limit; ++i)
@@ -179,7 +179,7 @@ struct ArgvReflector<math::vec_t<T, S>>
     static ArgvProperty reflect(math::vec_t<T, S> &value)
     {
         auto property = GetArgvProperty::of<T>();
-        property.load = [&](const auto &values) { ArgvExtractor::extractMathVetor<T, S>(values, value); };
+        property.load = [&](const auto &values) { ArgvExtractor::extractMathVector<T, S>(values, value); };
         property.stringify = [&] { return ArgvStringifier::stringifyMathVector(value); };
         property.multitoken = true;
         property.minItems = S;

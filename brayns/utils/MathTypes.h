@@ -27,6 +27,8 @@
 #include <rkcommon/math/Quaternion.h>
 #include <rkcommon/math/vec.h>
 
+#include <concepts>
+
 namespace brayns
 {
 namespace math = rkcommon::math;
@@ -116,20 +118,17 @@ constexpr vec_t<T, S> lerp(float alpha, const vec_t<T, S> &a, const vec_t<T, S> 
 {
     constexpr auto limit = static_cast<std::size_t>(S);
     auto result = vec_t<T, S>();
-    for (size_t i = 0; i < limit; ++i)
+    for (std::size_t i = 0; i < limit; ++i)
     {
         result[i] = a[i] * (1.f - alpha) + b[i] * alpha;
     }
     return result;
 }
 
-template<typename T>
-concept ValidInfiniteType = std::is_floating_point_v<T>;
-
-template<ValidInfiniteType T, int S>
-constexpr vec_t<int32_t, S> isfinite(const vec_t<T, S> &input)
+template<std::floating_point T, int S>
+constexpr vec_t<std::int32_t, S> isfinite(const vec_t<T, S> &input)
 {
-    auto result = vec_t<int32_t, S>();
+    auto result = vec_t<std::int32_t, S>();
 
     for (int i = 0; i < S; ++i)
     {
