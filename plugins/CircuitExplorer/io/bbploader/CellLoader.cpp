@@ -30,6 +30,36 @@
 
 namespace
 {
+class GlmToRkCommonConverter
+{
+public:
+    static std::vector<brayns::Vector3f> convert(const std::vector<glm::vec3> &input)
+    {
+        auto result = std::vector<brayns::Vector3f>();
+        result.reserve(input.size());
+
+        for (auto &inputVec : input)
+        {
+            result.emplace_back(inputVec.x, inputVec.y, inputVec.z);
+        }
+
+        return result;
+    }
+
+    static std::vector<brayns::Quaternion> convert(const std::vector<glm::quat> &input)
+    {
+        auto result = std::vector<brayns::Quaternion>();
+        result.reserve(input.size());
+
+        for (auto &inputQuat : input)
+        {
+            result.emplace_back(inputQuat.x, inputQuat.y, inputQuat.z, inputQuat.w);
+        }
+
+        return result;
+    }
+};
+
 class SomaImporter
 {
 public:
@@ -42,7 +72,7 @@ public:
         auto &gids = context.gids;
         auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
 
-        auto positions = circuit.getPositions(gids);
+        auto positions = GlmToRkCommonConverter::convert(circuit.getPositions(gids));
 
         auto &params = context.loadParameters;
         auto &morphParams = params.neuron_morphology_parameters;
@@ -73,8 +103,8 @@ public:
         auto &gids = context.gids;
         auto ids = std::vector<uint64_t>(gids.begin(), gids.end());
         auto morphPaths = _getMorphologyPaths(circuit, gids);
-        auto positions = circuit.getPositions(gids);
-        auto rotations = circuit.getRotations(gids);
+        auto positions = GlmToRkCommonConverter::convert(circuit.getPositions(gids));
+        auto rotations = GlmToRkCommonConverter::convert(circuit.getRotations(gids));
         auto &params = context.loadParameters;
         auto &morphParams = params.neuron_morphology_parameters;
 

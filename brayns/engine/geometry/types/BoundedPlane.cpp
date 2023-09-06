@@ -33,7 +33,7 @@ struct PlaneParameters
 
 namespace brayns
 {
-Bounds GeometryTraits<BoundedPlane>::computeBounds(const Matrix4f &matrix, const BoundedPlane &data)
+Bounds GeometryTraits<BoundedPlane>::computeBounds(const TransformMatrix &matrix, const BoundedPlane &data)
 {
     return GeometryTraits<Box>::computeBounds(matrix, data.bounds);
 }

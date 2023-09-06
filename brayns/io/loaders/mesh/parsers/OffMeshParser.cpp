@@ -196,8 +196,9 @@ private:
     static Vector3ui _extractIndices(std::string_view &data, size_t vertexCount)
     {
         auto indices = Parser::extractToken<Vector3ui>(data);
-        for (auto index : indices)
+        for (std::size_t i = 0; i < 3; ++i)
         {
+            auto index = indices[i];
             if (index >= vertexCount)
             {
                 auto message = "Invalid index: " + std::to_string(index) + " > " + std::to_string(vertexCount);
@@ -263,8 +264,9 @@ private:
     static void _addVertex(const MeshBuffer &buffer, TriangleMesh &mesh, const Vector3ui &triangle)
     {
         auto offset = mesh.vertices.size();
-        for (auto index : triangle)
+        for (std::size_t i = 0; i < 3; ++i)
         {
+            auto index = triangle[i];
             auto &vertex = buffer.vertices[index];
             mesh.vertices.push_back(vertex);
         }

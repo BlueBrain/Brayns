@@ -39,7 +39,7 @@ public:
     static inline const std::string handleName = "plane";
     static inline const std::string name = "plane";
 
-    static Bounds computeBounds(const Matrix4f &matrix, const Plane &data);
+    static Bounds computeBounds(const TransformMatrix &matrix, const Plane &data);
     static void updateData(ospray::cpp::Geometry &handle, std::vector<Plane> &data);
 };
 }

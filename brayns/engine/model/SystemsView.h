@@ -32,7 +32,7 @@ public:
 
     void update(const ParametersManager &parameters);
     InspectResultData inspect(const InspectContext &context);
-    Bounds computeBounds(const Matrix4f &matrix);
+    Bounds computeBounds(const TransformMatrix &matrix);
     std::vector<std::string> getColorMethods() const;
     std::vector<std::string> getColorValues(const std::string &method) const;
     void applyColor(const std::string &method, const ColorMethodInput &input);

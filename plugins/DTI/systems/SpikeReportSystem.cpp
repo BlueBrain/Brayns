@@ -20,7 +20,6 @@
 
 #include "SpikeReportSystem.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/components/SimulationInfo.h>
@@ -29,6 +28,8 @@
 #include <api/StreamlineColorGenerator.h>
 #include <components/SpikeReportData.h>
 #include <components/StreamlineColors.h>
+
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {

@@ -20,8 +20,6 @@
 
 #include "Sphere.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
-
 #include <ospray/ospray_cpp/Data.h>
 
 namespace
@@ -35,15 +33,15 @@ struct SphereParameters
 
 namespace brayns
 {
-Bounds GeometryTraits<Sphere>::computeBounds(const Matrix4f &matrix, const Sphere &data)
+Bounds GeometryTraits<Sphere>::computeBounds(const TransformMatrix &matrix, const Sphere &data)
 {
     Vector3f radiusDelta(data.radius);
     auto sphereMin = data.center - radiusDelta;
     auto sphereMax = data.center + radiusDelta;
 
     Bounds bounds;
-    bounds.expand(matrix * Vector4f(sphereMin, 1.f));
-    bounds.expand(matrix * Vector4f(sphereMax, 1.f));
+    bounds.expand(matrix.transformPoint(sphereMin));
+    bounds.expand(matrix.transformPoint(sphereMax));
     return bounds;
 }
 

@@ -64,7 +64,7 @@ std::string SonataReportData::getTimeUnit() const noexcept
 std::vector<float> SonataReportData::getFrame(double timestamp) const
 {
     auto [start, end, dt] = _population.getTimes();
-    timestamp = glm::clamp(timestamp, start, end - dt);
+    timestamp = brayns::math::clamp(timestamp, start, end - dt);
     auto endTime = timestamp + dt;
     auto frame = _population.get(_selection, timestamp, endTime);
 

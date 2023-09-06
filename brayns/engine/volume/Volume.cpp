@@ -65,7 +65,7 @@ bool Volume::commit()
     return true;
 }
 
-Bounds Volume::computeBounds(const Matrix4f &matrix) const noexcept
+Bounds Volume::computeBounds(const TransformMatrix &matrix) const noexcept
 {
     return _data->computeBounds(matrix);
 }

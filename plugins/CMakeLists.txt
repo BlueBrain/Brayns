@@ -15,7 +15,6 @@ endif()
 # CircutiExplorer
 if(BRAYNS_CIRCUITEXPLORER_ENABLED)
     find_package(Boost QUIET REQUIRED COMPONENTS system)
-    find_package(HDF5 REQUIRED)
     find_package(HighFive QUIET)
     find_package(sonata QUIET)
     find_package(MVDTool QUIET)

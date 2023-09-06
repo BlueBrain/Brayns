@@ -29,8 +29,7 @@ brayns::Vector3ui HeaderUtils::get3DSize(const NRRDHeader &header)
     const auto start = sizes.size() - 3;
     for (size_t i = start; i < sizes.size(); ++i)
     {
-        auto index = static_cast<glm::length_t>(i - start);
-        result[index] = sizes[i];
+        result[i - start] = sizes[i];
     }
     return result;
 }
@@ -54,10 +53,10 @@ brayns::Vector3f HeaderUtils::get3DDimensions(const NRRDHeader &header)
         brayns::Vector3f vector;
         for (size_t j = 0; j < 3; ++j)
         {
-            vector[static_cast<glm::length_t>(j)] = direction[j];
+            vector[j] = direction[j];
         }
 
-        result[static_cast<glm::length_t>(i)] = glm::length(vector);
+        result[i] = brayns::math::length(vector);
     }
     return result;
 }
@@ -83,12 +82,10 @@ brayns::Transform HeaderUtils::getTransform(const NRRDHeader &header)
     if (spaceDirection)
     {
         auto &vectors = *spaceDirection;
-        auto matrix = brayns::Matrix3f();
-        for (glm::length_t i = 0; i < 3; ++i)
-        {
-            matrix[i] = glm::normalize(brayns::Vector3f(vectors[i][0], vectors[i][1], vectors[i][2]));
-        }
-        transform.rotation = glm::quat_cast(matrix);
+        auto vx = brayns::math::normalize(brayns::Vector3f(vectors[0][0], vectors[0][1], vectors[0][2]));
+        auto vy = brayns::math::normalize(brayns::Vector3f(vectors[1][0], vectors[1][1], vectors[1][2]));
+        auto vz = brayns::math::normalize(brayns::Vector3f(vectors[2][0], vectors[2][1], vectors[2][2]));
+        transform.rotation = brayns::Quaternion(vx, vy, vz);
     }
 
     return transform;

@@ -105,7 +105,7 @@ public:
      * @param matrix transformation to apply to the volume spatial data.
      * @return Bounds axis-aligned bounding box of the volume
      */
-    Bounds computeBounds(const Matrix4f &matrix) const noexcept;
+    Bounds computeBounds(const TransformMatrix &matrix) const noexcept;
 
     /**
      * @brief Returns the volume Ospray handle

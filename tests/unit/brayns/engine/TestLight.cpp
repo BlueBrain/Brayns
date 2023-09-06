@@ -40,8 +40,8 @@ TEST_CASE("Light bounds")
 {
     BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
-    auto noTransform = brayns::Matrix4f(1.f);
-    auto transform = glm::translate(brayns::Vector3f(100.f, 0.f, 0.f));
+    auto noTransform = brayns::TransformMatrix();
+    auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)}.toMatrix();
 
     auto emptyBounds = brayns::Bounds();
 

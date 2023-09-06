@@ -74,10 +74,11 @@ public:
         }
     }
 
-    template<glm::length_t S, typename T>
-    static void extractGlm(const std::vector<ArgvValue> &values, glm::vec<S, T> &result)
+    template<typename T, int S>
+    static void extractMathVector(const std::vector<ArgvValue> &values, math::vec_t<T, S> &result)
     {
-        for (glm::length_t i = 0; i < S; ++i)
+        constexpr auto limit = static_cast<std::size_t>(S);
+        for (std::size_t i = 0; i < limit; ++i)
         {
             auto index = static_cast<size_t>(i);
             extract<T>(values[index], result[i]);
@@ -127,12 +128,12 @@ public:
         return stream.str();
     }
 
-    template<glm::length_t S, typename T>
-    static std::string stringifyGlm(const glm::vec<S, T> &value)
+    template<typename T, int S>
+    static std::string stringifyMathVector(const math::vec_t<T, S> &value)
     {
         std::ostringstream stream;
         bool first = true;
-        for (glm::length_t i = 0; i < S; ++i)
+        for (std::size_t i = 0; i < S; ++i)
         {
             if (!first)
             {
@@ -172,14 +173,14 @@ struct ArgvReflector<std::vector<T>>
     }
 };
 
-template<glm::length_t S, typename T>
-struct ArgvReflector<glm::vec<S, T>>
+template<typename T, int S>
+struct ArgvReflector<math::vec_t<T, S>>
 {
-    static ArgvProperty reflect(glm::vec<S, T> &value)
+    static ArgvProperty reflect(math::vec_t<T, S> &value)
     {
         auto property = GetArgvProperty::of<T>();
-        property.load = [&](const auto &values) { ArgvExtractor::extractGlm<S, T>(values, value); };
-        property.stringify = [&] { return ArgvStringifier::stringifyGlm(value); };
+        property.load = [&](const auto &values) { ArgvExtractor::extractMathVector<T, S>(values, value); };
+        property.stringify = [&] { return ArgvStringifier::stringifyMathVector(value); };
         property.multitoken = true;
         property.minItems = S;
         property.maxItems = S;

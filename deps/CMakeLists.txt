@@ -26,8 +26,6 @@ if(NOT Poco_FOUND)
         FetchContent_Populate(poco)
     endif()
 
-    # Both Poco and GLM create "uninstall" targets. But GLM checks wether the
-    # target exists before or not, whereas POCO doesn't give a damn.
     set(ENABLE_REDIS OFF CACHE BOOL "Enable Redis")
     set(ENABLE_ENCODINGS OFF CACHE BOOL "Enable Encodings")
     set(ENABLE_APACHECONNECTOR OFF CACHE BOOL "Enable Apache")
@@ -55,39 +53,6 @@ if(NOT Poco_FOUND)
     set(CMAKE_RELEASE_POSTFIX "" CACHE STRING "Set Release library postfix" FORCE)
     set(CMAKE_MINSIZEREL_POSTFIX "" CACHE STRING "Set MinSizeRel library postfix" FORCE)
     set(CMAKE_RELWITHDEBINFO_POSTFIX "" CACHE STRING "Set RelWithDebInfo library postfix" FORCE)
-endif()
-
-# =============================================================================
-# GLM
-# =============================================================================
-if(NOT glm_FOUND AND NOT TARGET glm)
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/glm")
-        message(STATUS "Downloading GLM from submodules")
-        FetchContent_Declare(
-            glm
-            GIT_REPOSITORY https://github.com/g-truc/glm.git
-            GIT_TAG 0.9.9.8
-            GIT_SHALLOW ON
-            GIT_SUBMODULES_RECURSE OFF
-            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glm
-        )
-        FetchContent_Populate(glm)
-    endif()
-
-    add_library(glm INTERFACE)
-    target_include_directories(glm SYSTEM INTERFACE
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/glm>
-        $<INSTALL_INTERFACE:include>)
-
-    install(TARGETS glm
-        EXPORT Brayns-targets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        INCLUDES DESTINATION include
-    )
-
-    install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/glm/glm
-        DESTINATION include)
 endif()
 
 # =============================================================================

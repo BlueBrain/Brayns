@@ -22,9 +22,9 @@
 
 #include <brayns/engine/components/ColorRamp.h>
 
-struct ColorRampUtils
+class ColorRampUtils
 {
+public:
     static brayns::ColorRamp createUnipolarColorRamp() noexcept;
-
     static std::vector<brayns::Vector4f> createSampleBuffer(const brayns::ColorRamp &colorRamp) noexcept;
 };

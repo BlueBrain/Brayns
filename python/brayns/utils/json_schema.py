@@ -213,7 +213,7 @@ def _deserialize_additional(obj: dict[str, Any]) -> bool | JsonSchema | None:
 
 
 def _deserialize_one_of(obj: dict[str, Any]) -> list[JsonSchema]:
-    value = obj.get("oneOf", list[JsonSchema]())
+    value = obj.get("oneOf", list[dict[str, Any]]())
     return [deserialize_schema(one_of) for one_of in value]
 
 

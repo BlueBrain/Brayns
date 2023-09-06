@@ -11,6 +11,39 @@ set(CMAKE_INSTALL_LIBDIR lib)
 find_package(Git REQUIRED)
 
 # =============================================================================
+# GLM
+# =============================================================================
+if((BRAYNS_CIRCUITEXPLORER_ENABLED OR BRAYNS_DTI_ENABLED) AND NOT glm_FOUND AND NOT TARGET glm)
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/glm")
+        message(STATUS "Downloading GLM from submodules")
+        FetchContent_Declare(
+            glm
+            GIT_REPOSITORY https://github.com/g-truc/glm.git
+            GIT_TAG 0.9.9.8
+            GIT_SHALLOW ON
+            GIT_SUBMODULES_RECURSE OFF
+            SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/glm
+        )
+        FetchContent_Populate(glm)
+    endif()
+
+    add_library(glm INTERFACE)
+    target_include_directories(glm SYSTEM INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/glm>
+        $<INSTALL_INTERFACE:include>)
+
+    install(TARGETS glm
+        EXPORT Brayns-targets
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib
+        INCLUDES DESTINATION include
+    )
+
+    install(DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/glm/glm
+        DESTINATION include)
+endif()
+
+# =============================================================================
 # libsonata
 # =============================================================================
 if(BRAYNS_CIRCUITEXPLORER_ENABLED AND NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)

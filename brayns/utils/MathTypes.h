@@ -20,40 +20,120 @@
 
 #pragma once
 
-#define GLM_FORCE_CTOR_INIT
-#include <glm/glm.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/ext.hpp>
-#include <glm/gtx/io.hpp>
+// Rkcommon simd math code has big precission issues
+// And previous math lib (glm) was being used without simd anyway
+#define RKCOMMON_NO_SIMD
+#include <rkcommon/math/AffineSpace.h>
+#include <rkcommon/math/Quaternion.h>
+#include <rkcommon/math/vec.h>
+
+#include <concepts>
 
 namespace brayns
 {
-/**
- * Matrix definitions
- */
-using Matrix3f = glm::mat3;
-using Matrix4f = glm::mat4;
+namespace math = rkcommon::math;
 
 /**
  * Vector definitions
  */
-using Vector2i = glm::vec<2, int32_t>;
-using Vector2l = glm::vec<2, int64_t>;
-using Vector3i = glm::vec<3, int32_t>;
-using Vector3l = glm::vec<3, int64_t>;
+using Vector2i = math::vec2i;
+using Vector2l = math::vec2l;
+using Vector3i = math::vec3i;
+using Vector3l = math::vec3l;
 
-using Vector2ui = glm::vec<2, uint32_t>;
-using Vector2ul = glm::vec<2, uint64_t>;
-using Vector3ui = glm::vec<3, uint32_t>;
-using Vector3ul = glm::vec<3, uint64_t>;
+using Vector2ui = math::vec2ui;
+using Vector2ul = math::vec2ul;
+using Vector3ui = math::vec3ui;
+using Vector3ul = math::vec3ul;
 
-using Vector2f = glm::vec2;
-using Vector3f = glm::vec3;
-using Vector4f = glm::vec4;
+using Vector2f = math::vec2f;
+using Vector3f = math::vec3f;
+using Vector4f = math::vec4f;
 
 /**
  * Quaternion definitions
  */
-using Quaternion = glm::quat;
+using Quaternion = math::quaternionf;
+
+/**
+ * AABB definitions
+ */
+using AxisAlignedBounds = math::box3f;
+
+/**
+ * Matrix definitions
+ */
+class TransformMatrix
+{
+public:
+    TransformMatrix() = default;
+
+    TransformMatrix(const Vector3f &translation, const Quaternion &rotation, const Vector3f &scale):
+        affine(math::LinearSpace3f(rotation) * math::LinearSpace3f::scale(scale), translation)
+    {
+    }
+
+    Vector3f transformPoint(const Vector3f &point) const
+    {
+        return math::xfmPoint(affine, point);
+    }
+
+    Vector3f transformVector(const Vector3f &vector) const
+    {
+        return math::xfmVector(affine, vector);
+    }
+
+    Vector3f transformNormal(const Vector3f &normal) const
+    {
+        return math::xfmNormal(affine, normal);
+    }
+
+    AxisAlignedBounds transformBounds(const AxisAlignedBounds &box) const
+    {
+        return math::xfmBounds(affine, box);
+    }
+
+    TransformMatrix &operator*=(const TransformMatrix &rhs)
+    {
+        affine *= rhs.affine;
+        return *this;
+    }
+
+    TransformMatrix operator*(const TransformMatrix &rhs) const
+    {
+        TransformMatrix result;
+        result.affine = affine * rhs.affine;
+        return result;
+    }
+
+    math::AffineSpace3f affine = math::AffineSpace3f(math::OneTy());
+};
 
 } // namespace brayns
+
+namespace rkcommon::math
+{
+template<typename T, int S>
+constexpr vec_t<T, S> lerp(float alpha, const vec_t<T, S> &a, const vec_t<T, S> &b)
+{
+    constexpr auto limit = static_cast<std::size_t>(S);
+    auto result = vec_t<T, S>();
+    for (std::size_t i = 0; i < limit; ++i)
+    {
+        result[i] = a[i] * (1.f - alpha) + b[i] * alpha;
+    }
+    return result;
+}
+
+template<std::floating_point T, int S>
+constexpr vec_t<std::int32_t, S> isfinite(const vec_t<T, S> &input)
+{
+    auto result = vec_t<std::int32_t, S>();
+
+    for (int i = 0; i < S; ++i)
+    {
+        result[i] = std::isfinite(input[i]);
+    }
+    return result;
+}
+}

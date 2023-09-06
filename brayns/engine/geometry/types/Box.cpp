@@ -32,20 +32,9 @@ struct BoxParameters
 
 namespace brayns
 {
-Bounds GeometryTraits<Box>::computeBounds(const Matrix4f &matrix, const Box &box)
+Bounds GeometryTraits<Box>::computeBounds(const TransformMatrix &matrix, const Box &box)
 {
-    const auto &min = box.min;
-    const auto &max = box.max;
-    Bounds bounds;
-    bounds.expand(matrix * Vector4f(min, 1.f));
-    bounds.expand(matrix * Vector4f(max.x, min.y, min.z, 1.f));
-    bounds.expand(matrix * Vector4f(min.x, min.y, max.z, 1.f));
-    bounds.expand(matrix * Vector4f(max.x, min.y, max.z, 1.f));
-    bounds.expand(matrix * Vector4f(min.x, max.y, min.z, 1.f));
-    bounds.expand(matrix * Vector4f(max.x, max.y, min.z, 1.f));
-    bounds.expand(matrix * Vector4f(min.x, max.y, max.z, 1.f));
-    bounds.expand(matrix * Vector4f(max, 1.f));
-    return bounds;
+    return Bounds(matrix.transformBounds(AxisAlignedBounds(box.min, box.max)));
 }
 
 void GeometryTraits<Box>::updateData(ospray::cpp::Geometry &handle, std::vector<Box> &data)

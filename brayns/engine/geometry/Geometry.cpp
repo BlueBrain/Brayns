@@ -57,7 +57,7 @@ size_t Geometry::numPrimitives() const noexcept
     return _data->numPrimitives();
 }
 
-Bounds Geometry::computeBounds(const Matrix4f &matrix) const noexcept
+Bounds Geometry::computeBounds(const TransformMatrix &matrix) const noexcept
 {
     return _data->computeBounds(matrix);
 }

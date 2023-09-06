@@ -21,7 +21,6 @@
 #include "OutlineShell.h"
 
 #include <brayns/engine/colormethods/SolidColorMethod.h>
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Isosurface.h>
@@ -31,6 +30,8 @@
 #include <brayns/engine/volume/types/RegularVolume.h>
 
 #include <api/ModelType.h>
+
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {

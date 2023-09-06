@@ -18,6 +18,7 @@ target_include_directories(braynsCircuitExplorer PUBLIC
 target_link_libraries(braynsCircuitExplorer PRIVATE
     braynsPluginAPI
     braynsNetwork
+    glm
     sonata::sonata_shared
     MorphIO::morphio
     Brion

@@ -108,7 +108,7 @@ public:
      * @param matrix transformation to apply to the geometry spatial data.
      * @return Bounds axis-aligned bounding box of the geometry
      */
-    Bounds computeBounds(const Matrix4f &matrix) const noexcept;
+    Bounds computeBounds(const TransformMatrix &matrix) const noexcept;
 
     /**
      * @brief Calls the underlying OSPRay commit function, if any parameter has been modified, and resets the modified

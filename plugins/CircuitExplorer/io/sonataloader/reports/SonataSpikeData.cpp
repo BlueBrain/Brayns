@@ -62,7 +62,7 @@ std::string SonataSpikeData::getTimeUnit() const noexcept
 std::vector<float> SonataSpikeData::getFrame(double timestamp) const
 {
     auto limit = static_cast<float>(getEndTime()) - 0.01f;
-    auto frame = glm::clamp(static_cast<float>(timestamp), 0.f, limit);
+    auto frame = brayns::math::clamp(static_cast<float>(timestamp), 0.f, limit);
     auto frameStart = frame - _interval;
     auto frameEnd = frame + _interval;
 

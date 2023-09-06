@@ -41,8 +41,8 @@ public:
         for (size_t i = 0; i < doubles.size(); i = i + 2)
         {
             auto &value = values.emplace_back(_safeDoubleCast(doubles[i]), _safeDoubleCast(doubles[i + 1]));
-            lowerLimits = glm::min(lowerLimits, value);
-            higherLimits = glm::max(higherLimits, value);
+            lowerLimits = brayns::math::min(lowerLimits, value);
+            higherLimits = brayns::math::max(higherLimits, value);
         }
     }
 
@@ -88,7 +88,7 @@ LayerDistanceAtlas::LayerDistanceAtlas(
 bool LayerDistanceAtlas::isValidVoxel(size_t index) const noexcept
 {
     assert(_isValidIndex(index));
-    return glm::compMin(glm::isfinite(_bounds[index]));
+    return brayns::math::reduce_min(brayns::math::isfinite(_bounds[index]));
 }
 
 VoxelType LayerDistanceAtlas::getVoxelType() const noexcept

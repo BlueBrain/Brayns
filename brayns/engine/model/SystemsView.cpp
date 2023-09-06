@@ -38,7 +38,7 @@ InspectResultData SystemsView::inspect(const InspectContext &context)
     return _systems->_inspect ? _systems->_inspect->execute(context, *_components) : InspectResultData();
 }
 
-Bounds SystemsView::computeBounds(const Matrix4f &matrix)
+Bounds SystemsView::computeBounds(const TransformMatrix &matrix)
 {
     return _systems->_bounds ? _systems->_bounds->compute(matrix, *_components) : Bounds();
 }

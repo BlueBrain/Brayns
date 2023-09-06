@@ -66,12 +66,13 @@ struct ChunkExtractor<std::array<T, S>>
     }
 };
 
-template<glm::length_t S, typename T>
-struct ChunkExtractor<glm::vec<S, T>>
+template<typename T, int S>
+struct ChunkExtractor<math::vec_t<T, S>>
 {
-    static void extract(std::string_view &data, glm::vec<S, T> &value, std::endian endian)
+    static void extract(std::string_view &data, math::vec_t<T, S> &value, std::endian endian)
     {
-        for (glm::length_t i = 0; i < S; ++i)
+        constexpr auto limit = static_cast<std::size_t>(S);
+        for (std::size_t i = 0; i < limit; ++i)
         {
             ChunkExtractor<T>::extract(data, value[i], endian);
         }
@@ -79,13 +80,14 @@ struct ChunkExtractor<glm::vec<S, T>>
 };
 
 template<typename T>
-struct ChunkExtractor<glm::qua<T>>
+struct ChunkExtractor<math::QuaternionT<T>>
 {
-    static void extract(std::string_view &data, glm::qua<T> &value, std::endian endian)
+    static void extract(std::string_view &data, math::QuaternionT<T> &value, std::endian endian)
     {
-        for (glm::length_t i = 0; i < 4; ++i)
+        auto components = &value.i;
+        for (std::size_t i = 0; i < 4; ++i)
         {
-            ChunkExtractor<T>::extract(data, value[i], endian);
+            ChunkExtractor<T>::extract(data, components[i], endian);
         }
     }
 };

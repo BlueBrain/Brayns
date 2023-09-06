@@ -20,8 +20,6 @@
 
 #include "GeometryView.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
-
 namespace
 {
 struct GeometryViewParameters

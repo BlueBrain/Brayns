@@ -220,7 +220,7 @@ TEST_CASE("Parameters Argument parser")
         injector.inject({"executable", "--param", "second"});
         CHECK(variable == ArgEnum::SECOND);
     };
-    SUBCASE("Glm parsing")
+    SUBCASE("Math type parsing")
     {
         auto properties = std::vector<brayns::ArgvProperty>();
 
@@ -231,7 +231,7 @@ TEST_CASE("Parameters Argument parser")
         auto parser = brayns::ArgvParser(properties);
         auto injector = ArgInjector(parser);
 
-        injector.injectFailure({"executable", "--param", "not_glm"}, "Invalid numeric value");
+        injector.injectFailure({"executable", "--param", "not_math_type"}, "Invalid numeric value");
         injector.injectFailure({"executable", "--param", "2 not_a_number"}, "Invalid numeric value");
         injector.injectFailure({"executable", "--param", "5"}, "Not enough items");
         injector.injectFailure({"executable", "--param", "1 2 3 10"}, "Too many items");

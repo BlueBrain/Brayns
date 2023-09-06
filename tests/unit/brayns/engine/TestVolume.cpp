@@ -42,7 +42,7 @@ TEST_CASE("Volume")
         grid.perVertexData = true;
         grid.size = brayns::Vector3ui(5);
         grid.spacing = brayns::Vector3f(1.f);
-        grid.voxels = std::vector<uint8_t>(glm::compMul(grid.size), 0);
+        grid.voxels = std::vector<uint8_t>(brayns::math::reduce_mul(grid.size), 0);
 
         auto volume = brayns::Volume(std::move(grid));
         volume.commit();
@@ -58,17 +58,17 @@ TEST_CASE("Volume")
         grid.perVertexData = true;
         grid.size = brayns::Vector3ui(5);
         grid.spacing = brayns::Vector3f(1.f);
-        grid.voxels = std::vector<uint8_t>(glm::compMul(grid.size), 0);
+        grid.voxels = std::vector<uint8_t>(brayns::math::reduce_mul(grid.size), 0);
 
         auto volume = brayns::Volume(std::move(grid));
 
-        auto bounds = volume.computeBounds(brayns::Matrix4f(1.f));
+        auto bounds = volume.computeBounds(brayns::TransformMatrix());
         auto min = bounds.getMin();
         auto max = bounds.getMax();
         CHECK(min == brayns::Vector3f(0.f));
         CHECK(max == brayns::Vector3f(5.f));
 
-        auto transform = glm::translate(brayns::Vector3f(100.f, 0.f, 0.f));
+        auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)}.toMatrix();
         bounds = volume.computeBounds(transform);
         min = bounds.getMin();
         max = bounds.getMax();

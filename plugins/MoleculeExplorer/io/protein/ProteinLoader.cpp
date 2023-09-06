@@ -21,7 +21,6 @@
 
 #include "ProteinLoader.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/geometry/types/Sphere.h>
@@ -35,6 +34,8 @@
 #include <brayns/utils/string/StringSplitter.h>
 
 #include <cassert>
+
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 #include "ProteinData.h"
 

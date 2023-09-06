@@ -73,13 +73,13 @@ private:
     {
         auto cube1 = brayns::Box{brayns::Vector3f(-1.2f, 1.f, -1.2f), brayns::Vector3f(1.2f, 3.f, 1.2f)};
         auto cube1Translation = brayns::Vector3f(2.f, 0.f, 2.f);
-        auto cube1Rotation = glm::rotate(glm::radians(35.f), brayns::Vector3f(0.f, 1.f, 0.f));
+        auto cube1Rotation = brayns::Quaternion(brayns::math::deg2rad(35.f), 0.f, 0.f);
         auto cube1Transform = brayns::Transform{cube1Translation, cube1Rotation};
         utils.addGeometry(cube1, cube1Transform);
 
         auto cube2 = brayns::Box{brayns::Vector3f(-1.2f, 1.f, -1.2f), brayns::Vector3f(1.2f, 5.f, 1.2f)};
         auto cube2Translation = brayns::Vector3f(-2.f, 0.f, -2.f);
-        auto cube2Rotation = glm::rotate(glm::radians(-35.f), brayns::Vector3f(0.f, 1.f, 0.f));
+        auto cube2Rotation = brayns::Quaternion(brayns::math::deg2rad(-35.f), 0.f, 0.f);
         auto cube2Transform = brayns::Transform{cube2Translation, cube2Rotation};
         utils.addGeometry(cube2, cube2Transform);
 

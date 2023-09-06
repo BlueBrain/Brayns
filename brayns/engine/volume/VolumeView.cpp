@@ -20,6 +20,8 @@
 
 #include "VolumeView.h"
 
+#include <ospray/ospray_cpp/ext/rkcommon.h>
+
 namespace
 {
 struct VolumeViewParameters

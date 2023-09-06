@@ -30,7 +30,12 @@ public:
     /**
      * @brief Default initializes min to {max float} and max to {lowest float} in anticipation of the use of expand().
      */
-    Bounds() = default;
+    Bounds();
+
+    /**
+     * @brief Initializes bounds from a AxisAlignedBounds math type.
+     */
+    Bounds(const AxisAlignedBounds &box);
 
     /**
      * @brief Initializes bounds with pre-defined boundaries.
@@ -91,8 +96,6 @@ public:
      */
     Vector3f dimensions() const noexcept;
 
-private:
-    Vector3f _min{std::numeric_limits<float>::max()};
-    Vector3f _max{std::numeric_limits<float>::lowest()};
+    AxisAlignedBounds box;
 };
 }

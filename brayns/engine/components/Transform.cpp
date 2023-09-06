@@ -22,9 +22,9 @@
 
 namespace brayns
 {
-Matrix4f Transform::toMatrix() const noexcept
+TransformMatrix Transform::toMatrix() const noexcept
 {
-    return glm::translate(Matrix4f(1.), translation) * glm::mat4_cast(rotation) * glm::scale(Matrix4f(1.), scale);
+    return TransformMatrix(translation, rotation, scale);
 }
 
 bool Transform::operator==(const Transform &other) const noexcept

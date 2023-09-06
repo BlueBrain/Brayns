@@ -103,7 +103,7 @@ public:
             auto max = brayns::Vector3f(2.5f, 2.5f, 11.f);
             auto box = brayns::Box{min, max};
             auto transform = brayns::Transform();
-            transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+            transform.rotation = brayns::Quaternion(brayns::math::deg2rad(-45.f), 0.f, 0.f);
             auto reference = _filename("test_clip_geometry_box", invertNormals);
             ClipGeometryTypeTester::testType(box, reference, transform, invertNormals);
         }
@@ -121,7 +121,7 @@ public:
         {
             auto equation = brayns::Vector4f(0.f, 0.f, 1.f, 0.f);
             auto transform = brayns::Transform();
-            transform.rotation = glm::quat_cast(glm::rotate(glm::radians(-45.f), brayns::Vector3f(0.f, 1.f, 0.f)));
+            transform.rotation = brayns::Quaternion(brayns::math::deg2rad(-45.f), 0.f, 0.f);
             auto plane = brayns::Plane{equation};
             auto reference = _filename("test_clip_geometry_plane", invertNormals);
             ClipGeometryTypeTester::testType(plane, reference, transform, invertNormals);
@@ -145,7 +145,7 @@ public:
             auto scale = brayns::Vector3f(5.f);
             auto position = -bounds.center();
             position.z += 10.f - dimensions.z * 0.5f;
-            auto transform = brayns::Transform{position, {}, scale};
+            auto transform = brayns::Transform{.translation = position, .scale = scale};
 
             auto reference = _filename("test_clip_geometry_mesh", invertNormals);
             ClipGeometryTypeTester::testType(mesh, reference, transform, invertNormals);

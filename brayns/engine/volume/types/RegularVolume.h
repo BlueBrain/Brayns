@@ -48,7 +48,7 @@ public:
     static inline const std::string handleName = "structuredRegular";
     static inline const std::string name = "gridvolume";
 
-    static Bounds computeBounds(const Matrix4f &matrix, const RegularVolume &data);
+    static Bounds computeBounds(const TransformMatrix &matrix, const RegularVolume &data);
 
     static void updateData(ospray::cpp::Volume &handle, RegularVolume &volumeData);
 };

@@ -20,9 +20,7 @@
 
 #include "RegularVolume.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
-
-#include <ospray/ospray.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {
@@ -34,7 +32,7 @@ public:
         const auto dataType = static_cast<OSPDataType>(volumeData.dataType);
         const auto &voxels = volumeData.voxels;
         const auto &size = volumeData.size;
-        const auto dimensionSize = glm::compMul(size);
+        const auto dimensionSize = brayns::math::reduce_mul(size);
         if (dimensionSize == 0)
         {
             throw std::runtime_error("Tried to commit volume with 0 size");
@@ -86,12 +84,12 @@ struct RegularVolumeParameters
 
 namespace brayns
 {
-Bounds VolumeTraits<RegularVolume>::computeBounds(const Matrix4f &matrix, const RegularVolume &data)
+Bounds VolumeTraits<RegularVolume>::computeBounds(const TransformMatrix &matrix, const RegularVolume &data)
 {
     auto size = brayns::Vector3f(data.size) * data.spacing;
     Bounds bounds;
-    bounds.expand(matrix * Vector4f(0.f, 0.f, 0.f, 1.f));
-    bounds.expand(matrix * Vector4f(size, 1.f));
+    bounds.expand(matrix.transformPoint(Vector3f(0.f, 0.f, 0.f)));
+    bounds.expand(matrix.transformPoint(size));
     return bounds;
 }
 

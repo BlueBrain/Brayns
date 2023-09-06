@@ -30,8 +30,8 @@
 
 #include "adapters/ArrayAdapter.h"
 #include "adapters/EnumAdapter.h"
-#include "adapters/GlmAdapter.h"
 #include "adapters/MapAdapter.h"
+#include "adapters/MathTypesAdapter.h"
 #include "adapters/ObjectAdapter.h"
 #include "adapters/PrimitiveAdapter.h"
 #include "adapters/PtrAdapter.h"

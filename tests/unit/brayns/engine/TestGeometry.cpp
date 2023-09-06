@@ -77,13 +77,13 @@ TEST_CASE("Geometry")
         auto sphere = brayns::Sphere{brayns::Vector3f(0.f), 10.f};
         auto geometry = brayns::Geometry(sphere);
 
-        auto bounds = geometry.computeBounds(brayns::Matrix4f(1.f));
+        auto bounds = geometry.computeBounds(brayns::TransformMatrix());
         auto min = bounds.getMin();
         auto max = bounds.getMax();
         CHECK(min == brayns::Vector3f(-10.f));
         CHECK(max == brayns::Vector3f(10.f));
 
-        auto transform = glm::translate(brayns::Vector3f(100.f, 0.f, 0.f));
+        auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)}.toMatrix();
         bounds = geometry.computeBounds(transform);
         min = bounds.getMin();
         max = bounds.getMax();

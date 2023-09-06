@@ -20,7 +20,7 @@
 
 #include "DirectionalLight.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {
@@ -38,7 +38,7 @@ namespace brayns
 {
 void LightTraits<DirectionalLight>::updateData(ospray::cpp::Light &handle, DirectionalLight &data)
 {
-    data.direction = glm::normalize(data.direction);
+    data.direction = math::normalize(data.direction);
     handle.setParam(DirectionalLightParameters::color, data.color);
     handle.setParam(DirectionalLightParameters::intensity, data.intensity);
     handle.setParam(DirectionalLightParameters::direction, data.direction);

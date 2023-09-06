@@ -20,7 +20,6 @@
 
 #pragma once
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
 #include <brayns/engine/material/Material.h>
 #include <brayns/utils/ModifiedFlag.h>
 
@@ -28,6 +27,7 @@
 
 #include <ospray/ospray_cpp/Data.h>
 #include <ospray/ospray_cpp/GeometricModel.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace brayns
 {

@@ -28,7 +28,7 @@ template<typename Type>
 class GenericBoundsSystem : public BoundsSystem
 {
 public:
-    Bounds compute(const Matrix4f &matrix, Components &components) override
+    Bounds compute(const TransformMatrix &matrix, Components &components) override
     {
         auto &component = components.get<Type>();
         auto &elements = component.elements;

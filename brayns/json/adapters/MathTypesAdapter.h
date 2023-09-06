@@ -30,16 +30,16 @@
 namespace brayns
 {
 /**
- * @brief Helper class to serialize GLM types to fixed-size JSON array.
+ * @brief Helper class to serialize math types to fixed-size JSON array.
  *
- * @tparam T GLM vector type.
+ * @tparam T math vector type.
  */
 template<typename T>
-struct GlmAdapter
+struct MathVectorAdapter
 {
-    using ValueType = typename T::value_type;
+    using ValueType = typename T::Scalar;
 
-    static inline const auto itemCount = static_cast<size_t>(T::length());
+    static inline constexpr auto itemCount = sizeof(T) / sizeof(typename T::Scalar);
 
     static JsonSchema getSchema()
     {
@@ -54,7 +54,8 @@ struct GlmAdapter
     static void serialize(const T &value, JsonValue &json)
     {
         auto &array = JsonFactory::emplaceArray(json);
-        for (glm::length_t i = 0; i < T::length(); ++i)
+
+        for (std::size_t i = 0; i < itemCount; ++i)
         {
             auto child = JsonValue();
             JsonAdapter<ValueType>::serialize(value[i], child);
@@ -69,7 +70,7 @@ struct GlmAdapter
         {
             throw std::invalid_argument("Invalid array size");
         }
-        auto i = glm::length_t(0);
+        auto i = std::size_t(0);
         for (const auto &item : array)
         {
             JsonAdapter<ValueType>::deserialize(item, value[i]);
@@ -79,23 +80,66 @@ struct GlmAdapter
 };
 
 /**
- * @brief JSON handling for glm::vec<S, T>.
+ * @brief JSON handling for math::vec_t<T, S>.
  *
- * @tparam S Component count.
  * @tparam T Component type.
+ * @tparam S Component count.
  */
-template<glm::length_t S, typename T>
-struct JsonAdapter<glm::vec<S, T>> : GlmAdapter<glm::vec<S, T>>
+template<typename T, int S>
+struct JsonAdapter<math::vec_t<T, S>> : MathVectorAdapter<math::vec_t<T, S>>
 {
 };
 
 /**
- * @brief JSON handling for glm::qua<T>.
+ * @brief JSON handling for math::QuaternionT<T>.
  *
  * @tparam T Component type.
  */
 template<typename T>
-struct JsonAdapter<glm::qua<T>> : GlmAdapter<glm::qua<T>>
+struct JsonAdapter<math::QuaternionT<T>>
 {
+    using ValueType = T;
+
+    static inline constexpr auto itemCount = 4;
+
+    static JsonSchema getSchema()
+    {
+        auto schema = JsonSchema();
+        schema.type = JsonType::Array;
+        schema.items = {JsonAdapter<ValueType>::getSchema()};
+        schema.minItems = itemCount;
+        schema.maxItems = itemCount;
+        return schema;
+    }
+
+    static void serialize(const math::QuaternionT<T> &value, JsonValue &json)
+    {
+        auto &array = JsonFactory::emplaceArray(json);
+
+        auto components = &value.i;
+
+        for (std::size_t i = 0; i < itemCount; ++i)
+        {
+            auto child = JsonValue();
+            JsonAdapter<ValueType>::serialize(components[i], child);
+            array.add(child);
+        }
+    }
+
+    static void deserialize(const JsonValue &json, math::QuaternionT<T> &value)
+    {
+        auto &array = JsonExtractor::extractArray(json);
+        if (array.size() != itemCount)
+        {
+            throw std::invalid_argument("Invalid array size");
+        }
+
+        auto components = &value.i;
+        auto i = std::size_t(0);
+        for (const auto &item : array)
+        {
+            JsonAdapter<ValueType>::deserialize(item, components[i++]);
+        }
+    }
 };
 } // namespace brayns

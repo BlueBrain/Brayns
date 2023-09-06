@@ -40,7 +40,7 @@ public:
     static inline const std::string handleName = "quad";
     static inline const std::string name = "quad";
 
-    static Bounds computeBounds(const Matrix4f &matrix, const QuadLight &light);
+    static Bounds computeBounds(const TransformMatrix &matrix, const QuadLight &light);
 
     static void updateData(ospray::cpp::Light &handle, QuadLight &data);
 };

@@ -31,7 +31,7 @@ std::vector<brayns::Vector4f> StreamlineColorGenerator::generate(const std::vect
     {
         auto &p1 = primitive.p0;
         auto &p2 = primitive.p1;
-        auto dir = glm::normalize(p2 - p1);
+        auto dir = brayns::math::normalize(p2 - p1);
         auto n = brayns::Vector3f(0.5f) + dir * 0.5f;
         colors.emplace_back(n, 1.f);
     }

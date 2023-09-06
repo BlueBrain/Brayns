@@ -145,8 +145,10 @@ public:
 
     void addDefaultLights()
     {
-        auto directional =
-            brayns::DirectionalLight{10.f, brayns::Vector3f(1.f), glm::normalize(brayns::Vector3f(1.f, -1.f, -1.f))};
+        auto directional = brayns::DirectionalLight{
+            10.f,
+            brayns::Vector3f(1.f),
+            brayns::math::normalize(brayns::Vector3f(1.f, -1.f, -1.f))};
         addLight(brayns::Light(directional));
         auto ambient = brayns::AmbientLight{0.2f};
         addLight(brayns::Light(ambient));
@@ -193,7 +195,7 @@ public:
 
         auto center = bounds.center();
         auto size = bounds.dimensions();
-        auto distance = size.y * 0.5 / glm::tan(glm::radians(projection.fovy * 0.5));
+        auto distance = size.y * 0.5f / brayns::math::tan(brayns::math::deg2rad(projection.fovy * 0.5f));
         auto position = center + brayns::Vector3f(0.f, 0.f, distance + size.z * 0.5f);
         auto view = brayns::View{position, center, brayns::Vector3f(0.f, 1.f, 0.f)};
 

@@ -21,7 +21,7 @@
 
 #include "Plastic.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {

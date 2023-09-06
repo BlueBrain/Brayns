@@ -22,9 +22,8 @@
 
 #include <limits>
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
-
 #include <ospray/ospray_cpp/Data.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace
 {
@@ -44,10 +43,10 @@ public:
             throw std::invalid_argument("TriangleMeshes must provide at least indices and vertices");
         }
 
-        auto max = std::numeric_limits<glm::uint>::max();
+        auto max = std::numeric_limits<brayns::Vector3ui::Scalar>::max();
         if (positions.size() > static_cast<size_t>(max))
         {
-            throw std::invalid_argument("TriangleMeshes cannot have more that 2**32 vertices");
+            throw std::invalid_argument("TriangleMeshes vertex count exceeded");
         }
 
         auto &normals = mesh.normals;
@@ -100,7 +99,7 @@ void TriangleMeshUtils::merge(const TriangleMesh &src, TriangleMesh &dst)
     auto &uvs = dst.uvs;
     auto &colors = dst.colors;
 
-    const auto numVertices = static_cast<glm::uint>(positions.size());
+    const auto numVertices = static_cast<Vector3ui::Scalar>(positions.size());
 
     const auto &srcIndices = src.indices;
     const auto &srcPositions = src.vertices;
@@ -142,9 +141,9 @@ void TriangleMeshUtils::generateNormals(TriangleMesh &mesh)
         const auto &bVertex = positions[b];
         const auto &cVertex = positions[c];
 
-        normals[a] += glm::cross((bVertex - aVertex), (cVertex - aVertex));
-        normals[b] += glm::cross((aVertex - bVertex), (cVertex - bVertex));
-        normals[c] += glm::cross((aVertex - cVertex), (bVertex - cVertex));
+        normals[a] += math::cross((bVertex - aVertex), (cVertex - aVertex));
+        normals[b] += math::cross((aVertex - bVertex), (cVertex - bVertex));
+        normals[c] += math::cross((aVertex - cVertex), (bVertex - cVertex));
 
         normalAccumulationCounter[a] += 1;
         normalAccumulationCounter[b] += 1;
@@ -155,16 +154,16 @@ void TriangleMeshUtils::generateNormals(TriangleMesh &mesh)
     {
         const auto inv = 1.f / static_cast<float>(normalAccumulationCounter[i]);
         normals[i] *= inv;
-        glm::normalize(normals[i]);
+        math::normalize(normals[i]);
     }
 }
 
-Bounds GeometryTraits<TriangleMesh>::computeBounds(const Matrix4f &matrix, const TriangleMesh &data)
+Bounds GeometryTraits<TriangleMesh>::computeBounds(const TransformMatrix &matrix, const TriangleMesh &data)
 {
     Bounds bounds;
     for (auto &vertex : data.vertices)
     {
-        bounds.expand(matrix * Vector4f(vertex, 1.f));
+        bounds.expand(matrix.transformPoint(vertex));
     }
     return bounds;
 }

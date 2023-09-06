@@ -20,8 +20,6 @@
 
 #include "Capsule.h"
 
-#include <brayns/engine/common/MathTypesOsprayTraits.h>
-
 #include <ospray/ospray_cpp/Data.h>
 
 namespace
@@ -52,7 +50,7 @@ Capsule CapsuleFactory::sphere(const Vector3f &center, const float radius) noexc
     return Capsule{center, radius, center + Vector3f(0.f, .01f, 0.f), radius};
 }
 
-Bounds GeometryTraits<Capsule>::computeBounds(const Matrix4f &matrix, const Capsule &data)
+Bounds GeometryTraits<Capsule>::computeBounds(const TransformMatrix &matrix, const Capsule &data)
 {
     Vector3f p0Delta(data.r0);
     auto p0Min = data.p0 - p0Delta;
@@ -62,10 +60,10 @@ Bounds GeometryTraits<Capsule>::computeBounds(const Matrix4f &matrix, const Caps
     auto p1Max = data.p1 + p1Delta;
 
     Bounds bounds;
-    bounds.expand(matrix * Vector4f(p0Min, 1.f));
-    bounds.expand(matrix * Vector4f(p0Max, 1.f));
-    bounds.expand(matrix * Vector4f(p1Min, 1.f));
-    bounds.expand(matrix * Vector4f(p1Max, 1.f));
+    bounds.expand(matrix.transformPoint(p0Min));
+    bounds.expand(matrix.transformPoint(p0Max));
+    bounds.expand(matrix.transformPoint(p1Min));
+    bounds.expand(matrix.transformPoint(p1Max));
     return bounds;
 }
 

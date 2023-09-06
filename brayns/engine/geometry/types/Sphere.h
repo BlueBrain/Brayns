@@ -37,7 +37,7 @@ public:
     static inline const std::string handleName = "sphere";
     static inline const std::string name = "sphere";
 
-    static Bounds computeBounds(const Matrix4f &matrix, const Sphere &data);
+    static Bounds computeBounds(const TransformMatrix &matrix, const Sphere &data);
     static void updateData(ospray::cpp::Geometry &handle, std::vector<Sphere> &data);
 };
 }

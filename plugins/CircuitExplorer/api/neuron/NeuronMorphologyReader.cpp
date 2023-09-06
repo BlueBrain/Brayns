@@ -76,7 +76,7 @@ public:
         // Compute mean radius
         float somaRadius = 0.f;
         for (const auto &somaPoint : somaSamples)
-            somaRadius += glm::length(somaPoint - somaPos);
+            somaRadius += brayns::math::length(somaPoint - somaPos);
         somaRadius /= static_cast<float>(somaPoints.size());
 
         NeuronMorphology::Soma result;

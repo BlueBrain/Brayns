@@ -46,7 +46,7 @@ TEST_CASE("Chunk extractor")
     brayns::ChunkExtractor<std::vector<int>>::extract(data, is, endian);
     CHECK_EQ(is, refs);
 
-    brayns::Vector2f refv = {1.2, 2.3};
+    brayns::Vector2f refv = {1.2f, 2.3f};
     data = {brayns::ByteConverter::getBytes(refv[0]), 2 * sizeof(float)};
     brayns::Vector2f v;
     brayns::ChunkExtractor<brayns::Vector2f>::extract(data, v, endian);

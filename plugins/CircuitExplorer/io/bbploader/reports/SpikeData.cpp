@@ -18,6 +18,8 @@
 
 #include "SpikeData.h"
 
+#include <brayns/utils/MathTypes.h>
+
 namespace bbploader
 {
 SpikeData::SpikeData(
@@ -53,11 +55,11 @@ std::string SpikeData::getTimeUnit() const noexcept
 
 std::vector<float> SpikeData::getFrame(double timestamp) const
 {
-    auto fTimestamp = static_cast<float>(glm::clamp(timestamp, 0., getEndTime()));
+    auto fTimestamp = static_cast<float>(brayns::math::clamp(timestamp, 0., getEndTime()));
 
     auto limitTimestamp = _report->getEndTime() - 0.01f;
-    auto frameStart = glm::clamp(fTimestamp - _interval, 0.f, limitTimestamp);
-    auto frameEnd = glm::clamp(fTimestamp + _interval, 0.f, limitTimestamp);
+    auto frameStart = brayns::math::clamp(fTimestamp - _interval, 0.f, limitTimestamp);
+    auto frameEnd = brayns::math::clamp(fTimestamp + _interval, 0.f, limitTimestamp);
 
     auto spikes = _report->getSpikes(frameStart, frameEnd);
 

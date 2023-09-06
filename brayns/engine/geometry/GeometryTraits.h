@@ -39,7 +39,7 @@ public:
     static inline const std::string handleName;
     static inline const std::string name;
 
-    static Bounds computeBounds(const Matrix4f &matrix, const T &data)
+    static Bounds computeBounds(const TransformMatrix &matrix, const T &data)
     {
         static_assert(geometrySpecialized<T>, "GeometryTraits not specialized");
         (void)matrix;

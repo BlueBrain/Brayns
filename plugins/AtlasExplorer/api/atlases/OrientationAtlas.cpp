@@ -42,12 +42,12 @@ public:
             auto y = floats[index + 2];
             auto z = floats[index + 3];
 
-            if (!_validQuaternion({w, x, y, z}))
+            if (!_validQuaternion({x, y, z, w}))
             {
                 continue;
             }
 
-            result[i] = glm::normalize(brayns::Quaternion(w, x, y, z));
+            result[i] = brayns::math::normalize(brayns::Quaternion(x, y, z, w));
         }
         return result;
     }
@@ -55,7 +55,7 @@ public:
 private:
     static bool _validQuaternion(const brayns::Vector4f &test)
     {
-        return glm::length2(test) > 0.f && glm::compMin(glm::isfinite(test));
+        return brayns::math::dot(test, test) > 0.f && brayns::math::reduce_min(brayns::math::isfinite(test));
     }
 };
 }
@@ -72,7 +72,7 @@ OrientationAtlas::OrientationAtlas(
 bool OrientationAtlas::isValidVoxel(size_t index) const noexcept
 {
     assert(_isValidIndex(index));
-    return glm::length2(_voxels[index]) > 0.f;
+    return brayns::math::dot(_voxels[index], _voxels[index]) > 0.f;
 }
 
 VoxelType OrientationAtlas::getVoxelType() const noexcept

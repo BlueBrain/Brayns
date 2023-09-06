@@ -30,11 +30,11 @@ namespace brayns
  */
 struct Transform
 {
-    Vector3f translation{0.f};
-    Quaternion rotation{1, 0, 0, 0};
-    Vector3f scale{1.f};
+    Vector3f translation = Vector3f(0.f, 0.f, 0.f);
+    Quaternion rotation = Quaternion(1, 0, 0, 0);
+    Vector3f scale = Vector3f(1.f, 1.f, 1.f);
 
-    Matrix4f toMatrix() const noexcept;
+    TransformMatrix toMatrix() const noexcept;
     bool operator==(const Transform &other) const noexcept;
     bool operator!=(const Transform &other) const noexcept;
 };

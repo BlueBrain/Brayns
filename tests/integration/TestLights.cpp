@@ -84,7 +84,7 @@ TEST_CASE("Light types")
     }
     SUBCASE("Directional light")
     {
-        auto direction = glm::normalize(brayns::Vector3f(1.f, -1.f, -1.f));
+        auto direction = brayns::math::normalize(brayns::Vector3f(1.f, -1.f, -1.f));
         auto intensity = 10.f;
         auto color = brayns::Vector3f(0.5f, 0.5f, 1.f);
         LightTypeTester::test(brayns::DirectionalLight{intensity, color, direction}, "test_light_directional.png");
@@ -96,7 +96,7 @@ TEST_CASE("Light types")
         auto &max = bounds.getMax();
         auto size = bounds.dimensions();
 
-        auto position = brayns::Vector3f(min.x, max.y + size.y * 0.1, min.z);
+        auto position = brayns::Vector3f(min.x, max.y + size.y * 0.1f, min.z);
         auto edge1 = brayns::Vector3f(size.x, 0.f, 0.f);
         auto edge2 = brayns::Vector3f(0.f, 0.f, size.z);
         auto intensity = 10.f;

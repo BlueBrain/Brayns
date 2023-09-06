@@ -197,8 +197,8 @@ NeuronGeometry NeuronGeometryBuilder::instantiate(const brayns::Vector3f &t, con
     auto &geometry = copy.geometry;
     for (auto &primitive : geometry)
     {
-        primitive.p0 = t + r * primitive.p0;
-        primitive.p1 = t + r * primitive.p1;
+        primitive.p0 = t + brayns::math::xfmPoint(r, primitive.p0);
+        primitive.p1 = t + brayns::math::xfmPoint(r, primitive.p1);
     }
     return copy;
 }
