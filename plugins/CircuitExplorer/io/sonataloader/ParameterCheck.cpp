@@ -23,6 +23,8 @@
 #include <io/sonataloader/data/Names.h>
 #include <io/sonataloader/data/PopulationType.h>
 
+#include <spdlog/fmt/fmt.h>
+
 #include <filesystem>
 #include <unordered_set>
 
@@ -141,7 +143,9 @@ public:
         for (auto &edgeParams : params.edge_populations)
         {
             _checkPopulation(params.node_population, edgeParams);
-            _checkSynapseAstrocyte(edgeParams);
+            auto properties = _config.getEdgesProperties(edgeParams.edge_population);
+            _checkSynapseAstrocyte(edgeParams, properties);
+            _checkEndfeet(edgeParams, properties);
             _checkReport(edgeParams);
         }
     }
@@ -163,12 +167,34 @@ private:
         }
     }
 
-    void _checkSynapseAstrocyte(const SonataEdgePopulationParameters &params)
+    void _checkSynapseAstrocyte(
+        const SonataEdgePopulationParameters &params,
+        const bbp::sonata::EdgePopulationProperties &edgeProperties)
     {
-        auto edgeProperties = _config.getEdgesProperties(params.edge_population);
         if (edgeProperties.type == sonataloader::EdgeNames::synapseAstrocyte && params.load_afferent)
         {
-            throw std::invalid_argument("synapse_astrocyte edge populations are not allowed in afferent mode");
+            throw std::invalid_argument(fmt::format("{} edges are not allowed in afferent mode", edgeProperties.type));
+        }
+    }
+
+    void _checkEndfeet(
+        const SonataEdgePopulationParameters &params,
+        const bbp::sonata::EdgePopulationProperties &edgeProperties)
+    {
+        if (edgeProperties.type != sonataloader::EdgeNames::endfoot)
+        {
+            return;
+        }
+
+        if (params.load_afferent)
+        {
+            throw std::invalid_argument(fmt::format("{} edges are not allowed in afferent mode", edgeProperties.type));
+        }
+
+        if (!edgeProperties.endfeetMeshesFile || (*edgeProperties.endfeetMeshesFile).empty())
+        {
+            throw std::invalid_argument(
+                fmt::format("No endfeet meshes file path defined for {}", params.edge_population));
         }
     }
 
