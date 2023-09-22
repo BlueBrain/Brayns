@@ -16,31 +16,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Common.h"
 
-#include "NeuronGeometry.h"
-#include "NeuronMorphology.h"
-
-/**
- * @brief The NeuronGeometryBuilder class transform a Morphology object into primitive geometry
- */
-class NeuronGeometryBuilder
+std::unordered_map<NeuronSection, std::vector<std::size_t>> NeuriteBuilder::_groupSections(
+    const NeuronMorphology &morphology)
 {
-public:
-    /**
-     * @brief Builds and stores the geometry from the given morphology
-     * @param morphology
-     */
-    explicit NeuronGeometryBuilder(const NeuronMorphology &morphology);
+    std::unordered_map<NeuronSection, std::vector<std::size_t>> sortedSections;
 
-    /**
-     * @brief Instantiates the built geometry with the given transform
-     * @param position (Translation)
-     * @param rotation (Rotation)
-     * @return NeuronGeometry
-     */
-    NeuronGeometry instantiate(const brayns::Vector3f &t, const brayns::Quaternion &r) const;
+    auto &sections = morphology.sections();
+    for (std::size_t sectionIndex = 0; sectionIndex < sections.size(); ++sectionIndex)
+    {
+        auto &section = sections[sectionIndex];
+        auto sectionType = section.type;
+        auto &sectionBuffer = sortedSections[sectionType];
+        sectionBuffer.push_back(sectionIndex);
+    }
 
-private:
-    NeuronGeometry _data;
-};
+    return sortedSections;
+}

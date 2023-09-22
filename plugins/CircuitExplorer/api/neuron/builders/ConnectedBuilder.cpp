@@ -16,9 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "NeuronGeometryBuilder.h"
+#include "ConnectedBuilder.h"
 
-#include <unordered_map>
+#include "Common.h"
 
 namespace
 {
@@ -60,7 +60,7 @@ class SomaBuilder
 public:
     static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
     {
-        auto &geometry = dst.geometry;
+        auto &primitives = dst.primitives;
         auto &sectionSegments = dst.sectionSegmentMapping;
         auto &sectionTypes = dst.sectionTypeMapping;
 
@@ -70,7 +70,7 @@ public:
         const auto &somaCenter = soma.center;
         const auto somaRadius = soma.radius;
         auto somaSphere = brayns::CapsuleFactory::sphere(somaCenter, somaRadius);
-        geometry.push_back(somaSphere);
+        primitives.push_back(somaSphere);
 
         const auto somaChildren = morphology.sectionChildrenIndices(-1);
         for (const auto childIndex : somaChildren)
@@ -85,53 +85,25 @@ public:
             const auto &samplePos = childFirstSample.position;
             const auto sampleRadius = childFirstSample.radius;
             auto somaCone = brayns::CapsuleFactory::cone(somaCenter, somaRadius, samplePos, sampleRadius);
-            geometry.push_back(somaCone);
+            primitives.push_back(somaCone);
         }
 
-        auto end = geometry.size();
+        auto end = primitives.size();
         sectionSegments.push_back({-1, 0, end});
         sectionTypes.push_back({NeuronSection::Soma, 0, end});
     }
 };
 
-class NeuriteBuilder
+class ConnectedNeuriteBuilder
 {
 public:
     static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
     {
-        auto &sections = morphology.sections();
-
-        auto &geometry = dst.geometry;
-        auto &sectionSegments = dst.sectionSegmentMapping;
-        auto &sectionTypes = dst.sectionTypeMapping;
-
-        // Sort sections by section type
-        std::unordered_map<NeuronSection, std::vector<const NeuronMorphology::Section *>> sortedSections;
-        for (const auto &section : sections)
-        {
-            auto sectionType = section.type;
-            auto &sectionBuffer = sortedSections[sectionType];
-            sectionBuffer.push_back(&section);
-        }
-
-        // Add section geometry, grouped by section type
-        for (auto &[sectionType, sectionPointers] : sortedSections)
-        {
-            auto sectionTypeIndexBegin = geometry.size();
-
-            // Add dendrites and axon
-            for (auto sectionPtr : sectionPointers)
+        NeuriteBuilder::build(
+            morphology,
+            dst,
+            [](const auto &samples, auto &primitives)
             {
-                auto &section = *sectionPtr;
-                auto &samples = section.samples;
-
-                if (samples.empty())
-                {
-                    continue;
-                }
-
-                auto sectionSegmentBegin = geometry.size();
-
                 for (size_t i = 1; i < samples.size(); ++i)
                 {
                     auto &s1 = samples[i - 1];
@@ -143,62 +115,19 @@ public:
                     auto r2 = s2.radius;
 
                     auto segmentGeometry = brayns::CapsuleFactory::cone(p1, r1, p2, r2);
-                    geometry.push_back(segmentGeometry);
+                    primitives.push_back(segmentGeometry);
                 }
-
-                auto sectionSegmentEnd = geometry.size();
-                sectionSegments.push_back({section.id, sectionSegmentBegin, sectionSegmentEnd});
-            }
-
-            auto sectionTypeIndexEnd = geometry.size();
-            if (sectionTypeIndexEnd - sectionTypeIndexBegin > 0)
-            {
-                sectionTypes.push_back({sectionType, sectionTypeIndexBegin, sectionTypeIndexEnd});
-            }
-        }
+            });
     }
 };
 
-class NeuronBuilder
-{
-public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
-    {
-        auto hasSoma = morphology.hasSoma();
-        auto numPrimitives = PrimitiveAllocationSize::compute(morphology);
-        auto numSections = morphology.sections().size() + (hasSoma ? 1 : 0);
-
-        auto &geometry = dst.geometry;
-        auto &sectionTypes = dst.sectionTypeMapping;
-        auto &sectionSegments = dst.sectionSegmentMapping;
-
-        geometry.reserve(numPrimitives);
-        sectionTypes.reserve(4);
-        sectionSegments.reserve(numSections);
-
-        if (hasSoma)
-        {
-            SomaBuilder::build(morphology, dst);
-        }
-
-        NeuriteBuilder::build(morphology, dst);
-    }
-};
 } // namespace
 
-NeuronGeometryBuilder::NeuronGeometryBuilder(const NeuronMorphology &morphology)
+NeuronGeometryInstantiator ConnectedBuilder::build(const NeuronMorphology &morphology) const
 {
-    NeuronBuilder::build(morphology, _data);
-}
-
-NeuronGeometry NeuronGeometryBuilder::instantiate(const brayns::Vector3f &t, const brayns::Quaternion &r) const
-{
-    auto copy = _data;
-    auto &geometry = copy.geometry;
-    for (auto &primitive : geometry)
-    {
-        primitive.p0 = t + brayns::math::xfmPoint(r, primitive.p0);
-        primitive.p1 = t + brayns::math::xfmPoint(r, primitive.p1);
-    }
-    return copy;
+    return NeuronGeometryInstantiator(NeuronBuilder::build(
+        morphology,
+        [](auto &morhpology) { return PrimitiveAllocationSize::compute(morhpology); },
+        [](auto &morphology, auto &geometry) { SomaBuilder::build(morphology, geometry); },
+        [](auto &morphology, auto &geometry) { ConnectedNeuriteBuilder::build(morphology, geometry); }));
 }

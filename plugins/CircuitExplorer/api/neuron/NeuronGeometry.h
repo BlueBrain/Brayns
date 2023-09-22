@@ -42,7 +42,7 @@ struct SectionSegmentMapping
 
 struct NeuronGeometry
 {
-    std::vector<brayns::Capsule> geometry;
+    std::vector<brayns::Capsule> primitives;
     std::vector<SectionTypeMapping> sectionTypeMapping;
     std::vector<SectionSegmentMapping> sectionSegmentMapping;
 };

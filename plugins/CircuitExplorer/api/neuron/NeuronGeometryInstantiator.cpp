@@ -16,21 +16,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
 #include "NeuronGeometryInstantiator.h"
 
-/**
- * @brief The NeuronGeometryBuilder class transform a Morphology object into primitive geometry
- */
-class INeuronGeometryBuilder
+NeuronGeometryInstantiator::NeuronGeometryInstantiator(NeuronGeometry geometry):
+    _geometry(std::move(geometry))
 {
-public:
-    virtual ~INeuronGeometryBuilder() = default;
+}
 
-    /**
-     * @brief Builds the geometry from the given morphology
-     * @param morphology The morphology to transform into geometry
-     */
-    virtual NeuronGeometryInstantiator build(const NeuronMorphology &morphology) const = 0;
-};
+NeuronGeometry NeuronGeometryInstantiator::instantiate(
+    const brayns::Vector3f &translation,
+    const brayns::Quaternion &rotation) const
+{
+    auto copy = _geometry;
+    for (auto &primitive : copy.primitives)
+    {
+        primitive.p0 = translation + brayns::math::xfmPoint(rotation, primitive.p0);
+        primitive.p1 = translation + brayns::math::xfmPoint(rotation, primitive.p1);
+    }
+    return copy;
+}

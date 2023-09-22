@@ -18,19 +18,10 @@
 
 #pragma once
 
-#include "NeuronGeometryInstantiator.h"
+#include <api/neuron/INeuronGeometryBuilder.h>
 
-/**
- * @brief The NeuronGeometryBuilder class transform a Morphology object into primitive geometry
- */
-class INeuronGeometryBuilder
+class ConnectedBuilder : public INeuronGeometryBuilder
 {
 public:
-    virtual ~INeuronGeometryBuilder() = default;
-
-    /**
-     * @brief Builds the geometry from the given morphology
-     * @param morphology The morphology to transform into geometry
-     */
-    virtual NeuronGeometryInstantiator build(const NeuronMorphology &morphology) const = 0;
+    NeuronGeometryInstantiator build(const NeuronMorphology &morphology) const override;
 };

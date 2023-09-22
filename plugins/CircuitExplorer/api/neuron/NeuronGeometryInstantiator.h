@@ -18,19 +18,25 @@
 
 #pragma once
 
-#include "NeuronGeometryInstantiator.h"
+#include "NeuronGeometry.h"
+#include "NeuronMorphology.h"
 
 /**
- * @brief The NeuronGeometryBuilder class transform a Morphology object into primitive geometry
+ * Instantiates a neuron geometry object based on a given transformation.
  */
-class INeuronGeometryBuilder
+class NeuronGeometryInstantiator
 {
 public:
-    virtual ~INeuronGeometryBuilder() = default;
+    explicit NeuronGeometryInstantiator(NeuronGeometry geometry);
 
     /**
-     * @brief Builds the geometry from the given morphology
-     * @param morphology The morphology to transform into geometry
+     * @brief Instantiates the neuron geometry with the given transform
+     * @param position Translation
+     * @param rotation Rotation
+     * @return NeuronGeometry
      */
-    virtual NeuronGeometryInstantiator build(const NeuronMorphology &morphology) const = 0;
+    NeuronGeometry instantiate(const brayns::Vector3f &translation, const brayns::Quaternion &rotation) const;
+
+private:
+    NeuronGeometry _geometry;
 };
