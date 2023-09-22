@@ -1,5 +1,18 @@
 # Change Log
 
+## [3.2.2](https://github.com/BlueBrain/Brayns/tree/3.2.2)
+
+**Implemented fixes and enhancements:**
+
+- Use libsonata endfeet mesh path [\#1201] (https://github.com/BlueBrain/Brayns/pull/1201)
+- Add healthcheck for Docker [\#1200](https://github.com/BlueBrain/Brayns/pull/1200)
+- Replace glm with rkcommon math [\#1198](https://github.com/BlueBrain/Brayns/pull/1198)
+- Add morphology section coloring [\#1196](https://github.com/BlueBrain/Brayns/pull/1196)
+- Add principled material [\#1195](https://github.com/BlueBrain/Brayns/pull/1195)
+- Add bbp metadata to image [\#1194](https://github.com/BlueBrain/Brayns/pull/1194)
+- Optimize morphology section geometry mapping [\#1193](https://github.com/BlueBrain/Brayns/pull/1193)
+- Include zlib and bzip2 include dirs [\#1192](https://github.com/BlueBrain/Brayns/pull/1192)
+
 ## [3.2.1](https://github.com/BlueBrain/Brayns/tree/3.2.1)
 
 **Implemented fixes and enhancements:**

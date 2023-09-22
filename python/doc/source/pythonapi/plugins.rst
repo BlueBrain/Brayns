@@ -55,7 +55,7 @@ morphology
 ----------
 
 .. automodule:: brayns.plugins.morphology
-    :members: GeometryType, Morphology, MorphologyLoader
+    :members: GeometryType, Morphology, MorphologyColorMethod, MorphologyLoader
     :undoc-members:
     :show-inheritance:
 
