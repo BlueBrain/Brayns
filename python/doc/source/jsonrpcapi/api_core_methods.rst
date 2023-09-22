@@ -4870,6 +4870,172 @@ Returns the material of the given model as a plastic material, if possible.
 
 ----
 
+get-material-principled
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Returns the material of the given model as a principled material, if possible.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "id": {
+                "description": "Model ID",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "anisotropy": {
+                "description": "Specular anisotropy reflection weight (Specular highlights depends on surface type/shape)",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+            },
+            "anisotropy_rotation": {
+                "description": "Rotation of the specular anisotropy reflection effect",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+            },
+            "back_light": {
+                "description": "For thin objects, weight of reflection and transmission (1 = 50/50, 2 = only transmission)",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 2
+            },
+            "coat": {
+                "description": "Clear coat weight (thin lacquered/glossy layer on top of the surface)",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+            },
+            "coat_color": {
+                "description": "Clear coat color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "coat_ior": {
+                "description": "Clear coat index of refraction",
+                "type": "number"
+            },
+            "coat_roughness": {
+                "description": "Clear coat diffuse/specular reflection roughness",
+                "type": "number"
+            },
+            "coat_thickness": {
+                "description": "Clear coat thickness",
+                "type": "number"
+            },
+            "diffuse": {
+                "description": "Diffuse reflection weight",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+            },
+            "edge_color": {
+                "description": "Edge tint for metallic surfaces",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "ior": {
+                "description": "Dielectric index of refraction",
+                "type": "number",
+                "minimum": 1
+            },
+            "metallic": {
+                "description": "Alpha parameter between dielectric and metallic",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+            },
+            "roughness": {
+                "description": "Diffuse and specular reflection roughness",
+                "type": "number"
+            },
+            "sheen": {
+                "description": "Sheen effect weight (fabric-like effect such as satin or velvet)",
+                "type": "number"
+            },
+            "sheen_color": {
+                "description": "Sheen color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "sheen_roughness": {
+                "description": "Sheen diffuse/specular reflection roughness",
+                "type": "number"
+            },
+            "sheen_tint": {
+                "description": "Strenght of sheen color (0 = white, 1 = sheen color)",
+                "type": "number"
+            },
+            "specular": {
+                "description": "Specular reflection/transmission weight",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+            },
+            "thickness": {
+                "description": "Thickness of the object if thin = true",
+                "type": "number"
+            },
+            "thin": {
+                "description": "Specified wether the object is solid or thin (hollow)",
+                "type": "boolean"
+            },
+            "transmission": {
+                "description": "Specular transmission weight",
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+            },
+            "transmission_color": {
+                "description": "Transmission attenuation color",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "transmission_depth": {
+                "description": "Distance from surface at which the color will equal transmission color",
+                "type": "number"
+            }
+        },
+        "additionalProperties": false
+    }
+
+----
+
 get-material-type
 ~~~~~~~~~~~~~~~~~
 
@@ -6786,6 +6952,175 @@ null.
 
 ----
 
+set-material-principled
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Updates the material of the given model to a principled material. This material is only usable with the production renderer.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "material": {
+                "title": "Principled",
+                "description": "Material parameters",
+                "type": "object",
+                "properties": {
+                    "anisotropy": {
+                        "description": "Specular anisotropy reflection weight (Specular highlights depends on surface type/shape)",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "anisotropy_rotation": {
+                        "description": "Rotation of the specular anisotropy reflection effect",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "back_light": {
+                        "description": "For thin objects, weight of reflection and transmission (1 = 50/50, 2 = only transmission)",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 2
+                    },
+                    "coat": {
+                        "description": "Clear coat weight (thin lacquered/glossy layer on top of the surface)",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "coat_color": {
+                        "description": "Clear coat color",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "coat_ior": {
+                        "description": "Clear coat index of refraction",
+                        "type": "number"
+                    },
+                    "coat_roughness": {
+                        "description": "Clear coat diffuse/specular reflection roughness",
+                        "type": "number"
+                    },
+                    "coat_thickness": {
+                        "description": "Clear coat thickness",
+                        "type": "number"
+                    },
+                    "diffuse": {
+                        "description": "Diffuse reflection weight",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "edge_color": {
+                        "description": "Edge tint for metallic surfaces",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "ior": {
+                        "description": "Dielectric index of refraction",
+                        "type": "number",
+                        "minimum": 1
+                    },
+                    "metallic": {
+                        "description": "Alpha parameter between dielectric and metallic",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "roughness": {
+                        "description": "Diffuse and specular reflection roughness",
+                        "type": "number"
+                    },
+                    "sheen": {
+                        "description": "Sheen effect weight (fabric-like effect such as satin or velvet)",
+                        "type": "number"
+                    },
+                    "sheen_color": {
+                        "description": "Sheen color",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "sheen_roughness": {
+                        "description": "Sheen diffuse/specular reflection roughness",
+                        "type": "number"
+                    },
+                    "sheen_tint": {
+                        "description": "Strenght of sheen color (0 = white, 1 = sheen color)",
+                        "type": "number"
+                    },
+                    "specular": {
+                        "description": "Specular reflection/transmission weight",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "thickness": {
+                        "description": "Thickness of the object if thin = true",
+                        "type": "number"
+                    },
+                    "thin": {
+                        "description": "Specified wether the object is solid or thin (hollow)",
+                        "type": "boolean"
+                    },
+                    "transmission": {
+                        "description": "Specular transmission weight",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "transmission_color": {
+                        "description": "Transmission attenuation color",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "transmission_depth": {
+                        "description": "Distance from surface at which the color will equal transmission color",
+                        "type": "number"
+                    }
+                },
+                "additionalProperties": false
+            },
+            "model_id": {
+                "description": "ID of the model to apply the material",
+                "type": "integer",
+                "minimum": 0
+            }
+        },
+        "required": [
+            "material",
+            "model_id"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always
+null.
+
+----
+
 set-renderer-interactive
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -7036,6 +7371,39 @@ progress notifications.
                         "maxItems": 2
                     }
                 },
+                "additionalProperties": false
+            },
+            "metadata": {
+                "title": "ImageMetadata",
+                "description": "Metadata information to embed into the image",
+                "type": "object",
+                "properties": {
+                    "description": {
+                        "description": "Image description",
+                        "type": "string"
+                    },
+                    "keywords": {
+                        "description": "List of keywords to describe the image contents",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "title": {
+                        "description": "Image title",
+                        "type": "string"
+                    },
+                    "where_used": {
+                        "description": "Event (publication, website, panel, etc.) for what the image was created",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "description",
+                    "keywords",
+                    "title",
+                    "where_used"
+                ],
                 "additionalProperties": false
             },
             "renderer": {

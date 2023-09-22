@@ -47,7 +47,7 @@ material
 --------
 
 .. automodule:: brayns.core.material
-    :members: CarPaintMaterial, EmissiveMaterial, get_material_name, get_material, GhostMaterial, GlassMaterial, Material, MatteMaterial, MetalMaterial, PhongMaterial, PlasticMaterial, set_material
+    :members: CarPaintMaterial, EmissiveMaterial, get_material_name, get_material, GhostMaterial, GlassMaterial, Material, MatteMaterial, MetalMaterial, PhongMaterial, PlasticMaterial, PrincipledMaterial, set_material
     :undoc-members:
     :show-inheritance:
 
@@ -163,18 +163,18 @@ image
     :undoc-members:
     :show-inheritance:
 
+snapshot
+--------
+
+.. automodule:: brayns.core.snapshot
+    :members: ImageMetadata, Snapshot
+    :undoc-members:
+    :show-inheritance:
+
 pick
 ----
 
 .. automodule:: brayns.core.pick
     :members: pick, PickResult
-    :undoc-members:
-    :show-inheritance:
-
-snapshot
---------
-
-.. automodule:: brayns.core.snapshot
-    :members: Snapshot
     :undoc-members:
     :show-inheritance:
