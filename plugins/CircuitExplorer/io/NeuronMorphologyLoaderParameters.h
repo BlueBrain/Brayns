@@ -22,7 +22,6 @@
 
 #include <brayns/json/Json.h>
 
-#include <api/neuron/NeuronBuildType.h>
 #include <api/neuron/NeuronGeometryType.h>
 
 struct NeuronMorphologyLoaderParameters
@@ -31,7 +30,6 @@ struct NeuronMorphologyLoaderParameters
     bool load_soma = false;
     bool load_axon = false;
     bool load_dendrites = false;
-    NeuronBuildType load_type = NeuronBuildType::ConnectedSegments;
     NeuronGeometryType geometry_type = NeuronGeometryType::Original;
     float resampling = 0;
     uint32_t subsampling = 1;
@@ -39,14 +37,6 @@ struct NeuronMorphologyLoaderParameters
 
 namespace brayns
 {
-template<>
-struct EnumReflector<NeuronBuildType>
-{
-    static EnumMap<NeuronBuildType> reflect()
-    {
-        return {{"connected_segments", NeuronBuildType::ConnectedSegments}, {"samples", NeuronBuildType::Samples}};
-    }
-};
 
 template<>
 struct EnumReflector<NeuronGeometryType>
@@ -57,7 +47,8 @@ struct EnumReflector<NeuronGeometryType>
             {"original", NeuronGeometryType::Original},
             {"smooth", NeuronGeometryType::Smooth},
             {"section_smooth", NeuronGeometryType::SectionSmooth},
-            {"constant_radii", NeuronGeometryType::ConstantRadii}};
+            {"constant_radii", NeuronGeometryType::ConstantRadii},
+            {"spheres", NeuronGeometryType::Spheres}};
     }
 };
 
@@ -101,13 +92,6 @@ struct JsonAdapter<NeuronMorphologyLoaderParameters> : ObjectAdapter<NeuronMorph
                 [](auto &object, auto value) { object.load_dendrites = value; })
             .description("Load the dendrites section of the neuron")
             .defaultValue(false);
-        builder
-            .getset(
-                "build_type",
-                [](auto &object) { return object.build_type; },
-                [](auto &object, auto value) { object.load_type = value; })
-            .description("Morhology build method")
-            .defaultValue(NeuronBuildType::ConnectedSegments);
         builder
             .getset(
                 "geometry_type",

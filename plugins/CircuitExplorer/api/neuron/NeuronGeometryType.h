@@ -25,5 +25,6 @@ enum class NeuronGeometryType
     Original,
     Smooth,
     SectionSmooth,
-    ConstantRadii
+    ConstantRadii,
+    Spheres,
 };

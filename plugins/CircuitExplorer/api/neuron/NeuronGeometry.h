@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <brayns/engine/geometry/types/Capsule.h>
-
 #include "NeuronSection.h"
 
 #include <vector>
@@ -40,9 +38,10 @@ struct SectionSegmentMapping
     size_t end;
 };
 
+template<typename PrimitiveType>
 struct NeuronGeometry
 {
-    std::vector<brayns::Capsule> primitives;
+    std::vector<PrimitiveType> primitives;
     std::vector<SectionTypeMapping> sectionTypeMapping;
     std::vector<SectionSegmentMapping> sectionSegmentMapping;
 };

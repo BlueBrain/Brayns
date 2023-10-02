@@ -18,19 +18,23 @@
 
 #pragma once
 
-#include "NeuronGeometryInstantiator.h"
+#include <api/neuron/NeuronBuilder.h>
 
-/**
- * @brief The NeuronGeometryBuilder class transform a Morphology object into primitive geometry
- */
-class INeuronGeometryBuilder
+#include <brayns/engine/geometry/types/Sphere.h>
+
+template<>
+class NeuronGeometryBuilder<brayns::Sphere>
 {
 public:
-    virtual ~INeuronGeometryBuilder() = default;
+    static NeuronGeometry<brayns::Sphere> build(const NeuronMorphology &morphology);
+};
 
-    /**
-     * @brief Builds the geometry from the given morphology
-     * @param morphology The morphology to transform into geometry
-     */
-    virtual NeuronGeometryInstantiator build(const NeuronMorphology &morphology) const = 0;
+template<>
+class NeuronGeometryInstantiator<brayns::Sphere>
+{
+public:
+    static NeuronGeometry<brayns::Sphere> instantiate(
+        const NeuronGeometry<brayns::Sphere> &source,
+        const brayns::Vector3f &translation,
+        const brayns::Quaternion &rotation);
 };

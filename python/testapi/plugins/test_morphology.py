@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.render import render_and_validate
+from testapi.render import render_and_validate, render_and_save
 from testapi.simple_test_case import SimpleTestCase
 
 
@@ -57,6 +57,15 @@ class TestMorphology(SimpleTestCase):
             brayns.Morphology(
                 load_dendrites=True,
                 geometry_type=brayns.GeometryType.CONSTANT_RADII,
+            ),
+        )
+
+    def test_spheres(self) -> None:
+        self.run_tests(
+            "spheres",
+            brayns.Morphology(
+                load_dendrites=True,
+                geometry_type=brayns.GeometryType.SPHERES,
             ),
         )
 

@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SphereBuilder.h"
+#include "NeuronSphereBuilder.h"
 
 #include "Common.h"
 
@@ -39,14 +39,12 @@ public:
 class SomaBuilder
 {
 public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
+    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Sphere> &dst)
     {
         const auto &soma = morphology.soma();
         const auto &somaCenter = soma.center;
         const auto somaRadius = soma.radius;
-        auto somaSphere = brayns::CapsuleFactory::sphere(somaCenter, somaRadius);
-
-        dst.primitives.push_back(somaSphere);
+        dst.primitives.push_back(brayns::Sphere(somaCenter, somaRadius));
         dst.sectionSegmentMapping.push_back({-1, 0, 1});
         dst.sectionTypeMapping.push_back({NeuronSection::Soma, 0, 1});
     }
@@ -55,17 +53,16 @@ public:
 class SphereNeuriteBuilder
 {
 public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
+    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Sphere> &dst)
     {
-        NeuriteBuilder::build(
+        NeuriteBuilder::build<brayns::Sphere>(
             morphology,
             dst,
-            [](const std::vector<NeuronMorphology::SectionSample> &samples, std::vector<brayns::Capsule> &primitives)
+            [](auto &samples, auto &primitives)
             {
                 for (auto &sample : samples)
                 {
-                    auto sampleGeometry = brayns::CapsuleFactory::sphere(sample.position, sample.radius);
-                    primitives.push_back(sampleGeometry);
+                    primitives.push_back(brayns::Sphere(sample.position, sample.radius));
                 }
             });
     }
@@ -73,11 +70,24 @@ public:
 
 } // namespace
 
-NeuronGeometryInstantiator ConnectedBuilder::build(const NeuronMorphology &morphology) const
+NeuronGeometry<brayns::Sphere> NeuronGeometryBuilder<brayns::Sphere>::build(const NeuronMorphology &morphology)
 {
-    return NeuronGeometryInstantiator(NeuronBuilder::build(
+    return NeuronBuilder::build<brayns::Sphere>(
         morphology,
         [](auto &morhpology) { return PrimitiveAllocationSize::compute(morhpology); },
         [](auto &morphology, auto &geometry) { SomaBuilder::build(morphology, geometry); },
-        [](auto &morphology, auto &geometry) { SphereNeuriteBuilder::build(morphology, geometry); }));
+        [](auto &morphology, auto &geometry) { SphereNeuriteBuilder::build(morphology, geometry); });
+}
+
+NeuronGeometry<brayns::Sphere> NeuronGeometryInstantiator<brayns::Sphere>::instantiate(
+    const NeuronGeometry<brayns::Sphere> &source,
+    const brayns::Vector3f &translation,
+    const brayns::Quaternion &rotation)
+{
+    auto copy = source;
+    for (auto &sphere : copy.primitives)
+    {
+        sphere.center = translation + brayns::math::xfmPoint(rotation, sphere.center);
+    }
+    return copy;
 }

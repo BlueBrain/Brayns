@@ -16,21 +16,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Common.h"
+#pragma once
 
-std::unordered_map<NeuronSection, std::vector<std::size_t>> NeuriteBuilder::_groupSections(
-    const NeuronMorphology &morphology)
+#include <api/neuron/NeuronBuilder.h>
+
+#include <brayns/engine/geometry/types/Capsule.h>
+
+template<>
+class NeuronGeometryBuilder<brayns::Capsule>
 {
-    std::unordered_map<NeuronSection, std::vector<std::size_t>> sortedSections;
+public:
+    static NeuronGeometry<brayns::Capsule> build(const NeuronMorphology &morphology);
+};
 
-    auto &sections = morphology.sections();
-    for (std::size_t sectionIndex = 0; sectionIndex < sections.size(); ++sectionIndex)
-    {
-        auto &section = sections[sectionIndex];
-        auto sectionType = section.type;
-        auto &sectionBuffer = sortedSections[sectionType];
-        sectionBuffer.push_back(sectionIndex);
-    }
-
-    return sortedSections;
-}
+template<>
+class NeuronGeometryInstantiator<brayns::Capsule>
+{
+public:
+    static NeuronGeometry<brayns::Capsule> instantiate(
+        const NeuronGeometry<brayns::Capsule> &source,
+        const brayns::Vector3f &translation,
+        const brayns::Quaternion &rotation);
+};

@@ -32,9 +32,10 @@
 #include <api/coloring/methods/BrainDatasetColorMethod.h>
 #include <api/coloring/methods/IdColorMethod.h>
 #include <api/coloring/methods/MorphologySectionTypeColorMethod.h>
-#include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
+#include <api/neuron/builders/NeuronCapsuleBuilder.h>
+#include <api/neuron/builders/NeuronSphereBuilder.h>
 #include <components/BrainColorData.h>
 #include <components/CircuitIds.h>
 #include <components/ColorHandler.h>
@@ -47,27 +48,16 @@
 
 namespace
 {
-struct MorphologyMap
-{
-    size_t cellCount{};
-    std::unordered_map<std::string, std::vector<size_t>> pathToCellIndices;
-};
-
 class MorphologyMapBuilder
 {
 public:
-    static MorphologyMap build(const std::vector<std::string> &paths)
+    static std::unordered_map<std::string, std::vector<size_t>> build(const std::vector<std::string> &paths)
     {
-        MorphologyMap result;
-        result.cellCount = paths.size();
-
-        auto &mapping = result.pathToCellIndices;
-
+        auto result = std::unordered_map<std::string, std::vector<size_t>>();
         for (size_t i = 0; i < paths.size(); ++i)
         {
-            mapping[paths[i]].push_back(i);
+            result[paths[i]].push_back(i);
         }
-
         return result;
     }
 };
@@ -77,15 +67,15 @@ class ParallelMorphologyLoader
 public:
     static inline constexpr size_t maxThreads = 800;
 
-    static std::vector<NeuronGeometry> load(
-        const MorphologyMap &morphologyMap,
+    template<typename PrimitiveType>
+    static std::vector<NeuronGeometry<PrimitiveType>> load(
+        const std::unordered_map<std::string, std::vector<size_t>> &morphologyMap,
         const NeuronMorphologyLoaderParameters &morphologyParameters,
         const std::vector<brayns::Vector3f> &positions,
         const std::vector<brayns::Quaternion> &rotations,
         ProgressUpdater &progressUpdater)
     {
-        auto cellCount = morphologyMap.cellCount;
-        auto morphologies = std::vector<NeuronGeometry>(cellCount);
+        auto morphologies = std::vector<NeuronGeometry<PrimitiveType>>(positions.size());
 
         auto soma = morphologyParameters.load_soma;
         auto axon = morphologyParameters.load_axon;
@@ -97,20 +87,19 @@ public:
             auto morphology = NeuronMorphologyReader::read(path, soma, axon, dendrites);
             pipeline.process(morphology);
 
-            auto builder = NeuronGeometryBuilder(morphology);
+            auto baseGeometry = NeuronGeometryBuilder<PrimitiveType>::build(morphology);
 
             for (auto idx : indices)
             {
-                morphologies[idx] = builder.instantiate(positions[idx], rotations[idx]);
+                morphologies[idx] =
+                    NeuronGeometryInstantiator<PrimitiveType>::instantiate(baseGeometry, positions[idx], rotations[idx]);
             }
         };
 
         auto updateMessage = std::string("Loading neurons");
-        auto &pathToCellIndexMap = morphologyMap.pathToCellIndices;
-
         auto loadTasks = std::deque<std::future<void>>();
 
-        for (auto &[path, cellIndices] : pathToCellIndexMap)
+        for (auto &[path, cellIndices] : morphologyMap)
         {
             if (loadTasks.size() == maxThreads)
             {
@@ -148,7 +137,8 @@ public:
         _components.add<CircuitIds>(std::move(ids));
     }
 
-    void addGeometry(std::vector<std::vector<brayns::Capsule>> primitivesList)
+    template<typename PrimitiveType>
+    void addGeometry(std::vector<std::vector<PrimitiveType>> primitivesList)
     {
         _components.add<brayns::Geometries>(std::move(primitivesList));
         _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
@@ -183,12 +173,14 @@ public:
 
     void addDefaultColor()
     {
+        // Neurons are yellow
         if (_modelType == ModelType::neurons)
         {
             _components.add<brayns::ColorSolid>(brayns::Vector4f(1.f, 1.f, 0.f, 1.f));
             return;
         }
 
+        // Astrocytes are blue
         _components.add<brayns::ColorSolid>(brayns::Vector4f(0.55f, 0.7f, 1.f, 1.f));
     }
 
@@ -197,6 +189,64 @@ private:
     brayns::Systems &_systems;
     const std::string &_modelType;
 };
+
+template<typename PrimitiveType>
+class Builder
+{
+public:
+    static std::vector<CellCompartments> build(
+        brayns::Model &model,
+        MorphologyCircuitBuilder::Context context,
+        ProgressUpdater &updater)
+    {
+        auto morphologies = ParallelMorphologyLoader::load<PrimitiveType>(
+            MorphologyMapBuilder::build(context.morphologyPaths),
+            context.morphologyParams,
+            context.positions,
+            context.rotations,
+            updater);
+
+        auto sectionTypeMappings = std::vector<std::vector<SectionTypeMapping>>();
+        auto compartments = std::vector<CellCompartments>();
+        auto geometries = std::vector<std::vector<PrimitiveType>>();
+        sectionTypeMappings.reserve(morphologies.size());
+        compartments.reserve(morphologies.size());
+        geometries.reserve(morphologies.size());
+
+        for (auto &morphology : morphologies)
+        {
+            sectionTypeMappings.push_back(std::move(morphology.sectionTypeMapping));
+            compartments.push_back({morphology.primitives.size(), std::move(morphology.sectionSegmentMapping)});
+            geometries.push_back(std::move(morphology.primitives));
+        }
+
+        auto builder = ModelBuilder(model);
+        builder.addIds(std::move(context.ids));
+        builder.addGeometry(std::move(geometries));
+        builder.addNeuronSections(std::move(sectionTypeMappings));
+        builder.addColoring(std::move(context.colorData));
+        builder.addDefaultColor();
+
+        return compartments;
+    }
+};
+
+class BuildDispatcher
+{
+public:
+    static std::vector<CellCompartments> dispatch(
+        brayns::Model &model,
+        MorphologyCircuitBuilder::Context context,
+        ProgressUpdater &updater)
+    {
+        auto geometryType = context.morphologyParams.geometry_type;
+        if (geometryType == NeuronGeometryType::Spheres)
+        {
+            return Builder<brayns::Sphere>::build(model, std::move(context), updater);
+        }
+        return Builder<brayns::Capsule>::build(model, std::move(context), updater);
+    }
+};
 }
 
 std::vector<CellCompartments> MorphologyCircuitBuilder::build(
@@ -204,40 +254,5 @@ std::vector<CellCompartments> MorphologyCircuitBuilder::build(
     Context context,
     ProgressUpdater &updater)
 {
-    auto &morphPaths = context.morphologyPaths;
-    auto &morphParams = context.morphologyParams;
-    auto &positions = context.positions;
-    auto &rotations = context.rotations;
-
-    auto morphologyPathMap = MorphologyMapBuilder::build(morphPaths);
-    auto morphologies = ParallelMorphologyLoader::load(morphologyPathMap, morphParams, positions, rotations, updater);
-
-    auto sectionTypeMappings = std::vector<std::vector<SectionTypeMapping>>();
-    sectionTypeMappings.reserve(morphologies.size());
-
-    auto compartments = std::vector<CellCompartments>();
-    compartments.reserve(morphologies.size());
-
-    auto geometries = std::vector<std::vector<brayns::Capsule>>();
-    geometries.reserve(morphologies.size());
-
-    for (auto &morphology : morphologies)
-    {
-        auto &sectionTypeMapping = morphology.sectionTypeMapping;
-        auto &sectionSegmentMapping = morphology.sectionSegmentMapping;
-        auto &geometry = morphology.geometry;
-
-        sectionTypeMappings.push_back(std::move(sectionTypeMapping));
-        compartments.push_back({geometry.size(), std::move(sectionSegmentMapping)});
-        geometries.push_back(std::move(geometry));
-    }
-
-    auto builder = ModelBuilder(model);
-    builder.addIds(std::move(context.ids));
-    builder.addGeometry(std::move(geometries));
-    builder.addNeuronSections(std::move(sectionTypeMappings));
-    builder.addColoring(std::move(context.colorData));
-    builder.addDefaultColor();
-
-    return compartments;
+    return BuildDispatcher::dispatch(model, std::move(context), updater);
 }

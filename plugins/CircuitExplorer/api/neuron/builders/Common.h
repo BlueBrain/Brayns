@@ -24,9 +24,9 @@
 #include <concepts>
 #include <unordered_map>
 
-template<typename T>
+template<typename T, typename PrimitiveType>
 concept GeometryGenerationCallaback =
-    std::invocable<T, const std::vector<NeuronMorphology::SectionSample> &, std::vector<brayns::Capsule> &>;
+    std::invocable<T, const std::vector<NeuronMorphology::SectionSample> &, std::vector<PrimitiveType> &>;
 
 /**
  * Generates the neurites geometry (through a callback) and the associated data structures for section and
@@ -35,17 +35,19 @@ concept GeometryGenerationCallaback =
 class NeuriteBuilder
 {
 public:
-    template<GeometryGenerationCallaback Callback>
-    static void build(const NeuronMorphology &morphology, NeuronGeometry &geometry, Callback &&geometryGenerator)
+    template<typename PrimitiveType, GeometryGenerationCallaback<PrimitiveType> Callback>
+    static void build(
+        const NeuronMorphology &morphology,
+        NeuronGeometry<PrimitiveType> &geometry,
+        Callback &&geometryGenerator)
     {
         auto &sectionSegments = geometry.sectionSegmentMapping;
         auto &sectionTypes = geometry.sectionTypeMapping;
-        auto &primitives = geometry.geometry;
+        auto &primitives = geometry.primitives;
 
         auto &sections = morphology.sections();
 
-        // Group sections by section type
-        auto groupedSections = _groupSections(morphology);
+        auto groupedSections = _groupSectionsByType(morphology);
 
         // Add section geometry, grouped by section type
         for (auto &[sectionType, sectionIndices] : groupedSections)
@@ -78,14 +80,28 @@ public:
     }
 
 private:
-    static std::unordered_map<NeuronSection, std::vector<std::size_t>> _groupSections(
-        const NeuronMorphology &morphology);
+    static std::unordered_map<NeuronSection, std::vector<std::size_t>> _groupSectionsByType(
+        const NeuronMorphology &morphology)
+    {
+        std::unordered_map<NeuronSection, std::vector<std::size_t>> sortedSections;
+
+        auto &sections = morphology.sections();
+        for (std::size_t sectionIndex = 0; sectionIndex < sections.size(); ++sectionIndex)
+        {
+            auto &section = sections[sectionIndex];
+            auto sectionType = section.type;
+            auto &sectionBuffer = sortedSections[sectionType];
+            sectionBuffer.push_back(sectionIndex);
+        }
+
+        return sortedSections;
+    }
 };
 
 template<typename T>
 concept PrimitiveAllocationSizer = std::invocable<T, const NeuronMorphology &>;
-template<typename T>
-concept PartBuilder = std::invocable<T, const NeuronMorphology &, NeuronGeometry &>;
+template<typename T, typename PrimitiveType>
+concept PartBuilder = std::invocable<T, const NeuronMorphology &, NeuronGeometry<PrimitiveType> &>;
 
 /**
  * Generates the neuron geometry from a neuron morphology, given a primitive counter for size allocation calculation,
@@ -94,8 +110,12 @@ concept PartBuilder = std::invocable<T, const NeuronMorphology &, NeuronGeometry
 class NeuronBuilder
 {
 public:
-    template<PrimitiveAllocationSizer Sizer, PartBuilder SomaBuilder, PartBuilder NeuriteBuilder>
-    static NeuronGeometry build(
+    template<
+        typename PrimitiveType,
+        PrimitiveAllocationSizer Sizer,
+        PartBuilder<PrimitiveType> SomaBuilder,
+        PartBuilder<PrimitiveType> NeuriteBuilder>
+    static NeuronGeometry<PrimitiveType> build(
         const NeuronMorphology &morphology,
         const Sizer &sizer,
         const SomaBuilder &somaBuilder,
@@ -105,12 +125,12 @@ public:
         auto numPrimitives = sizer(morphology);
         auto numSections = morphology.sections().size() + (hasSoma ? 1 : 0);
 
-        auto dst = NeuronGeometry();
-        auto &geometry = dst.geometry;
+        auto dst = NeuronGeometry<PrimitiveType>();
+        auto &primitives = dst.primitives;
         auto &sectionTypes = dst.sectionTypeMapping;
         auto &sectionSegments = dst.sectionSegmentMapping;
 
-        geometry.reserve(numPrimitives);
+        primitives.reserve(numPrimitives);
         sectionTypes.reserve(4);
         sectionSegments.reserve(numSections);
 

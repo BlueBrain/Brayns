@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ConnectedBuilder.h"
+#include "NeuronCapsuleBuilder.h"
 
 #include "Common.h"
 
@@ -58,34 +58,34 @@ public:
 class SomaBuilder
 {
 public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
+    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Capsule> &dst)
     {
         auto &primitives = dst.primitives;
         auto &sectionSegments = dst.sectionSegmentMapping;
         auto &sectionTypes = dst.sectionTypeMapping;
 
-        const auto &sections = morphology.sections();
-        const auto &soma = morphology.soma();
+        auto &sections = morphology.sections();
+        auto &soma = morphology.soma();
 
-        const auto &somaCenter = soma.center;
-        const auto somaRadius = soma.radius;
-        auto somaSphere = brayns::CapsuleFactory::sphere(somaCenter, somaRadius);
-        primitives.push_back(somaSphere);
+        // Add a sphere for the soma
+        auto &somaCenter = soma.center;
+        auto somaRadius = soma.radius;
+        primitives.push_back(brayns::CapsuleFactory::sphere(somaCenter, somaRadius));
 
-        const auto somaChildren = morphology.sectionChildrenIndices(-1);
-        for (const auto childIndex : somaChildren)
+        // Add a cone capsule towards each direct child section
+        auto somaChildren = morphology.sectionChildrenIndices(-1);
+        for (auto childIndex : somaChildren)
         {
-            const auto &child = sections[childIndex];
+            auto &child = sections[childIndex];
             if (child.samples.empty())
             {
                 continue;
             }
 
-            const auto &childFirstSample = child.samples[0];
-            const auto &samplePos = childFirstSample.position;
-            const auto sampleRadius = childFirstSample.radius;
-            auto somaCone = brayns::CapsuleFactory::cone(somaCenter, somaRadius, samplePos, sampleRadius);
-            primitives.push_back(somaCone);
+            auto &childFirstSample = child.samples[0];
+            auto &samplePos = childFirstSample.position;
+            auto sampleRadius = childFirstSample.radius;
+            primitives.push_back(brayns::CapsuleFactory::cone(somaCenter, somaRadius, samplePos, sampleRadius));
         }
 
         auto end = primitives.size();
@@ -97,9 +97,9 @@ public:
 class ConnectedNeuriteBuilder
 {
 public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry &dst)
+    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Capsule> &dst)
     {
-        NeuriteBuilder::build(
+        NeuriteBuilder::build<brayns::Capsule>(
             morphology,
             dst,
             [](const auto &samples, auto &primitives)
@@ -114,8 +114,7 @@ public:
                     auto &p2 = s2.position;
                     auto r2 = s2.radius;
 
-                    auto segmentGeometry = brayns::CapsuleFactory::cone(p1, r1, p2, r2);
-                    primitives.push_back(segmentGeometry);
+                    primitives.push_back(brayns::CapsuleFactory::cone(p1, r1, p2, r2));
                 }
             });
     }
@@ -123,11 +122,25 @@ public:
 
 } // namespace
 
-NeuronGeometryInstantiator ConnectedBuilder::build(const NeuronMorphology &morphology) const
+NeuronGeometry<brayns::Capsule> NeuronGeometryBuilder<brayns::Capsule>::build(const NeuronMorphology &morphology)
 {
-    return NeuronGeometryInstantiator(NeuronBuilder::build(
+    return NeuronBuilder::build<brayns::Capsule>(
         morphology,
         [](auto &morhpology) { return PrimitiveAllocationSize::compute(morhpology); },
         [](auto &morphology, auto &geometry) { SomaBuilder::build(morphology, geometry); },
-        [](auto &morphology, auto &geometry) { ConnectedNeuriteBuilder::build(morphology, geometry); }));
+        [](auto &morphology, auto &geometry) { ConnectedNeuriteBuilder::build(morphology, geometry); });
+}
+
+NeuronGeometry<brayns::Capsule> NeuronGeometryInstantiator<brayns::Capsule>::instantiate(
+    const NeuronGeometry<brayns::Capsule> &source,
+    const brayns::Vector3f &translation,
+    const brayns::Quaternion &rotation)
+{
+    auto copy = source;
+    for (auto &primitive : copy.primitives)
+    {
+        primitive.p0 = translation + brayns::math::xfmPoint(rotation, primitive.p0);
+        primitive.p1 = translation + brayns::math::xfmPoint(rotation, primitive.p1);
+    }
+    return copy;
 }
