@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.render import render_and_validate, render_and_save
+from testapi.render import render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
 
