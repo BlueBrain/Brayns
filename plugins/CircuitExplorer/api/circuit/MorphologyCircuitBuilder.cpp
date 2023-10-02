@@ -48,7 +48,10 @@
 
 namespace
 {
-class MorphologyMapBuilder
+/**
+ * @brief builds a map of morphology file paths to all the morphology indices that uses such file.
+ */
+class MorphologyPathMap
 {
 public:
     static std::unordered_map<std::string, std::vector<size_t>> build(const std::vector<std::string> &paths)
@@ -62,6 +65,9 @@ public:
     }
 };
 
+/**
+ * @brief Reads the morphology files and transform them into geometry.
+ */
 class ParallelMorphologyLoader
 {
 public:
@@ -122,6 +128,9 @@ public:
     }
 };
 
+/**
+ * Builder pattern with all needed steps to create a model with a neuron/astrocyte circuit on it.
+ */
 class ModelBuilder
 {
 public:
@@ -190,6 +199,45 @@ private:
     const std::string &_modelType;
 };
 
+/**
+ * @brief Flattens the morphology data into separate containers.
+ */
+template<typename PrimitiveType>
+class DataFlattener
+{
+public:
+    struct FlatData
+    {
+        std::vector<std::vector<SectionTypeMapping>> sectionTypeMappings;
+        std::vector<CellCompartments> compartments;
+        std::vector<std::vector<PrimitiveType>> geometries;
+
+        FlatData(std::size_t size)
+        {
+            sectionTypeMappings.reserve(size);
+            compartments.reserve(size);
+            geometries.reserve(size);
+        }
+
+        void flattenElement(NeuronGeometry<PrimitiveType> &element)
+        {
+            sectionTypeMappings.push_back(std::move(element.sectionTypeMapping));
+            compartments.push_back({element.primitives.size(), std::move(element.sectionSegmentMapping)});
+            geometries.push_back(std::move(element.primitives));
+        }
+    };
+
+    static FlatData flatten(std::vector<NeuronGeometry<PrimitiveType>> &input)
+    {
+        auto flatData = FlatData(input.size());
+        for (auto &element : input)
+        {
+            flatData.flattenElement(element);
+        }
+        return flatData;
+    }
+};
+
 template<typename PrimitiveType>
 class Builder
 {
@@ -200,34 +248,22 @@ public:
         ProgressUpdater &updater)
     {
         auto morphologies = ParallelMorphologyLoader::load<PrimitiveType>(
-            MorphologyMapBuilder::build(context.morphologyPaths),
+            MorphologyPathMap::build(context.morphologyPaths),
             context.morphologyParams,
             context.positions,
             context.rotations,
             updater);
 
-        auto sectionTypeMappings = std::vector<std::vector<SectionTypeMapping>>();
-        auto compartments = std::vector<CellCompartments>();
-        auto geometries = std::vector<std::vector<PrimitiveType>>();
-        sectionTypeMappings.reserve(morphologies.size());
-        compartments.reserve(morphologies.size());
-        geometries.reserve(morphologies.size());
-
-        for (auto &morphology : morphologies)
-        {
-            sectionTypeMappings.push_back(std::move(morphology.sectionTypeMapping));
-            compartments.push_back({morphology.primitives.size(), std::move(morphology.sectionSegmentMapping)});
-            geometries.push_back(std::move(morphology.primitives));
-        }
+        auto data = DataFlattener<PrimitiveType>::flatten(morphologies);
 
         auto builder = ModelBuilder(model);
         builder.addIds(std::move(context.ids));
-        builder.addGeometry(std::move(geometries));
-        builder.addNeuronSections(std::move(sectionTypeMappings));
+        builder.addGeometry(std::move(data.geometries));
+        builder.addNeuronSections(std::move(data.sectionTypeMappings));
         builder.addColoring(std::move(context.colorData));
         builder.addDefaultColor();
 
-        return compartments;
+        return data.compartments;
     }
 };
 
