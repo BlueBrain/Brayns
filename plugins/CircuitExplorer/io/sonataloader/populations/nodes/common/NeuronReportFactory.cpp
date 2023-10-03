@@ -236,16 +236,14 @@ public:
         const std::vector<CellCompartments> &compartments)
     {
         auto &callback = context.progress;
+        callback.update();
 
         auto &params = context.params;
         auto reportType = params.report_type;
         if (reportType == sl::ReportType::Spikes)
         {
-            callback.update("Loading spikes");
             return SpikeReportData::create(context, compartments);
         }
-
-        callback.update("Loading compartment report");
         return CompartmentReportData::create(context, compartments);
     }
 };

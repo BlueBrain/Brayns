@@ -39,7 +39,7 @@ public:
     static ProgressUpdater create(const brayns::LoaderProgress &callback, const SonataLoaderParameters &params)
     {
         auto numSteps = _computeNumSteps(params);
-        return ProgressUpdater(callback, numSteps);
+        return ProgressUpdater(callback, numSteps, 0.5f);
     }
 
 private:
@@ -105,7 +105,8 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
         auto &nodeName = nodeParams.node_population;
         brayns::Log::info("[CE] - Loading {} node population.", nodeName);
 
-        progress.beginStage(2);
+        auto nodeMessage = nodeName + " nodes load";
+        progress.beginStage(nodeMessage, 2);
         auto nodes = config.getNodes(nodeName);
         auto nodeSelection = sl::NodeSelector::select(config, nodeParams);
         auto nodeModelType = sl::ModelTypeFinder::fromNodes(nodes, config);
@@ -120,7 +121,8 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
             auto &edgeName = edgeParams.edge_population;
             brayns::Log::info("[CE] - Loading {} edge population.", edgeName);
 
-            progress.beginStage(2);
+            auto edgeMessage = edgeName + " edges load";
+            progress.beginStage(edgeMessage, 2);
             auto edges = config.getEdges(edgeName);
             auto edgeSelection = sl::EdgeSelector::select(config, edgeParams, nodeSelection);
             auto edgeModelType = sl::ModelTypeFinder::fromEdges(edges, edgeParams.load_afferent, config);
@@ -132,6 +134,8 @@ std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
             progress.endStage();
         }
     }
+
+    progress.end("Generating rendering structures. Might take a while");
 
     auto time = timer.seconds();
     brayns::Log::info("[CE] {}: done in {} second(s).", getName(), time);

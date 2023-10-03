@@ -115,10 +115,12 @@ public:
 
         auto model = std::make_shared<brayns::Model>(ModelType::neurons);
 
-        updater.beginStage(selection.flatSize());
+        updater.beginStage("Morphology load", selection.flatSize());
         MorphologyCircuitBuilder::build(*model, std::move(context), updater);
         sonataloader::NeuronMetadataFactory::create(*model, info.name);
         updater.endStage();
+
+        updater.end("Generating rendering structures. Might take a while");
 
         return model;
     }
