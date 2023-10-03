@@ -60,6 +60,15 @@ class TestMorphology(SimpleTestCase):
             ),
         )
 
+    def test_spheres(self) -> None:
+        self.run_tests(
+            "spheres",
+            brayns.Morphology(
+                load_dendrites=True,
+                geometry_type=brayns.GeometryType.SPHERES,
+            ),
+        )
+
     def test_resampling(self) -> None:
         self.run_tests(
             "resampling",

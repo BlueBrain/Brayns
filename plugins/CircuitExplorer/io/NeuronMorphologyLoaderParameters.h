@@ -37,6 +37,7 @@ struct NeuronMorphologyLoaderParameters
 
 namespace brayns
 {
+
 template<>
 struct EnumReflector<NeuronGeometryType>
 {
@@ -46,7 +47,8 @@ struct EnumReflector<NeuronGeometryType>
             {"original", NeuronGeometryType::Original},
             {"smooth", NeuronGeometryType::Smooth},
             {"section_smooth", NeuronGeometryType::SectionSmooth},
-            {"constant_radii", NeuronGeometryType::ConstantRadii}};
+            {"constant_radii", NeuronGeometryType::ConstantRadii},
+            {"spheres", NeuronGeometryType::Spheres}};
     }
 };
 

@@ -37,6 +37,7 @@ class GeometryType(Enum):
     SMOOTH = "smooth"
     SECTION_SMOOTH = "section_smooth"
     CONSTANT_RADII = "constant_radii"
+    SPHERES = "spheres"
 
 
 @dataclass

@@ -23,7 +23,6 @@
 
 #include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/geometry/types/Capsule.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
 #include <brayns/engine/systems/GenericColorSystem.h>
 #include <brayns/engine/systems/GeometryDataSystem.h>
@@ -32,9 +31,10 @@
 #include <api/coloring/handlers/ComposedColorHandler.h>
 #include <api/coloring/methods/MorphologySectionColorMethod.h>
 #include <api/coloring/methods/MorphologySectionTypeColorMethod.h>
-#include <api/neuron/NeuronGeometryBuilder.h>
 #include <api/neuron/NeuronMorphologyPipeline.h>
 #include <api/neuron/NeuronMorphologyReader.h>
+#include <api/neuron/builders/NeuronCapsuleBuilder.h>
+#include <api/neuron/builders/NeuronSphereBuilder.h>
 #include <components/ColorHandler.h>
 #include <components/NeuronSectionGeometryMap.h>
 #include <components/NeuronSectionType.h>
@@ -63,7 +63,8 @@ public:
     {
     }
 
-    void addGeometry(std::vector<brayns::Capsule> primitives)
+    template<typename PrimitiveType>
+    void addGeometry(std::vector<PrimitiveType> primitives)
     {
         _components.add<brayns::Geometries>(std::move(primitives));
         _systems.setBoundsSystem<brayns::GenericBoundsSystem<brayns::Geometries>>();
@@ -92,6 +93,47 @@ public:
 private:
     brayns::Components &_components;
     brayns::Systems &_systems;
+};
+
+class Loader
+{
+public:
+    template<typename PrimitiveType>
+    static std::shared_ptr<brayns::Model> load(const std::string &path, const NeuronMorphologyLoaderParameters &input)
+    {
+        auto morphology = NeuronMorphologyReader::read(path, input.load_soma, input.load_axon, input.load_dendrites);
+
+        auto pipeline = NeuronMorphologyPipeline::fromParameters(input);
+        pipeline.process(morphology);
+
+        auto neuronGeometry = NeuronGeometryBuilder<PrimitiveType>::build(morphology);
+
+        auto model = std::make_shared<brayns::Model>(ModelType::morphology);
+        auto builder = ModelBuilder(*model);
+        builder.addColoring(neuronGeometry.primitives.size());
+        builder.addGeometry(std::move(neuronGeometry.primitives));
+        builder.addSections(
+            std::move(neuronGeometry.sectionTypeMapping),
+            std::move(neuronGeometry.sectionSegmentMapping));
+
+        return model;
+    }
+};
+
+class LoadDispatcher
+{
+public:
+    static std::shared_ptr<brayns::Model> dispatch(
+        const std::string &path,
+        const NeuronMorphologyLoaderParameters &input)
+    {
+        auto asSpheres = input.geometry_type == NeuronGeometryType::Spheres;
+        if (asSpheres)
+        {
+            return Loader::load<brayns::Sphere>(path, input);
+        }
+        return Loader::load<brayns::Capsule>(path, input);
+    }
 };
 } // namespace
 
@@ -129,26 +171,7 @@ std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFi
     callback.updateProgress("Loading " + path, 0.f);
 
     SectionLoadChecker::check(input);
-
-    auto soma = input.load_soma;
-    auto axon = input.load_axon;
-    auto dend = input.load_dendrites;
-    NeuronMorphology morphology = NeuronMorphologyReader::read(path, soma, axon, dend);
-
-    auto pipeline = NeuronMorphologyPipeline::fromParameters(input);
-    pipeline.process(morphology);
-
-    auto neuronBuilder = NeuronGeometryBuilder(morphology);
-    auto neuronGeometry = neuronBuilder.instantiate({}, {});
-    auto &primitives = neuronGeometry.geometry;
-    auto &sectionTypeMapping = neuronGeometry.sectionTypeMapping;
-    auto &sectionGeometryMapping = neuronGeometry.sectionSegmentMapping;
-
-    auto model = std::make_shared<brayns::Model>(ModelType::morphology);
-    auto builder = ModelBuilder(*model);
-    builder.addColoring(primitives.size());
-    builder.addGeometry(std::move(primitives));
-    builder.addSections(std::move(sectionTypeMapping), std::move(sectionGeometryMapping));
+    auto model = LoadDispatcher::dispatch(path, input);
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());
 

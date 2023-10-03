@@ -1,8 +1,6 @@
 /* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
- *
- * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,28 +18,23 @@
 
 #pragma once
 
-#include "NeuronSection.h"
+#include <api/neuron/NeuronBuilder.h>
 
-#include <vector>
+#include <brayns/engine/geometry/types/Capsule.h>
 
-struct SectionTypeMapping
+template<>
+class NeuronGeometryBuilder<brayns::Capsule>
 {
-    NeuronSection type;
-    size_t begin;
-    size_t end;
+public:
+    static NeuronGeometry<brayns::Capsule> build(const NeuronMorphology &morphology);
 };
 
-struct SectionSegmentMapping
+template<>
+class NeuronGeometryInstantiator<brayns::Capsule>
 {
-    int32_t sectionId;
-    size_t begin;
-    size_t end;
-};
-
-template<typename PrimitiveType>
-struct NeuronGeometry
-{
-    std::vector<PrimitiveType> primitives;
-    std::vector<SectionTypeMapping> sectionTypeMapping;
-    std::vector<SectionSegmentMapping> sectionSegmentMapping;
+public:
+    static NeuronGeometry<brayns::Capsule> instantiate(
+        const NeuronGeometry<brayns::Capsule> &source,
+        const brayns::Vector3f &translation,
+        const brayns::Quaternion &rotation);
 };
