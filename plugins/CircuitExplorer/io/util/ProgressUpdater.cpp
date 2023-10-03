@@ -1,5 +1,7 @@
 #include "ProgressUpdater.h"
 
+#include <cassert>
+
 ProgressUpdater::ProgressUpdater(const brayns::LoaderProgress &callback, std::size_t numStages, float maxProgress):
     _callback(callback),
     _numStages(numStages),
@@ -12,10 +14,7 @@ ProgressUpdater::ProgressUpdater(const brayns::LoaderProgress &callback, std::si
 
 void ProgressUpdater::beginStage(std::string_view message, std::size_t numSubElements)
 {
-    if (_currentStageProgress > 0.f)
-    {
-        throw std::runtime_error("Missing call to endStage()");
-    }
+    assert(_currentStageProgress == 0.f);
 
     _currentMessage = std::string(message);
     _currentStageChunkSize = 1.f / static_cast<float>(numSubElements);
@@ -39,10 +38,7 @@ void ProgressUpdater::endStage()
 
 void ProgressUpdater::end(std::string_view message)
 {
-    if (_currentStage < _numStages)
-    {
-        throw std::runtime_error("Stages not completed before calling end()");
-    }
+    assert(_currentStage == _numStages);
 
     _callback.updateProgress(std::string(message), static_cast<float>(_numStages) * _stageSize);
 };
