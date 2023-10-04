@@ -137,13 +137,12 @@ public:
             return {};
         }
 
+        callback.update();
+
         if (reportType == bbploader::ReportType::Compartment)
         {
-            callback.update("Loading compartment report");
             return std::make_unique<CompartmentHandler>(context, compartments);
         }
-
-        callback.update("Loading spikes");
         return std::make_unique<SpikeHandler>(context, compartments);
     }
 };

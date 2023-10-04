@@ -93,7 +93,7 @@ public:
     static void create(sl::NodeLoadContext &context)
     {
         auto &cb = context.progress;
-        cb.update("Loading vasculature report");
+        cb.update();
 
         auto &params = context.params;
         auto reportType = params.report_type;

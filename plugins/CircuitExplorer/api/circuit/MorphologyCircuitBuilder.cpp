@@ -100,19 +100,20 @@ public:
                 morphologies[idx] =
                     NeuronGeometryInstantiator<PrimitiveType>::instantiate(baseGeometry, positions[idx], rotations[idx]);
             }
+
+            // Return the number of cells loaded for the progress updater
+            return indices.size();
         };
 
-        auto updateMessage = std::string("Loading neurons");
-        auto loadTasks = std::deque<std::future<void>>();
+        auto loadTasks = std::deque<std::future<std::size_t>>();
 
         for (auto &[path, cellIndices] : morphologyMap)
         {
             if (loadTasks.size() == maxThreads)
             {
                 auto &topTask = loadTasks.front();
-                topTask.get();
+                progressUpdater.update(topTask.get());
                 loadTasks.pop_front();
-                progressUpdater.update(updateMessage);
             }
 
             loadTasks.push_back(std::async(loadFn, path, cellIndices));
@@ -120,8 +121,7 @@ public:
 
         for (auto &task : loadTasks)
         {
-            task.get();
-            progressUpdater.update(updateMessage);
+            progressUpdater.update(task.get());
         }
 
         return morphologies;

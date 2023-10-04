@@ -51,13 +51,13 @@ struct SynapseImporter
 
         if (afferent)
         {
-            updater.update("Loading afferent synapses");
+            updater.update();
             auto model = bbploader::SynapseLoader::load(context, true);
             modelList.push_back(std::move(model));
         }
         if (efferent)
         {
-            updater.update("Loading efferent synapses");
+            updater.update();
             auto model = bbploader::SynapseLoader::load(context, false);
             modelList.push_back(std::move(model));
         }
@@ -113,7 +113,7 @@ std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromFile(
     const brion::BlueConfig config(path);
     bbploader::ParameterCheck::checkInput(config, params);
 
-    ProgressUpdater updater(callback, 3);
+    ProgressUpdater updater(callback, 3, 0.5f);
 
     const brain::Circuit circuit(config);
     const auto gids = bbploader::GIDLoader::compute(config, circuit, params);
@@ -124,21 +124,23 @@ std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromFile(
     auto model = std::make_shared<brayns::Model>(ModelType::neurons);
 
     // Load neurons
-    updater.beginStage(gids.size());
+    updater.beginStage("Neuron load", gids.size());
     auto compartments = bbploader::CellLoader::load(context, updater, *model);
     updater.endStage();
 
     // Load simulation
-    updater.beginStage();
+    updater.beginStage("Report load");
     bbploader::ReportLoader::load(context, compartments, updater, *model);
     updater.endStage();
 
     result.push_back(std::move(model));
 
     // Load synapses
-    updater.beginStage(2);
+    updater.beginStage("Synapse load", 2);
     SynapseImporter::import(context, result, updater);
     updater.endStage();
+
+    updater.end("Generating rendering structures. Might take a while");
 
     brayns::Log::info("[CE] {}: Loaded {} model(s) in {} second(s).", getName(), result.size(), timer.seconds());
 
