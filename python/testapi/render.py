@@ -36,7 +36,6 @@ class ValidationFailed(RuntimeError):
 
 @dataclass
 class RenderSettings:
-
     resolution: brayns.Resolution | None = brayns.Resolution.full_hd
     camera: brayns.Camera | None = None
     renderer: brayns.Renderer | None = None
