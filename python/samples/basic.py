@@ -44,7 +44,6 @@ connector = brayns.Connector(
 )
 
 with brayns.start(service, connector) as (process, instance):
-
     loader = brayns.BbpLoader(
         cells=brayns.BbpCells.from_density(1),
         report=brayns.BbpReport.compartment("somas"),

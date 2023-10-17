@@ -40,7 +40,6 @@ from .web_socket_listener import WebSocketListener
 
 @dataclass
 class SslClientContext:
-
     cafile: str | None = None
     capath: str | None = None
     cadata: str | None = None
@@ -48,7 +47,6 @@ class SslClientContext:
 
 @dataclass
 class WebSocketConnector:
-
     uri: str
     listener: WebSocketListener
     ssl_context: SslClientContext | None = None
