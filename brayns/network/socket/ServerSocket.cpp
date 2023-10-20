@@ -30,6 +30,7 @@
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/SecureServerSocket.h>
 #include <Poco/Net/WebSocket.h>
+#include "Poco/Net/NetException.h"
 
 #include <brayns/utils/Log.h>
 
@@ -37,10 +38,23 @@
 
 namespace
 {
-class RequestHandler : public Poco::Net::HTTPRequestHandler
+class HealthcheckHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-    explicit RequestHandler(brayns::SocketManager &manager):
+    virtual void handleRequest(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response) override
+    {
+        (void)request;
+        brayns::Log::debug("Healthcheck.");
+        response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
+        auto &stream = response.send();
+        stream << "Ok";
+    }
+};
+
+class WebSocketHandler : public Poco::Net::HTTPRequestHandler
+{
+public:
+    explicit WebSocketHandler(brayns::SocketManager &manager):
         _manager(manager)
     {
     }
@@ -49,27 +63,59 @@ public:
     {
         try
         {
-            auto poco = Poco::Net::WebSocket(request, response);
+            auto poco = _upgrade(request, response);
             auto socket = std::make_shared<brayns::WebSocket>(poco);
             auto client = brayns::ClientRef(std::move(socket));
             _manager.run(client);
         }
         catch (const Poco::Exception &e)
         {
-            brayns::Log::error("Websocket server connection failed: {}.", e.displayText());
+            brayns::Log::error("Error in websocket handler: {}.", e.displayText());
         }
         catch (const std::exception &e)
         {
-            brayns::Log::error("Unexpected error during websocket server connection: {}.", e.what());
+            brayns::Log::error("Unexpected error in websocket handler: {}.", e.what());
         }
         catch (...)
         {
-            brayns::Log::error("Unknown error during websocket server connection.");
+            brayns::Log::error("Unknown error in websocket handler.");
         }
     }
 
 private:
     brayns::SocketManager &_manager;
+
+    Poco::Net::WebSocket _upgrade(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
+    {
+        try
+        {
+            return Poco::Net::WebSocket(request, response);
+        }
+        catch (const Poco::Net::WebSocketException &e)
+        {
+            _badRequest(e.displayText(), response);
+            throw;
+        }
+        catch (...)
+        {
+            _internalError("Unexpected websocket handshake failure", response);
+            throw;
+        }
+    }
+
+    void _badRequest(const std::string &message, Poco::Net::HTTPServerResponse &response)
+    {
+        response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST);
+        auto &stream = response.send();
+        stream << message;
+    }
+
+    void _internalError(const std::string &message, Poco::Net::HTTPServerResponse &response)
+    {
+        response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
+        auto &stream = response.send();
+        stream << message;
+    }
 };
 
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
@@ -83,7 +129,11 @@ public:
     virtual Poco::Net::HTTPRequestHandler *createRequestHandler(const Poco::Net::HTTPServerRequest &request) override
     {
         brayns::Log::debug("HTTP request from '{}'.", request.getHost());
-        return new RequestHandler(_manager);
+        if (request.getURI() == "/healthz")
+        {
+            return new HealthcheckHandler();
+        }
+        return new WebSocketHandler(_manager);
     }
 
 private:
