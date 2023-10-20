@@ -1,5 +1,14 @@
 # Change Log
 
+## [3.3.0](https://github.com/BlueBrain/Brayns/tree/3.3.0)
+
+**Implemented fixes and enhancements:**
+
+- HTTP healthcheck support [\#1206] (https://github.com/BlueBrain/Brayns/pull/1206)
+- Removed development deps from requirements.txt [\#1205] (https://github.com/BlueBrain/Brayns/pull/1205)
+- Circuit loading is now 50% of the progress [\#1204] (https://github.com/BlueBrain/Brayns/pull/1204)
+- Loading morphologies with one sphere per sample [\#1203] (https://github.com/BlueBrain/Brayns/pull/1203)
+
 ## [3.2.2](https://github.com/BlueBrain/Brayns/tree/3.2.2)
 
 **Implemented fixes and enhancements:**
