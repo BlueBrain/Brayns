@@ -54,7 +54,7 @@ public:
     }
 
 private:
-    static std::string _fromExtension(const std::string &folder, const std::string name, const std::string extension)
+    static std::string _fromExtension(const std::string &folder, const std::string &name, const std::string &extension)
     {
         auto testPath = std::filesystem::path(folder) / std::filesystem::path(name + "." + extension);
 
@@ -66,7 +66,7 @@ private:
         return extension;
     }
 
-    static std::string _guessExtension(const std::string &folder, const std::string name)
+    static std::string _guessExtension(const std::string &folder, const std::string &name)
     {
         const auto extensionList = std::array<std::string, 3>{"asc", "h5", "swc"};
         for (auto &extension : extensionList)
@@ -79,6 +79,21 @@ private:
         }
 
         throw std::invalid_argument(fmt::format("Could not find morphology files at {}", folder));
+    }
+};
+
+class CellSelector
+{
+public:
+    static bbp::sonata::Selection select(
+        const bbp::sonata::NodePopulation &nodes,
+        const CellPlacementLoaderParameters &params)
+    {
+        if (!params.ids.empty())
+        {
+            return bbp::sonata::Selection::fromValues(params.ids);
+        }
+        return sonataloader::PercentageFilter::filter(nodes.selectAll(), params.percentage);
     }
 };
 
@@ -97,13 +112,12 @@ public:
         ProgressUpdater &updater)
     {
         auto nodes = bbp::sonata::NodePopulation(info.path, "", info.name);
-        auto selection = sonataloader::PercentageFilter::filter(nodes.selectAll(), parameters.percentage);
+        auto selection = CellSelector::select(nodes, parameters);
 
         auto positions = sonataloader::Cells::getPositions(nodes, selection);
         auto rotations = sonataloader::Cells::getRotations(nodes, selection);
         auto morphologyPaths = _buildMorphologyPaths(parameters, nodes, selection);
-        auto geometryType = NeuronGeometryType::Smooth;
-        auto morphologyParams = NeuronMorphologyLoaderParameters{1.f, true, false, true, geometryType, 1.f, 0};
+        auto &morphologyParams = parameters.morphology_parameters;
 
         auto context = MorphologyCircuitBuilder::Context{
             selection.flatten(),

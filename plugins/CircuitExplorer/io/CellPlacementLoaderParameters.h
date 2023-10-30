@@ -22,11 +22,15 @@
 
 #include <brayns/json/Json.h>
 
+#include <io/NeuronMorphologyLoaderParameters.h>
+
 struct CellPlacementLoaderParameters
 {
     std::string morphology_folder;
-    float percentage = 0;
     std::optional<std::string> extension;
+    float percentage = 0;
+    std::vector<uint64_t> ids;
+    NeuronMorphologyLoaderParameters morphology_parameters;
 };
 
 namespace brayns
@@ -45,6 +49,13 @@ struct JsonAdapter<CellPlacementLoaderParameters> : ObjectAdapter<CellPlacementL
             .description("Path to morphology folder");
         builder
             .getset(
+                "extension",
+                [](auto &object) -> auto & { return object.extension; },
+                [](auto &object, auto value) { object.extension = std::move(value); })
+            .description("Morphology file extension")
+            .required(false);
+        builder
+            .getset(
                 "percentage",
                 [](auto &object) { return object.percentage; },
                 [](auto &object, auto value) { object.percentage = value; })
@@ -54,10 +65,17 @@ struct JsonAdapter<CellPlacementLoaderParameters> : ObjectAdapter<CellPlacementL
             .defaultValue(1);
         builder
             .getset(
-                "extension",
-                [](auto &object) -> auto & { return object.extension; },
-                [](auto &object, auto value) { object.extension = std::move(value); })
-            .description("Morphology file extension")
+                "ids",
+                [](auto &object) -> auto & { return object.ids; },
+                [](auto &object, auto value) { object.ids = std::move(value); })
+            .description("IDs of the nodes to load (overrides percentage)")
+            .required(false);
+        builder
+            .getset(
+                "morphology_parameters",
+                [](auto &object) -> auto & { return object.morphology_parameters; },
+                [](auto &object, auto value) { object.morphology_parameters = std::move(value); })
+            .description("Settings for morphology geometry loading")
             .required(false);
         return builder.build();
     }
