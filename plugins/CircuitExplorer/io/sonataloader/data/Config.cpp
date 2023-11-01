@@ -59,30 +59,9 @@ public:
         return it->second;
     }
 
-    static bool isValid(const std::string &path, const std::string &extension)
+    static bool isValid(const std::string &path)
     {
-        auto pathObject = std::filesystem::path(path);
-        if (!std::filesystem::is_directory(pathObject))
-        {
-            return false;
-        }
-
-        auto testExtension = "." + extension;
-        for (auto &item : std::filesystem::directory_iterator(pathObject))
-        {
-            if (!std::filesystem::is_regular_file(item))
-            {
-                continue;
-            }
-
-            auto &file = item.path();
-            auto fileExtension = file.extension().string();
-            if (fileExtension == testExtension)
-            {
-                return true;
-            }
-        }
-        return false;
+        return std::filesystem::is_directory(path);
     }
 };
 
@@ -184,19 +163,19 @@ MorphologyPath Config::getMorphologyPath(const std::string &populationName) cons
 {
     auto properties = _config.getNodePopulationProperties(populationName);
 
-    if (MorphologyPathResolver::isValid(properties.morphologiesDir, "swc"))
+    if (MorphologyPathResolver::isValid(properties.morphologiesDir))
     {
         return MorphologyPath(properties.morphologiesDir, MorphologyFormat::swc);
     }
 
     auto asciiPath = MorphologyPathResolver::getFormatPath(properties, MorphologyFormat::ascii);
-    if (MorphologyPathResolver::isValid(asciiPath, "asc"))
+    if (MorphologyPathResolver::isValid(asciiPath))
     {
         return MorphologyPath(asciiPath, "asc");
     }
 
     auto h5Path = MorphologyPathResolver::getFormatPath(properties, MorphologyFormat::h5);
-    if (MorphologyPathResolver::isValid(h5Path, "h5"))
+    if (MorphologyPathResolver::isValid(h5Path))
     {
         return MorphologyPath(h5Path, "h5");
     }
