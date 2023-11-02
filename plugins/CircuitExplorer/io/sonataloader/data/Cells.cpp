@@ -93,7 +93,7 @@ std::vector<brayns::Quaternion> Cells::getRotations(const Nodes &nodes, const Se
 
     for (size_t i = 0; i < count; ++i)
     {
-        result.push_back(brayns::math::normalize(brayns::Quaternion(x[i], y[i], z[i], w[i])));
+        result.push_back(brayns::math::normalize(brayns::Quaternion(w[i], x[i], y[i], z[i])));
     }
 
     return result;

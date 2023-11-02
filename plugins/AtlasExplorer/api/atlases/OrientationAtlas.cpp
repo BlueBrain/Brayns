@@ -42,12 +42,12 @@ public:
             auto y = floats[index + 2];
             auto z = floats[index + 3];
 
-            if (!_validQuaternion({x, y, z, w}))
+            if (!_validQuaternion({w, x, y, z}))
             {
                 continue;
             }
 
-            result[i] = brayns::math::normalize(brayns::Quaternion(x, y, z, w));
+            result[i] = brayns::math::normalize(brayns::Quaternion(w, x, y, z));
         }
         return result;
     }
