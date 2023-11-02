@@ -185,7 +185,7 @@ struct JsonAdapter<SonataNodePopulationParameters> : ObjectAdapter<SonataNodePop
         builder
             .getset(
                 "node_count_limit",
-                [](auto &object) -> auto & { return object.node_count_limit; },
+                [](auto &object) { return object.node_count_limit; },
                 [](auto &object, auto value) { object.node_count_limit = value; })
             .description("Maximum number of nodes to load")
             .required(false);

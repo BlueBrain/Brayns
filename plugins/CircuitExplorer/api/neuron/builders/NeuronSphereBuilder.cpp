@@ -74,7 +74,7 @@ NeuronGeometry<brayns::Sphere> NeuronGeometryBuilder<brayns::Sphere>::build(cons
 {
     return NeuronBuilder::build<brayns::Sphere>(
         morphology,
-        [](auto &morhpology) { return PrimitiveAllocationSize::compute(morhpology); },
+        [](auto &morphology) { return PrimitiveAllocationSize::compute(morphology); },
         [](auto &morphology, auto &geometry) { SomaBuilder::build(morphology, geometry); },
         [](auto &morphology, auto &geometry) { SphereNeuriteBuilder::build(morphology, geometry); });
 }

@@ -19,10 +19,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from brayns.core import Loader
+
+from .morphology import Morphology, serialize_morphology
 
 
 @dataclass
@@ -37,11 +39,19 @@ class CellPlacementLoader(Loader):
     :type density: float
     :param extension: Optional morphology file extension to load.
     :type extension: str | None, optional
+    :param ids: IDs of the nodes to load, overrides density if not None.
+    :type ids: list[str] | None, optional
+    :param morphology: Morphology loading settings.
+    :type morphology: Morphology, optional
     """
 
     morphologies_folder: str
     density: float = 1.0
     extension: str | None = None
+    ids: list[int] | None = None
+    morphology: Morphology = field(
+        default_factory=lambda: Morphology(load_dendrites=True)
+    )
 
     @classmethod
     @property
@@ -51,8 +61,12 @@ class CellPlacementLoader(Loader):
     def get_properties(self) -> dict[str, Any]:
         message: dict[str, Any] = {
             "morphology_folder": self.morphologies_folder,
-            "percentage": self.density,
+            "morphology_parameters": serialize_morphology(self.morphology),
         }
         if self.extension is not None:
             message["extension"] = self.extension
+        if self.density != 1.0:
+            message["percentage"] = self.density
+        if self.ids is not None:
+            message["ids"] = self.ids
         return message

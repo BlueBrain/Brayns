@@ -35,7 +35,7 @@ public:
      * @brief Returns the type of the node population.
      * @param name Name of the node population.
      * @param config Sonata network configuration.
-     * @return std::string
+     * @return std::string Nodes type.
      */
     static std::string getNodeType(const std::string &name, const Config &config);
     static std::string getNodeType(const bbp::sonata::NodePopulation &nodes, const Config &config);
@@ -44,7 +44,7 @@ public:
      * @brief Returns the type of the edge population.
      * @param name Name of the edge population.
      * @param config Sonata network configuration.
-     * @return std::string
+     * @return std::string Edge type.
      */
     static std::string getEdgeType(const std::string &name, const Config &config);
     static std::string getEdgeType(const bbp::sonata::EdgePopulation &edges, const Config &config);

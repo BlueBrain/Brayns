@@ -31,6 +31,10 @@ class TestCellPlacementLoader(unittest.TestCase):
             morphologies_folder="/a/random/folder",
             density=0.7,
             extension="ext",
+            ids=[1, 2, 3],
+            morphology=brayns.Morphology(
+                load_soma=True, load_dendrites=True, load_axon=True
+            ),
         )
         self.assertEqual(
             loader.get_properties(),
@@ -38,5 +42,15 @@ class TestCellPlacementLoader(unittest.TestCase):
                 "morphology_folder": "/a/random/folder",
                 "percentage": 0.7,
                 "extension": "ext",
+                "ids": [1, 2, 3],
+                "morphology_parameters": {
+                    "geometry_type": "smooth",
+                    "load_axon": True,
+                    "load_dendrites": True,
+                    "load_soma": True,
+                    "radius_multiplier": 1.0,
+                    "resampling": 2,
+                    "subsampling": 1,
+                },
             },
         )
