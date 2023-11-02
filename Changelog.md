@@ -1,5 +1,13 @@
 # Change Log
 
+## [3.4.0](https://github.com/BlueBrain/Brayns/tree/3.4.0)
+
+**Implemented fixes and enhancements:**
+
+- Fix morphology orientations [\#1210] (https://github.com/BlueBrain/Brayns/pull/1210)
+- Fix morphology path validation [\#1209] (https://github.com/BlueBrain/Brayns/pull/1209)
+- Cell placement loader with IDs and morphology settings [\#1208] (https://github.com/BlueBrain/Brayns/pull/1208)
+
 ## [3.3.0](https://github.com/BlueBrain/Brayns/tree/3.3.0)
 
 **Implemented fixes and enhancements:**
