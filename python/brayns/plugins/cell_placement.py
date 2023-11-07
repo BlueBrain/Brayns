@@ -49,9 +49,7 @@ class CellPlacementLoader(Loader):
     density: float = 1.0
     extension: str | None = None
     ids: list[int] | None = None
-    morphology: Morphology = field(
-        default_factory=lambda: Morphology(load_dendrites=True)
-    )
+    morphology: Morphology = field(default_factory=Morphology)
 
     @classmethod
     @property

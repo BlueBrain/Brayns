@@ -116,7 +116,7 @@ struct JsonAdapter<BBPLoaderParameters> : ObjectAdapter<BBPLoaderParameters>
                 [](auto &object) -> auto & { return object.neuron_morphology_parameters; },
                 [](auto &object, auto value) { object.neuron_morphology_parameters = std::move(value); })
             .description("Settings to configure neuron morphology loading")
-            .required(false);
+            .defaultValue(brayns::JsonFactory::object());
         builder
             .getset(
                 "load_afferent_synapses",

@@ -224,7 +224,7 @@ struct JsonAdapter<SonataNodePopulationParameters> : ObjectAdapter<SonataNodePop
                 [](auto &object) -> auto & { return object.neuron_morphology_parameters; },
                 [](auto &object, auto value) { object.neuron_morphology_parameters = std::move(value); })
             .description("Settings for morphology geometry loading (ignored for vasculature populations)")
-            .required(false);
+            .defaultValue(brayns::JsonFactory::object());
         builder
             .getset(
                 "vasculature_geometry_parameters",

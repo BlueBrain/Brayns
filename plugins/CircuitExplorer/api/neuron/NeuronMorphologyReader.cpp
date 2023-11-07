@@ -165,11 +165,6 @@ NeuronMorphology NeuronMorphologyReader::read(const std::string &path, bool soma
         throw std::invalid_argument("Nothing requested to be loaded");
     }
 
-    if (!axon && !dendrites)
-    {
-        throw std::runtime_error("Soma-only NeuronMorphologies not allowed");
-    }
-
     auto morph = MorphIOReader::read(path);
 
     auto sections = NeuriteReader::read(morph, axon, dendrites);
