@@ -81,6 +81,20 @@ const JsonObject &JsonExtractor::extractObject(const JsonValue &json)
     return *json.extract<JsonObject::Ptr>();
 }
 
+JsonValue JsonFactory::array()
+{
+    auto json = JsonValue();
+    emplaceArray(json);
+    return json;
+}
+
+JsonValue JsonFactory::object()
+{
+    auto json = JsonValue();
+    emplaceObject(json);
+    return json;
+}
+
 JsonArray &JsonFactory::emplaceArray(JsonValue &json)
 {
     auto array = Poco::makeShared<JsonArray>();

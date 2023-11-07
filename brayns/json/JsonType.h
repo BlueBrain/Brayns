@@ -198,6 +198,8 @@ public:
 class JsonFactory
 {
 public:
+    static JsonValue array();
+    static JsonValue object();
     static JsonArray &emplaceArray(JsonValue &json);
     static JsonObject &emplaceObject(JsonValue &json);
 };
