@@ -1,5 +1,11 @@
 # Change Log
 
+## [3.4.1](https://github.com/BlueBrain/Brayns/tree/3.4.1)
+
+**Implemented fixes and enhancements:**
+
+- Fix morphology default settings and allow soma only [\#1213] (https://github.com/BlueBrain/Brayns/pull/1213)
+
 ## [3.4.0](https://github.com/BlueBrain/Brayns/tree/3.4.0)
 
 **Implemented fixes and enhancements:**
