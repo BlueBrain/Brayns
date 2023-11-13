@@ -1,9 +1,93 @@
 .. _apicore-label:
 
-Core API methods
-----------------
+Core API
+========
 
-This page references the entrypoints of the Core plugin.
+This page references the loaders and entrypoints registered by the Core plugin.
+
+Loaders
+-------
+
+mesh
+~~~~
+
+Can load the following formats: **off**, **stl**, **ply**, **obj**.
+
+This loader does not support loading binary data using 'upload-model'.
+
+.. jsonschema::
+
+    {}
+
+----
+
+mhd-volume
+~~~~~~~~~~
+
+Can load the following formats: **mhd**.
+
+This loader does not support loading binary data using 'upload-model'.
+
+.. jsonschema::
+
+    {}
+
+----
+
+raw-volume
+~~~~~~~~~~
+
+Can load the following formats: **raw**.
+
+This loader supports loading binary data using 'upload-model'.
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "data_type": {
+                "description": "Volume byte data type",
+                "type": "string",
+                "enum": [
+                    "unsinged_char",
+                    "short",
+                    "unsigned_short",
+                    "half_float",
+                    "float",
+                    "double"
+                ]
+            },
+            "dimensions": {
+                "description": "Volume grid size XYZ",
+                "type": "array",
+                "items": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "spacing": {
+                "description": "Volume grid cell spacing XYZ",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            }
+        },
+        "required": [
+            "data_type",
+            "dimensions",
+            "spacing"
+        ],
+        "additionalProperties": false
+    }
+
+Entrypoints
+-----------
 
 add-bounded-planes
 ~~~~~~~~~~~~~~~~~~
@@ -4481,7 +4565,7 @@ Returns a list of input variables for a given model and color method.
 get-loaders
 ~~~~~~~~~~~
 
-Get all loaders.
+Retreive the description of all available loaders.
 
 **Params**:
 
@@ -4494,11 +4578,16 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
     {
         "type": "array",
         "items": {
-            "title": "LoaderInfo",
+            "title": "Loader",
             "type": "object",
             "properties": {
+                "binary": {
+                    "description": "True if loader supports loading binary data",
+                    "type": "boolean",
+                    "readOnly": true
+                },
                 "extensions": {
-                    "description": "Supported file extensions",
+                    "description": "Supported file formats / extensions",
                     "type": "array",
                     "readOnly": true,
                     "items": {
@@ -4507,7 +4596,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 },
                 "input_parameters_schema": {
                     "title": "JsonSchema",
-                    "description": "Loader properties",
+                    "description": "Loader params schema",
                     "type": "object",
                     "readOnly": true
                 },
@@ -4515,12 +4604,19 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                     "description": "Loader name",
                     "type": "string",
                     "readOnly": true
+                },
+                "plugin": {
+                    "description": "Plugin required to use the loader",
+                    "type": "string",
+                    "readOnly": true
                 }
             },
             "required": [
+                "binary",
                 "extensions",
                 "input_parameters_schema",
-                "name"
+                "name",
+                "plugin"
             ],
             "additionalProperties": false
         }
