@@ -128,8 +128,15 @@ public:
     void loadModels(const std::string &path)
     {
         auto &loadRegistry = _brayns.getLoaderRegistry();
-        auto &loader = loadRegistry.getSuitableLoader(path, "", "");
-        auto loadedModels = loader.loadFromFile(path, {}, {});
+        auto format = brayns::LoaderFormat::from(path);
+        auto *loader = loadRegistry.findByFormat(format);
+        if (!loader)
+        {
+            throw std::runtime_error("Unsupported file");
+        }
+        auto params = brayns::RawFileLoaderRequest();
+        params.path = path;
+        auto loadedModels = loader->loadFile(params);
 
         auto &engine = _brayns.getEngine();
         auto &scene = engine.getScene();

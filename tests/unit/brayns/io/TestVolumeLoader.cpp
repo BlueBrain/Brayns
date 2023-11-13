@@ -61,46 +61,45 @@ TEST_CASE("Raw Volume loader")
     {
         auto loader = brayns::RawVolumeLoader();
 
-        auto invalidDimensions = brayns::RawVolumeLoaderParameters();
-        invalidDimensions.data_type = brayns::VolumeDataType::Float;
-        invalidDimensions.dimensions = brayns::Vector3ui(0);
-        invalidDimensions.spacing = brayns::Vector3f(1.f);
-        CHECK_THROWS_WITH(
-            loader.importFromFile(TestPaths::Volumes::raw, {}, invalidDimensions),
-            "Volume dimensions are empty");
+        auto invalidDimensions = brayns::RawVolumeLoader::FileRequest();
+        invalidDimensions.path = TestPaths::Volumes::raw;
+        invalidDimensions.params.data_type = brayns::VolumeDataType::Float;
+        invalidDimensions.params.dimensions = brayns::Vector3ui(0);
+        invalidDimensions.params.spacing = brayns::Vector3f(1.f);
+        CHECK_THROWS_WITH(loader.loadFile(invalidDimensions), "Volume dimensions are empty");
 
-        auto invalidDataType = brayns::RawVolumeLoaderParameters();
-        invalidDataType.data_type = brayns::VolumeDataType::Short;
-        invalidDataType.dimensions = brayns::Vector3ui(256, 256, 112);
-        invalidDataType.spacing = brayns::Vector3f(1.f);
-        CHECK_THROWS_WITH(
-            loader.importFromFile(TestPaths::Volumes::raw, {}, invalidDataType),
-            "Data size and exptected size mismatch");
+        auto invalidDataType = brayns::RawVolumeLoader::FileRequest();
+        invalidDataType.path = TestPaths::Volumes::raw;
+        invalidDataType.params.data_type = brayns::VolumeDataType::Short;
+        invalidDataType.params.dimensions = brayns::Vector3ui(256, 256, 112);
+        invalidDataType.params.spacing = brayns::Vector3f(1.f);
+        CHECK_THROWS_WITH(loader.loadFile(invalidDataType), "Data size and exptected size mismatch");
 
-        auto params = brayns::RawVolumeLoaderParameters();
-        params.data_type = brayns::VolumeDataType::Float;
-        params.dimensions = brayns::Vector3ui(256, 256, 112);
-        params.spacing = brayns::Vector3f(1.f);
-        CHECK_THROWS_WITH(
-            loader.importFromFile(TestPaths::Volumes::emptyRaw, {}, params),
-            "Data size and exptected size mismatch");
+        auto request = brayns::RawVolumeLoader::FileRequest();
+        request.path = TestPaths::Volumes::emptyRaw;
+        request.params.data_type = brayns::VolumeDataType::Float;
+        request.params.dimensions = brayns::Vector3ui(256, 256, 112);
+        request.params.spacing = brayns::Vector3f(1.f);
+        CHECK_THROWS_WITH(loader.loadFile(request), "Data size and exptected size mismatch");
     }
     SUBCASE("Load")
     {
         auto loader = brayns::RawVolumeLoader();
 
-        auto params = brayns::RawVolumeLoaderParameters();
-        params.data_type = brayns::VolumeDataType::Float;
-        params.dimensions = brayns::Vector3ui(256, 256, 112);
-        params.spacing = brayns::Vector3f(1.f);
-        auto result = loader.importFromFile(TestPaths::Volumes::raw, {}, params);
+        auto request = brayns::RawVolumeLoader::FileRequest();
+        request.path = TestPaths::Volumes::raw;
+        request.params.data_type = brayns::VolumeDataType::Float;
+        request.params.dimensions = brayns::Vector3ui(256, 256, 112);
+        request.params.spacing = brayns::Vector3f(1.f);
+        auto result = loader.loadFile(request);
+
         CHECK(result.size() == 1);
 
         auto &model = *result.front();
         auto &volume = VolumeExtractor::extract(model);
-        CHECK(volume.dataType == params.data_type);
-        CHECK(volume.size == params.dimensions);
-        CHECK(volume.spacing == params.spacing);
+        CHECK(volume.dataType == request.params.data_type);
+        CHECK(volume.size == request.params.dimensions);
+        CHECK(volume.spacing == request.params.spacing);
     }
 }
 
@@ -117,25 +116,28 @@ TEST_CASE("Mhd Volume loader")
     {
         auto loader = brayns::MHDVolumeLoader();
 
-        CHECK_THROWS_WITH(
-            loader.importFromFile(TestPaths::Volumes::emptyMhd, {}),
-            "Incomplete MHD file. Missing ObjectType");
+        auto request = brayns::MHDVolumeLoader::FileRequest();
 
-        CHECK_THROWS_WITH(
-            loader.importFromFile(TestPaths::Volumes::invalidMhd, {}),
-            "Incomplete MHD file. Missing ElementType");
+        request.path = TestPaths::Volumes::emptyMhd;
+        CHECK_THROWS_WITH(loader.loadFile(request), "Incomplete MHD file. Missing ObjectType");
 
-        CHECK_THROWS_WITH(loader.importFromFile(TestPaths::Volumes::badFormatMhd, {}), "Unsupported data type: MET_INT");
+        request.path = TestPaths::Volumes::invalidMhd;
+        CHECK_THROWS_WITH(loader.loadFile(request), "Incomplete MHD file. Missing ElementType");
 
-        CHECK_THROWS_WITH(
-            loader.importFromFile(TestPaths::Volumes::badObjectTypeMhd, {}),
-            "Wrong object type for mhd file");
+        request.path = TestPaths::Volumes::badFormatMhd;
+        CHECK_THROWS_WITH(loader.loadFile(request), "Unsupported data type: MET_INT");
+
+        request.path = TestPaths::Volumes::badObjectTypeMhd;
+        CHECK_THROWS_WITH(loader.loadFile(request), "Wrong object type for mhd file");
     }
     SUBCASE("Load")
     {
         auto loader = brayns::MHDVolumeLoader();
 
-        auto result = loader.importFromFile(TestPaths::Volumes::mhd, {});
+        auto request = brayns::MHDVolumeLoader::FileRequest();
+        request.path = TestPaths::Volumes::mhd;
+
+        auto result = loader.loadFile(request);
         CHECK(result.size() == 1);
 
         auto &model = *result.front();

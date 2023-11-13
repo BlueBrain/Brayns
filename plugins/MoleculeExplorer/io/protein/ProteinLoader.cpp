@@ -229,29 +229,27 @@ public:
 };
 } // namespace
 
-std::vector<std::string> ProteinLoader::getSupportedExtensions() const
-{
-    return {"pdb", "pdb1"};
-}
-
 std::string ProteinLoader::getName() const
 {
     return "protein";
 }
 
-std::vector<std::shared_ptr<brayns::Model>> ProteinLoader::importFromFile(
-    const std::string &path,
-    const brayns::LoaderProgress &callback,
-    const ProteinLoaderParameters &parameters) const
+std::vector<std::string> ProteinLoader::getExtensions() const
 {
-    (void)callback;
+    return {"pdb", "pdb1"};
+}
+
+std::vector<std::shared_ptr<brayns::Model>> ProteinLoader::loadFile(const FileRequest &request)
+{
+    auto path = std::string(request.path);
+    auto &params = request.params;
 
     brayns::Log::info("[ME] Loading protein file {}.", path);
 
     auto atoms = PdbReader::readFile(path);
-    auto radii = RadiusGenerator::generateForAtoms(parameters, atoms);
+    auto radii = RadiusGenerator::generateForAtoms(params, atoms);
     auto spheres = SphereGenerator::generate(atoms, radii);
-    auto colorIndices = ColormapIndexer::indexAtoms(parameters, atoms);
+    auto colorIndices = ColormapIndexer::indexAtoms(params, atoms);
     auto &colors = ProteinData::colors;
 
     auto model = std::make_shared<brayns::Model>("protein");
@@ -270,16 +268,4 @@ std::vector<std::shared_ptr<brayns::Model>> ProteinLoader::importFromFile(
     std::vector<std::shared_ptr<brayns::Model>> result;
     result.push_back(std::move(model));
     return result;
-}
-
-std::vector<std::shared_ptr<brayns::Model>> ProteinLoader::importFromBlob(
-    const brayns::Blob &blob,
-    const brayns::LoaderProgress &callback,
-    const ProteinLoaderParameters &parameters) const
-{
-    (void)blob;
-    (void)callback;
-    (void)parameters;
-
-    throw std::runtime_error("Loading from blob not supported");
 }

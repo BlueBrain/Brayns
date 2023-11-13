@@ -1,7 +1,6 @@
-/* Copyright (c) 2015-2023 EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  *
- * Responsible Author: adrien.fleury@epfl.ch
+ * Responsible Author: Daniel.Nachbaur@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -21,18 +20,33 @@
 
 #pragma once
 
-#include <brayns/io/LoaderRegistry.h>
+#include <string>
+#include <vector>
 
 #include <brayns/json/Json.h>
 
 namespace brayns
 {
+struct LoaderInfo
+{
+    std::string plugin;
+    std::string name;
+    std::vector<std::string> extensions;
+    bool binary = false;
+    JsonSchema schema;
+};
+
 template<>
 struct JsonAdapter<LoaderInfo> : ObjectAdapter<LoaderInfo>
 {
     static JsonObjectInfo reflect()
     {
-        auto builder = Builder("LoaderInfo");
+        auto builder = Builder("Loader");
+        builder
+            .get(
+                "plugin",
+                [](auto &object) -> auto & { return object.plugin; })
+            .description("Plugin required to use the loader");
         builder
             .get(
                 "name",
@@ -42,12 +56,14 @@ struct JsonAdapter<LoaderInfo> : ObjectAdapter<LoaderInfo>
             .get(
                 "extensions",
                 [](auto &object) -> auto & { return object.extensions; })
-            .description("Supported file extensions");
+            .description("Supported file formats / extensions");
+        builder.get("binary", [](auto &object) { return object.binary; })
+            .description("True if loader supports loading binary data");
         builder
             .get(
                 "input_parameters_schema",
-                [](auto &object) -> auto & { return object.inputParametersSchema; })
-            .description("Loader properties");
+                [](auto &object) -> auto & { return object.schema; })
+            .description("Loader params schema");
         return builder.build();
     }
 };

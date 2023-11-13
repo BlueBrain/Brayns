@@ -114,50 +114,40 @@ std::string DTILoader::getName() const
     return "DTI loader";
 }
 
-std::vector<std::string> DTILoader::getSupportedExtensions() const
+std::vector<std::string> DTILoader::getExtensions() const
 {
     return {"json"};
 }
 
-std::vector<std::shared_ptr<brayns::Model>> DTILoader::importFromBlob(
-    const brayns::Blob &blob,
-    const brayns::LoaderProgress &callback,
-    const DTILoaderParameters &params) const
+std::vector<std::shared_ptr<brayns::Model>> DTILoader::loadFile(const FileRequest &request)
 {
-    (void)blob;
-    (void)callback;
-    (void)params;
-    throw std::runtime_error("Loading DTI from blob is not supported");
-}
+    auto path = std::string(request.path);
+    auto &progress = request.progress;
+    auto &params = request.params;
 
-std::vector<std::shared_ptr<brayns::Model>> DTILoader::importFromFile(
-    const std::string &path,
-    const brayns::LoaderProgress &callback,
-    const DTILoaderParameters &params) const
-{
     std::vector<std::shared_ptr<brayns::Model>> result;
     result.push_back(std::make_shared<brayns::Model>(ModelType::dti));
     auto &model = *(result.back());
 
-    callback.updateProgress("Reading configuration", 0.f);
+    progress("Reading configuration", 0.f);
     const auto config = DTIConfigurationReader::read(path);
 
     const auto &circuitPath = config.circuit_path;
     auto builder = BuilderFactory::create(circuitPath);
 
-    callback.updateProgress("Reading gid to row mapping file (might take time)", 0.2f);
+    progress("Reading gid to row mapping file (might take time)", 0.2f);
     builder->readGidRowFile(config.gids_to_streamlines_path);
 
-    callback.updateProgress("Loading streamlines", 0.4f);
+    progress("Loading streamlines", 0.4f);
     builder->readStreamlinesFile(config.streamlines_path);
 
-    callback.updateProgress("Generating geometry", 0.6f);
+    progress("Generating geometry", 0.6f);
     builder->buildGeometry(params.radius, model);
 
-    callback.updateProgress("Loading simulation", 0.8f);
+    progress("Loading simulation", 0.8f);
     builder->buildSimulation(circuitPath, params.spike_decay_time, model);
 
-    callback.updateProgress("Done", 1.f);
+    progress("Done", 1.f);
     return result;
 }
 } // namespace dti

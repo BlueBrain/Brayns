@@ -23,7 +23,6 @@
 
 #include <brayns/io/LoaderRegistry.h>
 
-#include <brayns/network/adapters/LoaderInfoAdapter.h>
 #include <brayns/network/entrypoint/Entrypoint.h>
 
 namespace brayns

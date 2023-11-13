@@ -46,7 +46,7 @@ class XyzReader
 public:
     static inline constexpr float defaultRadius = 0.15f;
 
-    static std::vector<brayns::Sphere> fromBytes(const brayns::LoaderProgress &callback, const std::string &bytes)
+    static std::vector<brayns::Sphere> fromBytes(const brayns::LoaderProgress &progress, const std::string &bytes)
     {
         std::vector<brayns::Sphere> spheres;
 
@@ -70,7 +70,7 @@ public:
             spheres.push_back(sphere);
 
             const std::string msg = "Loading...";
-            callback.updateProgress(msg, i++ / static_cast<float>(lineCount));
+            progress(msg, i++ / static_cast<float>(lineCount));
         }
 
         return spheres;
@@ -127,23 +127,29 @@ public:
 };
 } // namespace
 
-std::vector<std::string> XyzLoader::getSupportedExtensions() const
-{
-    return {"xyz"};
-}
-
 std::string XyzLoader::getName() const
 {
     return "xyz";
 }
 
-std::vector<std::shared_ptr<brayns::Model>> XyzLoader::importFromBlob(
-    const brayns::Blob &blob,
-    const brayns::LoaderProgress &callback) const
+std::vector<std::string> XyzLoader::getExtensions() const
 {
-    brayns::Log::info("[ME] Loading xyz {}.", blob.name);
+    return {"xyz"};
+}
 
-    auto spheres = XyzReader::fromBytes(callback, std::string(blob.data.begin(), blob.data.end()));
+bool XyzLoader::canLoadBinary() const
+{
+    return true;
+}
+
+std::vector<std::shared_ptr<brayns::Model>> XyzLoader::loadBinary(const BinaryRequest &request)
+{
+    auto data = request.data;
+    auto &progress = request.progress;
+
+    brayns::Log::info("[ME] Loading xyz.");
+
+    auto spheres = XyzReader::fromBytes(progress, std::string(data));
     auto sphereCount = spheres.size();
 
     auto model = std::make_shared<brayns::Model>("xyz");
@@ -159,12 +165,4 @@ std::vector<std::shared_ptr<brayns::Model>> XyzLoader::importFromBlob(
     std::vector<std::shared_ptr<brayns::Model>> result;
     result.push_back(std::move(model));
     return result;
-}
-
-std::vector<std::shared_ptr<brayns::Model>> XyzLoader::importFromFile(
-    const std::string &filename,
-    const brayns::LoaderProgress &callback) const
-{
-    auto data = brayns::FileReader::read(filename);
-    return importFromBlob({"xyz", filename, {data.begin(), data.end()}}, callback);
 }

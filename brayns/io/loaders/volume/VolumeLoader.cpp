@@ -130,15 +130,15 @@ public:
 class VoxelBuilder
 {
 public:
-    static brayns::RegularVolume fromBlob(const brayns::Blob &blob, const brayns::RawVolumeLoaderParameters &params)
+    static brayns::RegularVolume build(std::string_view data, const brayns::RawVolumeLoaderParameters &params)
     {
-        _checkDataSize(blob.data.size(), params);
+        _checkDataSize(data.size(), params);
 
         auto volume = brayns::RegularVolume();
         volume.dataType = params.data_type;
         volume.size = params.dimensions;
         volume.spacing = params.spacing;
-        volume.voxels = blob.data;
+        volume.voxels = std::vector<uint8_t>(data.begin(), data.end());
         return volume;
     }
 
@@ -205,65 +205,55 @@ private:
 
 namespace brayns
 {
-std::vector<std::shared_ptr<Model>> RawVolumeLoader::importFromBlob(
-    const Blob &blob,
-    const LoaderProgress &callback,
-    const RawVolumeLoaderParameters &parameters) const
-{
-    callback.updateProgress("Parsing voxels", 0.f);
-    auto volume = VoxelBuilder::fromBlob(blob, parameters);
-
-    callback.updateProgress("Building model", 0.5f);
-    auto model = std::make_shared<Model>("Volume");
-    auto builder = ModelBuilder(*model);
-    builder.addVolume(std::move(volume));
-    builder.addSystems();
-
-    callback.updateProgress("Done", 1.f);
-    auto result = std::vector<std::shared_ptr<Model>>();
-    result.push_back(std::move(model));
-    return result;
-}
-
-std::vector<std::shared_ptr<Model>> RawVolumeLoader::importFromFile(
-    const std::string &filename,
-    const LoaderProgress &callback,
-    const RawVolumeLoaderParameters &parameters) const
-{
-    auto fileData = brayns::FileReader::read(filename);
-    auto src = reinterpret_cast<const uint8_t *>(fileData.data());
-
-    auto blob = Blob();
-    blob.name = filename;
-    blob.type = "raw";
-    blob.data = std::vector<uint8_t>(src, src + fileData.size());
-    return importFromBlob(blob, callback, parameters);
-}
-
 std::string RawVolumeLoader::getName() const
 {
     return "raw-volume";
 }
 
-std::vector<std::string> RawVolumeLoader::getSupportedExtensions() const
+std::vector<std::string> RawVolumeLoader::getExtensions() const
 {
     return {"raw"};
 }
 
-std::vector<std::shared_ptr<Model>> MHDVolumeLoader::importFromBlob(
-    const Blob &blob,
-    const LoaderProgress &callback) const
+bool RawVolumeLoader::canLoadBinary() const
 {
-    (void)blob;
-    (void)callback;
-    throw std::runtime_error("MHD Volume loading from blob is not supported");
+    return true;
 }
 
-std::vector<std::shared_ptr<Model>> MHDVolumeLoader::importFromFile(
-    const std::string &filename,
-    const LoaderProgress &callback) const
+std::vector<std::shared_ptr<Model>> RawVolumeLoader::loadBinary(const BinaryRequest &request)
 {
-    auto mhd = MhdParser::parse(filename);
+    auto &progress = request.progress;
+
+    progress("Parsing voxels", 0.f);
+    auto volume = VoxelBuilder::build(request.data, request.params);
+
+    progress("Building model", 0.5f);
+    auto model = std::make_shared<Model>("Volume");
+    auto builder = ModelBuilder(*model);
+    builder.addVolume(std::move(volume));
+    builder.addSystems();
+
+    progress("Done", 1.f);
+    auto result = std::vector<std::shared_ptr<Model>>();
+    result.push_back(std::move(model));
+    return result;
+}
+
+std::string MHDVolumeLoader::getName() const
+{
+    return "mhd-volume";
+}
+
+std::vector<std::string> MHDVolumeLoader::getExtensions() const
+{
+    return {"mhd"};
+}
+
+std::vector<std::shared_ptr<Model>> MHDVolumeLoader::loadFile(const FileRequest &request)
+{
+    auto path = std::string(request.path);
+
+    auto mhd = MhdParser::parse(path);
 
     auto &objectType = mhd["ObjectType"];
     if (objectType != "Image")
@@ -276,23 +266,18 @@ std::vector<std::shared_ptr<Model>> MHDVolumeLoader::importFromFile(
     auto dimensions = Parser::extractToken<Vector3ui>(rawDimensions);
     auto spacing = Parser::extractToken<Vector3f>(rawSpacing);
     auto dataType = MhdDataTypeConverter::convert(mhd["ElementType"]);
-    auto volumeFilePath = MhdRawFilePathResolver::resolve(mhd["ElementDataFile"], filename);
+    auto volumeFilePath = MhdRawFilePathResolver::resolve(mhd["ElementDataFile"], path);
 
-    auto params = RawVolumeLoaderParameters();
+    auto rawRequest = RawVolumeLoader::FileRequest();
+
+    rawRequest.path = path;
+    rawRequest.progress = request.progress;
+
+    auto &params = rawRequest.params;
     params.dimensions = dimensions;
     params.spacing = spacing;
     params.data_type = dataType;
 
-    return RawVolumeLoader().importFromFile(volumeFilePath, callback, params);
-}
-
-std::string MHDVolumeLoader::getName() const
-{
-    return "mhd-volume";
-}
-
-std::vector<std::string> MHDVolumeLoader::getSupportedExtensions() const
-{
-    return {"mhd"};
+    return RawVolumeLoader().loadFile(rawRequest);
 }
 } // namespace brayns

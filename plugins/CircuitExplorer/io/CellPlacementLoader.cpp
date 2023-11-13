@@ -28,6 +28,8 @@
 #include <api/ModelType.h>
 #include <api/circuit/MorphologyCircuitBuilder.h>
 
+#include <brayns/network/jsonrpc/JsonRpcException.h>
+
 #include <brayns/utils/Log.h>
 #include <brayns/utils/Timer.h>
 
@@ -185,46 +187,34 @@ public:
         return result;
     }
 };
-}
-
-std::vector<std::string> CellPlacementLoader::getSupportedExtensions() const
-{
-    return {"circuit.morphologies.h5"};
-}
-
-bool CellPlacementLoader::isSupported(const std::string &filename, const std::string &extension) const
-{
-    (void)extension;
-    auto path = std::filesystem::path(filename);
-    auto name = path.filename();
-    return name.string() == "circuit.morphologies.h5";
-}
+} // namespace
 
 std::string CellPlacementLoader::getName() const
 {
     return "Cell placement loader";
 }
 
-std::vector<std::shared_ptr<brayns::Model>> CellPlacementLoader::importFromBlob(
-    const brayns::Blob &blob,
-    const brayns::LoaderProgress &callback,
-    const CellPlacementLoaderParameters &params) const
+std::vector<std::string> CellPlacementLoader::getExtensions() const
 {
-    (void)blob;
-    (void)callback;
-    (void)params;
-    throw std::runtime_error("Binary upload is not availble for " + getName());
+    return {"circuit.morphologies.h5"};
 }
 
-std::vector<std::shared_ptr<brayns::Model>> CellPlacementLoader::importFromFile(
-    const std::string &path,
-    const brayns::LoaderProgress &callback,
-    const CellPlacementLoaderParameters &params) const
+std::vector<std::shared_ptr<brayns::Model>> CellPlacementLoader::loadFile(const FileRequest &request)
 {
+    auto path = std::string(request.path);
+    auto &progress = request.progress;
+    auto &params = request.params;
+
+    auto filename = std::filesystem::path(path).filename().string();
+    if (filename != "circuit.morphologies.h5")
+    {
+        throw brayns::InvalidParamsException("Invalid filename: '" + filename + "'");
+    }
+
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
     auto timer = brayns::Timer();
 
-    auto models = StorageLoader::fromFile(path, callback, params);
+    auto models = StorageLoader::fromFile(path, progress, params);
 
     brayns::Log::info("[CE] {}: Loaded {} model(s) in {} second(s).", getName(), models.size(), timer.seconds());
 

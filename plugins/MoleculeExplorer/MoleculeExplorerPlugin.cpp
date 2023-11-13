@@ -30,9 +30,10 @@
 
 MoleculeExplorerPlugin::MoleculeExplorerPlugin(brayns::PluginAPI &api)
 {
-    auto &loaders = api.getLoaderRegistry();
-    loaders.registerLoader(std::make_unique<ProteinLoader>());
-    loaders.registerLoader(std::make_unique<XyzLoader>());
+    auto &registry = api.getLoaderRegistry();
+    auto loaders = brayns::LoaderRegistryBuilder("Molecule Explorer", registry);
+    loaders.add<ProteinLoader>();
+    loaders.add<XyzLoader>();
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)

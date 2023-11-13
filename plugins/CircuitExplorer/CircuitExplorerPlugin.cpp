@@ -33,11 +33,15 @@
 
 CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
 {
+    auto name = "Circuit Explorer";
+
     auto &registry = api.getLoaderRegistry();
-    registry.registerLoader(std::make_unique<BBPLoader>());
-    registry.registerLoader(std::make_unique<CellPlacementLoader>());
-    registry.registerLoader(std::make_unique<NeuronMorphologyLoader>());
-    registry.registerLoader(std::make_unique<SonataLoader>());
+    auto loaders = brayns::LoaderRegistryBuilder(name, registry);
+
+    loaders.add<BBPLoader>();
+    loaders.add<CellPlacementLoader>();
+    loaders.add<NeuronMorphologyLoader>();
+    loaders.add<SonataLoader>();
 
     auto interface = api.getNetworkInterface();
     if (!interface)
@@ -47,9 +51,10 @@ CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
     auto &engine = api.getEngine();
     auto &scene = engine.getScene();
     auto &models = scene.getModels();
-    auto builder = brayns::EntrypointBuilder("Circuit Explorer", *interface);
-    builder.add<GetCircuitIdsEntrypoint>(models);
-    builder.add<SetCircuitThicknessEntrypoint>(models);
+    auto entrypoints = brayns::EntrypointBuilder(name, *interface);
+
+    entrypoints.add<GetCircuitIdsEntrypoint>(models);
+    entrypoints.add<SetCircuitThicknessEntrypoint>(models);
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)

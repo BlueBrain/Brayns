@@ -25,35 +25,25 @@
 namespace brayns
 {
 /**
- * A volume loader for mhd volumes.
- */
-class MHDVolumeLoader : public NoInputLoader
-{
-public:
-    std::vector<std::string> getSupportedExtensions() const final;
-    std::string getName() const final;
-    std::vector<std::shared_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback) const final;
-    std::vector<std::shared_ptr<Model>> importFromFile(
-        const std::string &filename,
-        const LoaderProgress &callback) const final;
-};
-
-/**
  * A volume loader for raw volumes with params for dimensions.
  */
 class RawVolumeLoader : public Loader<RawVolumeLoaderParameters>
 {
 public:
-    std::vector<std::string> getSupportedExtensions() const final;
-    std::string getName() const final;
-    std::vector<std::shared_ptr<Model>> importFromBlob(
-        const Blob &blob,
-        const LoaderProgress &callback,
-        const RawVolumeLoaderParameters &properties) const final;
+    std::string getName() const override;
+    std::vector<std::string> getExtensions() const override;
+    bool canLoadBinary() const override;
+    std::vector<std::shared_ptr<Model>> loadBinary(const BinaryRequest &request) override;
+};
 
-    std::vector<std::shared_ptr<Model>> importFromFile(
-        const std::string &filename,
-        const LoaderProgress &callback,
-        const RawVolumeLoaderParameters &properties) const final;
+/**
+ * A volume loader for mhd volumes.
+ */
+class MHDVolumeLoader : public Loader<EmptyJson>
+{
+public:
+    std::string getName() const override;
+    std::vector<std::string> getExtensions() const override;
+    std::vector<std::shared_ptr<Model>> loadFile(const FileRequest &request) override;
 };
 } // namespace brayns

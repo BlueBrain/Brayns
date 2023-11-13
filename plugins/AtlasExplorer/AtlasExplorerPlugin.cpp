@@ -30,20 +30,26 @@
 
 AtlasExplorerPlugin::AtlasExplorerPlugin(brayns::PluginAPI &api)
 {
+    auto name = "Atlas Explorer";
+
     auto &registry = api.getLoaderRegistry();
-    registry.registerLoader(std::make_unique<NRRDLoader>());
+    auto loaders = brayns::LoaderRegistryBuilder(name, registry);
+
+    loaders.add<NRRDLoader>();
 
     auto interface = api.getNetworkInterface();
     if (!interface)
     {
         return;
     }
+
     auto &engine = api.getEngine();
     auto &scene = engine.getScene();
     auto &models = scene.getModels();
-    auto builder = brayns::EntrypointBuilder("Atlas Explorer", *interface);
-    builder.add<GetAvailableAtlasUseCasesEntrypoint>(models);
-    builder.add<VisualizeAtlasUseCaseEntrypoint>(models);
+    auto entrypoints = brayns::EntrypointBuilder(name, *interface);
+
+    entrypoints.add<GetAvailableAtlasUseCasesEntrypoint>(models);
+    entrypoints.add<VisualizeAtlasUseCaseEntrypoint>(models);
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)

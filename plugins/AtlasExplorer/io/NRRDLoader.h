@@ -24,20 +24,10 @@
 
 #include "NRRDLoadeParameters.h"
 
-class NRRDLoader final : public brayns::Loader<NRRDLoaderParameters>
+class NRRDLoader : public brayns::Loader<NRRDLoaderParameters>
 {
 public:
-    std::vector<std::string> getSupportedExtensions() const override;
-
     std::string getName() const override;
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
-        const brayns::Blob &blob,
-        const brayns::LoaderProgress &callback,
-        const NRRDLoaderParameters &parameters) const override;
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
-        const std::string &path,
-        const brayns::LoaderProgress &callback,
-        const NRRDLoaderParameters &parameters) const override;
+    std::vector<std::string> getExtensions() const override;
+    std::vector<std::shared_ptr<brayns::Model>> loadFile(const FileRequest &request) override;
 };

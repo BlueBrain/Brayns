@@ -20,6 +20,7 @@
 
 #include <doctest/doctest.h>
 
+#include <brayns/io/Loader.h>
 #include <brayns/io/LoaderRegistry.h>
 
 #include <brayns/json/Json.h>
@@ -60,7 +61,7 @@ struct JsonAdapter<MockParameters> : ObjectAdapter<MockParameters>
 
 namespace
 {
-class MockLoader final : public brayns::Loader<MockParameters>
+class MockLoader : public brayns::Loader<MockParameters>
 {
 public:
     static inline const std::string name = "mock-loader";
@@ -71,65 +72,25 @@ public:
         return name;
     }
 
-    std::vector<std::string> getSupportedExtensions() const override
+    std::vector<std::string> getExtensions() const override
     {
         return extensions;
     }
 
-    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
-        const brayns::Blob &blob,
-        const brayns::LoaderProgress &callback,
-        const MockParameters &params) const override
+    bool canLoadBinary() const override
     {
-        (void)blob;
-        (void)callback;
-        (void)params;
+        return true;
+    }
+
+    std::vector<std::shared_ptr<brayns::Model>> loadBinary(const BinaryRequest &request) override
+    {
+        (void)request;
         return {};
     }
 
-    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
-        const std::string &path,
-        const brayns::LoaderProgress &callback,
-        const MockParameters &params) const override
+    std::vector<std::shared_ptr<brayns::Model>> loadFile(const FileRequest &request) override
     {
-        (void)path;
-        (void)callback;
-        (void)params;
-        return {};
-    }
-};
-
-class MockNoInputLoader final : public brayns::NoInputLoader
-{
-public:
-    static inline const std::string name = "mock-noinput-loader";
-    static inline const std::vector<std::string> extensions = {".b"};
-
-    std::string getName() const override
-    {
-        return name;
-    }
-
-    std::vector<std::string> getSupportedExtensions() const override
-    {
-        return extensions;
-    }
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
-        const brayns::Blob &blob,
-        const brayns::LoaderProgress &callback) const override
-    {
-        (void)blob;
-        (void)callback;
-        return {};
-    }
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
-        const std::string &path,
-        const brayns::LoaderProgress &callback) const override
-    {
-        (void)path;
-        (void)callback;
+        (void)request;
         return {};
     }
 };
@@ -140,58 +101,49 @@ TEST_CASE("Loader registry")
     SUBCASE("Register loader")
     {
         auto registry = brayns::LoaderRegistry();
-        CHECK(registry.getLoaderInfos().empty());
+        CHECK(registry.getInfos().empty());
 
-        registry.registerLoader(std::make_unique<MockLoader>());
-        registry.registerLoader(std::make_unique<MockNoInputLoader>());
-        auto &infos = registry.getLoaderInfos();
-        CHECK(infos.size() == 2);
+        auto loaders = brayns::LoaderRegistryBuilder("Plugin", registry);
+
+        loaders.add<MockLoader>();
+
+        auto infos = registry.getInfos();
+
+        CHECK(infos.size() == 1);
+        CHECK(infos[0].plugin == "Plugin");
         CHECK(infos[0].name == MockLoader::name);
         CHECK(infos[0].extensions == MockLoader::extensions);
-        CHECK(infos[1].name == MockNoInputLoader::name);
-        CHECK(infos[1].extensions == MockNoInputLoader::extensions);
+        CHECK(infos[0].binary);
 
-        registry.clear();
-        CHECK(registry.getLoaderInfos().empty());
+        CHECK(infos[0].schema == brayns::Json::getSchema<MockParameters>());
     }
     SUBCASE("Query suitability")
     {
         auto registry = brayns::LoaderRegistry();
-        registry.registerLoader(std::make_unique<MockLoader>());
-        registry.registerLoader(std::make_unique<MockNoInputLoader>());
+        registry.add("", std::make_unique<MockLoader>());
 
-        CHECK(registry.isSupportedFile("/a/file/path.a"));
-        CHECK(registry.isSupportedFile("/another/file/path.b"));
-        CHECK(!registry.isSupportedFile("/a/third/file/path.c"));
-        CHECK(!registry.isSupportedFile("/and/why/not/a/forth"));
-        CHECK(registry.isSupportedFile("even_local_files.a"));
-        CHECK(registry.isSupportedFile("and/relatives/too.b"));
+        CHECK(registry.findByName(MockLoader::name));
+        CHECK_FALSE(registry.findByName("something wrong"));
 
-        CHECK(registry.isSupportedType("a"));
-        CHECK(registry.isSupportedType(".a"));
-        CHECK(registry.isSupportedType("b"));
-        CHECK(!registry.isSupportedType("c"));
-        CHECK(!registry.isSupportedType(".c"));
-        CHECK(!registry.isSupportedType(""));
-    }
-    SUBCASE("Retrieve loader")
-    {
-        auto registry = brayns::LoaderRegistry();
-        registry.registerLoader(std::make_unique<MockLoader>());
+        auto valid = std::vector<std::string>({"/a/file/path.a", "local_file.a"});
 
-        CHECK_NOTHROW(registry.getSuitableLoader("/a/path.a", "", ""));
-        CHECK_NOTHROW(registry.getSuitableLoader("", ".a", ""));
-        CHECK_NOTHROW(registry.getSuitableLoader("", "", "mock-loader"));
-        CHECK_NOTHROW(registry.getSuitableLoader("path.a", "a", ""));
-        CHECK_NOTHROW(registry.getSuitableLoader("another/path.a", "", "mock-loader"));
-        CHECK_NOTHROW(registry.getSuitableLoader("", ".a", "mock-loader"));
-        CHECK_NOTHROW(registry.getSuitableLoader("/final/path.a", ".a", "mock-loader"));
+        for (const auto &path : valid)
+        {
+            auto format = brayns::LoaderFormat::from(path);
+            CHECK(registry.findByFormat(format));
+        }
 
-        CHECK_THROWS_AS(registry.getSuitableLoader("", "", ""), std::runtime_error);
-        CHECK_THROWS_AS(registry.getSuitableLoader("/wrong/path.c", "", ""), std::runtime_error);
-        CHECK_THROWS_AS(registry.getSuitableLoader("", ".badextension", ""), std::runtime_error);
-        CHECK_THROWS_AS(registry.getSuitableLoader("", "", "bad-loader-name"), std::runtime_error);
-        CHECK_THROWS_AS(registry.getSuitableLoader("", ".a", "bad-loader-name"), std::runtime_error);
-        CHECK_THROWS_AS(registry.getSuitableLoader("a/path.a", "", "bad-loader-name"), std::runtime_error);
+        auto invalid = std::vector<std::string>(
+            {"/another/file/path.b",
+             "/a/third/file/path.c",
+             "/and/why/not/a/forth",
+             "and/relatives/too.b",
+             "something"});
+
+        for (const auto &path : invalid)
+        {
+            auto format = brayns::LoaderFormat::from(path);
+            CHECK_FALSE(registry.findByFormat(format));
+        }
     }
 }

@@ -25,22 +25,10 @@
 /**
  * @brief Imports a circuit from a BBP's BlueConfig/CircuitConfig file
  */
-class BBPLoader final : public brayns::Loader<BBPLoaderParameters>
+class BBPLoader : public brayns::Loader<BBPLoaderParameters>
 {
 public:
-    std::vector<std::string> getSupportedExtensions() const final;
-
-    bool isSupported(const std::string &filename, const std::string &extension) const final;
-
-    std::string getName() const final;
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
-        const brayns::Blob &blob,
-        const brayns::LoaderProgress &callback,
-        const BBPLoaderParameters &params) const final;
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
-        const std::string &path,
-        const brayns::LoaderProgress &callback,
-        const BBPLoaderParameters &params) const final;
+    std::string getName() const override;
+    std::vector<std::string> getExtensions() const override;
+    std::vector<std::shared_ptr<brayns::Model>> loadFile(const FileRequest &request) override;
 };

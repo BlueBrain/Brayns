@@ -28,101 +28,126 @@
 
 namespace brayns
 {
-LoaderRegistry LoaderRegistry::createWithCoreLoaders()
+LoaderRef::LoaderRef(LoaderInfo info, std::unique_ptr<ILoader> loader):
+    _info(std::move(info)),
+    _loader(std::move(loader))
 {
-    LoaderRegistry registry;
-    registry.registerLoader(std::make_unique<MeshLoader>());
-    registry.registerLoader(std::make_unique<MHDVolumeLoader>());
-    registry.registerLoader(std::make_unique<RawVolumeLoader>());
-    return registry;
 }
 
-void LoaderRegistry::registerLoader(std::unique_ptr<AbstractLoader> loader)
+const LoaderInfo &LoaderRef::getInfo() const
 {
-    _loaderInfos.push_back({loader->getName(), loader->getSupportedExtensions(), loader->getInputParametersSchema()});
-
-    brayns::Log::info("Registering loader {}.", loader->getName());
-
-    _loaders.push_back(std::move(loader));
+    return _info;
 }
 
-const std::vector<LoaderInfo> &LoaderRegistry::getLoaderInfos() const
+const std::string &LoaderRef::getPlugin() const
 {
-    return _loaderInfos;
+    return _info.plugin;
 }
 
-bool LoaderRegistry::isSupportedFile(const std::string &filename) const
+const std::string &LoaderRef::getName() const
 {
-    if (std::filesystem::is_directory(filename))
+    return _info.name;
+}
+
+const std::vector<std::string> &LoaderRef::getExtensions() const
+{
+    return _info.extensions;
+}
+
+bool LoaderRef::canLoadBinary() const
+{
+    return _info.binary;
+}
+
+const JsonSchema &LoaderRef::getSchema() const
+{
+    return _info.schema;
+}
+
+std::vector<std::shared_ptr<Model>> LoaderRef::loadBinary(const RawBinaryLoaderRequest &request)
+{
+    return _loader->loadBinary(request);
+}
+
+std::vector<std::shared_ptr<Model>> LoaderRef::loadFile(const RawFileLoaderRequest &request)
+{
+    return _loader->loadFile(request);
+}
+
+LoaderRef LoaderBuilder::build(std::string plugin, std::unique_ptr<ILoader> loader)
+{
+    auto info = LoaderInfo();
+    info.plugin = std::move(plugin);
+    info.name = loader->getName();
+    info.extensions = loader->getExtensions();
+    info.binary = loader->canLoadBinary();
+    info.schema = loader->getSchema();
+    return LoaderRef(std::move(info), std::move(loader));
+}
+
+std::vector<LoaderInfo> LoaderRegistry::getInfos() const
+{
+    auto loaders = std::vector<LoaderInfo>();
+    loaders.reserve(_loaders.size());
+    for (const auto &loader : _loaders)
     {
-        return false;
+        loaders.push_back(loader.getInfo());
     }
+    return loaders;
+}
 
-    auto extension = std::filesystem::path(filename).extension().lexically_normal().string();
+LoaderRef *LoaderRegistry::findByName(const std::string &name)
+{
     for (auto &loader : _loaders)
     {
-        if (loader->isSupported(filename, extension))
+        if (loader.getName() == name)
         {
-            return true;
+            return &loader;
         }
     }
-    return false;
+    return nullptr;
 }
 
-bool LoaderRegistry::isSupportedType(const std::string &type) const
+LoaderRef *LoaderRegistry::findByFormat(const std::string &format)
 {
     for (auto &loader : _loaders)
     {
-        if (loader->isSupported("", type))
+        for (const auto &extension : loader.getExtensions())
         {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-const AbstractLoader &LoaderRegistry::getSuitableLoader(
-    const std::string &filename,
-    const std::string &filetype,
-    const std::string &loaderName) const
-{
-    if (std::filesystem::is_directory(filename))
-    {
-        throw std::runtime_error("'" + filename + "' is a directory");
-    }
-
-    auto extension =
-        filetype.empty() ? std::filesystem::path(filename).extension().lexically_normal().string() : filetype;
-
-    // Find specific loader
-    if (!loaderName.empty())
-    {
-        for (auto &loader : _loaders)
-        {
-            if (loader->getName() == loaderName)
+            if (extension == format)
             {
-                return *loader.get();
+                return &loader;
             }
         }
-
-        throw std::runtime_error("No loader found with name '" + loaderName + "'");
     }
-
-    for (auto &loader : _loaders)
-    {
-        if (loader->isSupported(filename, extension))
-        {
-            return *loader;
-        }
-    }
-
-    throw std::runtime_error("No loader found for filename '" + filename + "' and filetype '" + filetype + "'");
+    return nullptr;
 }
 
-void LoaderRegistry::clear()
+void LoaderRegistry::add(std::string plugin, std::unique_ptr<ILoader> loader)
 {
-    _loaders.clear();
-    _loaderInfos.clear();
+    auto ref = LoaderBuilder::build(std::move(plugin), std::move(loader));
+    Log::info("Plugin '{}' registered loader '{}'.", ref.getPlugin(), ref.getName());
+    _loaders.push_back(std::move(ref));
+}
+
+LoaderRegistryBuilder::LoaderRegistryBuilder(std::string plugin, LoaderRegistry &loaders):
+    _plugin(std::move(plugin)),
+    _loaders(loaders)
+{
+}
+
+void LoaderRegistryBuilder::addLoader(std::unique_ptr<ILoader> loader)
+{
+    _loaders.add(_plugin, std::move(loader));
+}
+
+LoaderRegistry CoreLoaderRegistry::create()
+{
+    auto loaders = LoaderRegistry();
+    auto builder = LoaderRegistryBuilder("Core", loaders);
+    builder.add<MeshLoader>();
+    builder.add<MHDVolumeLoader>();
+    builder.add<RawVolumeLoader>();
+    return loaders;
 }
 } // namespace brayns

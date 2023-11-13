@@ -20,63 +20,70 @@
 
 #pragma once
 
-#include <brayns/io/Loader.h>
+#include "ILoader.h"
+#include "LoaderInfo.h"
 
 namespace brayns
 {
-struct LoaderInfo
+class LoaderRef
 {
-    std::string name;
-    std::vector<std::string> extensions;
-    JsonSchema inputParametersSchema;
+public:
+    explicit LoaderRef(LoaderInfo info, std::unique_ptr<ILoader> loader);
+
+    const LoaderInfo &getInfo() const;
+    const std::string &getPlugin() const;
+    const std::string &getName() const;
+    const std::vector<std::string> &getExtensions() const;
+    bool canLoadBinary() const;
+    const JsonSchema &getSchema() const;
+    std::vector<std::shared_ptr<Model>> loadBinary(const RawBinaryLoaderRequest &request);
+    std::vector<std::shared_ptr<Model>> loadFile(const RawFileLoaderRequest &request);
+
+private:
+    LoaderInfo _info;
+    std::unique_ptr<ILoader> _loader;
 };
 
-/**
- * Holds information about registered loaders and helps invoking the appropriate
- * loader for a given blob or file.
- */
+class LoaderBuilder
+{
+public:
+    static LoaderRef build(std::string plugin, std::unique_ptr<ILoader> loader);
+};
+
 class LoaderRegistry
 {
 public:
-    /**
-     * @brief Create a registry with core loaders registered.
-     *
-     * @return LoaderRegistry Registry.
-     */
-    static LoaderRegistry createWithCoreLoaders();
-
-    /** Register the given loader. */
-    void registerLoader(std::unique_ptr<AbstractLoader> loader);
-
-    /**
-     * Get a list of loaders and their supported file extensions and properties
-     */
-    const std::vector<LoaderInfo> &getLoaderInfos() const;
-
-    /**
-     * @return true if any of the registered loaders can handle the given file
-     */
-    bool isSupportedFile(const std::string &filename) const;
-
-    /**
-     * @return true if any of the registered loaders can handle the given type
-     */
-    bool isSupportedType(const std::string &type) const;
-
-    /**
-     * Get a loader that matches the provided name, filetype or loader name.
-     * @throw std::runtime_error if no loader found.
-     */
-    const AbstractLoader &getSuitableLoader(
-        const std::string &filename,
-        const std::string &filetype,
-        const std::string &loaderName) const;
-
-    /** @internal */
-    void clear();
+    std::vector<LoaderInfo> getInfos() const;
+    LoaderRef *findByName(const std::string &name);
+    LoaderRef *findByFormat(const std::string &format);
+    void add(std::string plugin, std::unique_ptr<ILoader> loader);
 
 private:
-    std::vector<std::unique_ptr<AbstractLoader>> _loaders;
-    std::vector<LoaderInfo> _loaderInfos;
+    std::vector<LoaderRef> _loaders;
+};
+
+class LoaderRegistryBuilder
+{
+public:
+    explicit LoaderRegistryBuilder(std::string plugin, LoaderRegistry &loaders);
+
+    void addLoader(std::unique_ptr<ILoader> loader);
+
+    template<typename T, typename... Args>
+    void add(Args &&...args)
+    {
+        auto loader = std::make_unique<T>(std::forward<Args>(args)...);
+        addLoader(std::move(loader));
+    }
+
+private:
+    std::string _plugin;
+    LoaderRegistry &_loaders;
+};
+
+class CoreLoaderRegistry
+{
+public:
+    static LoaderRegistry create();
 };
 } // namespace brayns

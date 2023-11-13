@@ -23,7 +23,10 @@
 
 #include <brayns/engine/common/AddLoadInfo.h>
 #include <brayns/engine/common/SimulationScanner.h>
+
+#include <brayns/network/common/LoaderHelper.h>
 #include <brayns/network/common/ProgressHandler.h>
+
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
 namespace
@@ -40,54 +43,6 @@ public:
         if (data.empty())
         {
             throw brayns::InvalidParamsException("Mo model binary data");
-        }
-    }
-};
-
-class BlobLoader
-{
-public:
-    static brayns::Blob load(const brayns::UploadModelParams &params, std::string_view data)
-    {
-        auto blob = _prepare(params);
-        _load(data, blob);
-        return blob;
-    }
-
-private:
-    static brayns::Blob _prepare(const brayns::UploadModelParams &params)
-    {
-        brayns::Blob blob;
-        blob.type = params.type;
-        blob.name = params.loader_name;
-        return blob;
-    }
-
-    static void _load(std::string_view data, brayns::Blob &blob)
-    {
-        auto &destination = blob.data;
-        auto size = data.size();
-        destination.reserve(size);
-        destination.insert(destination.end(), data.begin(), data.end());
-    }
-};
-
-class LoaderFinder
-{
-public:
-    static const brayns::AbstractLoader &find(
-        const brayns::UploadModelParams &params,
-        const brayns::LoaderRegistry &loaders)
-    {
-        try
-        {
-            auto &name = params.loader_name;
-            auto &type = params.type;
-            return loaders.getSuitableLoader("", type, name);
-        }
-        catch (const std::runtime_error &e)
-        {
-            throw brayns::InvalidParamsException(e.what());
         }
     }
 };
@@ -111,7 +66,7 @@ public:
     static void load(
         const brayns::UploadModelEntrypoint::Request &request,
         brayns::ModelManager &manager,
-        const brayns::LoaderRegistry &loaders,
+        brayns::LoaderRegistry &loaders,
         brayns::CancellationToken &token)
     {
         auto params = request.getParams();
@@ -120,13 +75,23 @@ public:
         RequestValidator::validate(params, data);
 
         auto progress = brayns::ProgressHandler(token, request);
-        auto blob = BlobLoader::load(params, data);
+
         progress.notify("Model uploaded", 0.5);
 
-        auto &loader = LoaderFinder::find(params, loaders);
-        auto parameters = params.loader_properties;
+        auto &name = params.loader_name;
+        auto &properties = params.loader_properties;
+        auto &format = params.type;
+
+        auto &loader = brayns::LoaderHelper::findAndValidate(loaders, name, format, properties);
+
+        if (!loader.canLoadBinary())
+        {
+            throw brayns::InvalidParamsException("Loader '" + loader.getName() + "' cannot load binary");
+        }
+
         auto callback = [&](auto &operation, auto amount) { progress.notify(operation, 0.5 + 0.5 * amount); };
-        auto models = loader.loadFromBlob(blob, brayns::LoaderProgress(callback), parameters);
+        auto models = loader.loadBinary({params.type, data, callback, properties});
+
         auto result = manager.add(std::move(models));
 
         auto loadInfo = LoadInfoFactory::create(params);
@@ -141,7 +106,7 @@ namespace brayns
 {
 UploadModelEntrypoint::UploadModelEntrypoint(
     ModelManager &models,
-    const LoaderRegistry &loaders,
+    LoaderRegistry &loaders,
     SimulationParameters &simulation,
     CancellationToken token):
     _models(models),

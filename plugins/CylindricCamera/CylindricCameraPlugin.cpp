@@ -39,9 +39,11 @@ CylindricCameraPlugin::CylindricCameraPlugin(brayns::PluginAPI &api)
     {
         return;
     }
-    auto builder = brayns::EntrypointBuilder("Cylindric Camera", *interface);
-    builder.add<SetCylindricCameraEntrypoint>(engine);
-    builder.add<GetCylindricCameraEntrypoint>(engine);
+
+    auto entrypoints = brayns::EntrypointBuilder("Cylindric Camera", *interface);
+
+    entrypoints.add<SetCylindricCameraEntrypoint>(engine);
+    entrypoints.add<GetCylindricCameraEntrypoint>(engine);
 }
 
 extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)

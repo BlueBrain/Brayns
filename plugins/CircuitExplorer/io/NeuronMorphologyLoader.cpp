@@ -137,41 +137,31 @@ public:
 };
 } // namespace
 
-std::vector<std::string> NeuronMorphologyLoader::getSupportedExtensions() const
-{
-    return {"swc", "h5", "asc"};
-}
-
 std::string NeuronMorphologyLoader::getName() const
 {
     return "Neuron Morphology loader";
 }
 
-std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromBlob(
-    const brayns::Blob &blob,
-    const brayns::LoaderProgress &cb,
-    const NeuronMorphologyLoaderParameters &params) const
+std::vector<std::string> NeuronMorphologyLoader::getExtensions() const
 {
-    (void)blob;
-    (void)cb;
-    (void)params;
-    throw std::runtime_error("MorphologyLoader: Import from blob not supported");
+    return {"swc", "h5", "asc"};
 }
 
-std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::importFromFile(
-    const std::string &path,
-    const brayns::LoaderProgress &callback,
-    const NeuronMorphologyLoaderParameters &input) const
+std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::loadFile(const FileRequest &request)
 {
+    auto path = std::string(request.path);
+    auto &progress = request.progress;
+    auto &params = request.params;
+
     brayns::Timer timer;
 
     auto name = getName();
 
     brayns::Log::info("[CE] {}: loading {}.", name, path);
-    callback.updateProgress("Loading " + path, 0.f);
+    progress("Loading " + path, 0.f);
 
-    SectionLoadChecker::check(input);
-    auto model = LoadDispatcher::dispatch(path, input);
+    SectionLoadChecker::check(params);
+    auto model = LoadDispatcher::dispatch(path, params);
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());
 

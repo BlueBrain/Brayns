@@ -25,7 +25,7 @@ void ProgressUpdater::update(std::size_t numSubElementsCompleted) noexcept
     const auto globalProgress = (static_cast<float>(_currentStage) + _currentStageProgress) * _stageSize;
     _currentStageProgress += _currentStageChunkSize * static_cast<float>(numSubElementsCompleted);
     _currentStageProgress = std::clamp(_currentStageProgress, 0.f, 1.f);
-    _callback.updateProgress(_currentMessage, globalProgress);
+    _callback(_currentMessage, globalProgress);
 }
 
 void ProgressUpdater::endStage()
@@ -40,5 +40,5 @@ void ProgressUpdater::end(std::string_view message)
 {
     assert(_currentStage == _numStages);
 
-    _callback.updateProgress(std::string(message), static_cast<float>(_numStages) * _stageSize);
+    _callback(std::string(message), static_cast<float>(_numStages) * _stageSize);
 };
