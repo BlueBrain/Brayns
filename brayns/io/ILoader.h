@@ -20,16 +20,17 @@
 
 #pragma once
 
-#include <brayns/engine/model/Model.h>
-
-#include <brayns/json/Json.h>
-
-#include <filesystem>
 #include <functional>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <brayns/engine/model/Model.h>
+
+#include <brayns/json/Json.h>
+
+#include <brayns/utils/string/StringCase.h>
 
 namespace brayns
 {
@@ -61,14 +62,5 @@ public:
     virtual bool canLoadBinary() const = 0;
     virtual std::vector<std::shared_ptr<Model>> loadBinary(const RawBinaryLoaderRequest &request) = 0;
     virtual std::vector<std::shared_ptr<Model>> loadFile(const RawFileLoaderRequest &request) = 0;
-};
-
-class LoaderFormat
-{
-public:
-    static std::string from(const std::filesystem::path &path)
-    {
-        return path.extension().lexically_normal().string();
-    }
 };
 } // namespace brayns

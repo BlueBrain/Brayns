@@ -20,14 +20,14 @@
 
 #include <doctest/doctest.h>
 
+#include <brayns/io/LoaderFormat.h>
 #include <brayns/io/loaders/mesh/MeshLoader.h>
+
 #include <brayns/utils/FileReader.h>
 
 #include <tests/helpers/BraynsTestUtils.h>
 #include <tests/paths.h>
 #include <tests/unit/PlaceholderEngine.h>
-
-#include <filesystem>
 
 namespace
 {
@@ -45,9 +45,11 @@ public:
     static std::vector<std::shared_ptr<brayns::Model>> loadBinary(const std::string &path)
     {
         auto loader = brayns::MeshLoader();
+        auto format = brayns::LoaderFormat::fromPath(path);
+        auto data = brayns::FileReader::read(path);
         auto request = brayns::MeshLoader::BinaryRequest();
-        request.format = brayns::LoaderFormat::from(path);
-        request.data = brayns::FileReader::read(path);
+        request.format = format;
+        request.data = data;
         return loader.loadBinary(request);
     }
 };

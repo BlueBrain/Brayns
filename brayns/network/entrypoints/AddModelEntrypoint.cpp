@@ -24,6 +24,8 @@
 #include <brayns/engine/common/AddLoadInfo.h>
 #include <brayns/engine/common/SimulationScanner.h>
 
+#include <brayns/io/LoaderFormat.h>
+
 #include <brayns/network/common/LoaderHelper.h>
 #include <brayns/network/common/ProgressHandler.h>
 
@@ -43,7 +45,7 @@ public:
         }
         auto &name = params.loader_name;
         auto &properties = params.loader_properties;
-        auto format = brayns::LoaderFormat::from(path);
+        auto format = brayns::LoaderFormat::fromPath(path);
         return brayns::LoaderHelper::findAndValidate(loaders, name, format, properties);
     }
 };

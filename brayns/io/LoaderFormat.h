@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2023, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,13 +20,18 @@
 
 #pragma once
 
-#include <brayns/io/Loader.h>
+#include <filesystem>
+#include <string_view>
 
-class XyzLoader : public brayns::Loader<brayns::EmptyLoaderParams>
+#include <brayns/utils/string/StringCase.h>
+#include <brayns/utils/string/StringInfo.h>
+
+namespace brayns
+{
+class LoaderFormat
 {
 public:
-    std::string getName() const override;
-    std::vector<std::string> getExtensions() const override;
-    bool canLoadBinary() const override;
-    std::vector<std::shared_ptr<brayns::Model>> loadBinary(const BinaryRequest &request) override;
+    static std::string fromPath(const std::filesystem::path &path);
+    static std::string fromExtension(std::string_view extension);
 };
+} // namespace brayns

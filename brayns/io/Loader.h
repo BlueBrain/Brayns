@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  *
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -22,7 +22,9 @@
 
 #include <stdexcept>
 
+#include "EmptyLoaderParams.h"
 #include "ILoader.h"
+#include "LoaderFormat.h"
 
 #include <brayns/utils/FileReader.h>
 
@@ -45,7 +47,7 @@ struct FileLoaderRequest
     T params{};
 };
 
-template<typename ParamsType>
+template<typename ParamsType = EmptyLoaderParams>
 class Loader : public ILoader
 {
 public:
@@ -62,9 +64,11 @@ public:
     virtual std::vector<std::shared_ptr<Model>> loadFile(const FileRequest &request)
     {
         auto path = std::string(request.path);
+        auto format = LoaderFormat::fromPath(path);
+        auto data = FileReader::read(path);
         auto binary = BinaryRequest();
-        binary.format = LoaderFormat::from(path);
-        binary.data = FileReader::read(path);
+        binary.format = format;
+        binary.data = data;
         binary.progress = request.progress;
         binary.params = request.params;
         return loadBinary(binary);

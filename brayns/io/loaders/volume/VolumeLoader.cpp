@@ -154,7 +154,7 @@ private:
         auto expectedSize = linealSize * _getTypeByteSize(params.data_type);
         if (expectedSize != dataSize)
         {
-            throw std::invalid_argument("Data size and exptected size mismatch");
+            throw std::invalid_argument("Data size and expected size mismatch");
         }
     }
 
@@ -270,7 +270,7 @@ std::vector<std::shared_ptr<Model>> MHDVolumeLoader::loadFile(const FileRequest 
 
     auto rawRequest = RawVolumeLoader::FileRequest();
 
-    rawRequest.path = path;
+    rawRequest.path = volumeFilePath;
     rawRequest.progress = request.progress;
 
     auto &params = rawRequest.params;

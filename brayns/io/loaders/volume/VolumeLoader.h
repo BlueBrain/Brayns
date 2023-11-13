@@ -39,7 +39,7 @@ public:
 /**
  * A volume loader for mhd volumes.
  */
-class MHDVolumeLoader : public Loader<EmptyJson>
+class MHDVolumeLoader : public Loader<EmptyLoaderParams>
 {
 public:
     std::string getName() const override;

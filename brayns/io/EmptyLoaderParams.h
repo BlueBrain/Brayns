@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2023, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,13 +20,35 @@
 
 #pragma once
 
-#include <brayns/io/Loader.h>
+#include <brayns/json/Json.h>
 
-class XyzLoader : public brayns::Loader<brayns::EmptyLoaderParams>
+namespace brayns
 {
-public:
-    std::string getName() const override;
-    std::vector<std::string> getExtensions() const override;
-    bool canLoadBinary() const override;
-    std::vector<std::shared_ptr<brayns::Model>> loadBinary(const BinaryRequest &request) override;
+struct EmptyLoaderParams
+{
 };
+
+template<>
+struct JsonAdapter<EmptyLoaderParams>
+{
+    static JsonSchema getSchema()
+    {
+        auto schema = JsonSchema();
+        schema.title = "EmptyLoaderParams";
+        schema.type = JsonType::Undefined;
+        return schema;
+    }
+
+    static void serialize(const EmptyLoaderParams &value, JsonValue &json)
+    {
+        (void)value;
+        JsonFactory::emplaceObject(json);
+    }
+
+    static void deserialize(const JsonValue &json, EmptyLoaderParams &value)
+    {
+        (void)json;
+        (void)value;
+    }
+};
+} // namespace brayns

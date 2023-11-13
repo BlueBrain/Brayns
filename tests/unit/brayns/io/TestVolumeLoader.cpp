@@ -73,14 +73,14 @@ TEST_CASE("Raw Volume loader")
         invalidDataType.params.data_type = brayns::VolumeDataType::Short;
         invalidDataType.params.dimensions = brayns::Vector3ui(256, 256, 112);
         invalidDataType.params.spacing = brayns::Vector3f(1.f);
-        CHECK_THROWS_WITH(loader.loadFile(invalidDataType), "Data size and exptected size mismatch");
+        CHECK_THROWS_WITH(loader.loadFile(invalidDataType), "Data size and expected size mismatch");
 
         auto request = brayns::RawVolumeLoader::FileRequest();
         request.path = TestPaths::Volumes::emptyRaw;
         request.params.data_type = brayns::VolumeDataType::Float;
         request.params.dimensions = brayns::Vector3ui(256, 256, 112);
         request.params.spacing = brayns::Vector3f(1.f);
-        CHECK_THROWS_WITH(loader.loadFile(request), "Data size and exptected size mismatch");
+        CHECK_THROWS_WITH(loader.loadFile(request), "Data size and expected size mismatch");
     }
     SUBCASE("Load")
     {

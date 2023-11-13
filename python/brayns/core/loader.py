@@ -41,11 +41,17 @@ class LoaderInfo:
     :type extensions: list[str]
     :param schema: Parameters JSON schema (low level).
     :type schema: JsonSchema
+    :param binary: Wether the loader can load binary data.
+    :type binary: bool
+    :param schema: Plugin required to have the loader available.
+    :type schema: str
     """
 
     name: str
     extensions: list[str]
     schema: JsonSchema
+    binary: bool = False
+    plugin: str = ""
 
 
 def get_loaders(instance: Instance) -> list[LoaderInfo]:
@@ -263,6 +269,8 @@ def _deserialize_loader(message: dict[str, Any]) -> LoaderInfo:
         name=message["name"],
         extensions=message["extensions"],
         schema=deserialize_schema(message["input_parameters_schema"]),
+        binary=message.get("binary", False),
+        plugin=message.get("plugin", ""),
     )
 
 

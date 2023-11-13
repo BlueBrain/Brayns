@@ -101,7 +101,7 @@ private:
  * A default white material is used for the mesh model.
  *
  */
-class MeshLoader : public Loader<EmptyJson>
+class MeshLoader : public Loader<EmptyLoaderParams>
 {
 public:
     /**

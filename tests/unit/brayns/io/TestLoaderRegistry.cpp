@@ -21,6 +21,7 @@
 #include <doctest/doctest.h>
 
 #include <brayns/io/Loader.h>
+#include <brayns/io/LoaderFormat.h>
 #include <brayns/io/LoaderRegistry.h>
 
 #include <brayns/json/Json.h>
@@ -65,7 +66,7 @@ class MockLoader : public brayns::Loader<MockParameters>
 {
 public:
     static inline const std::string name = "mock-loader";
-    static inline const std::vector<std::string> extensions = {".a"};
+    static inline const std::vector<std::string> extensions = {"a"};
 
     std::string getName() const override
     {
@@ -125,11 +126,11 @@ TEST_CASE("Loader registry")
         CHECK(registry.findByName(MockLoader::name));
         CHECK_FALSE(registry.findByName("something wrong"));
 
-        auto valid = std::vector<std::string>({"/a/file/path.a", "local_file.a"});
+        auto valid = std::vector<std::string>({"/a/file/path.a", "local_file.a", "otherfile.A", "some/a"});
 
         for (const auto &path : valid)
         {
-            auto format = brayns::LoaderFormat::from(path);
+            auto format = brayns::LoaderFormat::fromPath(path);
             CHECK(registry.findByFormat(format));
         }
 
@@ -142,7 +143,7 @@ TEST_CASE("Loader registry")
 
         for (const auto &path : invalid)
         {
-            auto format = brayns::LoaderFormat::from(path);
+            auto format = brayns::LoaderFormat::fromPath(path);
             CHECK_FALSE(registry.findByFormat(format));
         }
     }
