@@ -48,26 +48,6 @@ namespace
 class MeshParsingHelper
 {
 public:
-    static brayns::TriangleMesh parse(const brayns::MeshParserRegistry &parsers, const std::string &filename)
-    {
-        std::filesystem::path path(filename);
-        auto extension = path.extension();
-        auto format = extension.string();
-        format.erase(0, 1);
-        auto data = brayns::FileReader::read(filename);
-        return parse(parsers, format, data);
-    }
-
-    static brayns::TriangleMesh parse(const brayns::MeshParserRegistry &parsers, const brayns::Blob &blob)
-    {
-        auto &format = blob.type;
-        auto &blobData = blob.data;
-        auto address = static_cast<const void *>(blobData.data());
-        auto data = static_cast<const char *>(address);
-        auto size = blobData.size();
-        return parse(parsers, format, {data, size});
-    }
-
     static brayns::TriangleMesh parse(
         const brayns::MeshParserRegistry &parsers,
         const std::string &format,
@@ -201,29 +181,20 @@ MeshLoader::MeshLoader()
     _parsers.add<OffMeshParser>();
 }
 
-std::vector<std::string> MeshLoader::getSupportedExtensions() const
-{
-    return _parsers.getAllSupportedExtensions();
-}
-
 std::string MeshLoader::getName() const
 {
     return "mesh";
 }
 
-std::vector<std::shared_ptr<Model>> MeshLoader::importFromFile(
-    const std::string &fileName,
-    const LoaderProgress &callback) const
+std::vector<std::string> MeshLoader::getExtensions() const
 {
-    (void)callback;
-    auto mesh = MeshParsingHelper::parse(_parsers, fileName);
-    return MeshImporter::import(mesh);
+    return _parsers.getAllSupportedExtensions();
 }
 
-std::vector<std::shared_ptr<Model>> MeshLoader::importFromBlob(const Blob &blob, const LoaderProgress &callback) const
+std::vector<std::shared_ptr<Model>> MeshLoader::loadBinary(const BinaryRequest &request)
 {
-    (void)callback;
-    auto mesh = MeshParsingHelper::parse(_parsers, blob);
+    auto format = std::string(request.format);
+    auto mesh = MeshParsingHelper::parse(_parsers, format, request.data);
     return MeshImporter::import(mesh);
 }
 } // namespace brayns

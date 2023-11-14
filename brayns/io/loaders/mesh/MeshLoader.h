@@ -101,7 +101,7 @@ private:
  * A default white material is used for the mesh model.
  *
  */
-class MeshLoader : public NoInputLoader
+class MeshLoader : public Loader<EmptyLoaderParams>
 {
 public:
     /**
@@ -111,40 +111,27 @@ public:
     MeshLoader();
 
     /**
-     * @brief Extract all supported formats using the registered parsers.
-     *
-     * @return std::vector<std::string> Supported file extensions.
-     */
-    std::vector<std::string> getSupportedExtensions() const final;
-
-    /**
      * @brief Get the loader name.
      *
      * @return std::string Loader name.
      */
-    std::string getName() const final;
+    std::string getName() const override;
 
     /**
-     * @brief Import the mesh in the given scene from the given file.
+     * @brief Extract all supported formats using the registered parsers.
      *
-     * @param fileName File to import.
-     * @param callback Deprecated.
+     * @return std::vector<std::string> Supported file extensions.
+     */
+    std::vector<std::string> getExtensions() const override;
+
+    /**
+     * @brief Import the mesh in the given scene from the given binary data.
+     *
+     * @param request Loading request.
      * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
      * @throw std::runtime_error An error occurs.
      */
-    std::vector<std::shared_ptr<Model>> importFromFile(
-        const std::string &fileName,
-        const LoaderProgress &callback) const final;
-
-    /**
-     * @brief Import the mesh in the given scene from the given blob of data.
-     *
-     * @param blob Mesh data.
-     * @param callback Deprecated.
-     * @return std::vector<ModelDescriptorPtr> Models containing the mesh.
-     * @throw std::runtime_error An error occurs.
-     */
-    std::vector<std::shared_ptr<Model>> importFromBlob(const Blob &blob, const LoaderProgress &callback) const final;
+    std::vector<std::shared_ptr<Model>> loadBinary(const BinaryRequest &request) override;
 
 private:
     MeshParserRegistry _parsers;

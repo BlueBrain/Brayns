@@ -35,12 +35,12 @@ std::string GetLoadersEntrypoint::getMethod() const
 
 std::string GetLoadersEntrypoint::getDescription() const
 {
-    return "Get all loaders";
+    return "Retreive the description of all available loaders";
 }
 
 void GetLoadersEntrypoint::onRequest(const Request &request)
 {
-    auto &loaders = _loaders.getLoaderInfos();
-    request.reply(loaders);
+    auto infos = _loaders.getInfos();
+    request.reply(infos);
 }
 } // namespace brayns

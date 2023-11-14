@@ -23,6 +23,7 @@ from __future__ import annotations
 import json
 import sys
 from collections import defaultdict
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import brayns
@@ -41,7 +42,7 @@ JSON-RPC API reference
 
 FILENAME = "api_{plugin}_methods.rst"
 
-TITLE = "{plugin} API methods"
+TITLE = "{plugin} API"
 
 HEADER = """
 .. _api{label}-label:
@@ -49,8 +50,39 @@ HEADER = """
 {title}
 {underline}
 
-This page references the entrypoints of the {plugin} plugin.
+This page references the loaders and entrypoints registered by the {plugin} plugin.
 """.strip()
+
+CONTENT = """
+{header}
+
+Loaders
+-------
+
+{loaders}
+
+Entrypoints
+-----------
+
+{entrypoints}
+""".strip()
+
+LOADER = """
+{name}
+{underline}
+
+Can load the following formats: {extensions}.
+
+{binary}
+
+{schema}{separator}
+""".strip()
+
+NO_LOADERS = "This plugin does not register any loaders."
+
+BINARY = "This loader supports loading binary data using 'upload-model'."
+
+NO_BINARY = "This loader does not support loading binary data using 'upload-model'."
 
 ENTRYPOINT = """
 {name}
@@ -66,6 +98,8 @@ ENTRYPOINT = """
 
 {result}{separator}
 """.strip()
+
+NO_ENTRYPOINTS = "This plugin does not register any entrypoints."
 
 ASYNCHRONOUS = """
 This entrypoint is asynchronous, it means that it can take a long time and send
@@ -97,6 +131,12 @@ SCHEMA = """
 SEPARATOR = "\n\n----"
 
 
+@dataclass
+class Plugin:
+    loaders: list[brayns.LoaderInfo] = field(default_factory=list)
+    entrypoints: list[brayns.Entrypoint] = field(default_factory=list)
+
+
 def build_from_argv() -> None:
     python = Path(__file__).parent.parent
     directory = python / "doc" / "source" / "jsonrpcapi"
@@ -116,30 +156,28 @@ def build_from_uri(uri: str, directory: Path) -> None:
 
 
 def build_from_instance(instance: brayns.Instance, directory: Path) -> None:
-    entrypoints = brayns.get_entrypoints(instance)
-    return build_from_entrypoints(entrypoints, directory)
-
-
-def build_from_entrypoints(
-    entrypoints: list[brayns.Entrypoint], directory: Path
-) -> None:
-    plugins = defaultdict[str, list[brayns.Entrypoint]](list)
-    for entrypoint in entrypoints:
-        plugins[entrypoint.plugin].append(entrypoint)
-    for entrypoints in plugins.values():
-        entrypoints.sort(key=lambda entrypoint: entrypoint.method)
+    plugins = defaultdict[str, Plugin](Plugin)
+    for loader in brayns.get_loaders(instance):
+        plugins[loader.plugin].loaders.append(loader)
+    for entrypoint in brayns.get_entrypoints(instance):
+        plugins[entrypoint.plugin].entrypoints.append(entrypoint)
+    for plugin in plugins.values():
+        plugin.loaders.sort(key=lambda loader: loader.name)
+        plugin.entrypoints.sort(key=lambda entrypoint: entrypoint.method)
     build_from_plugins(plugins, directory)
 
 
-def build_from_plugins(
-    plugins: dict[str, list[brayns.Entrypoint]], directory: Path
-) -> None:
-    directory.mkdir(exist_ok=True)
+def plugin_id(name: str) -> str:
+    return name.lower().replace(" ", "")
+
+
+def build_from_plugins(plugins: dict[str, Plugin], directory: Path) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
     filenames = list[str]()
-    for plugin, entrypoints in plugins.items():
-        filename = FILENAME.format(plugin=plugin.lower().replace(" ", ""))
+    for name, plugin in plugins.items():
+        filename = FILENAME.format(plugin=plugin_id(name))
         filenames.append(filename)
-        build_plugin(plugin, entrypoints, directory, filename)
+        build_plugin(name, plugin, directory, filename)
     build_summary(directory, filenames)
 
 
@@ -166,31 +204,53 @@ def format_summary_items(filenames: list[str]) -> str:
     )
 
 
-def build_plugin(
-    plugin: str,
-    entrypoints: list[brayns.Entrypoint],
-    directory: Path,
-    filename: str,
-) -> None:
-    data = format_plugin(plugin, entrypoints) + "\n"
+def build_plugin(name: str, plugin: Plugin, directory: Path, filename: str) -> None:
+    data = format_plugin(name, plugin) + "\n"
     path = directory / filename
     with path.open("w") as file:
         file.write(data)
 
 
-def format_plugin(plugin: str, entrypoints: list[brayns.Entrypoint]) -> str:
-    title = TITLE.format(plugin=plugin)
+def format_plugin(name: str, plugin: Plugin) -> str:
+    title = TITLE.format(plugin=name)
     header = HEADER.format(
-        label=plugin.lower().replace(" ", ""),
+        label=plugin_id(name),
         title=title,
-        underline=len(title) * "-",
-        plugin=plugin,
+        underline=len(title) * "=",
+        plugin=name,
     )
-    api = format_entrypoints(entrypoints)
-    return f"{header}\n\n{api}"
+    loaders = format_loaders(plugin.loaders)
+    entrypoints = format_entrypoints(plugin.entrypoints)
+    return CONTENT.format(header=header, loaders=loaders, entrypoints=entrypoints)
+
+
+def format_loaders(loaders: list[brayns.LoaderInfo]) -> str:
+    if not loaders:
+        return NO_LOADERS
+    docs = list[str]()
+    for loader in loaders[:-1]:
+        doc = format_loader(loader)
+        docs.append(doc)
+    last = format_loader(loaders[-1], separator=False)
+    docs.append(last)
+    return "\n\n".join(docs)
+
+
+def format_loader(loader: brayns.LoaderInfo, separator: bool = True) -> str:
+    return LOADER.format(
+        name=loader.name,
+        underline=len(loader.name) * "~",
+        plugin=loader.plugin,
+        extensions=", ".join(f"**{extension}**" for extension in loader.extensions),
+        binary=BINARY if loader.binary else NO_BINARY,
+        schema=format_schema(loader.schema),
+        separator=SEPARATOR if separator else "",
+    )
 
 
 def format_entrypoints(entrypoints: list[brayns.Entrypoint]) -> str:
+    if not entrypoints:
+        return NO_ENTRYPOINTS
     docs = list[str]()
     for entrypoint in entrypoints[:-1]:
         doc = format_entrypoint(entrypoint)

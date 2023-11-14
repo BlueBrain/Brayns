@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2023, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -16,19 +18,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "LoaderFormat.h"
 
-#include <brayns/io/Loader.h>
+#include <brayns/utils/string/StringCase.h>
+#include <brayns/utils/string/StringInfo.h>
 
-#include <io/BBPLoaderParameters.h>
-
-/**
- * @brief Imports a circuit from a BBP's BlueConfig/CircuitConfig file
- */
-class BBPLoader : public brayns::Loader<BBPLoaderParameters>
+namespace brayns
 {
-public:
-    std::string getName() const override;
-    std::vector<std::string> getExtensions() const override;
-    std::vector<std::shared_ptr<brayns::Model>> loadFile(const FileRequest &request) override;
-};
+std::string LoaderFormat::fromPath(const std::filesystem::path &path)
+{
+    auto extension = path.extension().string();
+    if (extension.empty())
+    {
+        return path.filename();
+    }
+    return fromExtension(extension);
+}
+
+std::string LoaderFormat::fromExtension(std::string_view extension)
+{
+    if (StringInfo::startsWith(extension, '.'))
+    {
+        extension = extension.substr(1);
+    }
+    return StringCase::toLower(extension);
+}
+} // namespace brayns

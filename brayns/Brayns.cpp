@@ -120,7 +120,7 @@ Brayns::Brayns(int argc, const char **argv):
     LoggingStartup::run(_parametersManager);
 
     Log::info("Registering core loaders.");
-    _loaderRegistry = LoaderRegistry::createWithCoreLoaders();
+    _loaderRegistry = CoreLoaderRegistry::create();
 
     if (NetworkStartup::isEnabled(*this))
     {
@@ -144,7 +144,7 @@ Brayns::~Brayns()
     {
         _network->stop();
     }
-    _loaderRegistry.clear();
+    _loaderRegistry = {};
     // make sure that plugin objects are removed first, as plugins are
     // destroyed before the engine, but plugin destruction still should have
     // a valid engine and _api (aka this object).

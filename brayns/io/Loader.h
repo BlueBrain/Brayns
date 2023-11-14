@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  *
- * Responsible Author: Daniel.Nachbaur@epfl.ch
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,252 +20,87 @@
 
 #pragma once
 
-#include <brayns/engine/model/Model.h>
+#include <stdexcept>
 
-#include <brayns/json/Json.h>
+#include "EmptyLoaderParams.h"
+#include "ILoader.h"
+#include "LoaderFormat.h"
 
-#include <functional>
-#include <string>
-#include <vector>
+#include <brayns/utils/FileReader.h>
 
 namespace brayns
 {
-/**
- * @brief Model binary data.
- *
- */
-struct Blob
-{
-    /**
-     * @brief File type.
-     *
-     */
-    std::string type;
-
-    /**
-     * @brief Loader name.
-     *
-     */
-    std::string name;
-
-    /**
-     * @brief Binary data.
-     *
-     */
-    std::vector<uint8_t> data;
-};
-
-/**
- * A class for providing progress feedback
- */
-class LoaderProgress
-{
-public:
-    /**
-     * The callback for each progress update with the signature (message,
-     * fraction of progress in 0..1 range)
-     */
-    using CallbackFn = std::function<void(const std::string &, float)>;
-
-    explicit LoaderProgress(CallbackFn callback);
-
-    LoaderProgress() = default;
-    ~LoaderProgress() = default;
-
-    /**
-     * Update the current progress of an operation and call the callback
-     */
-    void updateProgress(const std::string &message, const float fraction) const;
-
-private:
-    CallbackFn _callback;
-};
-
-/**
- * @brief Base class to allow template-parametrized loaders to define their
- *        input parameters at compile time
- */
-class AbstractLoader
-{
-public:
-    virtual ~AbstractLoader() = default;
-
-    /**
-     * @return The loaders supported file extensions
-     */
-    virtual std::vector<std::string> getSupportedExtensions() const = 0;
-
-    /**
-     * @brief Query the loader to check if a file can be loaded. Filename and file extension (without the dot)
-     * are checked.
-     * @param path Path to the file.
-     * @param extension Extracted file extension from path (without the dot)
-     */
-    virtual bool isSupported(const std::string &path, const std::string &extension) const;
-
-    /**
-     * @brief Returns the loader identificative name.
-     * @return std::string.
-     */
-    virtual std::string getName() const = 0;
-
-    /**
-     * @brief returns the loader input parameter schema.
-     * @returns a JsonSchema object.
-     */
-    virtual const JsonSchema &getInputParametersSchema() const = 0;
-
-    /**
-     * @brief Loads a list of models from a blob of bytes.
-     * @param blob The byte data.
-     * @param callback A callback to update the progress to the caller.
-     * @param params A JSON object with the parameters to configure the load.
-     * @return a list of loaded models.
-     */
-    virtual std::vector<std::shared_ptr<Model>> loadFromBlob(
-        const Blob &blob,
-        const LoaderProgress &callback,
-        const JsonValue &params) const = 0;
-
-    /**
-     * @brief Loads a list of models from a file.
-     * @param path Path to the file on the current filesystem.
-     * @param callback A callback to update the progress to the caller.
-     * @param params A JSON object with the parameters to configure the load.
-     * @return a list of loaded models.
-     */
-    virtual std::vector<std::shared_ptr<Model>> loadFromFile(
-        const std::string &path,
-        const LoaderProgress &callback,
-        const JsonValue &params) const = 0;
-};
-
-/**
- * A base class for data loaders to unify loading data from blobs and files, and
- * provide progress feedback.
- */
 template<typename T>
-class Loader : public AbstractLoader
+struct BinaryLoaderRequest
+{
+    std::string_view format;
+    std::string_view data;
+    LoaderProgress progress = [](const auto &, auto) {};
+    T params{};
+};
+
+template<typename T>
+struct FileLoaderRequest
+{
+    std::string_view path;
+    LoaderProgress progress = [](const auto &, auto) {};
+    T params{};
+};
+
+template<typename ParamsType = EmptyLoaderParams>
+class Loader : public ILoader
 {
 public:
-    virtual ~Loader() = default;
+    using Params = ParamsType;
+    using BinaryRequest = BinaryLoaderRequest<Params>;
+    using FileRequest = FileLoaderRequest<Params>;
 
-    virtual const JsonSchema &getInputParametersSchema() const override
+    virtual std::vector<std::shared_ptr<Model>> loadBinary(const BinaryRequest &request)
     {
-        return _parameterSchema;
+        (void)request;
+        throw std::runtime_error("Binary not supported");
     }
 
-    virtual std::vector<std::shared_ptr<Model>> loadFromBlob(
-        const Blob &blob,
-        const LoaderProgress &callback,
-        const JsonValue &params) const override
+    virtual std::vector<std::shared_ptr<Model>> loadFile(const FileRequest &request)
     {
-        const T inputParams = _parseParameters(params);
-        return importFromBlob(blob, callback, inputParams);
+        auto path = std::string(request.path);
+        auto format = LoaderFormat::fromPath(path);
+        auto data = FileReader::read(path);
+        auto binary = BinaryRequest();
+        binary.format = format;
+        binary.data = data;
+        binary.progress = request.progress;
+        binary.params = request.params;
+        return loadBinary(binary);
     }
 
-    virtual std::vector<std::shared_ptr<Model>> loadFromFile(
-        const std::string &path,
-        const LoaderProgress &callback,
-        const JsonValue &params) const override
+    JsonSchema getSchema() const override
     {
-        const T inputParams = _parseParameters(params);
-        return importFromFile(path, callback, inputParams);
+        return Json::getSchema<Params>();
     }
 
-    /**
-     * @copydoc AbstractLoader::loadFromBlob()
-     *
-     * @param blob The byte data.
-     * @param callback A callback to update the progress to the caller.
-     * @param params Parameters to configure the load.
-     * @return a list of loaded models.
-     */
-    virtual std::vector<std::shared_ptr<Model>> importFromBlob(
-        const Blob &blob,
-        const LoaderProgress &callback,
-        const T &params) const = 0;
-
-    /**
-     * @copydoc AbstractLoader::loadFromFile()
-     *
-     * @param path Path to the file on the current filesystem.
-     * @param callback A callback to update the progress to the caller.
-     * @param params Parameters to configure the load.
-     * @return a list of loaded models.
-     */
-    virtual std::vector<std::shared_ptr<Model>> importFromFile(
-        const std::string &path,
-        const LoaderProgress &callback,
-        const T &params) const = 0;
-
-private:
-    const JsonSchema _parameterSchema = Json::getSchema<T>();
-
-    T _parseParameters(const JsonValue &input) const
+    bool canLoadBinary() const override
     {
-        if (input.isEmpty())
-        {
-            return Json::deserialize<T>(Json::parse("{}"));
-        }
-        auto errors = Json::validate(input, _parameterSchema);
-        if (!errors.empty())
-        {
-            throw JsonSchemaException("Invalid loader parameters", errors);
-        }
-        return Json::deserialize<T>(input);
+        return false;
     }
-};
 
-/**
- * @brief Convenience type for loaders that do not have load parameters.
- */
-struct EmptyLoaderParameters
-{
-};
+    std::vector<std::shared_ptr<Model>> loadBinary(const RawBinaryLoaderRequest &request) override
+    {
+        auto parsed = BinaryRequest();
+        parsed.format = request.format;
+        parsed.data = request.data;
+        parsed.progress = request.progress;
+        parsed.params = Json::deserialize<Params>(request.params);
+        return loadBinary(parsed);
+    }
 
-template<>
-struct JsonAdapter<EmptyLoaderParameters>
-{
-    static JsonSchema getSchema();
-    static void serialize(const EmptyLoaderParameters &params, JsonValue &value);
-    static void deserialize(const JsonValue &value, EmptyLoaderParameters &params);
-};
-
-/**
- * @brief Base class for loaders that do not have load parameters.
- */
-class NoInputLoader : public Loader<EmptyLoaderParameters>
-{
-public:
-    /**
-     * @copydoc AbstractLoader::loadFromBlob()
-     * @param blob The byte data.
-     * @param ccallback A callback to update the progress to the caller.
-     * @return a list of loaded models.
-     */
-    virtual std::vector<std::shared_ptr<Model>> importFromBlob(
-        const Blob &blob,
-        const LoaderProgress &callback) const = 0;
-
-    /**
-     * @copydoc AbstractLoader::loadFromFile()
-     * @param path Path to the file on the current filesystem.
-     * @param callback A callback to update the progress to the caller.
-     * @return a list of loaded models.
-     */
-    virtual std::vector<std::shared_ptr<Model>> importFromFile(
-        const std::string &path,
-        const LoaderProgress &callback) const = 0;
-
-    std::vector<std::shared_ptr<Model>> importFromBlob(
-        const Blob &blob,
-        const LoaderProgress &callback,
-        const EmptyLoaderParameters &parameters) const final;
-
-    std::vector<std::shared_ptr<Model>> importFromFile(
-        const std::string &path,
-        const LoaderProgress &callback,
-        const EmptyLoaderParameters &parameters) const final;
+    std::vector<std::shared_ptr<Model>> loadFile(const RawFileLoaderRequest &request) override
+    {
+        auto parsed = FileRequest();
+        parsed.path = request.path;
+        parsed.progress = request.progress;
+        parsed.params = Json::deserialize<Params>(request.params);
+        return loadFile(parsed);
+    }
 };
 } // namespace brayns

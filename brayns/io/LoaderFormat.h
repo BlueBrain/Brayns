@@ -1,6 +1,8 @@
 /* Copyright (c) 2015-2023, EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,17 +20,18 @@
 
 #pragma once
 
-#include <brayns/io/Loader.h>
+#include <filesystem>
+#include <string_view>
 
-#include <io/BBPLoaderParameters.h>
+#include <brayns/utils/string/StringCase.h>
+#include <brayns/utils/string/StringInfo.h>
 
-/**
- * @brief Imports a circuit from a BBP's BlueConfig/CircuitConfig file
- */
-class BBPLoader : public brayns::Loader<BBPLoaderParameters>
+namespace brayns
+{
+class LoaderFormat
 {
 public:
-    std::string getName() const override;
-    std::vector<std::string> getExtensions() const override;
-    std::vector<std::shared_ptr<brayns::Model>> loadFile(const FileRequest &request) override;
+    static std::string fromPath(const std::filesystem::path &path);
+    static std::string fromExtension(std::string_view extension);
 };
+} // namespace brayns

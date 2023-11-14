@@ -37,6 +37,8 @@
 #include <brayns/engine/systems/GeometryDataSystem.h>
 #include <brayns/engine/systems/VolumeDataSystem.h>
 
+#include <brayns/io/LoaderFormat.h>
+
 /**
  * @brief Encapsulates some utilities used across all the tests
  */
@@ -128,8 +130,18 @@ public:
     void loadModels(const std::string &path)
     {
         auto &loadRegistry = _brayns.getLoaderRegistry();
-        auto &loader = loadRegistry.getSuitableLoader(path, "", "");
-        auto loadedModels = loader.loadFromFile(path, {}, {});
+        auto format = brayns::LoaderFormat::fromPath(path);
+
+        auto *loader = loadRegistry.findByFormat(format);
+
+        if (!loader)
+        {
+            throw std::runtime_error("Unsupported file");
+        }
+
+        auto request = brayns::RawFileLoaderRequest();
+        request.path = path;
+        auto loadedModels = loader->loadFile(request);
 
         auto &engine = _brayns.getEngine();
         auto &scene = engine.getScene();

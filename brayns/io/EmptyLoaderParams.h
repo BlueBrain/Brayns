@@ -1,5 +1,4 @@
-/* Copyright (c) 2015-2023 EPFL/Blue Brain Project
- * All rights reserved. Do not distribute without permission.
+/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  *
  * Responsible Author: adrien.fleury@epfl.ch
  *
@@ -21,34 +20,35 @@
 
 #pragma once
 
-#include <brayns/io/LoaderRegistry.h>
-
 #include <brayns/json/Json.h>
 
 namespace brayns
 {
-template<>
-struct JsonAdapter<LoaderInfo> : ObjectAdapter<LoaderInfo>
+struct EmptyLoaderParams
 {
-    static JsonObjectInfo reflect()
+};
+
+template<>
+struct JsonAdapter<EmptyLoaderParams>
+{
+    static JsonSchema getSchema()
     {
-        auto builder = Builder("LoaderInfo");
-        builder
-            .get(
-                "name",
-                [](auto &object) -> auto & { return object.name; })
-            .description("Loader name");
-        builder
-            .get(
-                "extensions",
-                [](auto &object) -> auto & { return object.extensions; })
-            .description("Supported file extensions");
-        builder
-            .get(
-                "input_parameters_schema",
-                [](auto &object) -> auto & { return object.inputParametersSchema; })
-            .description("Loader properties");
-        return builder.build();
+        auto schema = JsonSchema();
+        schema.title = "EmptyLoaderParams";
+        schema.type = JsonType::Undefined;
+        return schema;
+    }
+
+    static void serialize(const EmptyLoaderParams &value, JsonValue &json)
+    {
+        (void)value;
+        JsonFactory::emplaceObject(json);
+    }
+
+    static void deserialize(const JsonValue &json, EmptyLoaderParams &value)
+    {
+        (void)json;
+        (void)value;
     }
 };
 } // namespace brayns

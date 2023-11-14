@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <compare>
 #include <map>
 #include <optional>
 #include <string>
@@ -125,5 +126,7 @@ struct JsonSchema
      *
      */
     std::vector<JsonSchema> oneOf;
+
+    auto operator<=>(const JsonSchema &) const = default;
 };
 } // namespace brayns

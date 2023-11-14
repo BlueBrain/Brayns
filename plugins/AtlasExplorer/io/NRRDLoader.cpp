@@ -30,32 +30,21 @@
 #include <api/usecases/OutlineShell.h>
 #include <components/AtlasData.h>
 
-std::vector<std::string> NRRDLoader::getSupportedExtensions() const
-{
-    return {".nrrd"};
-}
-
 std::string NRRDLoader::getName() const
 {
     return "NRRD loader";
 }
 
-std::vector<std::shared_ptr<brayns::Model>> NRRDLoader::importFromBlob(
-    const brayns::Blob &blob,
-    const brayns::LoaderProgress &callback,
-    const NRRDLoaderParameters &parameters) const
+std::vector<std::string> NRRDLoader::getExtensions() const
 {
-    (void)blob;
-    (void)callback;
-    (void)parameters;
-    throw std::runtime_error("Binary load is not allowed for NRRD files");
+    return {".nrrd"};
 }
 
-std::vector<std::shared_ptr<brayns::Model>> NRRDLoader::importFromFile(
-    const std::string &path,
-    const brayns::LoaderProgress &callback,
-    const NRRDLoaderParameters &parameters) const
+std::vector<std::shared_ptr<brayns::Model>> NRRDLoader::loadFile(const FileRequest &request)
 {
+    auto path = std::string(request.path);
+    auto &progress = request.progress;
+
     auto fileContent = brayns::FileReader::read(path);
     auto contentView = std::string_view(fileContent);
 
@@ -64,20 +53,20 @@ std::vector<std::shared_ptr<brayns::Model>> NRRDLoader::importFromFile(
     auto spacing = HeaderUtils::get3DDimensions(header);
     auto transform = HeaderUtils::getTransform(header);
 
-    callback.updateProgress("Parsing NRRD data", 0.4f);
+    progress("Parsing NRRD data", 0.4f);
     auto data = DataParser::parse(header, contentView);
 
-    callback.updateProgress("Transforming data", 0.6f);
+    progress("Transforming data", 0.6f);
     auto factory = AtlasFactory::createDefault();
-    auto atlas = factory.create(parameters.type, size, spacing, *data);
+    auto atlas = factory.create(request.params.type, size, spacing, *data);
 
-    callback.updateProgress("Generating volume mesh", 0.8f);
+    progress("Generating volume mesh", 0.8f);
     auto model = OutlineShell().run(*atlas, {});
     auto &components = model->getComponents();
     components.add<AtlasData>(std::move(atlas));
     components.add<brayns::Transform>(transform);
 
-    callback.updateProgress("Done", 1.f);
+    progress("Done", 1.f);
     auto result = std::vector<std::shared_ptr<brayns::Model>>();
     result.push_back(std::move(model));
     return result;

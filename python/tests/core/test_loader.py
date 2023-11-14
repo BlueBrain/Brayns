@@ -80,6 +80,8 @@ class TestLoader(unittest.TestCase):
             name="test",
             extensions=["test1", "test2"],
             schema=mock_schema(),
+            binary=True,
+            plugin="Plugin",
         )
 
     def mock_message(self) -> dict[str, Any]:
@@ -87,6 +89,8 @@ class TestLoader(unittest.TestCase):
             "name": "test",
             "extensions": ["test1", "test2"],
             "input_parameters_schema": mock_schema_message(),
+            "binary": True,
+            "plugin": "Plugin",
         }
 
 

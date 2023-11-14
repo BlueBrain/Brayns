@@ -27,21 +27,11 @@
 
 namespace dti
 {
-class DTILoader final : public brayns::Loader<DTILoaderParameters>
+class DTILoader : public brayns::Loader<DTILoaderParameters>
 {
 public:
-    std::string getName() const final;
-
-    std::vector<std::string> getSupportedExtensions() const final;
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
-        const brayns::Blob &blob,
-        const brayns::LoaderProgress &callback,
-        const DTILoaderParameters &params) const override;
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
-        const std::string &filename,
-        const brayns::LoaderProgress &callback,
-        const DTILoaderParameters &params) const override;
+    std::vector<std::string> getExtensions() const override;
+    std::string getName() const override;
+    std::vector<std::shared_ptr<brayns::Model>> loadFile(const FileRequest &request) override;
 };
 } // namespace dti

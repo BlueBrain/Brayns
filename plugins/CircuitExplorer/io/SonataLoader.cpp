@@ -64,43 +64,33 @@ public:
         return config;
     }
 };
-}
-
-std::vector<std::string> SonataLoader::getSupportedExtensions() const
-{
-    return std::vector<std::string>{".json"};
-}
+} // namespace
 
 std::string SonataLoader::getName() const
 {
-    return std::string("SONATA loader");
+    return "SONATA loader";
 }
 
-std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromBlob(
-    const brayns::Blob &blob,
-    const brayns::LoaderProgress &cb,
-    const SonataLoaderParameters &params) const
+std::vector<std::string> SonataLoader::getExtensions() const
 {
-    (void)blob;
-    (void)cb;
-    (void)params;
-    throw std::runtime_error("Import from blob not supported");
+    return {".json"};
 }
 
-std::vector<std::shared_ptr<brayns::Model>> SonataLoader::importFromFile(
-    const std::string &path,
-    const brayns::LoaderProgress &callback,
-    const SonataLoaderParameters &input) const
+std::vector<std::shared_ptr<brayns::Model>> SonataLoader::loadFile(const FileRequest &request)
 {
+    auto path = std::string(request.path);
+    auto &callback = request.progress;
+    auto &params = request.params;
+
     const brayns::Timer timer;
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 
-    auto config = ConfigReader::read(path, input);
+    auto config = ConfigReader::read(path, params);
 
-    auto progress = ProgressUpdaterFactory::create(callback, input);
+    auto progress = ProgressUpdaterFactory::create(callback, params);
     std::vector<std::shared_ptr<brayns::Model>> result;
 
-    for (auto &nodeParams : input.node_population_settings)
+    for (auto &nodeParams : params.node_population_settings)
     {
         auto &nodeName = nodeParams.node_population;
         brayns::Log::info("[CE] - Loading {} node population.", nodeName);

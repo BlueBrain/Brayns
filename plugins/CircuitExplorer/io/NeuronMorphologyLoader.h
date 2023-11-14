@@ -28,17 +28,7 @@
 class NeuronMorphologyLoader : public brayns::Loader<NeuronMorphologyLoaderParameters>
 {
 public:
-    std::vector<std::string> getSupportedExtensions() const final;
-
-    std::string getName() const final;
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromBlob(
-        const brayns::Blob &blob,
-        const brayns::LoaderProgress &cb,
-        const NeuronMorphologyLoaderParameters &params) const final;
-
-    std::vector<std::shared_ptr<brayns::Model>> importFromFile(
-        const std::string &path,
-        const brayns::LoaderProgress &cb,
-        const NeuronMorphologyLoaderParameters &params) const final;
+    std::string getName() const override;
+    std::vector<std::string> getExtensions() const override;
+    std::vector<std::shared_ptr<brayns::Model>> loadFile(const FileRequest &request) override;
 };

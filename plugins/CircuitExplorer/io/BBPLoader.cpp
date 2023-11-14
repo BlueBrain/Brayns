@@ -38,8 +38,9 @@
 
 namespace
 {
-struct SynapseImporter
+class SynapseImporter
 {
+public:
     static void import(
         const bbploader::LoadContext &context,
         std::vector<std::shared_ptr<brayns::Model>> &modelList,
@@ -63,50 +64,24 @@ struct SynapseImporter
         }
     }
 };
-}
-
-std::vector<std::string> BBPLoader::getSupportedExtensions() const
-{
-    return {"BlueConfig", "CircuitConfig"};
-}
-
-bool BBPLoader::isSupported(const std::string &filename, const std::string &extension) const
-{
-    const auto containsKeyword = [](const std::string &matcher)
-    {
-        const auto lcm = brayns::StringCase::toLower(matcher);
-        if (lcm.find("blueconfig") != std::string::npos || lcm.find("circuitconfig") != std::string::npos)
-        {
-            return true;
-        }
-
-        return false;
-    };
-
-    return containsKeyword(std::filesystem::path(filename).filename()) || containsKeyword(extension);
-}
+} // namespace
 
 std::string BBPLoader::getName() const
 {
     return "BBP loader";
 }
 
-std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromBlob(
-    const brayns::Blob &blob,
-    const brayns::LoaderProgress &callback,
-    const BBPLoaderParameters &params) const
+std::vector<std::string> BBPLoader::getExtensions() const
 {
-    (void)blob;
-    (void)callback;
-    (void)params;
-    throw std::runtime_error("BBP loader: import from blob not supported");
+    return {"BlueConfig", "CircuitConfig"};
 }
 
-std::vector<std::shared_ptr<brayns::Model>> BBPLoader::importFromFile(
-    const std::string &path,
-    const brayns::LoaderProgress &callback,
-    const BBPLoaderParameters &params) const
+std::vector<std::shared_ptr<brayns::Model>> BBPLoader::loadFile(const FileRequest &request)
 {
+    auto path = std::string(request.path);
+    auto &callback = request.progress;
+    auto &params = request.params;
+
     brayns::Timer timer;
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
 

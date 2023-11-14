@@ -1,9 +1,17 @@
 .. _apicylindriccamera-label:
 
-Cylindric Camera API methods
-----------------------------
+Cylindric Camera API
+====================
 
-This page references the entrypoints of the Cylindric Camera plugin.
+This page references the loaders and entrypoints registered by the Cylindric Camera plugin.
+
+Loaders
+-------
+
+This plugin does not register any loaders.
+
+Entrypoints
+-----------
 
 get-camera-cylindric
 ~~~~~~~~~~~~~~~~~~~~

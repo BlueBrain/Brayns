@@ -37,7 +37,7 @@ class UploadModelEntrypoint : public Entrypoint<UploadModelParams, std::vector<M
 public:
     UploadModelEntrypoint(
         ModelManager &models,
-        const LoaderRegistry &loaders,
+        LoaderRegistry &loaders,
         SimulationParameters &simulation,
         CancellationToken token);
 
@@ -50,7 +50,7 @@ public:
 
 private:
     ModelManager &_models;
-    const LoaderRegistry &_loaders;
+    LoaderRegistry &_loaders;
     SimulationParameters &_simulation;
     CancellationToken _token;
 };

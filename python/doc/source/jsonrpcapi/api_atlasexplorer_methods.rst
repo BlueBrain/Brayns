@@ -1,9 +1,44 @@
 .. _apiatlasexplorer-label:
 
-Atlas Explorer API methods
---------------------------
+Atlas Explorer API
+==================
 
-This page references the entrypoints of the Atlas Explorer plugin.
+This page references the loaders and entrypoints registered by the Atlas Explorer plugin.
+
+Loaders
+-------
+
+NRRD loader
+~~~~~~~~~~~
+
+Can load the following formats: **.nrrd**.
+
+This loader does not support loading binary data using 'upload-model'.
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "type": {
+                "description": "Voxel type to interpret the atlas being loaded",
+                "type": "string",
+                "enum": [
+                    "scalar",
+                    "orientation",
+                    "flatmap",
+                    "layer_distance"
+                ]
+            }
+        },
+        "required": [
+            "type"
+        ],
+        "additionalProperties": false
+    }
+
+Entrypoints
+-----------
 
 get-available-atlas-usecases
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

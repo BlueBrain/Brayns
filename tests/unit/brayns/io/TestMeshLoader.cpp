@@ -20,14 +20,14 @@
 
 #include <doctest/doctest.h>
 
+#include <brayns/io/LoaderFormat.h>
 #include <brayns/io/loaders/mesh/MeshLoader.h>
+
 #include <brayns/utils/FileReader.h>
 
 #include <tests/helpers/BraynsTestUtils.h>
 #include <tests/paths.h>
 #include <tests/unit/PlaceholderEngine.h>
-
-#include <filesystem>
 
 namespace
 {
@@ -37,28 +37,20 @@ public:
     static std::vector<std::shared_ptr<brayns::Model>> loadFile(const std::string &path)
     {
         auto loader = brayns::MeshLoader();
-        return loader.importFromFile(path, {});
+        auto request = brayns::MeshLoader::FileRequest();
+        request.path = path;
+        return loader.loadFile(request);
     }
 
-    static std::vector<std::shared_ptr<brayns::Model>> loadBlob(const std::string &path)
+    static std::vector<std::shared_ptr<brayns::Model>> loadBinary(const std::string &path)
     {
         auto loader = brayns::MeshLoader();
-        auto blob = _fileToBlob(path);
-        return loader.importFromBlob(blob, {});
-    }
-
-private:
-    static brayns::Blob _fileToBlob(const std::string path)
-    {
-        auto content = brayns::FileReader::read(path);
-        auto contentSize = content.size();
-        auto contentBytes = reinterpret_cast<const uint8_t *>(content.data());
-
-        auto blob = brayns::Blob();
-        blob.data = std::vector<uint8_t>(contentBytes, contentBytes + contentSize);
-        blob.name = path;
-        blob.type = std::filesystem::path(path).extension().string().substr(1);
-        return blob;
+        auto format = brayns::LoaderFormat::fromPath(path);
+        auto data = brayns::FileReader::read(path);
+        auto request = brayns::MeshLoader::BinaryRequest();
+        request.format = format;
+        request.data = data;
+        return loader.loadBinary(request);
     }
 };
 
@@ -104,7 +96,7 @@ TEST_CASE("Mesh loader")
     }
     SUBCASE("OBJ loading")
     {
-        auto blobList = MeshLoader::loadBlob(TestPaths::Meshes::obj);
+        auto blobList = MeshLoader::loadBinary(TestPaths::Meshes::obj);
         auto fileList = MeshLoader::loadFile(TestPaths::Meshes::obj);
 
         CHECK(blobList.size() == 1);
@@ -129,7 +121,7 @@ TEST_CASE("Mesh loader")
     }
     SUBCASE("PLY loading")
     {
-        auto blobList = MeshLoader::loadBlob(TestPaths::Meshes::ply);
+        auto blobList = MeshLoader::loadBinary(TestPaths::Meshes::ply);
         auto fileList = MeshLoader::loadFile(TestPaths::Meshes::ply);
 
         CHECK(blobList.size() == 1);
@@ -154,7 +146,7 @@ TEST_CASE("Mesh loader")
     }
     SUBCASE("OFF loading")
     {
-        auto blobList = MeshLoader::loadBlob(TestPaths::Meshes::off);
+        auto blobList = MeshLoader::loadBinary(TestPaths::Meshes::off);
         auto fileList = MeshLoader::loadFile(TestPaths::Meshes::off);
 
         CHECK(blobList.size() == 1);
@@ -179,7 +171,7 @@ TEST_CASE("Mesh loader")
     }
     SUBCASE("STL loading")
     {
-        auto blobList = MeshLoader::loadBlob(TestPaths::Meshes::stl);
+        auto blobList = MeshLoader::loadBinary(TestPaths::Meshes::stl);
         auto fileList = MeshLoader::loadFile(TestPaths::Meshes::stl);
 
         CHECK(blobList.size() == 1);
