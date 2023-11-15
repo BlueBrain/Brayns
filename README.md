@@ -6,7 +6,7 @@ Brayns is a large-scale scientific visualization platform. It is based on Intel 
 
 It is based on a extension-plugin architecture. The core provides basic functionalities that can be reused and/or extended on plugins, which are independent and can be loaded or disabled at start-up. This simplifies the process of adding support for new scientific visualization use cases, without compromising the reliability of the rest of the software.
 
-Brayns counts with a main application for its usage:
+Brayns comes with a main application for its usage:
 
  * **braynsService**: A rendering backend which can be accessed over the internet and streams images to the connected clients.
 
