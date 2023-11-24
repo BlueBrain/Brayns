@@ -30,7 +30,7 @@ namespace
 class MethodFinder
 {
 public:
-    static const brayns::EntrypointRef &find(const std::string &method, const brayns::EntrypointRegistry &entrypoints)
+    static brayns::EntrypointRef &find(const std::string &method, brayns::EntrypointRegistry &entrypoints)
     {
         auto entrypoint = entrypoints.find(method);
         if (!entrypoint)
@@ -76,7 +76,7 @@ private:
 
 namespace brayns
 {
-const EntrypointRef &EntrypointFinder::find(const JsonRpcRequest &request, const EntrypointRegistry &entrypoints)
+EntrypointRef &EntrypointFinder::find(const JsonRpcRequest &request, EntrypointRegistry &entrypoints)
 {
     auto &method = request.getMethod();
     auto &entrypoint = MethodFinder::find(method, entrypoints);

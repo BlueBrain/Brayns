@@ -58,22 +58,17 @@ EntrypointRef::EntrypointRef(std::string plugin, std::unique_ptr<IEntrypoint> en
     EntrypointSchemaBuilder::build(_schema, *_entrypoint);
 }
 
-void EntrypointRef::onRequest(const JsonRpcRequest &request) const
+void EntrypointRef::onRequest(const JsonRpcRequest &request)
 {
     _entrypoint->onRequest(request);
 }
 
-void EntrypointRef::onUpdate() const
-{
-    _entrypoint->onUpdate();
-}
-
-void EntrypointRef::onCancel() const
+void EntrypointRef::onCancel()
 {
     _entrypoint->onCancel();
 }
 
-void EntrypointRef::onDisconnect() const
+void EntrypointRef::onDisconnect()
 {
     _entrypoint->onDisconnect();
 }

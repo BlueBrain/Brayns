@@ -34,7 +34,7 @@ namespace
 class RequestHandler
 {
 public:
-    static void handle(const brayns::JsonRpcRequest &request, const brayns::EntrypointRef &entrypoint)
+    static void handle(const brayns::JsonRpcRequest &request, brayns::EntrypointRef &entrypoint)
     {
         try
         {
@@ -67,7 +67,7 @@ public:
 
 namespace brayns
 {
-JsonRpcTask::JsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint):
+JsonRpcTask::JsonRpcTask(JsonRpcRequest request, EntrypointRef &entrypoint):
     _request(std::move(request)),
     _entrypoint(entrypoint)
 {

@@ -43,7 +43,7 @@ public:
      *
      * If the task has priority, it will be executed directly.
      *
-     * Otherwise it will be queued and run on next call to runAllTasks().
+     * Otherwise it will be queued and run on next call to run().
      *
      * @param task Task to run.
      */
@@ -53,7 +53,7 @@ public:
      * @brief Run all registered tasks in the order they have been added.
      *
      */
-    void runAllTasks();
+    void run();
 
     /**
      * @brief Cancel all requests sent by client.
@@ -69,6 +69,12 @@ public:
      * @param id ID of the task to cancel.
      */
     void cancel(const ClientRef &client, const RequestId &id);
+
+    /**
+     * @brief Clear all tasks without running them.
+     *
+     */
+    void clear();
 
 private:
     std::deque<std::unique_ptr<ITask>> _tasks;

@@ -35,21 +35,15 @@ public:
     virtual ~ISocket() = default;
 
     /**
-     * @brief Used to start the network socket.
+     * @brief Start the network socket.
      *
      */
     virtual void start() = 0;
 
     /**
-     * @brief Used to stop the network socket.
+     * @brief Stop the network socket.
      *
      */
     virtual void stop() = 0;
-
-    /**
-     * @brief Used to poll the socket and trigger the listener.
-     *
-     */
-    virtual void poll() = 0;
 };
 } // namespace brayns

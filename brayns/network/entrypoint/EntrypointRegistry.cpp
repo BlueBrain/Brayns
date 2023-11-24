@@ -27,7 +27,7 @@
 
 namespace brayns
 {
-const EntrypointRef *EntrypointRegistry::find(const std::string &method) const
+EntrypointRef *EntrypointRegistry::find(const std::string &method)
 {
     auto i = _entrypoints.find(method);
     return i == _entrypoints.end() ? nullptr : &i->second;

@@ -23,8 +23,8 @@
 
 namespace brayns
 {
-QuitEntrypoint::QuitEntrypoint(Engine &engine):
-    _engine(engine)
+QuitEntrypoint::QuitEntrypoint(INetworkInterface &interface):
+    _interface(interface)
 {
 }
 
@@ -40,7 +40,7 @@ std::string QuitEntrypoint::getDescription() const
 
 void QuitEntrypoint::onRequest(const Request &request)
 {
-    _engine.setRunning(false);
+    _interface.stop();
     request.reply(EmptyJson());
 }
 } // namespace brayns

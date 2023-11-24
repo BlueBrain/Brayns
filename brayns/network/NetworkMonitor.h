@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2023 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,30 +21,39 @@
 
 #pragma once
 
-#include <optional>
+#include <condition_variable>
+#include <mutex>
 
-#include <brayns/engine/core/Engine.h>
-
-#include <brayns/network/common/Clock.h>
-#include <brayns/network/entrypoint/Entrypoint.h>
-#include <brayns/network/messages/ExitLaterMessage.h>
+#include <brayns/network/client/ClientRef.h>
+#include <brayns/network/client/ClientRequest.h>
 
 namespace brayns
 {
-class ExitLaterEntrypoint : public Entrypoint<ExitLaterMessage, EmptyJson>
+struct NetworkBuffer
+{
+    std::vector<ClientRef> connectedClients;
+    std::vector<ClientRef> disconnectedClients;
+    std::vector<ClientRequest> requests;
+
+    bool isEmpty() const
+    {
+        return connectedClients.empty() && disconnectedClients.empty() && requests.empty();
+    }
+};
+
+class NetworkMonitor
 {
 public:
-    explicit ExitLaterEntrypoint(Engine &engine);
-
-    virtual std::string getMethod() const override;
-    virtual std::string getDescription() const override;
-    virtual bool isDeprecated() const override;
-    virtual void onRequest(const Request &request) override;
-    virtual void onUpdate() override;
+    NetworkBuffer wait();
+    NetworkBuffer poll();
+    void clear();
+    void notifyConnection(const ClientRef &client);
+    void notifyDisonnection(const ClientRef &client);
+    void notifyRequest(ClientRequest request);
 
 private:
-    Engine &_engine;
-    std::optional<TimePoint> _start;
-    std::optional<Duration> _duration;
+    std::mutex _mutex;
+    std::condition_variable _condition;
+    NetworkBuffer _buffer;
 };
 } // namespace brayns

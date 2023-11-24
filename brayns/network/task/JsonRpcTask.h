@@ -37,28 +37,28 @@ public:
      * @param request JSON-RPC request to process.
      * @param entrypoint Entrypoint used to process request.
      */
-    JsonRpcTask(JsonRpcRequest request, const EntrypointRef &entrypoint);
+    explicit JsonRpcTask(JsonRpcRequest request, EntrypointRef &entrypoint);
 
     /**
      * @brief Get the client who sent the request.
      *
      * @return const ClientRef& Client ref.
      */
-    virtual const ClientRef &getClient() const override;
+    const ClientRef &getClient() const override;
 
     /**
      * @brief Get the request ID.
      *
      * @return const RequestId& JSON-RPC request ID.
      */
-    virtual const RequestId &getId() const override;
+    const RequestId &getId() const override;
 
     /**
      * @brief Get the method.
      *
      * @return const std::string& JSON-RPC method.
      */
-    virtual const std::string &getMethod() const override;
+    const std::string &getMethod() const override;
 
     /**
      * @brief Check if entrypoint has priority.
@@ -66,29 +66,29 @@ public:
      * @return true High priority.
      * @return false Normal priority.
      */
-    virtual bool hasPriority() const override;
+    bool hasPriority() const override;
 
     /**
      * @brief Process request using entrypoint.
      *
      */
-    virtual void run() override;
+    void run() override;
 
     /**
-     * @brief Cancel the task.
+     * @brief Notify running entrypoint of cancellation.
      *
      */
-    virtual void cancel() override;
+    void cancel() override;
 
     /**
-     * @brief Disable the task execution.
+     * @brief Notify running entrypoint of disconnection.
      *
      */
-    virtual void disconnect() override;
+    void disconnect() override;
 
 private:
     JsonRpcRequest _request;
-    const EntrypointRef &_entrypoint;
+    EntrypointRef &_entrypoint;
     bool _running = false;
     bool _cancelled = false;
     bool _disconnected = false;

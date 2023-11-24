@@ -69,16 +69,6 @@ TEST_CASE("SocketManager")
          brayns::InputPacket::fromText("text1"),
          brayns::InputPacket::fromText("text2")});
 
-    SUBCASE("Poll without clients")
-    {
-        auto ptr = std::make_unique<MockListener>();
-        auto &listener = *ptr;
-        auto manager = brayns::SocketManager(std::move(ptr));
-        manager.poll();
-        CHECK(listener.getConnectedClients().empty());
-        CHECK(listener.getDisconnectedClients().empty());
-        CHECK(listener.getReceivedRequests().empty());
-    }
     SUBCASE("Run client until no more messages are available")
     {
         auto socket = std::make_shared<MockWebSocket>(0, packets);
@@ -87,7 +77,6 @@ TEST_CASE("SocketManager")
         auto &listener = *ptr;
         auto manager = brayns::SocketManager(std::move(ptr));
         manager.run(client);
-        manager.poll();
         auto &received = listener.getReceivedRequests();
         CHECK_EQ(received.size(), packets.size());
         for (size_t i = 0; i < packets.size(); ++i)
@@ -108,7 +97,6 @@ TEST_CASE("SocketManager")
         auto &listener = *ptr;
         auto manager = brayns::SocketManager(std::move(ptr));
         manager.run(client);
-        manager.poll();
         auto ref = std::vector<brayns::ClientRef>({client});
         CHECK_EQ(listener.getConnectedClients(), ref);
         CHECK_EQ(listener.getDisconnectedClients(), ref);

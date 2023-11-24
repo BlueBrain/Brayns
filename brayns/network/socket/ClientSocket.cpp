@@ -124,11 +124,6 @@ void ClientTask::stop()
     }
 }
 
-void ClientTask::poll()
-{
-    _manager.poll();
-}
-
 ClientTask::~ClientTask()
 {
     stop();
@@ -176,10 +171,5 @@ void ClientSocket::stop()
 {
     _task.stop();
     Log::info("Client task stopped.");
-}
-
-void ClientSocket::poll()
-{
-    _task.poll();
 }
 } // namespace brayns

@@ -23,16 +23,6 @@
 
 namespace brayns
 {
-ClientManager::~ClientManager()
-{
-    disconnectAll();
-}
-
-bool ClientManager::isEmpty() const
-{
-    return _clients.empty();
-}
-
 void ClientManager::add(ClientRef client)
 {
     _clients.insert(std::move(client));
@@ -43,11 +33,12 @@ void ClientManager::remove(const ClientRef &client)
     _clients.erase(client);
 }
 
-void ClientManager::disconnectAll() const
+void ClientManager::clear()
 {
     for (const auto &client : _clients)
     {
         client.disconnect();
     }
+    _clients.clear();
 }
 } // namespace brayns

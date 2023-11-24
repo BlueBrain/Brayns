@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-SchemaEntrypoint::SchemaEntrypoint(const EntrypointRegistry &entrypoints):
+SchemaEntrypoint::SchemaEntrypoint(EntrypointRegistry &entrypoints):
     _entrypoints(entrypoints)
 {
 }

@@ -85,16 +85,6 @@ public:
     EngineFactories &getFactories() noexcept;
 
     /**
-     * @brief Sets wether the engine should keep running or not
-     */
-    void setRunning(bool running) noexcept;
-
-    /**
-     * @brief Returns wether the engine is running or not
-     */
-    bool isRunning() const noexcept;
-
-    /**
      * @brief Returns the system parameters manager
      */
     const ParametersManager &getParametersManager() const noexcept;
@@ -131,8 +121,5 @@ private:
     Renderer _renderer;
 
     EngineFactories _factories;
-
-    // Run flag
-    bool _keepRunning{true};
 };
 } // namespace brayns

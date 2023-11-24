@@ -35,20 +35,6 @@ class ClientManager
 {
 public:
     /**
-     * @brief Close all sockets.
-     *
-     */
-    ~ClientManager();
-
-    /**
-     * @brief Check if at least one client is connected.
-     *
-     * @return true Has clients.
-     * @return false No clients.
-     */
-    bool isEmpty() const;
-
-    /**
      * @brief Add a client.
      *
      * @param client Client ref.
@@ -63,10 +49,10 @@ public:
     void remove(const ClientRef &client);
 
     /**
-     * @brief Disconnect all clients.
+     * @brief Remove all clients.
      *
      */
-    void disconnectAll() const;
+    void clear();
 
 private:
     std::unordered_set<ClientRef> _clients;

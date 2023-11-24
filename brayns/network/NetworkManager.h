@@ -29,6 +29,7 @@
 #include <brayns/pluginapi/PluginAPI.h>
 
 #include "INetworkInterface.h"
+#include "NetworkMonitor.h"
 
 namespace brayns
 {
@@ -48,22 +49,10 @@ public:
     explicit NetworkManager(PluginAPI &api);
 
     /**
-     * @brief Start network server / client to accept incoming requests.
+     * @brief Start server / client until stop request is received.
      *
      */
-    void start();
-
-    /**
-     * @brief Close all connections.
-     *
-     */
-    void stop();
-
-    /**
-     * @brief Poll socket and run pending tasks.
-     *
-     */
-    void update();
+    void run();
 
     /**
      * @brief Register an entrypoint.
@@ -75,15 +64,21 @@ public:
     /**
      * @brief Poll socket to receive incoming messages.
      *
-     * Automatically called in update().
      */
     virtual void poll() override;
 
+    /**
+     * @brief Stop the network loop.
+     *
+     */
+    virtual void stop() override;
+
 private:
-    PluginAPI &_api;
     std::unique_ptr<ISocket> _socket;
     ClientManager _clients;
     EntrypointRegistry _entrypoints;
     TaskManager _tasks;
+    bool _running = false;
+    NetworkMonitor _monitor;
 };
 } // namespace brayns

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2023 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,36 +21,21 @@
 
 #pragma once
 
-#include <mutex>
-#include <vector>
+#include <brayns/network/client/ClientRequest.h>
+#include <brayns/network/entrypoint/EntrypointRegistry.h>
 
-#include "ClientRequest.h"
+#include "TaskManager.h"
 
 namespace brayns
 {
-/**
- * @brief Synchronized buffer to store incoming requests per client.
- *
- */
-class RequestBuffer
+class TaskDispatcher
 {
 public:
     /**
-     * @brief Add a request to the receive buffer.
+     * @brief Dispatch request to entrypoints or create a task for it.
      *
-     * @param request Raw client request.
+     * @param request Request to dispatch to entrypoints.
      */
-    void add(ClientRequest request);
-
-    /**
-     * @brief Extract all requests received since last call.
-     *
-     * @return std::vector<ClientRequest> List of received requests.
-     */
-    std::vector<ClientRequest> poll();
-
-private:
-    std::mutex _mutex;
-    std::vector<ClientRequest> _requests;
+    static void dispatch(ClientRequest request, EntrypointRegistry &entrypoints, TaskManager &tasks);
 };
 } // namespace brayns

@@ -93,10 +93,10 @@ private:
 class TaskHelper
 {
 public:
-    static void registerTask(TaskSettings settings, TaskController &controller, brayns::TaskManager &manager)
+    static void registerTask(TaskSettings settings, TaskController &controller, brayns::TaskManager &tasks)
     {
         auto task = std::make_unique<MockTask>(std::move(settings), controller);
-        manager.add(std::move(task));
+        tasks.add(std::move(task));
     }
 
     static brayns::ClientRef newClient(size_t id)
@@ -117,18 +117,18 @@ TEST_CASE("TaskManager")
     SUBCASE("Running tasks normally")
     {
         auto settings = TaskSettings{client, id, method};
-        auto manager = brayns::TaskManager();
+        auto tasks = brayns::TaskManager();
 
         auto first = TaskController();
-        TaskHelper::registerTask(settings, first, manager);
+        TaskHelper::registerTask(settings, first, tasks);
 
         auto second = TaskController();
-        TaskHelper::registerTask(settings, second, manager);
+        TaskHelper::registerTask(settings, second, tasks);
 
         CHECK_FALSE(first.executed);
         CHECK_FALSE(second.executed);
 
-        manager.runAllTasks();
+        tasks.run();
 
         CHECK(first.executed);
         CHECK(second.executed);
@@ -136,46 +136,46 @@ TEST_CASE("TaskManager")
     SUBCASE("Running tasks with priority")
     {
         auto settings = TaskSettings{client, id, method};
-        auto manager = brayns::TaskManager();
+        auto tasks = brayns::TaskManager();
 
         auto first = TaskController();
-        TaskHelper::registerTask(settings, first, manager);
+        TaskHelper::registerTask(settings, first, tasks);
 
         auto priority = TaskController();
         settings.priority = true;
-        TaskHelper::registerTask(settings, priority, manager);
+        TaskHelper::registerTask(settings, priority, tasks);
 
         CHECK_FALSE(first.executed);
         CHECK(priority.executed);
 
-        manager.runAllTasks();
+        tasks.run();
 
         CHECK(first.executed);
     }
     SUBCASE("Client disconnection")
     {
         auto settings = TaskSettings{client, id, method};
-        auto manager = brayns::TaskManager();
+        auto tasks = brayns::TaskManager();
 
         auto match = TaskController();
-        TaskHelper::registerTask(settings, match, manager);
+        TaskHelper::registerTask(settings, match, tasks);
 
         auto differentClient = TaskController();
         settings.client = otherClient;
-        TaskHelper::registerTask(settings, differentClient, manager);
+        TaskHelper::registerTask(settings, differentClient, tasks);
 
         auto differentId = TaskController();
         settings.client = client;
         settings.id = otherId;
-        TaskHelper::registerTask(settings, differentId, manager);
+        TaskHelper::registerTask(settings, differentId, tasks);
 
-        manager.disconnect(client);
+        tasks.disconnect(client);
 
         CHECK(match.disconnected);
         CHECK_FALSE(differentClient.disconnected);
         CHECK(differentId.disconnected);
 
-        manager.runAllTasks();
+        tasks.run();
 
         CHECK(match.executed);
         CHECK(differentClient.executed);
@@ -184,27 +184,27 @@ TEST_CASE("TaskManager")
     SUBCASE("Cancel task")
     {
         auto settings = TaskSettings{client, id, method};
-        auto manager = brayns::TaskManager();
+        auto tasks = brayns::TaskManager();
 
         auto match = TaskController();
-        TaskHelper::registerTask(settings, match, manager);
+        TaskHelper::registerTask(settings, match, tasks);
 
         auto differentClient = TaskController();
         settings.client = otherClient;
-        TaskHelper::registerTask(settings, differentClient, manager);
+        TaskHelper::registerTask(settings, differentClient, tasks);
 
         auto differentId = TaskController();
         settings.client = client;
         settings.id = otherId;
-        TaskHelper::registerTask(settings, differentId, manager);
+        TaskHelper::registerTask(settings, differentId, tasks);
 
-        manager.cancel(client, id);
+        tasks.cancel(client, id);
 
         CHECK(match.cancelled);
         CHECK_FALSE(differentClient.cancelled);
         CHECK_FALSE(differentId.cancelled);
 
-        manager.runAllTasks();
+        tasks.run();
 
         CHECK(match.executed);
         CHECK(differentClient.executed);
@@ -212,20 +212,20 @@ TEST_CASE("TaskManager")
     }
     SUBCASE("Cancel non-existing task")
     {
-        auto manager = brayns::TaskManager();
-        auto cancel = [&] { manager.cancel(client, id); };
+        auto tasks = brayns::TaskManager();
+        auto cancel = [&] { tasks.cancel(client, id); };
         CHECK_THROWS_AS(cancel(), brayns::InvalidParamsException);
     }
     SUBCASE("Cancel task which has no ID")
     {
         auto emptyId = brayns::RequestId();
         auto settings = TaskSettings{client, emptyId, method};
-        auto manager = brayns::TaskManager();
+        auto tasks = brayns::TaskManager();
 
         auto controller = TaskController();
-        TaskHelper::registerTask(settings, controller, manager);
+        TaskHelper::registerTask(settings, controller, tasks);
 
-        auto cancel = [&] { manager.cancel(client, brayns::RequestId()); };
+        auto cancel = [&] { tasks.cancel(client, brayns::RequestId()); };
         CHECK_THROWS_AS(cancel(), brayns::InvalidParamsException);
     }
 }

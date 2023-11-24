@@ -29,13 +29,13 @@ namespace brayns
 class RegistryEntrypoint : public Entrypoint<EmptyJson, std::vector<std::string>>
 {
 public:
-    explicit RegistryEntrypoint(const EntrypointRegistry &entrypoints);
+    explicit RegistryEntrypoint(EntrypointRegistry &entrypoints);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    const EntrypointRegistry &_entrypoints;
+    EntrypointRegistry &_entrypoints;
 };
 } // namespace brayns

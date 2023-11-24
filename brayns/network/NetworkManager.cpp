@@ -26,7 +26,7 @@
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/network/socket/ClientSocket.h>
 #include <brayns/network/socket/ServerSocket.h>
-#include <brayns/network/socket/SocketListener.h>
+#include <brayns/network/task/TaskDispatcher.h>
 
 #include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 #include <brayns/network/entrypoints/AddClippingGeometryEntrypoint.h>
@@ -43,7 +43,6 @@
 #include <brayns/network/entrypoints/ClearRenderablesEntrypoint.h>
 #include <brayns/network/entrypoints/ColorRampEntrypoint.h>
 #include <brayns/network/entrypoints/EnableSimulationEntrypoint.h>
-#include <brayns/network/entrypoints/ExitLaterEntrypoint.h>
 #include <brayns/network/entrypoints/ExportGBuffersEntrypoint.h>
 #include <brayns/network/entrypoints/FramebufferEntrypoint.h>
 #include <brayns/network/entrypoints/GetLoadersEntrypoint.h>
@@ -73,7 +72,7 @@ public:
     static void registerEntrypoints(
         brayns::INetworkInterface &interface,
         brayns::PluginAPI &api,
-        const brayns::EntrypointRegistry &entrypoints,
+        brayns::EntrypointRegistry &entrypoints,
         brayns::TaskManager &tasks)
     {
         auto &parameters = api.getParametersManager();
@@ -112,7 +111,6 @@ public:
         builder.add<brayns::ClearRenderablesEntrypoint>(models, simulation);
         builder.add<brayns::ColorModelEntrypoint>(models);
         builder.add<brayns::EnableSimulationEntrypoint>(models);
-        builder.add<brayns::ExitLaterEntrypoint>(engine);
         builder.add<brayns::ExportGBuffersEntrypoint>(engine, token);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
         builder.add<brayns::GetCameraViewEntrypoint>(engine);
@@ -141,7 +139,7 @@ public:
         builder.add<brayns::GetSimulationParametersEntrypoint>(simulation);
         builder.add<brayns::InspectEntrypoint>(engine);
         builder.add<brayns::InstantiateModelEntrypoint>(models);
-        builder.add<brayns::QuitEntrypoint>(engine);
+        builder.add<brayns::QuitEntrypoint>(interface);
         builder.add<brayns::RegistryEntrypoint>(entrypoints);
         builder.add<brayns::RemoveModelEntrypoint>(models, simulation);
         builder.add<brayns::RenderImageEntrypoint>(engine);
@@ -195,34 +193,89 @@ public:
         return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
     }
 };
+
+class SocketListener : public brayns::ISocketListener
+{
+public:
+    explicit SocketListener(brayns::NetworkMonitor &monitor):
+        _monitor(monitor)
+    {
+    }
+
+    void onConnect(const brayns::ClientRef &client) override
+    {
+        _monitor.notifyConnection(client);
+    }
+
+    void onDisconnect(const brayns::ClientRef &client) override
+    {
+        _monitor.notifyDisonnection(client);
+    }
+
+    void onRequest(brayns::ClientRequest request) override
+    {
+        _monitor.notifyRequest(std::move(request));
+    }
+
+private:
+    brayns::NetworkMonitor &_monitor;
+};
+
+class NetworkReceiver
+{
+public:
+    static void receive(
+        brayns::NetworkBuffer &buffer,
+        brayns::ClientManager &clients,
+        brayns::EntrypointRegistry &entrypoints,
+        brayns::TaskManager &tasks)
+    {
+        for (const auto &client : buffer.connectedClients)
+        {
+            brayns::Log::info("New client connected: {}.", client);
+            clients.add(client);
+        }
+        for (auto &request : buffer.requests)
+        {
+            brayns::Log::info("New request {}.", request);
+            brayns::TaskDispatcher::dispatch(std::move(request), entrypoints, tasks);
+        }
+        for (const auto &client : buffer.disconnectedClients)
+        {
+            brayns::Log::info("Client disconnected itself: {}.", client);
+            tasks.disconnect(client);
+            clients.remove(client);
+        }
+    }
+};
 } // namespace
 
 namespace brayns
 {
-NetworkManager::NetworkManager(PluginAPI &api):
-    _api(api)
+NetworkManager::NetworkManager(PluginAPI &api)
 {
-    auto listener = std::make_unique<brayns::SocketListener>(_clients, _entrypoints, _tasks);
-    _socket = SocketFactory::createSocket(_api, std::move(listener));
-    CoreEntrypointRegistry::registerEntrypoints(*this, _api, _entrypoints, _tasks);
+    auto listener = std::make_unique<SocketListener>(_monitor);
+    _socket = SocketFactory::createSocket(api, std::move(listener));
+    CoreEntrypointRegistry::registerEntrypoints(*this, api, _entrypoints, _tasks);
 }
 
-void NetworkManager::start()
+void NetworkManager::run()
 {
     _socket->start();
-}
-
-void NetworkManager::stop()
-{
+    _running = true;
+    while (_running)
+    {
+        Log::debug("Waiting for incoming messages.");
+        auto buffer = _monitor.wait();
+        Log::debug("Processing received messages.");
+        NetworkReceiver::receive(buffer, _clients, _entrypoints, _tasks);
+        Log::debug("Running all registered tasks.");
+        _tasks.run();
+    }
     _socket->stop();
-}
-
-void NetworkManager::update()
-{
-    Log::trace("Network update");
-    _socket->poll();
-    _tasks.runAllTasks();
-    _entrypoints.forEach([](auto &entrypoint) { entrypoint.onUpdate(); });
+    _clients.clear();
+    _monitor.clear();
+    _tasks.clear();
 }
 
 void NetworkManager::registerEntrypoint(EntrypointRef entrypoint)
@@ -235,7 +288,14 @@ void NetworkManager::registerEntrypoint(EntrypointRef entrypoint)
 
 void NetworkManager::poll()
 {
-    Log::trace("Poll network requests from plugin or entrypoint");
-    _socket->poll();
+    Log::trace("Poll network requests from entrypoint");
+    auto buffer = _monitor.poll();
+    NetworkReceiver::receive(buffer, _clients, _entrypoints, _tasks);
+}
+
+void NetworkManager::stop()
+{
+    Log::info("Network loop stopped.");
+    _running = false;
 }
 } // namespace brayns

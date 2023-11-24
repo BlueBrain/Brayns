@@ -22,15 +22,26 @@
 class MockEntrypoint : public brayns::Entrypoint<int, int>
 {
 public:
-    MockEntrypoint(std::string method = "test", int reply = 0):
+    MockEntrypoint(std::string method = "test", int reply = 0, bool priority = false):
         _method(std::move(method)),
-        _reply(reply)
+        _reply(reply),
+        _priority(priority)
     {
     }
 
-    bool hasBeenCalled() const
+    bool isCalled() const
     {
         return _called;
+    }
+
+    bool isCancelled() const
+    {
+        return _cancelled;
+    }
+
+    bool isDisconnected() const
+    {
+        return _disconnected;
     }
 
     virtual std::string getMethod() const override
@@ -49,8 +60,21 @@ public:
         request.reply(_reply);
     }
 
+    virtual void onDisconnect() override
+    {
+        _disconnected = true;
+    }
+
+    virtual void onCancel() override
+    {
+        _cancelled = true;
+    }
+
 private:
     std::string _method;
     int _reply;
+    bool _priority;
     bool _called = false;
+    bool _cancelled = false;
+    bool _disconnected = false;
 };

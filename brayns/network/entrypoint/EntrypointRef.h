@@ -50,25 +50,19 @@ public:
      * @param request Client request to the underlying entrypoint.
      * @throw JsonRpcException Errors that must be replied.
      */
-    void onRequest(const JsonRpcRequest &request) const;
-
-    /**
-     * @brief Call implementation onUpdate().
-     *
-     */
-    void onUpdate() const;
+    void onRequest(const JsonRpcRequest &request);
 
     /**
      * @brief Call implementation onCancel().
      *
      */
-    void onCancel() const;
+    void onCancel();
 
     /**
      * @brief Call implementation onDisconnect().
      *
      */
-    void onDisconnect() const;
+    void onDisconnect();
 
     /**
      * @brief Get the name of the plugin that registered the entrypoint.
