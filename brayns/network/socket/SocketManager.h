@@ -21,9 +21,6 @@
 
 #pragma once
 
-#include <brayns/network/client/ClientBuffer.h>
-#include <brayns/network/client/RequestBuffer.h>
-
 #include "ISocketListener.h"
 
 namespace brayns
@@ -51,16 +48,7 @@ public:
      */
     void run(const ClientRef &client);
 
-    /**
-     * @brief Poll connections and requests and trigger listener.
-     *
-     */
-    void poll();
-
 private:
     std::unique_ptr<ISocketListener> _listener;
-    ClientBuffer _newClients;
-    ClientBuffer _removedClients;
-    RequestBuffer _requests;
 };
 } // namespace brayns

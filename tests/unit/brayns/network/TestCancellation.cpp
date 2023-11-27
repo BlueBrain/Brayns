@@ -54,7 +54,7 @@ TEST_CASE("CancellationToken")
         auto interface = MockInterface();
         auto token = brayns::CancellationToken(interface);
         token.poll();
-        CHECK(interface.hasBeenPolled());
+        CHECK(interface.isPolled());
     }
     SUBCASE("Cancel")
     {
@@ -62,7 +62,7 @@ TEST_CASE("CancellationToken")
         auto token = brayns::CancellationToken(interface);
         token.cancel();
         CHECK_THROWS_AS(token.poll(), brayns::TaskCancelledException);
-        CHECK(interface.hasBeenPolled());
+        CHECK(interface.isPolled());
     }
     SUBCASE("Reset")
     {
@@ -71,7 +71,7 @@ TEST_CASE("CancellationToken")
         token.cancel();
         token.reset();
         token.poll();
-        CHECK(interface.hasBeenPolled());
+        CHECK(interface.isPolled());
     }
 }
 
@@ -97,7 +97,7 @@ TEST_CASE("ProgressHandler")
         auto token = brayns::CancellationToken(interface);
         auto progress = brayns::ProgressHandler(token, request);
         progress.notify("test", 0.5);
-        CHECK(interface.hasBeenPolled());
+        CHECK(interface.isPolled());
         CHECK_EQ(operation, "test");
         CHECK_EQ(amount, 0.5);
     }
@@ -110,6 +110,6 @@ TEST_CASE("ProgressHandler")
         auto token = brayns::CancellationToken(interface);
         auto progress = brayns::ProgressHandler(token, request);
         progress.poll();
-        CHECK(interface.hasBeenPolled());
+        CHECK(interface.isPolled());
     }
 }

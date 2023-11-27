@@ -192,16 +192,6 @@ EngineFactories &Engine::getFactories() noexcept
     return _factories;
 }
 
-void Engine::setRunning(bool keepRunning) noexcept
-{
-    _keepRunning = keepRunning;
-}
-
-bool Engine::isRunning() const noexcept
-{
-    return _keepRunning;
-}
-
 const ParametersManager &Engine::getParametersManager() const noexcept
 {
     return _params;

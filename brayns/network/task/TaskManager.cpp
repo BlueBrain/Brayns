@@ -35,7 +35,7 @@ void TaskManager::add(std::unique_ptr<ITask> task)
     _tasks.push_back(std::move(task));
 }
 
-void TaskManager::runAllTasks()
+void TaskManager::run()
 {
     while (!_tasks.empty())
     {
@@ -81,5 +81,10 @@ void TaskManager::cancel(const ClientRef &client, const RequestId &id)
     {
         throw InvalidParamsException(fmt::format("No requests found with ID {}.", client, id));
     }
+}
+
+void TaskManager::clear()
+{
+    _tasks.clear();
 }
 } // namespace brayns

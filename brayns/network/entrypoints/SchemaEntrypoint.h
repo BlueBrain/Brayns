@@ -30,13 +30,13 @@ namespace brayns
 class SchemaEntrypoint : public Entrypoint<SchemaParams, SchemaResult>
 {
 public:
-    explicit SchemaEntrypoint(const EntrypointRegistry &entrypoints);
+    explicit SchemaEntrypoint(EntrypointRegistry &entrypoints);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    const EntrypointRegistry &_entrypoints;
+    EntrypointRegistry &_entrypoints;
 };
 } // namespace brayns

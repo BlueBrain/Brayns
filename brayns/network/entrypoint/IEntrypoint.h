@@ -120,14 +120,6 @@ public:
     }
 
     /**
-     * @brief Called once per update.
-     *
-     */
-    virtual void onUpdate()
-    {
-    }
-
-    /**
      * @brief Called when the entrypoint is cancelled.
      *
      * Only called when isAsync() is true and entrypoint is running.

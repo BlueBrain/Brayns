@@ -41,7 +41,7 @@ public:
      * @param method Entrypoint method (ex: "set-camera").
      * @return const EntrypointRef* Entrypoint or null if not registered.
      */
-    const EntrypointRef *find(const std::string &method) const;
+    EntrypointRef *find(const std::string &method);
 
     /**
      * @brief Add a new entrypoint.
@@ -58,7 +58,7 @@ public:
      * @param functor Functor with signature void(const EntrypointRef &).
      */
     template<typename FunctorType>
-    void forEach(FunctorType functor) const
+    void forEach(FunctorType functor)
     {
         for (const auto &[method, entrypoint] : _entrypoints)
         {

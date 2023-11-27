@@ -83,31 +83,6 @@ public:
         return !uri.empty();
     }
 };
-
-class RateLimiter
-{
-public:
-    explicit RateLimiter(brayns::Duration period):
-        _period(period)
-    {
-    }
-
-    void wait()
-    {
-        auto now = brayns::Clock::now();
-        auto delta = now - _lastCall;
-        if (delta >= _period)
-        {
-            return;
-        }
-        std::this_thread::sleep_for(_period - delta);
-        _lastCall = brayns::Clock::now();
-    }
-
-private:
-    brayns::Duration _period;
-    brayns::TimePoint _lastCall = brayns::Clock::now();
-};
 } // namespace
 
 namespace brayns
@@ -130,24 +105,11 @@ Brayns::Brayns(int argc, const char **argv):
 
     Log::info("Loading plugins.");
     _pluginManager.loadPlugins();
-
-    if (_network)
-    {
-        Log::info("Starting network manager.");
-        _network->start();
-    }
 }
 
 Brayns::~Brayns()
 {
-    if (_network)
-    {
-        _network->stop();
-    }
     _loaderRegistry = {};
-    // make sure that plugin objects are removed first, as plugins are
-    // destroyed before the engine, but plugin destruction still should have
-    // a valid engine and _api (aka this object).
     _pluginManager.destroyPlugins();
 }
 
@@ -163,12 +125,7 @@ void Brayns::runAsService()
         throw std::runtime_error("Trying to run a service without URI");
     }
     Log::info("Brayns service started.");
-    auto limiter = RateLimiter(std::chrono::milliseconds(1));
-    while (_engine.isRunning())
-    {
-        _network->update();
-        limiter.wait();
-    }
+    _network->run();
 }
 
 Engine &Brayns::getEngine()

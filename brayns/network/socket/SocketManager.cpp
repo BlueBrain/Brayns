@@ -33,35 +33,20 @@ SocketManager::SocketManager(std::unique_ptr<ISocketListener> listener):
 
 void SocketManager::run(const ClientRef &client)
 {
-    _newClients.add(client);
+    _listener->onConnect(client);
     while (true)
     {
         try
         {
             auto packet = client.receive();
-            _requests.add({client, std::move(packet)});
+            auto request = ClientRequest(client, std::move(packet));
+            _listener->onRequest(std::move(request));
         }
         catch (...)
         {
             break;
         }
     }
-    _removedClients.add(client);
-}
-
-void SocketManager::poll()
-{
-    for (const auto &client : _newClients.poll())
-    {
-        _listener->onConnect(client);
-    }
-    for (auto &request : _requests.poll())
-    {
-        _listener->onRequest(std::move(request));
-    }
-    for (const auto &client : _removedClients.poll())
-    {
-        _listener->onDisconnect(client);
-    }
+    _listener->onDisconnect(client);
 }
 } // namespace brayns

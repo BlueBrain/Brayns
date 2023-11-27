@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/engine/core/Engine.h>
+#include <brayns/network/INetworkInterface.h>
 
 #include <brayns/network/entrypoint/Entrypoint.h>
 
@@ -30,13 +30,13 @@ namespace brayns
 class QuitEntrypoint : public Entrypoint<EmptyJson, EmptyJson>
 {
 public:
-    explicit QuitEntrypoint(Engine &engine);
+    explicit QuitEntrypoint(INetworkInterface &interface);
 
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
     virtual void onRequest(const Request &request) override;
 
 private:
-    Engine &_engine;
+    INetworkInterface &_interface;
 };
 } // namespace brayns

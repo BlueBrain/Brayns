@@ -44,6 +44,6 @@ public:
      * @return const EntrypointRef & Entrypoint to process request.
      * @throw JsonRpcException No entrypoint found or invalid params.
      */
-    static const EntrypointRef &find(const JsonRpcRequest &request, const EntrypointRegistry &entrypoints);
+    static EntrypointRef &find(const JsonRpcRequest &request, EntrypointRegistry &entrypoints);
 };
 } // namespace brayns

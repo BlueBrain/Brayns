@@ -44,7 +44,6 @@ public:
 
     void start();
     void stop();
-    void poll();
 
 private:
     void _run();
@@ -90,12 +89,6 @@ public:
      *
      */
     virtual void stop() override;
-
-    /**
-     * @brief Poll connections and requests and trigger listener.
-     *
-     */
-    virtual void poll() override;
 
 private:
     ClientTask _task;

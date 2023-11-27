@@ -255,9 +255,4 @@ void ServerSocket::stop()
         Log::error("Failed to stop server: '{}'.", e.what());
     }
 }
-
-void ServerSocket::poll()
-{
-    _manager.poll();
-}
 } // namespace brayns

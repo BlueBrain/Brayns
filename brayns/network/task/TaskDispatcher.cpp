@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SocketListener.h"
+#include "TaskDispatcher.h"
 
 #include <brayns/utils/Log.h>
 
@@ -37,12 +37,12 @@ class JsonRpcDispatcher
 public:
     static void dispatch(
         brayns::JsonRpcRequest request,
-        const brayns::EntrypointRegistry &entrypoints,
+        brayns::EntrypointRegistry &entrypoints,
         brayns::TaskManager &tasks)
     {
         try
         {
-            brayns::Log::debug("Dispatch JSON-RPC request {} to entrypoints.", request);
+            brayns::Log::debug("Dispatching JSON-RPC request {} to entrypoints.", request);
             auto &entrypoint = brayns::EntrypointFinder::find(request, entrypoints);
             brayns::Log::debug("Entrypoint found to process request: '{}'.", entrypoint.getMethod());
             auto task = std::make_unique<brayns::JsonRpcTask>(std::move(request), entrypoint);
@@ -71,7 +71,7 @@ class RawRequestDispatcher
 public:
     static void dispatch(
         const brayns::ClientRequest &request,
-        const brayns::EntrypointRegistry &entrypoints,
+        brayns::EntrypointRegistry &entrypoints,
         brayns::TaskManager &tasks)
     {
         try
@@ -110,35 +110,15 @@ private:
 
 namespace brayns
 {
-SocketListener::SocketListener(ClientManager &clients, const EntrypointRegistry &entrypoints, TaskManager &tasks):
-    _clients(clients),
-    _entrypoints(entrypoints),
-    _tasks(tasks)
+void TaskDispatcher::dispatch(ClientRequest request, EntrypointRegistry &entrypoints, TaskManager &tasks)
 {
-}
-
-void SocketListener::onConnect(const ClientRef &client)
-{
-    Log::info("Connection of client {}.", client);
-    _clients.add(client);
-}
-
-void SocketListener::onDisconnect(const ClientRef &client)
-{
-    Log::info("Disconnection of client {}.", client);
-    _tasks.disconnect(client);
-    _clients.remove(client);
-}
-
-void SocketListener::onRequest(ClientRequest request)
-{
-    Log::info("Received request {}.", request);
+    Log::info("Processing request {}.", request);
     if (request.isText())
     {
         Log::debug("Request content: '{}'.", request.getData());
     }
-    Log::debug("Dispatch request {}.", request);
-    RawRequestDispatcher::dispatch(request, _entrypoints, _tasks);
+    Log::debug("Dispatching request {}.", request);
+    RawRequestDispatcher::dispatch(request, entrypoints, tasks);
     Log::debug("Request {} dispatched.", request);
 }
 } // namespace brayns

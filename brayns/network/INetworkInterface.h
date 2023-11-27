@@ -47,5 +47,11 @@ public:
      * @note The network manager already calls it on each update.
      */
     virtual void poll() = 0;
+
+    /**
+     * @brief Stop the network loop.
+     *
+     */
+    virtual void stop() = 0;
 };
 } // namespace brayns

@@ -27,9 +27,14 @@ public:
         return _entrypoints;
     }
 
-    bool hasBeenPolled() const
+    bool isPolled() const
     {
         return _polled;
+    }
+
+    bool isStoped() const
+    {
+        return _stopped;
     }
 
     virtual void registerEntrypoint(brayns::EntrypointRef entrypoint) override
@@ -42,7 +47,13 @@ public:
         _polled = true;
     }
 
+    virtual void stop() override
+    {
+        _stopped = true;
+    }
+
 private:
     std::vector<brayns::EntrypointRef> _entrypoints;
     bool _polled = false;
+    bool _stopped = false;
 };
