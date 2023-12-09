@@ -63,7 +63,7 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/spdlog")
     FetchContent_Declare(
         spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG v1.9.2
+        GIT_TAG v1.12.0
         GIT_SHALLOW ON
         GIT_SUBMODULES_RECURSE ON
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spdlog
