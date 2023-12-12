@@ -20,6 +20,8 @@
 
 #include "SimulationSystem.h"
 
+#include <utility>
+
 #include <brayns/engine/components/SimulationInfo.h>
 
 namespace

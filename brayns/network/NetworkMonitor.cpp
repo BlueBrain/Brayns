@@ -21,7 +21,7 @@
 
 #include "NetworkMonitor.h"
 
-#include <algorithm>
+#include <utility>
 
 namespace brayns
 {

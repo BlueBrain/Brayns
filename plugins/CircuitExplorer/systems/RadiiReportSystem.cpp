@@ -20,6 +20,8 @@
 
 #include "RadiiReportSystem.h"
 
+#include <utility>
+
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/SimulationInfo.h>
 #include <brayns/engine/geometry/types/Capsule.h>
