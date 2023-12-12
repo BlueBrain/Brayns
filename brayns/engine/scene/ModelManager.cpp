@@ -20,6 +20,8 @@
 
 #include "ModelManager.h"
 
+#include <utility>
+
 namespace
 {
 class InstanceFinder

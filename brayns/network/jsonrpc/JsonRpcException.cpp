@@ -100,11 +100,3 @@ TaskCancelledException::TaskCancelledException():
 {
 }
 } // namespace brayns
-
-namespace std
-{
-std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcException &e)
-{
-    return stream << "{code = " << e.getCode() << ", message = '" << e.what() << "'}";
-}
-} // namespace std

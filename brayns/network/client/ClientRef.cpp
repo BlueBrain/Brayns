@@ -61,16 +61,3 @@ bool ClientRef::operator!=(const ClientRef &other) const
     return _socket != other._socket;
 }
 } // namespace brayns
-
-namespace std
-{
-std::ostream &operator<<(std::ostream &stream, const brayns::ClientRef &client)
-{
-    return stream << client.getId();
-}
-
-size_t hash<brayns::ClientRef>::operator()(const brayns::ClientRef &client) const
-{
-    return client.getId();
-}
-} // namespace std

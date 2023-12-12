@@ -20,6 +20,8 @@
 
 #include "ReportSystem.h"
 
+#include <utility>
+
 #include <brayns/engine/components/ColorMap.h>
 #include <brayns/engine/components/ColorRamp.h>
 #include <brayns/engine/components/SimulationInfo.h>

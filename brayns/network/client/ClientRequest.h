@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <spdlog/fmt/ostr.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <brayns/network/websocket/InputPacket.h>
 
@@ -80,7 +80,18 @@ private:
 };
 } // namespace brayns
 
-namespace std
+namespace fmt
 {
-std::ostream &operator<<(std::ostream &stream, const brayns::ClientRequest &request);
-} // namespace std
+template<>
+struct formatter<brayns::ClientRequest> : fmt::formatter<std::string>
+{
+    auto format(const brayns::ClientRequest &request, fmt::format_context &context) const
+    {
+        auto &client = request.getClient();
+        auto data = request.getData();
+        auto size = data.size();
+        auto binary = request.isBinary();
+        return format_to(context.out(), "{{client = {}, size = {}, binary = {}}}", client, size, binary);
+    }
+};
+} // namespace fmt

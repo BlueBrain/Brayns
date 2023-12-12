@@ -22,7 +22,7 @@
 #include "StringExtractor.h"
 
 #include <algorithm>
-#include <utility> // std::exchange
+#include <utility>
 
 #include "StringInfo.h"
 #include "StringTrimmer.h"

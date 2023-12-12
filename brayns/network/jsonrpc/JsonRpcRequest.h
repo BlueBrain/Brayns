@@ -23,7 +23,7 @@
 
 #include <string_view>
 
-#include <spdlog/fmt/ostr.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <brayns/network/client/ClientRef.h>
 #include <brayns/network/jsonrpc/JsonRpcException.h>
@@ -126,7 +126,19 @@ private:
 };
 } // namespace brayns
 
-namespace std
+namespace fmt
 {
-std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcRequest &request);
-} // namespace std
+template<>
+struct formatter<brayns::JsonRpcRequest> : fmt::formatter<std::string>
+{
+    auto format(const brayns::JsonRpcRequest &request, fmt::format_context &context) const
+    {
+        auto &client = request.getClient();
+        auto &id = request.getId();
+        auto &method = request.getMethod();
+        auto &binary = request.getBinary();
+        constexpr auto format = "{{client = {}, id = {}, method = {}, binary = {} bytes}}";
+        return format_to(context.out(), format, client, id, method, binary.size());
+    }
+};
+} // namespace fmt

@@ -20,6 +20,8 @@
 
 #include "SpikeReportSystem.h"
 
+#include <utility>
+
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/components/GeometryViews.h>
 #include <brayns/engine/components/SimulationInfo.h>

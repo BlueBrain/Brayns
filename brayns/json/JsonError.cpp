@@ -21,6 +21,8 @@
 
 #include "JsonError.h"
 
+#include <utility>
+
 namespace brayns
 {
 JsonPathElement::JsonPathElement(size_t index):

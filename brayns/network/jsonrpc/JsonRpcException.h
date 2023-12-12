@@ -23,7 +23,7 @@
 
 #include <stdexcept>
 
-#include <spdlog/fmt/ostr.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <brayns/json/Json.h>
 
@@ -140,7 +140,14 @@ public:
 };
 } // namespace brayns
 
-namespace std
+namespace fmt
 {
-std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcException &e);
-} // namespace std
+template<>
+struct formatter<brayns::JsonRpcException> : fmt::formatter<std::string>
+{
+    auto format(const brayns::JsonRpcException &e, fmt::format_context &context) const
+    {
+        return format_to(context.out(), "{{code = {}, message = {}}}", e.getCode(), e.what());
+    }
+};
+} // namespace fmt

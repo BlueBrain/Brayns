@@ -20,6 +20,8 @@
 
 #include "ProgressiveFrameHandler.h"
 
+#include <utility>
+
 namespace
 {
 class FrameSizeScaler
