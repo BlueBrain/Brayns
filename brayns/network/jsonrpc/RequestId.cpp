@@ -137,16 +137,3 @@ void JsonAdapter<RequestId>::deserialize(const JsonValue &json, RequestId &value
     }
 }
 } // namespace brayns
-
-namespace std
-{
-std::ostream &operator<<(std::ostream &stream, const brayns::RequestId &id)
-{
-    return stream << id.getDisplayText();
-}
-
-size_t hash<brayns::RequestId>::operator()(const brayns::RequestId &id) const
-{
-    return id.getHashCode();
-}
-} // namespace std

@@ -68,7 +68,7 @@ public:
             [](void *data, OSPError error, const char *message)
             {
                 (void)data;
-                brayns::Log::error("[OSPRAY] Error {}: {}", error, message);
+                brayns::Log::error("[OSPRAY] Error {}: {}", static_cast<int>(error), message);
                 throw std::runtime_error(message);
             });
 

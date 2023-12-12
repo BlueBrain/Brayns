@@ -62,9 +62,7 @@ TEST_CASE("ClientRequest")
     auto client = brayns::ClientRef(socket);
     auto packet = brayns::InputPacket::fromText("test");
     auto request = brayns::ClientRequest(client, packet);
-    auto stream = std::ostringstream();
-    stream << request;
-    auto test = stream.str();
+    auto test = fmt::format("{}", request);
     auto ref = "{client = 3, size = 4, binary = false}";
     CHECK_EQ(test, ref);
 }

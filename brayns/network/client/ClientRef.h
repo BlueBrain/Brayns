@@ -24,7 +24,7 @@
 #include <functional>
 #include <memory>
 
-#include <spdlog/fmt/ostr.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <brayns/network/websocket/IWebSocket.h>
 
@@ -96,11 +96,24 @@ private:
 
 namespace std
 {
-std::ostream &operator<<(std::ostream &stream, const brayns::ClientRef &client);
-
 template<>
 struct hash<brayns::ClientRef>
 {
-    size_t operator()(const brayns::ClientRef &client) const;
+    size_t operator()(const brayns::ClientRef &client) const
+    {
+        return client.getId();
+    }
 };
 } // namespace std
+
+namespace fmt
+{
+template<>
+struct formatter<brayns::ClientRef> : fmt::formatter<size_t>
+{
+    auto format(const brayns::ClientRef &client, fmt::format_context &context) const
+    {
+        return fmt::formatter<size_t>::format(client.getId(), context);
+    }
+};
+} // namespace fmt

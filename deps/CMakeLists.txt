@@ -18,7 +18,7 @@ if(NOT Poco_FOUND)
         FetchContent_Declare(
             poco
             GIT_REPOSITORY https://github.com/pocoproject/poco.git
-            GIT_TAG poco-1.12.4-release
+            GIT_TAG poco-1.12.5-release
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE ON
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/poco
@@ -63,7 +63,7 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/spdlog")
     FetchContent_Declare(
         spdlog
         GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG v1.9.2
+        GIT_TAG v1.12.0
         GIT_SHALLOW ON
         GIT_SUBMODULES_RECURSE ON
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/spdlog
@@ -102,7 +102,7 @@ if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tinyexr")
     FetchContent_Declare(
         tinyexr
         GIT_REPOSITORY https://github.com/syoyo/tinyexr
-        GIT_TAG v1.0.1
+        GIT_TAG v1.0.7
         GIT_SHALLOW ON
         GIT_SUBMODULES_RECURSE OFF
         SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tinyexr
@@ -129,7 +129,7 @@ if(BRAYNS_TESTS_ENABLED)
         FetchContent_Declare(
             doctest
             GIT_REPOSITORY https://github.com/doctest/doctest
-            GIT_TAG v2.4.9
+            GIT_TAG v2.4.11
             GIT_SHALLOW ON
             GIT_SUBMODULES_RECURSE OFF
             SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/doctest

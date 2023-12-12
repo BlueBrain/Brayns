@@ -26,7 +26,7 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include <spdlog/fmt/ostr.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/JSONException.h>
@@ -205,7 +205,15 @@ public:
 };
 } // namespace brayns
 
-namespace std
+namespace fmt
 {
-std::ostream &operator<<(std::ostream &stream, const brayns::JsonType &type);
-} // namespace std
+template<>
+struct formatter<brayns::JsonType> : fmt::formatter<std::string>
+{
+    auto format(const brayns::JsonType &type, fmt::format_context &context) const
+    {
+        auto &name = brayns::EnumInfo::getName(type);
+        return fmt::formatter<std::string>::format(name, context);
+    }
+};
+} // namespace fmt

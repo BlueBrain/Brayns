@@ -24,7 +24,7 @@
 #include <functional>
 #include <typeindex>
 
-#include <spdlog/fmt/ostr.h>
+#include <spdlog/fmt/fmt.h>
 
 #include <brayns/json/JsonAdapter.h>
 
@@ -75,11 +75,24 @@ struct JsonAdapter<RequestId>
 
 namespace std
 {
-std::ostream &operator<<(std::ostream &stream, const brayns::RequestId &id);
-
 template<>
 struct hash<brayns::RequestId>
 {
-    size_t operator()(const brayns::RequestId &id) const;
+    size_t operator()(const brayns::RequestId &id) const
+    {
+        return id.getHashCode();
+    }
 };
 } // namespace std
+
+namespace fmt
+{
+template<>
+struct formatter<brayns::RequestId> : fmt::formatter<std::string>
+{
+    auto format(const brayns::RequestId &id, fmt::format_context &context) const
+    {
+        return fmt::formatter<std::string>::format(id.getDisplayText(), context);
+    }
+};
+} // namespace fmt

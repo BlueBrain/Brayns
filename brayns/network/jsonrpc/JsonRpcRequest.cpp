@@ -100,19 +100,3 @@ void JsonRpcRequest::progress(const std::string &operation, double amount) const
     ClientSender::sendText(message, _client);
 }
 } // namespace brayns
-
-namespace std
-{
-std::ostream &operator<<(std::ostream &stream, const brayns::JsonRpcRequest &request)
-{
-    auto &client = request.getClient();
-    auto &id = request.getId();
-    auto &method = request.getMethod();
-    auto &binary = request.getBinary();
-    stream << "{client = " << client;
-    stream << ", id = " << id;
-    stream << ", method = " << method;
-    stream << ", binary = " << binary.size() << " bytes}";
-    return stream;
-}
-} // namespace std

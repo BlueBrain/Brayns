@@ -49,18 +49,3 @@ std::string_view ClientRequest::getData() const
     return _packet.getData();
 }
 } // namespace brayns
-
-namespace std
-{
-std::ostream &operator<<(std::ostream &stream, const brayns::ClientRequest &request)
-{
-    auto &client = request.getClient();
-    auto data = request.getData();
-    auto size = data.size();
-    auto binary = request.isBinary() ? "true" : "false";
-    stream << "{client = " << client;
-    stream << ", size = " << size;
-    stream << ", binary = " << binary << "}";
-    return stream;
-}
-} // namespace std

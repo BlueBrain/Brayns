@@ -109,11 +109,3 @@ JsonObject &JsonFactory::emplaceObject(JsonValue &json)
     return *object;
 }
 } // namespace brayns
-
-namespace std
-{
-std::ostream &operator<<(std::ostream &stream, const brayns::JsonType &type)
-{
-    return stream << brayns::EnumInfo::getName(type);
-}
-} // namespace std

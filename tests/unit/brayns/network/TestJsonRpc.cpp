@@ -117,9 +117,7 @@ TEST_CASE("JsonRpcRequest")
     message.method = "test";
     auto binary = "binary";
     auto request = brayns::JsonRpcRequest(client, message, binary);
-    std::ostringstream stream;
-    stream << request;
-    auto test = stream.str();
+    auto test = fmt::format("{}", request);
     auto ref = "{client = 3, id = 1, method = test, binary = 6 bytes}";
     CHECK_EQ(test, ref);
 }
