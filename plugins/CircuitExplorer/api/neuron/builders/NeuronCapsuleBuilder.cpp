@@ -27,81 +27,199 @@ class PrimitiveAllocationSize
 public:
     static size_t compute(const NeuronMorphology &morphology)
     {
-        size_t result = 0;
+        auto result = size_t(0);
 
-        if (morphology.hasSoma())
+        result += _getSomaSampleCount(morphology);
+
+        for (const auto &section : morphology.sections())
         {
-            const auto somaChildren = morphology.sectionChildrenIndices(-1);
-
-            result += 1; // soma sphere
-            result += somaChildren.size(); // soma-neurite cones
-        }
-
-        const auto &sections = morphology.sections();
-        for (const auto &section : sections)
-        {
-            auto &samples = section.samples;
-            if (!samples.empty())
-            {
-                // * -> sample
-                // = -> primitive added
-                // section: *=*=*=*
-                // Hence -1
-                result += samples.size() - 1;
-            }
+            result += _getConnectionCount(section.samples.size());
         }
 
         return result;
+    }
+
+private:
+    static size_t _getSomaSampleCount(const NeuronMorphology &morphology)
+    {
+        if (!morphology.hasSoma())
+        {
+            return 0;
+        }
+
+        auto &soma = morphology.soma();
+        auto sampleCount = soma.samples.size();
+
+        switch (soma.type)
+        {
+        case NeuronMorphology::SomaType::SinglePoint:
+        case NeuronMorphology::SomaType::ThreePoints:
+            return 1;
+        case NeuronMorphology::SomaType::Cylinders:
+            return _getConnectionCount(sampleCount);
+        case NeuronMorphology::SomaType::Contour:
+            return _getContourSize(morphology);
+        default:
+            throw std::runtime_error("Internal error: corrupted soma type");
+        }
+    }
+
+    static size_t _getConnectionCount(size_t sampleCount)
+    {
+        if (sampleCount < 2)
+        {
+            return 0;
+        }
+        return sampleCount - 1;
+    }
+
+    static size_t _getContourSize(const NeuronMorphology &morphology)
+    {
+        auto children = morphology.sectionChildrenIndices(-1);
+        return children.size() + 1;
     }
 };
 
 class SomaBuilder
 {
 public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Capsule> &dst)
+    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Capsule> &geometries)
     {
-        auto &primitives = dst.primitives;
-        auto &sectionSegments = dst.sectionSegmentMapping;
-        auto &sectionTypes = dst.sectionTypeMapping;
+        auto &primitives = geometries.primitives;
+        auto &sectionSegments = geometries.sectionSegmentMapping;
+        auto &sectionTypes = geometries.sectionTypeMapping;
 
-        auto &sections = morphology.sections();
         auto &soma = morphology.soma();
+        auto &samples = soma.samples;
 
-        // Add a sphere for the soma
-        auto &somaCenter = soma.center;
-        auto somaRadius = soma.radius;
-        primitives.push_back(brayns::CapsuleFactory::sphere(somaCenter, somaRadius));
-
-        // Add a cone capsule towards each direct child section
-        auto somaChildren = morphology.sectionChildrenIndices(-1);
-        for (auto childIndex : somaChildren)
+        switch (soma.type)
         {
-            auto &child = sections[childIndex];
-            if (child.samples.empty())
-            {
-                continue;
-            }
-
-            auto &childFirstSample = child.samples[0];
-            auto &samplePos = childFirstSample.position;
-            auto sampleRadius = childFirstSample.radius;
-            primitives.push_back(brayns::CapsuleFactory::cone(somaCenter, somaRadius, samplePos, sampleRadius));
+        case NeuronMorphology::SomaType::SinglePoint:
+            _singlePoint(samples, primitives);
+            break;
+        case NeuronMorphology::SomaType::ThreePoints:
+            _threePoints(samples, primitives);
+            break;
+        case NeuronMorphology::SomaType::Cylinders:
+            _cylinders(samples, primitives);
+            break;
+        case NeuronMorphology::SomaType::Contour:
+            _contour(morphology, primitives);
+            break;
+        default:
+            throw std::runtime_error("Internal error: corrupted soma type");
         }
 
         auto end = primitives.size();
         sectionSegments.push_back({-1, 0, end});
         sectionTypes.push_back({NeuronSection::Soma, 0, end});
     }
+
+private:
+    static void _singlePoint(
+        const std::vector<NeuronMorphology::SectionSample> &samples,
+        std::vector<brayns::Capsule> &capsules)
+    {
+        if (samples.size() != 1)
+        {
+            throw std::runtime_error("Internal error: corrupted single point soma");
+        }
+        auto &sample = samples[0];
+        auto sphere = brayns::CapsuleFactory::sphere(sample.position, sample.radius);
+        capsules.push_back(sphere);
+    }
+
+    static void _threePoints(
+        const std::vector<NeuronMorphology::SectionSample> &samples,
+        std::vector<brayns::Capsule> &capsules)
+    {
+        if (samples.size() != 3)
+        {
+            throw std::runtime_error("Internal error: corrupted 3 points soma");
+        }
+
+        auto &middle = samples[0];
+        auto &center = middle.position;
+        auto radius = middle.radius;
+
+        auto top = center;
+        top.y += radius;
+
+        auto bottom = center;
+        bottom.y -= radius;
+
+        auto cylinder = brayns::CapsuleFactory::cylinder(top, bottom, radius);
+        capsules.push_back(cylinder);
+    }
+
+    static void _cylinders(
+        const std::vector<NeuronMorphology::SectionSample> &samples,
+        std::vector<brayns::Capsule> &capsules)
+    {
+        auto sampleCount = samples.size();
+
+        if (sampleCount < 2)
+        {
+            return;
+        }
+
+        for (auto i = size_t(1); i < sampleCount; ++i)
+        {
+            auto &start = samples[i - 1];
+            auto &end = samples[i];
+
+            auto cone = brayns::CapsuleFactory::cone(start.position, start.radius, end.position, end.radius);
+            capsules.push_back(cone);
+        }
+    }
+
+    static void _contour(const NeuronMorphology &morphology, std::vector<brayns::Capsule> &capsules)
+    {
+        auto &soma = morphology.soma();
+        auto &samples = soma.samples;
+        auto sampleCount = static_cast<float>(samples.size());
+
+        auto center = brayns::Vector3f(0.0f);
+        for (const auto &sample : samples)
+        {
+            center += sample.position;
+        }
+        center /= sampleCount;
+
+        auto radius = 0.0f;
+        for (const auto &sample : samples)
+        {
+            auto distance = brayns::math::length(sample.position - center);
+            radius += distance;
+        }
+        radius /= sampleCount;
+
+        auto sphere = brayns::CapsuleFactory::sphere(center, radius);
+        capsules.push_back(sphere);
+
+        auto &sections = morphology.sections();
+        for (auto index : morphology.sectionChildrenIndices(-1))
+        {
+            auto &section = sections[index];
+            if (section.samples.empty())
+            {
+                continue;
+            }
+            auto &child = section.samples[0];
+            auto cone = brayns::CapsuleFactory::cone(center, radius, child.position, child.radius);
+            capsules.push_back(cone);
+        }
+    }
 };
 
 class ConnectedNeuriteBuilder
 {
 public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Capsule> &dst)
+    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Capsule> &geometries)
     {
         NeuriteBuilder::build<brayns::Capsule>(
             morphology,
-            dst,
+            geometries,
             [](const auto &samples, auto &primitives)
             {
                 for (size_t i = 1; i < samples.size(); ++i)
@@ -119,14 +237,13 @@ public:
             });
     }
 };
-
 } // namespace
 
 NeuronGeometry<brayns::Capsule> NeuronGeometryBuilder<brayns::Capsule>::build(const NeuronMorphology &morphology)
 {
     return NeuronBuilder::build<brayns::Capsule>(
         morphology,
-        [](auto &morhpology) { return PrimitiveAllocationSize::compute(morhpology); },
+        [](auto &morphology) { return PrimitiveAllocationSize::compute(morphology); },
         [](auto &morphology, auto &geometry) { SomaBuilder::build(morphology, geometry); },
         [](auto &morphology, auto &geometry) { ConnectedNeuriteBuilder::build(morphology, geometry); });
 }

@@ -49,11 +49,9 @@ private:
 class ParentChildrenSmoother
 {
 public:
-    ParentChildrenSmoother(float somaRadiusMultiplier, float sectionRadiusChange):
-        _somaRadiusMultiplier(somaRadiusMultiplier),
+    explicit ParentChildrenSmoother(float sectionRadiusChange):
         _sectionRadiusChange(sectionRadiusChange)
     {
-        assert(somaRadiusMultiplier > 0.f);
         assert(_sectionRadiusChange >= 0.f && _sectionRadiusChange <= 1.f);
     }
 
@@ -65,7 +63,7 @@ public:
         while (!queue.empty())
         {
             auto parentIndex = queue.next();
-            auto parentSection = _getSection(morphology, parentIndex);
+            auto &parentSection = morphology.sections()[parentIndex];
             auto parentRadius = parentSection.samples.front().radius;
 
             auto childSections = morphology.sectionChildrenIndices(parentSection.id);
@@ -81,13 +79,6 @@ private:
     {
         auto somaChildren = morphology.sectionChildrenIndices(-1);
         queue.append(somaChildren);
-        if (!morphology.hasSoma())
-        {
-            return;
-        }
-
-        auto startingRadius = morphology.soma().radius * _somaRadiusMultiplier;
-        _setSectionRadius(morphology, somaChildren, startingRadius);
     }
 
     void _setSectionRadius(NeuronMorphology &morphology, const std::vector<size_t> &sectionIndices, float radius)
@@ -103,13 +94,6 @@ private:
         }
     }
 
-    const NeuronMorphology::Section &_getSection(const NeuronMorphology &morphology, size_t sectionIndex)
-    {
-        auto &sections = morphology.sections();
-        auto &section = sections[sectionIndex];
-        return section;
-    }
-
 private:
     float _somaRadiusMultiplier;
     float _sectionRadiusChange;
@@ -118,8 +102,7 @@ private:
 
 void SectionSmoother::process(NeuronMorphology &morphology) const
 {
-    constexpr float somaRadiusMultiplier = 0.25f;
     constexpr float sectionRadiusChange = 0.11f;
-    ParentChildrenSmoother smoother(somaRadiusMultiplier, sectionRadiusChange);
+    auto smoother = ParentChildrenSmoother(sectionRadiusChange);
     smoother.apply(morphology);
 }
