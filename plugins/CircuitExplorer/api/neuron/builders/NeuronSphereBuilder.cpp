@@ -27,7 +27,12 @@ class PrimitiveAllocationSize
 public:
     static size_t compute(const NeuronMorphology &morphology)
     {
-        size_t result = morphology.hasSoma() ? 1 : 0;
+        auto result = size_t(0);
+        if (morphology.hasSoma())
+        {
+            auto &soma = morphology.soma();
+            result += soma.samples.size();
+        }
         for (const auto &section : morphology.sections())
         {
             result += section.samples.size();
@@ -39,25 +44,28 @@ public:
 class SomaBuilder
 {
 public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Sphere> &dst)
+    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Sphere> &geometries)
     {
-        const auto &soma = morphology.soma();
-        const auto &somaCenter = soma.center;
-        const auto somaRadius = soma.radius;
-        dst.primitives.push_back(brayns::Sphere(somaCenter, somaRadius));
-        dst.sectionSegmentMapping.push_back({-1, 0, 1});
-        dst.sectionTypeMapping.push_back({NeuronSection::Soma, 0, 1});
+        auto &soma = morphology.soma();
+        auto &samples = soma.samples;
+        auto sampleCount = samples.size();
+        for (const auto &sample : samples)
+        {
+            geometries.primitives.emplace_back(sample.position, sample.radius);
+        }
+        geometries.sectionSegmentMapping.push_back({-1, 0, sampleCount});
+        geometries.sectionTypeMapping.push_back({NeuronSection::Soma, 0, sampleCount});
     }
 };
 
 class SphereNeuriteBuilder
 {
 public:
-    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Sphere> &dst)
+    static void build(const NeuronMorphology &morphology, NeuronGeometry<brayns::Sphere> &geometries)
     {
         NeuriteBuilder::build<brayns::Sphere>(
             morphology,
-            dst,
+            geometries,
             [](auto &samples, auto &primitives)
             {
                 for (auto &sample : samples)

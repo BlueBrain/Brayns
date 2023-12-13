@@ -76,8 +76,7 @@ private:
 class ParentChildrenSmoother
 {
 public:
-    ParentChildrenSmoother(float somaRadiusMultiplier, float maxParentChildrenChange):
-        _somaRadiusMultiplier(somaRadiusMultiplier),
+    explicit ParentChildrenSmoother(float maxParentChildrenChange):
         _maxParentChildrenChange(maxParentChildrenChange)
     {
     }
@@ -101,18 +100,6 @@ private:
     {
         auto somaChildren = morphology.sectionChildrenIndices(-1);
         queue.append(somaChildren);
-        if (!morphology.hasSoma())
-        {
-            return;
-        }
-
-        auto startingRadius = morphology.soma().radius * _somaRadiusMultiplier;
-        auto callback = [&](float srcRadius)
-        {
-            (void)srcRadius;
-            return startingRadius;
-        };
-        _initializeFirstSample(morphology, somaChildren, callback);
     }
 
     void _initializeChildrenSections(NeuronMorphology &morphology, SmoothQueue &queue, size_t sectionIndex)
@@ -155,15 +142,13 @@ private:
     }
 
 private:
-    float _somaRadiusMultiplier = 0.4f;
-    float _maxParentChildrenChange = 0.07f;
+    float _maxParentChildrenChange;
 };
 } // namespace
 
 void Smoother::process(NeuronMorphology &morphology) const
 {
-    constexpr float somaRadiusMultiplier = 0.4f;
     constexpr float maxParentChildChange = 0.07f;
-    ParentChildrenSmoother smoother(somaRadiusMultiplier, maxParentChildChange);
+    auto smoother = ParentChildrenSmoother(maxParentChildChange);
     smoother.apply(morphology);
 }

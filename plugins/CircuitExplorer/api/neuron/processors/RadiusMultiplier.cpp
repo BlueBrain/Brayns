@@ -28,14 +28,17 @@ void RadiusMultiplier::process(NeuronMorphology &morphology) const
     if (morphology.hasSoma())
     {
         auto &soma = morphology.soma();
-        soma.radius *= _radiusMultiplier;
+        for (auto &sample : soma.samples)
+        {
+            sample.radius *= _radiusMultiplier;
+        }
     }
 
     for (auto &section : morphology.sections())
     {
-        for (auto &segment : section.samples)
+        for (auto &sample : section.samples)
         {
-            segment.radius *= _radiusMultiplier;
+            sample.radius *= _radiusMultiplier;
         }
     }
 }

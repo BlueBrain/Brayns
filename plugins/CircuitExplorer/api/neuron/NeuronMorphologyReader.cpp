@@ -18,6 +18,8 @@
 
 #include "NeuronMorphologyReader.h"
 
+#include <spdlog/fmt/fmt.h>
+
 #include <morphio/errorMessages.h>
 #include <morphio/morphology.h>
 #include <morphio/section.h>
@@ -49,49 +51,90 @@ private:
 class SomaReader
 {
 public:
-    static NeuronMorphology::Soma read(const morphio::Morphology &m)
+    static std::optional<NeuronMorphology::Soma> read(const morphio::Morphology &morphology)
     {
-        const auto somaData = m.soma();
-        const auto somaPoints = somaData.points();
+        auto soma = morphology.soma();
 
-        if (somaPoints.empty())
+        auto originalType = soma.type();
+
+        if (originalType == morphio::SOMA_UNDEFINED)
         {
-            throw std::runtime_error("Morphology does not have somata information");
+            return std::nullopt;
         }
 
-        // Compute average position
-        std::vector<brayns::Vector3f> somaSamples;
-        somaSamples.reserve(somaPoints.size());
-        brayns::Vector3f somaPos(0.f, 0.f, 0.f);
-        for (size_t i = 0; i < somaPoints.size(); ++i)
+        auto type = _getSomaType(originalType);
+
+        auto points = soma.points();
+        auto diameters = soma.diameters();
+
+        if (points.size() != diameters.size())
         {
-            const auto p = somaPoints[i];
-            somaSamples.emplace_back(p[0], p[1], p[2]);
-            somaPos.x += p[0];
-            somaPos.y += p[1];
-            somaPos.z += p[2];
+            throw std::runtime_error("Corrupted morphology soma (radius count != position count)");
         }
-        somaPos /= static_cast<float>(somaPoints.size());
 
-        // Compute mean radius
-        float somaRadius = 0.f;
-        for (const auto &somaPoint : somaSamples)
-            somaRadius += brayns::math::length(somaPoint - somaPos);
-        somaRadius /= static_cast<float>(somaPoints.size());
+        auto sampleCount = points.size();
 
-        NeuronMorphology::Soma result;
-        result.center = std::move(somaPos);
-        result.radius = somaRadius;
-        return result;
+        if (type == NeuronMorphology::SomaType::SinglePoint)
+        {
+            _checkSampleCount(sampleCount, 1);
+        }
+
+        if (type == NeuronMorphology::SomaType::ThreePoints)
+        {
+            _checkSampleCount(sampleCount, 3);
+        }
+
+        auto samples = std::vector<NeuronMorphology::SectionSample>();
+        samples.reserve(sampleCount);
+
+        for (auto i = size_t(0); i < sampleCount; ++i)
+        {
+            auto &point = points[i];
+            auto &diameter = diameters[i];
+
+            auto &sample = samples.emplace_back();
+            sample.position = {point[0], point[1], point[2]};
+            sample.radius = diameter / 2.0f;
+        }
+
+        return NeuronMorphology::Soma{type, std::move(samples)};
+    }
+
+private:
+    static NeuronMorphology::SomaType _getSomaType(morphio::SomaType original)
+    {
+        switch (original)
+        {
+        case morphio::SOMA_SINGLE_POINT:
+            return NeuronMorphology::SomaType::SinglePoint;
+        case morphio::SOMA_NEUROMORPHO_THREE_POINT_CYLINDERS:
+            return NeuronMorphology::SomaType::ThreePoints;
+        case morphio::SOMA_CYLINDERS:
+            return NeuronMorphology::SomaType::Cylinders;
+        case morphio::SOMA_SIMPLE_CONTOUR:
+            return NeuronMorphology::SomaType::Contour;
+        default:
+            throw std::runtime_error("Unknown soma type");
+        }
+    }
+
+    static void _checkSampleCount(size_t sampleCount, size_t expectedCount)
+    {
+        if (sampleCount == expectedCount)
+        {
+            return;
+        }
+        auto message = fmt::format("Invalid sample count: {} (expected {})", sampleCount, expectedCount);
+        throw std::runtime_error(message);
     }
 };
 
 class NeuriteReader
 {
 public:
-    static std::vector<NeuronMorphology::Section> read(const morphio::Morphology &m, bool axon, bool dendrites)
+    static std::vector<NeuronMorphology::Section> read(const morphio::Morphology &morphology, bool axon, bool dendrites)
     {
-        const auto &morphSections = m.sections();
+        const auto &morphSections = morphology.sections();
 
         std::vector<NeuronMorphology::Section> result;
         result.reserve(morphSections.size());
@@ -165,14 +208,15 @@ NeuronMorphology NeuronMorphologyReader::read(const std::string &path, bool soma
         throw std::invalid_argument("Nothing requested to be loaded");
     }
 
-    auto morph = MorphIOReader::read(path);
+    auto morphology = MorphIOReader::read(path);
 
-    auto sections = NeuriteReader::read(morph, axon, dendrites);
-    std::optional<NeuronMorphology::Soma> somaObject = std::nullopt;
+    auto sections = NeuriteReader::read(morphology, axon, dendrites);
+
+    auto optionalSoma = std::optional<NeuronMorphology::Soma>();
     if (soma)
     {
-        somaObject = SomaReader::read(morph);
+        optionalSoma = SomaReader::read(morphology);
     }
 
-    return NeuronMorphology(std::move(sections), std::move(somaObject));
+    return NeuronMorphology(std::move(sections), std::move(optionalSoma));
 }

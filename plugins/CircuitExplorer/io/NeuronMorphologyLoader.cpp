@@ -42,18 +42,6 @@
 
 namespace
 {
-class SectionLoadChecker
-{
-public:
-    static void check(const NeuronMorphologyLoaderParameters &input)
-    {
-        if (!input.load_axon && !input.load_dendrites)
-        {
-            throw std::invalid_argument("At least one section of the morphology (axons or dendrites) must be enabled");
-        }
-    }
-};
-
 class ModelBuilder
 {
 public:
@@ -160,7 +148,6 @@ std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::loadFile(con
     brayns::Log::info("[CE] {}: loading {}.", name, path);
     progress("Loading " + path, 0.f);
 
-    SectionLoadChecker::check(params);
     auto model = LoadDispatcher::dispatch(path, params);
 
     brayns::Log::info("[CE] {}: done in {} second(s).", name, timer.seconds());

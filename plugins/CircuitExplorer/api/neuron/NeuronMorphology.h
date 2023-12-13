@@ -48,13 +48,21 @@ public:
         std::vector<SectionSample> samples;
     };
 
+    enum class SomaType
+    {
+        SinglePoint,
+        ThreePoints,
+        Cylinders,
+        Contour,
+    };
+
     /**
      * @brief The Soma class represents the cell soma body
      */
     struct Soma
     {
-        brayns::Vector3f center;
-        float radius;
+        SomaType type;
+        std::vector<SectionSample> samples;
     };
 
 public:

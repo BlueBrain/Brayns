@@ -23,14 +23,17 @@ void ConstantRadius::process(NeuronMorphology &morphology) const
     if (morphology.hasSoma())
     {
         auto &soma = morphology.soma();
-        soma.radius = 1.f;
+        for (auto &sample : soma.samples)
+        {
+            sample.radius = 1.0f;
+        }
     }
 
     for (auto &section : morphology.sections())
     {
-        for (auto &segment : section.samples)
+        for (auto &sample : section.samples)
         {
-            segment.radius = 1.f;
+            sample.radius = 1.f;
         }
     }
 }
