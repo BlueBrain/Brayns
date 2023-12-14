@@ -1,5 +1,13 @@
 # Change Log
 
+## [3.5.0](https://github.com/BlueBrain/Brayns/tree/3.5.0)
+
+**Implemented fixes and enhancements:**
+
+- Fixed morphologies modeling and relax some checks [\#1220] (https://github.com/BlueBrain/Brayns/pull/1220)
+- Fixed 100% CPU usage [\#1217] (https://github.com/BlueBrain/Brayns/pull/1217)
+- Loaders are now on readthedocs.io [\#1216] (https://github.com/BlueBrain/Brayns/pull/1216)
+
 ## [3.4.1](https://github.com/BlueBrain/Brayns/tree/3.4.1)
 
 **Implemented fixes and enhancements:**

@@ -4078,42 +4078,6 @@ null.
 
 ----
 
-exit-later
-~~~~~~~~~~
-
-Old monitoring, use 'quit' instead to stop the service.
-
-.. attention::
-
-    This entrypoint is DEPRECATED, it will be removed or renamed in the next
-    major release.
-
-**Params**:
-
-.. jsonschema::
-
-    {
-        "type": "object",
-        "properties": {
-            "minutes": {
-                "description": "Number of minutes after which Brayns will shut down",
-                "type": "integer",
-                "minimum": 0
-            }
-        },
-        "required": [
-            "minutes"
-        ],
-        "additionalProperties": false
-    }
-
-**Result**:
-
-This entrypoint has no result, the "result" field is still present but is always
-null.
-
-----
-
 export-gbuffers
 ~~~~~~~~~~~~~~~
 
