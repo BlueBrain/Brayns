@@ -20,12 +20,10 @@
 
 #include <spdlog/fmt/fmt.h>
 
-#include <morphio/errorMessages.h>
 #include <morphio/morphology.h>
 #include <morphio/section.h>
 #include <morphio/soma.h>
 
-#include <filesystem>
 #include <mutex>
 
 namespace
