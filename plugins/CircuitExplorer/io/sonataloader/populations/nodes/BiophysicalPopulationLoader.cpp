@@ -44,7 +44,7 @@ public:
         }
 
         brayns::Log::warn("[CE] Cannot retrieve '{}' rotations, using identity", population.name());
-        return std::vector<brayns::Quaternion>(selection.flatSize());
+        return std::vector<brayns::Quaternion>(selection.flatSize(), brayns::Quaternion(1, 0, 0, 0));
     }
 };
 }
