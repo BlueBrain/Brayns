@@ -1,5 +1,11 @@
 # Change Log
 
+## [3.5.1](https://github.com/BlueBrain/Brayns/tree/3.5.1)
+
+**Implemented fixes and enhancements:**
+
+- Fix default cell orientations [\#1223] (https://github.com/BlueBrain/Brayns/pull/1223)
+
 ## [3.5.0](https://github.com/BlueBrain/Brayns/tree/3.5.0)
 
 **Implemented fixes and enhancements:**
