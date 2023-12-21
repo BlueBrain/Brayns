@@ -31,6 +31,7 @@ class Atlas
 {
 public:
     Atlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing);
+    virtual ~Atlas() = default;
 
     /**
      * @brief Get the volume grid dimensions.
