@@ -19,21 +19,21 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.loading import add_sphere, load_circuit
+from testapi.loading import add_sphere, load_sonata_circuit
 from testapi.render import render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
 
 class TestColoring(SimpleTestCase):
     def test_color_model(self) -> None:
-        model = load_circuit(self)
+        model = load_sonata_circuit(self)
         brayns.color_model(
             self.instance,
             model.id,
             method=brayns.CircuitColorMethod.ID,
             colors={
-                "0-500": brayns.Color4.red,
-                "501-1000": brayns.Color4.green,
+                "0-5": brayns.Color4.red,
+                "5-10": brayns.Color4.green,
             },
         )
         render_and_validate(self, "color_model")
@@ -44,22 +44,25 @@ class TestColoring(SimpleTestCase):
         render_and_validate(self, "set_model_color")
 
     def test_get_color_methods(self) -> None:
-        model = load_circuit(self)
+        model = load_sonata_circuit(self)
         methods = brayns.get_color_methods(self.instance, model.id)
         ref = {
-            brayns.ColorMethod.SOLID,
-            brayns.CircuitColorMethod.ID,
             brayns.CircuitColorMethod.ETYPE,
+            brayns.CircuitColorMethod.ID,
             brayns.CircuitColorMethod.LAYER,
             brayns.CircuitColorMethod.MORPHOLOGY,
+            brayns.CircuitColorMethod.MORPHOLOGY_CLASS,
             brayns.CircuitColorMethod.MTYPE,
+            brayns.CircuitColorMethod.REGION,
+            brayns.CircuitColorMethod.SUBREGION,
+            brayns.CircuitColorMethod.SYNAPSE_CLASS,
+            brayns.ColorMethod.SOLID,
         }
         self.assertEqual(len(methods), len(ref))
         self.assertSetEqual(set(methods), ref)
 
     def test_get_color_values(self) -> None:
-        model = load_circuit(self)
+        model = load_sonata_circuit(self)
         method = brayns.CircuitColorMethod.LAYER
         values = brayns.get_color_values(self.instance, model.id, method)
-        ref = [str(i) for i in range(6)]
-        self.assertEqual(values, ref)
+        self.assertEqual(values, ["CBXmo"])

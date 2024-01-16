@@ -19,22 +19,24 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.loading import load_sonata_circuit
+from testapi.render import RenderSettings, render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestSimulation(SimpleTestCase):
-    def test_get_simulation(self) -> None:
-        load_sonata_circuit(self, report=True)
-        test = brayns.get_simulation(self.instance)
-        self.assertEqual(test.start_frame, 0)
-        self.assertEqual(test.end_frame, 2)
-        self.assertEqual(test.current_frame, 0)
-        self.assertAlmostEqual(test.delta_time, 1)
-        self.assertEqual(test.time_unit, brayns.TimeUnit.MILLISECOND)
-
-    def test_set_simulation_frame(self) -> None:
-        load_sonata_circuit(self, report=True)
-        brayns.set_simulation_frame(self.instance, 2)
-        simulation = brayns.get_simulation(self.instance)
-        self.assertEqual(simulation.current_frame, 2)
+class TestSonata(SimpleTestCase):
+    def test_load_models(self) -> None:
+        loader = brayns.SonataLoader(
+            [
+                brayns.SonataNodePopulation(
+                    name="cerebellum_neurons",
+                    nodes=brayns.SonataNodes.from_density(0.5),
+                    report=brayns.SonataReport.compartment("test"),
+                    morphology=brayns.Morphology(load_dendrites=True),
+                )
+            ]
+        )
+        models = loader.load_models(self.instance, self.sonata_circuit)
+        self.assertEqual(len(models), 1)
+        brayns.set_model_color(self.instance, models[0].id, brayns.Color4.red)
+        settings = RenderSettings(frame=1)
+        render_and_validate(self, "sonata_circuit", settings)

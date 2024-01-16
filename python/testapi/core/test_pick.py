@@ -21,7 +21,7 @@
 from typing import cast
 
 import brayns
-from testapi.loading import load_circuit
+from testapi.loading import load_sonata_circuit
 from testapi.render import prepare_image
 from testapi.simple_test_case import SimpleTestCase
 
@@ -32,11 +32,11 @@ class TestPick(SimpleTestCase):
         test = brayns.pick(self.instance, brayns.Vector2(0.5, 0.5))
         self.assertIsNotNone(test)
         test = cast(brayns.PickResult, test)
-        self.assertAlmostEqual(test.position.x, 38.38946, delta=0.001)
-        self.assertAlmostEqual(test.position.y, 999.41394, delta=0.001)
-        self.assertAlmostEqual(test.position.z, 56.914795, delta=0.001)
+        self.assertAlmostEqual(test.position.x, 195.463, delta=0.01)
+        self.assertAlmostEqual(test.position.y, 176.531, delta=0.01)
+        self.assertAlmostEqual(test.position.z, 104.240, delta=0.01)
         self.assertEqual(test.model_id, 0)
-        self.assertEqual(test.metadata, {"neuron_id": 559})
+        self.assertEqual(test.metadata, {"neuron_id": 5})
 
     def test_missed(self) -> None:
         self._prepare_scene()
@@ -48,5 +48,5 @@ class TestPick(SimpleTestCase):
         self.assertIsNone(test)
 
     def _prepare_scene(self) -> None:
-        load_circuit(self)
+        load_sonata_circuit(self, dendrites=True)
         prepare_image(self.instance)

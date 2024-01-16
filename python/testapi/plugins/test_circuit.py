@@ -19,18 +19,32 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.loading import load_circuit, load_neurons
+from testapi.loading import load_sonata_circuit
 from testapi.render import render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
 
 class TestGetCircuitIds(SimpleTestCase):
     def test_get_circuit_ids(self) -> None:
-        model = load_circuit(self)
+        model = load_sonata_circuit(self)
         ids = brayns.get_circuit_ids(self.instance, model.id)
-        self.assertEqual(ids, list(range(1, 1001)))
+        self.assertEqual(ids, list(range(0, 10)))
 
     def test_set_circuit_thickness(self) -> None:
-        model = load_neurons(self, [1])
+        model = self.load_neurons([1])
         brayns.set_circuit_thickness(self.instance, model.id, 5)
         render_and_validate(self, "set_circuit_thickness")
+
+    def load_neurons(self, ids: list[int]) -> brayns.Model:
+        loader = brayns.SonataLoader(
+            [
+                brayns.SonataNodePopulation(
+                    name="cerebellum_neurons",
+                    nodes=brayns.SonataNodes.from_ids(ids),
+                    morphology=brayns.Morphology(load_dendrites=True),
+                )
+            ]
+        )
+        models = loader.load_models(self.instance, self.sonata_circuit)
+        self.assertEqual(len(models), 1)
+        return models[0]

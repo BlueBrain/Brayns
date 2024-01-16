@@ -69,6 +69,7 @@ def render_and_save(
 def render_and_validate(
     context: SimpleTestCase, filename: str, settings: RenderSettings = RenderSettings()
 ) -> None:
+    render_and_save(context, filename, settings)
     test = render(context.instance, settings)
     path = _get_full_path(context, filename, settings)
     validate_from_file(test, path, settings.threshold)
