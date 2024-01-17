@@ -19,32 +19,28 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.loading import load_sonata_circuit
-from testapi.render import render_and_validate
+from testapi.render import RenderSettings, render_and_validate
 from testapi.simple_test_case import SimpleTestCase
 
 
-class TestGetCircuitIds(SimpleTestCase):
-    def test_get_circuit_ids(self) -> None:
-        model = load_sonata_circuit(self)
-        ids = brayns.get_circuit_ids(self.instance, model.id)
-        self.assertEqual(ids, list(range(0, 10)))
-
-    def test_set_circuit_thickness(self) -> None:
-        model = self.load_neurons([1])
-        brayns.set_circuit_thickness(self.instance, model.id, 5)
-        render_and_validate(self, "set_circuit_thickness")
-
-    def load_neurons(self, ids: list[int]) -> brayns.Model:
+class TestSonata(SimpleTestCase):
+    def test_load_models(self) -> None:
         loader = brayns.SonataLoader(
             [
                 brayns.SonataNodePopulation(
                     name="cerebellum_neurons",
-                    nodes=brayns.SonataNodes.from_ids(ids),
-                    morphology=brayns.Morphology(load_dendrites=True),
+                    nodes=brayns.SonataNodes.from_density(0.5),
+                    report=brayns.SonataReport.compartment("test"),
+                    morphology=brayns.Morphology(load_dendrites=True, load_axon=True),
                 )
             ]
         )
         models = loader.load_models(self.instance, self.sonata_circuit)
         self.assertEqual(len(models), 1)
-        return models[0]
+        ramp = brayns.ColorRamp(
+            value_range=brayns.ValueRange(0, 3),
+            colors=[brayns.Color4.red, brayns.Color4.blue],
+        )
+        brayns.set_color_ramp(self.instance, models[0].id, ramp)
+        settings = RenderSettings(frame=1)
+        render_and_validate(self, "sonata_circuit", settings)

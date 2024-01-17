@@ -51,6 +51,10 @@ class ApiTestCase(unittest.TestCase):
         return os.environ["BRAYNS_TEST_BBP_CIRCUIT"]
 
     @property
+    def sonata_circuit(self) -> str:
+        return os.environ["BRAYNS_TEST_SONATA_CIRCUIT"]
+
+    @property
     def morphology_file(self) -> str:
         return os.environ["BRAYNS_TEST_MORPHOLOGY"]
 

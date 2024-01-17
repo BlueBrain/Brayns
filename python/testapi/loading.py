@@ -39,30 +39,19 @@ def add_clip_plane(context: SimpleTestCase) -> brayns.Model:
     return brayns.add_clipping_geometries(context.instance, [plane])
 
 
-def load_circuit(
+def load_sonata_circuit(
     context: SimpleTestCase, dendrites: bool = False, report: bool = False
 ) -> brayns.Model:
-    loader = brayns.BbpLoader(
-        cells=brayns.BbpCells.all(),
-        report=brayns.BbpReport.compartment("somas") if report else None,
-        morphology=brayns.Morphology(
-            radius_multiplier=10,
-            load_soma=True,
-            load_dendrites=dendrites,
-        ),
+    loader = brayns.SonataLoader(
+        [
+            brayns.SonataNodePopulation(
+                name="cerebellum_neurons",
+                nodes=brayns.SonataNodes.all(),
+                report=brayns.SonataReport.compartment("test") if report else None,
+                morphology=brayns.Morphology(load_dendrites=dendrites),
+            )
+        ]
     )
-    models = loader.load_models(context.instance, context.bbp_circuit)
-    context.assertEqual(len(models), 1)
-    return models[0]
-
-
-def load_neurons(context: SimpleTestCase, gids: list[int]) -> brayns.Model:
-    loader = brayns.BbpLoader(
-        cells=brayns.BbpCells.from_gids(gids),
-        morphology=brayns.Morphology(
-            load_dendrites=True,
-        ),
-    )
-    models = loader.load_models(context.instance, context.bbp_circuit)
+    models = loader.load_models(context.instance, context.sonata_circuit)
     context.assertEqual(len(models), 1)
     return models[0]

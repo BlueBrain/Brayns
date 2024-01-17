@@ -19,22 +19,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import brayns
-from testapi.loading import load_circuit
+from testapi.loading import load_sonata_circuit
 from testapi.simple_test_case import SimpleTestCase
 
 
 class TestSimulation(SimpleTestCase):
     def test_get_simulation(self) -> None:
-        load_circuit(self, report=True)
+        load_sonata_circuit(self, report=True)
         test = brayns.get_simulation(self.instance)
         self.assertEqual(test.start_frame, 0)
-        self.assertEqual(test.end_frame, 99)
+        self.assertEqual(test.end_frame, 2)
         self.assertEqual(test.current_frame, 0)
-        self.assertAlmostEqual(test.delta_time, 0.1)
+        self.assertAlmostEqual(test.delta_time, 1)
         self.assertEqual(test.time_unit, brayns.TimeUnit.MILLISECOND)
 
     def test_set_simulation_frame(self) -> None:
-        load_circuit(self, report=True)
-        brayns.set_simulation_frame(self.instance, 12)
+        load_sonata_circuit(self, report=True)
+        brayns.set_simulation_frame(self.instance, 2)
         simulation = brayns.get_simulation(self.instance)
-        self.assertEqual(simulation.current_frame, 12)
+        self.assertEqual(simulation.current_frame, 2)
