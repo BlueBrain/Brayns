@@ -27,7 +27,7 @@ import brayns
 
 from .simple_test_case import SimpleTestCase
 
-DEFAULT_THRESHOLD = 1.0
+DEFAULT_THRESHOLD = 0.01
 
 
 class ValidationFailed(RuntimeError):
