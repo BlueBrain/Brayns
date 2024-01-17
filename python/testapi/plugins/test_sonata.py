@@ -37,5 +37,10 @@ class TestSonata(SimpleTestCase):
         )
         models = loader.load_models(self.instance, self.sonata_circuit)
         self.assertEqual(len(models), 1)
+        ramp = brayns.ColorRamp(
+            value_range=brayns.ValueRange(0, 3),
+            colors=[brayns.Color4.red, brayns.Color4.blue],
+        )
+        brayns.set_color_ramp(self.instance, models[0].id, ramp)
         settings = RenderSettings(frame=1)
         render_and_validate(self, "sonata_circuit", settings)
