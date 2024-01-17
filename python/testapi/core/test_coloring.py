@@ -26,7 +26,7 @@ from testapi.simple_test_case import SimpleTestCase
 
 class TestColoring(SimpleTestCase):
     def test_color_model(self) -> None:
-        model = load_sonata_circuit(self)
+        model = load_sonata_circuit(self, dendrites=True)
         brayns.color_model(
             self.instance,
             model.id,
