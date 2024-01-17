@@ -31,12 +31,11 @@ class TestSonata(SimpleTestCase):
                     name="cerebellum_neurons",
                     nodes=brayns.SonataNodes.from_density(0.5),
                     report=brayns.SonataReport.compartment("test"),
-                    morphology=brayns.Morphology(load_dendrites=True),
+                    morphology=brayns.Morphology(load_dendrites=True, load_axon=True),
                 )
             ]
         )
         models = loader.load_models(self.instance, self.sonata_circuit)
         self.assertEqual(len(models), 1)
-        brayns.set_model_color(self.instance, models[0].id, brayns.Color4.red)
         settings = RenderSettings(frame=1)
         render_and_validate(self, "sonata_circuit", settings)
