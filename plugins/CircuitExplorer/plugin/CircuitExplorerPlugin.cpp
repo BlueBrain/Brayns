@@ -1,4 +1,4 @@
-/* Copyright (c) 2018-2019, EPFL/Blue Brain Project
+/* Copyright 2018-2024 Blue Brain Project/EPFL
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *

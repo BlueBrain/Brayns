@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2021 EPFL/Blue Brain Project
+# Copyright 2015-2024 Blue Brain Project/EPFL
 # All rights reserved. Do not distribute without permission.
 #
 # Responsible Author: adrien.fleury@epfl.ch
@@ -42,7 +42,7 @@ def create_mock_requests(
         )
 
 
-_PATTERN = '''# Copyright (c) 2015-2021 EPFL/Blue Brain Project
+_PATTERN = '''# Copyright 2015-2024 Blue Brain Project/EPFL
 # All rights reserved. Do not distribute without permission.
 #
 # Responsible Author: adrien.fleury@epfl.ch

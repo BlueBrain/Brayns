@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2018, EPFL/Blue Brain Project
+/* Copyright 2015-2024 Blue Brain Project/EPFL
  * All rights reserved. Do not distribute without permission.
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>

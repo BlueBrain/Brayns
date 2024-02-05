@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2019, Blue Brain Project
+# Copyright 2016-2024 Blue Brain Project/EPFL
 #                          Cyrille Favreau <cyrille.favreau@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>

@@ -1,4 +1,4 @@
-/* Copyright (c) 2019, EPFL/Blue Brain Project
+/* Copyright 2019-2024 Blue Brain Project/EPFL
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Nadir Roman Guerrerou <nadir.romanguerrero@epfl.ch>
  *

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2016-2018, Blue Brain Project
+# Copyright 2016-2024 Blue Brain Project/EPFL
 #                          Raphael Dumusc <raphael.dumusc@epfl.ch>
 #                          Daniel Nachbaur <daniel.nachbaur@epfl.ch>
 #                          Cyrille Favreau <cyrille.favreau@epfl.ch>
