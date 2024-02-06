@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Juan Hernando <cyrille.favreau@epfl.ch>
  *

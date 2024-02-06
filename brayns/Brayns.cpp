@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
  *                     Jafet Villafranca <jafet.villafrancadiaz@epfl.ch>
@@ -52,7 +52,7 @@ private:
     static void _logVersion()
     {
         brayns::Log::info(
-            "Brayns version {}.{}.{} ({}) Copyright (c) 2015-2023, EPFL/Blue Brain Project.",
+            "Brayns version {}.{}.{} ({}) Copyright (c) 2015-2024, EPFL/Blue Brain Project.",
             brayns::Version::getMajor(),
             brayns::Version::getMinor(),
             brayns::Version::getPatch(),

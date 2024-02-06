@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2023, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
  *
  * Responsible Authors: Daniel.Nachbaur@epfl.ch
  *                      Nadir Román Guerrero <nadir.romanguerrero@epfl.ch>
