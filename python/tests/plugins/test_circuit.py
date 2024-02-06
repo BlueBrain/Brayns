@@ -1,4 +1,4 @@
-# Copyright (c) 2015-2023 EPFL/Blue Brain Project
+# Copyright (c) 2015-2024 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 #
 # Responsible Author: adrien.fleury@epfl.ch
@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-# Copyright (c) 2015-2023 EPFL/Blue Brain Project
+# Copyright (c) 2015-2024 EPFL/Blue Brain Project
 # All rights reserved. Do not distribute without permission.
 #
 # Responsible Author: adrien.fleury@epfl.ch
