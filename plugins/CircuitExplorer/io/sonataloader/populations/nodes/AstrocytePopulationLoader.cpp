@@ -44,7 +44,7 @@ void AstrocytePopulationLoader::load(NodeLoadContext &context) const
     }
 
     auto &selection = context.selection;
-    auto dummyRotations = std::vector<brayns::Quaternion>(selection.flatSize());
+    auto dummyRotations = std::vector<brayns::Quaternion>(selection.flatSize(), brayns::Quaternion(1, 0, 0, 0));
     MorphologyImporter::import(context, dummyRotations);
 }
 } // namespace sonataloader
