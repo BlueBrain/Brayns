@@ -20,6 +20,7 @@
 
 #include "VasculatureCircuitBuilder.h"
 
+#include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/components/ColorSolid.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/geometry/types/Capsule.h>
@@ -92,6 +93,7 @@ public:
     void addSystems()
     {
         auto colorMethods = brayns::ColorMethodList();
+        colorMethods.push_back(std::make_unique<brayns::SolidColorMethod>());
         colorMethods.push_back(std::make_unique<IdColorMethod>());
         colorMethods.push_back(std::make_unique<VasculatureSectionColorMethod>());
 
