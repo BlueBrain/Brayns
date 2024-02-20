@@ -1,6 +1,7 @@
 .coverage
 .idea/
 brayns.egg-info/
+build
 .installed
 pycodestyle.txt
 pydocstyle.txt

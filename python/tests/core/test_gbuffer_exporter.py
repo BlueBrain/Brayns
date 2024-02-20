@@ -68,7 +68,7 @@ class TestGBufferExporter(unittest.TestCase):
         return brayns.GBufferExporter(
             channels=[brayns.GBufferChannel.COLOR],
             resolution=brayns.Resolution(1920, 1080),
-            camera=brayns.Camera(view=mock_view()),
+            camera=brayns.Camera(view=mock_view(), near_clipping_distance=1.5),
             renderer=brayns.ProductionRenderer(),
             frame=12,
         )
@@ -79,6 +79,7 @@ class TestGBufferExporter(unittest.TestCase):
             "resolution": [1920, 1080],
             "camera_view": mock_view_message(),
             "camera": brayns.PerspectiveProjection().get_properties_with_name(),
+            "camera_near_clip": 1.5,
             "renderer": brayns.ProductionRenderer().get_properties_with_name(),
             "simulation_frame": 12,
         }

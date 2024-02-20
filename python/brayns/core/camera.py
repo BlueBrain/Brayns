@@ -186,6 +186,7 @@ class Camera:
         return Camera(
             view=self.view.translate(translation),
             projection=copy.deepcopy(self.projection),
+            near_clipping_distance=self.near_clipping_distance,
         )
 
     def rotate_around_target(self, rotation: Rotation) -> Camera:
@@ -199,6 +200,7 @@ class Camera:
         return Camera(
             view=self.view.rotate_around_target(rotation),
             projection=copy.deepcopy(self.projection),
+            near_clipping_distance=self.near_clipping_distance,
         )
 
 

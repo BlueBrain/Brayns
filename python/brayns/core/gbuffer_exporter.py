@@ -175,6 +175,7 @@ def _serialize_export(
         camera = export.camera
         message["camera_view"] = serialize_view(camera.view)
         message["camera"] = camera.projection.get_properties_with_name()
+        message["camera_near_clip"] = camera.near_clipping_distance
     if export.renderer is not None:
         message["renderer"] = export.renderer.get_properties_with_name()
     if export.frame is not None:
