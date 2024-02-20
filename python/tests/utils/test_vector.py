@@ -104,7 +104,8 @@ class TestVector(unittest.TestCase):
         test = brayns.Vector3(1, 2, 3) - 1
         ref = brayns.Vector3(0, 1, 2)
         self.assertEqual(test, ref)
-        test = brayns.Vector3(1, 2, 3) - 1
+        test = 1 - brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3(0, -1, -2)
         self.assertEqual(test, ref)
 
     def test_mul_scalar(self) -> None:
