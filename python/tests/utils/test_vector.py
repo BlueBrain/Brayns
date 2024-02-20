@@ -88,9 +88,24 @@ class TestVector(unittest.TestCase):
         ref = brayns.Vector3(5, 7, 9)
         self.assertEqual(test, ref)
 
+    def test_add_scalar(self) -> None:
+        test = brayns.Vector3(1, 2, 3) + 1
+        ref = brayns.Vector3(2, 3, 4)
+        self.assertEqual(test, ref)
+        test = 1 + brayns.Vector3(1, 2, 3)
+        self.assertEqual(test, ref)
+
     def test_sub(self) -> None:
         test = brayns.Vector3(4, 2, 7) - brayns.Vector3(1, 2, 3)
         ref = brayns.Vector3(3, 0, 4)
+        self.assertEqual(test, ref)
+
+    def test_sub_scalar(self) -> None:
+        test = brayns.Vector3(1, 2, 3) - 1
+        ref = brayns.Vector3(0, 1, 2)
+        self.assertEqual(test, ref)
+        test = 1 - brayns.Vector3(1, 2, 3)
+        ref = brayns.Vector3(0, -1, -2)
         self.assertEqual(test, ref)
 
     def test_mul_scalar(self) -> None:

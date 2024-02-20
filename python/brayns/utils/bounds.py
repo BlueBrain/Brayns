@@ -74,6 +74,20 @@ class Bounds:
         """
         return Bounds(-Vector3.one / 2, Vector3.one / 2)
 
+    def __contains__(self, point: Vector3) -> bool:
+        """Check if the given point is inside bounds.
+
+        :param point: Point to check.
+        :type point: Vector3
+        :return: True if min <= point <= max.
+        :rtype: bool
+        """
+        if not all(i <= limit for i, limit in zip(point, self.max)):
+            return False
+        if not all(i >= limit for i, limit in zip(point, self.min)):
+            return False
+        return True
+
     @property
     def center(self) -> Vector3:
         """Compute the center point of the bounds.

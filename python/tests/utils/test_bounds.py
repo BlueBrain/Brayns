@@ -61,6 +61,13 @@ class TestBounds(unittest.TestCase):
         self.assertEqual(test.min, -brayns.Vector3.one / 2)
         self.assertEqual(test.max, brayns.Vector3.one / 2)
 
+    def test_contains(self) -> None:
+        test = brayns.Bounds(-brayns.Vector3(1, 2, 3), brayns.Vector3(1, 2, 3))
+        self.assertTrue(brayns.Vector3(1, 0, 2) in test)
+        self.assertTrue(brayns.Vector3.one in test)
+        self.assertFalse(brayns.Vector3(2, 2, 3) in test)
+        self.assertFalse(-5 * brayns.Vector3.one in test)
+
     def test_center(self) -> None:
         self.assertEqual(self.bounds.center, brayns.Vector3(2.5, 3.5, 4.5))
 
