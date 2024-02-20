@@ -33,6 +33,7 @@ struct GBuffersParams
     Vector2ui resolution{0};
     EngineObjectData camera;
     View camera_view;
+    float camera_near_clip = 0.0f;
     EngineObjectData renderer;
     uint32_t simulation_frame = 0;
     std::string file_path;
@@ -65,6 +66,13 @@ struct JsonAdapter<GBuffersParams> : ObjectAdapter<GBuffersParams>
                 [](auto &object) -> auto & { return object.camera_view; },
                 [](auto &object, const auto &value) { object.camera_view = value; })
             .description("Camera view")
+            .required(false);
+        builder
+            .getset(
+                "camera_near_clip",
+                [](auto &object) -> auto & { return object.camera_near_clip; },
+                [](auto &object, const auto &value) { object.camera_near_clip = value; })
+            .description("Camera near clipping distance")
             .required(false);
         builder
             .getset(
