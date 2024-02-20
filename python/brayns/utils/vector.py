@@ -72,11 +72,17 @@ class Vector(tuple[U, ...]):
     def __abs__(self: T) -> T:
         return self.unpack(abs(i) for i in self)
 
-    def __add__(self: T, other: T) -> T:
-        return self.unpack(i + j for i, j in zip(self, other))
+    def __add__(self: T, value: int | float | T) -> T:
+        return self.__unpack(value, lambda x, y: x + y)
 
-    def __sub__(self: T, other: T) -> T:
-        return self.unpack(i - j for i, j in zip(self, other))
+    def __radd__(self: T, value: int | float | T) -> T:
+        return self.__unpack(value, lambda x, y: y + x)
+
+    def __sub__(self: T, value: int | float | T) -> T:
+        return self.__unpack(value, lambda x, y: x - y)
+
+    def __rsub__(self: T, value: int | float | T) -> T:
+        return self.__unpack(value, lambda x, y: y - x)
 
     def __mul__(self: T, value: int | float | T) -> T:
         return self.__unpack(value, lambda x, y: x * y)
