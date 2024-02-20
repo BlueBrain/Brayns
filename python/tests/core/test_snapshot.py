@@ -21,10 +21,9 @@
 import unittest
 from typing import Any
 
+import brayns
 from tests.mock_instance import MockInstance
 from tests.mock_messages import mock_view, mock_view_message
-
-import brayns
 
 
 class TestSnapshot(unittest.TestCase):
@@ -76,7 +75,7 @@ class TestSnapshot(unittest.TestCase):
         )
         return brayns.Snapshot(
             resolution=brayns.Resolution(1920, 1080),
-            camera=brayns.Camera(view=mock_view()),
+            camera=brayns.Camera(view=mock_view(), near_clipping_distance=1.5),
             renderer=brayns.ProductionRenderer(),
             frame=12,
             jpeg_quality=50,
@@ -92,6 +91,7 @@ class TestSnapshot(unittest.TestCase):
             },
             "camera_view": mock_view_message(),
             "camera": brayns.PerspectiveProjection().get_properties_with_name(),
+            "camera_near_clip": 1.5,
             "renderer": brayns.ProductionRenderer().get_properties_with_name(),
             "simulation_frame": 12,
             "metadata": {

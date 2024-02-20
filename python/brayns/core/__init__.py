@@ -104,6 +104,7 @@ from .model import (
     remove_models,
     update_model,
 )
+from .near_clip import get_camera_near_clip, set_camera_near_clip
 from .opacity_curve import ControlPoint, OpacityCurve
 from .pick import PickResult, pick
 from .projection import (
@@ -175,6 +176,7 @@ __all__ = [
     "get_application",
     "get_bounds",
     "get_camera_name",
+    "get_camera_near_clip",
     "get_camera_projection",
     "get_camera_view",
     "get_camera",
@@ -228,6 +230,7 @@ __all__ = [
     "Renderer",
     "Scene",
     "serialize_view",
+    "set_camera_near_clip",
     "set_camera_projection",
     "set_camera_view",
     "set_camera",
