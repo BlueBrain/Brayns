@@ -82,3 +82,26 @@ class TestCamera(SimpleTestCase):
             focus_distance=2,
         )
         run_projection_tests(self, projection)
+
+    def test_getset_near_clip(self) -> None:
+        distance = brayns.get_camera_near_clip(self.instance)
+        self.assertEqual(distance, 1e-6)
+        brayns.set_camera_near_clip(self.instance, 2)
+        distance = brayns.get_camera_near_clip(self.instance)
+        self.assertEqual(distance, 2)
+        camera = brayns.get_camera(self.instance, brayns.PerspectiveProjection)
+        self.assertEqual(camera.near_clipping_distance, 2)
+
+    def test_render_near_clip(self) -> None:
+        close = brayns.Sphere(0.5, brayns.Vector3(0, 0, -2))
+        far = brayns.Sphere(0.5, brayns.Vector3(0, 0, -4))
+        brayns.add_geometries(
+            self.instance,
+            [(close, brayns.Color4.red), (far, brayns.Color4.blue)],
+        )
+        view = brayns.View.front
+        camera = brayns.Camera(view)
+        settings = RenderSettings(camera=camera, center_camera=False)
+        render_and_validate(self, "clip_two", settings)
+        camera.near_clipping_distance = 3
+        render_and_validate(self, "clip_one", settings)

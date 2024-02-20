@@ -104,6 +104,20 @@ public:
     const View &getView() const noexcept;
 
     /**
+     * @brief Get the near clip plane distance.
+     *
+     * @return float Clipping distance.
+     */
+    float getNearClippingDistance() const;
+
+    /**
+     * @brief Set the near clip plane distance.
+     *
+     * @param distance Clipping distance.
+     */
+    void setNearClippingDistance(float distance);
+
+    /**
      * @brief Sets the render plane aspect ratio.
      * @param aspectRatio (width/height).
      */
@@ -125,6 +139,7 @@ public:
 
 private:
     void _updateView();
+    void _updateNearClippingDistance();
     void _updateAspectRatio();
     void _updateImageOrientation();
 
@@ -133,6 +148,7 @@ private:
     ospray::cpp::Camera _handle;
     std::unique_ptr<IDataWrapper<ospray::cpp::Camera>> _data;
     View _view;
+    float _nearClippingDistance = 1e-6f;
     float _aspectRatio = 1.f;
     ModifiedFlag _flag;
 };

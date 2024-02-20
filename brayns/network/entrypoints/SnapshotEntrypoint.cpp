@@ -46,6 +46,7 @@ public:
         auto &camera = engine.getCamera();
         auto view = camera.getView();
         params.camera_view = view;
+        params.camera_near_clip = camera.getNearClippingDistance();
 
         auto &paramsManager = engine.getParametersManager();
 
@@ -176,6 +177,7 @@ public:
         auto camera = cameraFactory.createOr(cameraData, engine.getCamera());
         camera.setAspectRatioFromFrameSize(imageSize);
         camera.setView(params.camera_view);
+        camera.setNearClippingDistance(params.camera_near_clip);
         camera.commit();
 
         // Scene

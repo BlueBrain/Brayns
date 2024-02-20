@@ -35,6 +35,7 @@
 #include <brayns/network/entrypoints/AddModelEntrypoint.h>
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
+#include <brayns/network/entrypoints/CameraNearClipEntrypoint.h>
 #include <brayns/network/entrypoints/CameraViewEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/ClearClippingGeometriesEntrypoint.h>
@@ -104,8 +105,8 @@ public:
         builder.add<brayns::AddPlanesEntrypoint>(models);
         builder.add<brayns::AddSpheresEntrypoint>(models);
         builder.add<brayns::CancelEntrypoint>(tasks);
-        builder.add<brayns::ClearClipPlanesEntrypoint>(models);
         builder.add<brayns::ClearClippingGeometriesEntrypoint>(models);
+        builder.add<brayns::ClearClipPlanesEntrypoint>(models);
         builder.add<brayns::ClearLightsEntrypoint>(models);
         builder.add<brayns::ClearModelsEntrypoint>(models, simulation);
         builder.add<brayns::ClearRenderablesEntrypoint>(models, simulation);
@@ -113,10 +114,11 @@ public:
         builder.add<brayns::EnableSimulationEntrypoint>(models);
         builder.add<brayns::ExportGBuffersEntrypoint>(engine, token);
         builder.add<brayns::GetApplicationParametersEntrypoint>(application);
-        builder.add<brayns::GetCameraViewEntrypoint>(engine);
+        builder.add<brayns::GetCameraNearClipEntrypoint>(engine);
         builder.add<brayns::GetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
+        builder.add<brayns::GetCameraViewEntrypoint>(engine);
         builder.add<brayns::GetColorMethodsEntrypoint>(models);
         builder.add<brayns::GetColorRampEntrypoint>(models);
         builder.add<brayns::GetColorValuesEntrypoint>(models);
@@ -145,12 +147,11 @@ public:
         builder.add<brayns::RenderImageEntrypoint>(engine);
         builder.add<brayns::SchemaEntrypoint>(entrypoints);
         builder.add<brayns::SetApplicationParametersEntrypoint>(application);
-        builder.add<brayns::SetCameraViewEntrypoint>(engine);
+        builder.add<brayns::SetCameraNearClipEntrypoint>(engine);
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
+        builder.add<brayns::SetCameraViewEntrypoint>(engine);
         builder.add<brayns::SetColorRampEntrypoint>(models);
-        builder.add<brayns::SetProgressiveFramebufferEntrypoint>(engine);
-        builder.add<brayns::SetStaticFramebufferEntrypoint>(engine);
         builder.add<brayns::SetMaterialCarPaint>(models);
         builder.add<brayns::SetMaterialEmissive>(models);
         builder.add<brayns::SetMaterialGhost>(models);
@@ -160,9 +161,11 @@ public:
         builder.add<brayns::SetMaterialPhong>(models);
         builder.add<brayns::SetMaterialPlastic>(models);
         builder.add<brayns::SetMaterialPrincipled>(models);
+        builder.add<brayns::SetProgressiveFramebufferEntrypoint>(engine);
         builder.add<brayns::SetRendererInteractiveEntrypoint>(engine);
         builder.add<brayns::SetRendererProductionEntrypoint>(engine);
         builder.add<brayns::SetSimulationParametersEntrypoint>(simulation);
+        builder.add<brayns::SetStaticFramebufferEntrypoint>(engine);
         builder.add<brayns::SnapshotEntrypoint>(engine, token);
         builder.add<brayns::UpdateModelEntrypoint>(models);
         builder.add<brayns::UploadModelEntrypoint>(models, loaders, simulation, token);

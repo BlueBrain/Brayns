@@ -26,6 +26,7 @@ from dataclasses import dataclass, field
 from brayns.network import Instance
 from brayns.utils import Rotation, Vector3
 
+from .near_clip import get_camera_near_clip, set_camera_near_clip
 from .projection import (
     PerspectiveProjection,
     Projection,
@@ -39,11 +40,12 @@ from .view import View, get_camera_view, set_camera_view
 class Camera:
     """Camera used to render.
 
-    A camera is composed of a ``View`` and a ``Projection``.
+    A camera is composed of a ``View``, a ``Projection`` and a clipping distance.
     """
 
     view: View = field(default_factory=lambda: View.front)
     projection: Projection = field(default_factory=PerspectiveProjection)
+    near_clipping_distance: float = 1e-6
 
     @property
     def name(self) -> str:
@@ -216,7 +218,8 @@ def get_camera(instance: Instance, projection_type: type[Projection]) -> Camera:
     """
     view = get_camera_view(instance)
     projection = get_camera_projection(instance, projection_type)
-    return Camera(view, projection)
+    distance = get_camera_near_clip(instance)
+    return Camera(view, projection, distance)
 
 
 def set_camera(instance: Instance, camera: Camera) -> None:
@@ -229,3 +232,4 @@ def set_camera(instance: Instance, camera: Camera) -> None:
     """
     set_camera_view(instance, camera.view)
     set_camera_projection(instance, camera.projection)
+    set_camera_near_clip(instance, camera.near_clipping_distance)

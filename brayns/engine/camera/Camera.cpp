@@ -29,6 +29,7 @@ struct CameraParameters
     static inline const std::string position = "position";
     static inline const std::string direction = "direction";
     static inline const std::string up = "up";
+    static inline const std::string nearClip = "nearClip";
     static inline const std::string aspect = "aspect";
     static inline const std::string imageStart = "imageStart";
     static inline const std::string imageEnd = "imageEnd";
@@ -59,6 +60,18 @@ public:
     }
 };
 
+class NearClipIntegrity
+{
+public:
+    static void check(float distance)
+    {
+        if (distance < 0)
+        {
+            throw std::invalid_argument("Near clipping distance cannot be < 0");
+        }
+    }
+};
+
 class FrameSizeIntegrity
 {
 public:
@@ -85,6 +98,7 @@ Camera &Camera::operator=(Camera &&other) noexcept
     _handle = std::move(other._handle);
     _data = std::move(other._data);
     _view = other._view;
+    _nearClippingDistance = other._nearClippingDistance;
     _aspectRatio = other._aspectRatio;
     _flag = std::move(other._flag);
     return *this;
@@ -102,6 +116,7 @@ Camera &Camera::operator=(const Camera &other)
     _data = other._data->clone();
     _data->pushTo(_handle);
     _view = other._view;
+    _nearClippingDistance = other._nearClippingDistance;
     _aspectRatio = other._aspectRatio;
     _flag.setModified(true);
     return *this;
@@ -123,6 +138,17 @@ const View &Camera::getView() const noexcept
     return _view;
 }
 
+float Camera::getNearClippingDistance() const
+{
+    return _nearClippingDistance;
+}
+
+void Camera::setNearClippingDistance(float distance)
+{
+    NearClipIntegrity::check(distance);
+    _flag.update(_nearClippingDistance, distance);
+}
+
 void Camera::setAspectRatioFromFrameSize(const Vector2ui &frameSize)
 {
     FrameSizeIntegrity::check(frameSize);
@@ -137,6 +163,7 @@ bool Camera::commit()
     }
     _data->pushTo(_handle);
     _updateView();
+    _updateNearClippingDistance();
     _updateAspectRatio();
     _updateImageOrientation();
     _handle.commit();
@@ -161,6 +188,11 @@ void Camera::_updateView()
     _handle.setParam(CameraParameters::position, position);
     _handle.setParam(CameraParameters::direction, forward);
     _handle.setParam(CameraParameters::up, realUp);
+}
+
+void Camera::_updateNearClippingDistance()
+{
+    _handle.setParam(CameraParameters::nearClip, _nearClippingDistance);
 }
 
 void Camera::_updateAspectRatio()
