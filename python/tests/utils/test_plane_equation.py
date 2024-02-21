@@ -25,8 +25,8 @@ import brayns
 
 class TestBounds(unittest.TestCase):
     def test_of(self) -> None:
-        normal = -brayns.Axis.z
-        point = brayns.Axis.z
+        normal = brayns.Vector3(1, 3, -2)
+        point = brayns.Vector3(1, 2, 3)
         test = brayns.PlaneEquation.of(normal, point)
-        ref = brayns.PlaneEquation(0, 0, -1, 1)
+        ref = brayns.PlaneEquation(1, 3, -2, -1)
         self.assertEqual(test, ref)
