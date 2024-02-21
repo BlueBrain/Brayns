@@ -38,6 +38,21 @@ class PlaneEquation(Vector[float]):
     :type d: float
     """
 
+    @staticmethod
+    def of(normal: Vector3, point: Vector3) -> PlaneEquation:
+        """Compute the equation of a plane from its normal and a point.
+
+        :param normal: Plane normal vector.
+        :type normal: Vector3
+        :param point: Any point of the plane.
+        :type point: Vector3
+        :return: Plane equation.
+        :rtype: PlaneEquation
+        """
+        a, b, c = normal
+        d = -normal.dot(point)
+        return PlaneEquation(a, b, c, d)
+
     def __new__(cls, a: float, b: float, c: float, d: float = 0.0) -> PlaneEquation:
         return super().__new__(cls, a, b, c, d)
 
