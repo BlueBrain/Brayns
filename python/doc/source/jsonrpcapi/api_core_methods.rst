@@ -4108,6 +4108,10 @@ progress notifications.
                 },
                 "additionalProperties": false
             },
+            "camera_near_clip": {
+                "description": "Camera near clipping distance",
+                "type": "number"
+            },
             "camera_view": {
                 "title": "View",
                 "description": "Camera view",
@@ -4246,6 +4250,35 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
         },
         "required": [
             "plugins"
+        ],
+        "additionalProperties": false
+    }
+
+----
+
+get-camera-near-clip
+~~~~~~~~~~~~~~~~~~~~
+
+Retreive the current camera clipping distance.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "distance": {
+                "description": "Camera near clipping distance",
+                "type": "number"
+            }
+        },
+        "required": [
+            "distance"
         ],
         "additionalProperties": false
     }
@@ -6419,6 +6452,36 @@ null.
 
 ----
 
+set-camera-near-clip
+~~~~~~~~~~~~~~~~~~~~
+
+Update the camera near clipping distance.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "distance": {
+                "description": "Camera near clipping distance",
+                "type": "number"
+            }
+        },
+        "required": [
+            "distance"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always
+null.
+
+----
+
 set-camera-orthographic
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -7359,6 +7422,10 @@ progress notifications.
                     }
                 },
                 "additionalProperties": false
+            },
+            "camera_near_clip": {
+                "description": "Camera near clipping distance",
+                "type": "number"
             },
             "camera_view": {
                 "title": "View",

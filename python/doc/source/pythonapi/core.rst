@@ -131,6 +131,14 @@ gbuffer_exporter
     :undoc-members:
     :show-inheritance:
 
+near_clip
+---------
+
+.. automodule:: brayns.core.near_clip
+    :members: get_camera_near_clip, set_camera_near_clip
+    :undoc-members:
+    :show-inheritance:
+
 view
 ----
 
