@@ -1,5 +1,17 @@
 # Change Log
 
+## [3.6.0](https://github.com/BlueBrain/Brayns/tree/3.6.0)
+
+- Python API improvements [\#1233] (https://github.com/BlueBrain/Brayns/pull/1233)
+- Add camera near plane [\#1231] (https://github.com/BlueBrain/Brayns/pull/1231)
+- More orientation fixes [\#1230] (https://github.com/BlueBrain/Brayns/pull/1230)
+- Add solid color method for vasculature [\#1229] (https://github.com/BlueBrain/Brayns/pull/1229)
+- Add sonata tests [\#1226] (https://github.com/BlueBrain/Brayns/pull/1226)
+
+**Implemented fixes and enhancements:**
+
+- Fix default cell orientations [\#1223] (https://github.com/BlueBrain/Brayns/pull/1223)
+
 ## [3.5.1](https://github.com/BlueBrain/Brayns/tree/3.5.1)
 
 **Implemented fixes and enhancements:**
