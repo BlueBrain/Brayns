@@ -27,6 +27,7 @@
 
 #include <api/ModelType.h>
 #include <api/circuit/MorphologyCircuitBuilder.h>
+#include <api/circuit/SomaCircuitBuilder.h>
 
 #include <brayns/network/jsonrpc/JsonRpcException.h>
 
@@ -116,20 +117,44 @@ public:
         auto nodes = bbp::sonata::NodePopulation(info.path, "", info.name);
         auto selection = CellSelector::select(nodes, parameters);
 
+        auto ids = selection.flatten();
         auto positions = sonataloader::Cells::getPositions(nodes, selection);
-        auto rotations = sonataloader::Cells::getRotations(nodes, selection);
-        auto morphologyPaths = _buildMorphologyPaths(parameters, nodes, selection);
+
         auto &morphologyParams = parameters.morphology_parameters;
 
+        auto model = std::make_shared<brayns::Model>(ModelType::neurons);
+
+        auto morphologyEmpty =
+            !morphologyParams.load_soma && !morphologyParams.load_dendrites && !morphologyParams.load_axon;
+
+        auto noFolder = parameters.morphology_folder.empty();
+
+        if (noFolder && !morphologyEmpty)
+        {
+            throw brayns::InvalidParamsException("Morphology folder required to load detailed morphologies");
+        }
+
+        if (morphologyEmpty || noFolder)
+        {
+            auto context = SomaCircuitBuilder::Context{
+                std::move(ids),
+                std::move(positions),
+                std::make_unique<sonataloader::SonataColorData>(std::move(nodes)),
+                morphologyParams.radius_multiplier};
+            SomaCircuitBuilder::build(*model, std::move(context));
+            return model;
+        }
+
+        auto rotations = sonataloader::Cells::getRotations(nodes, selection);
+        auto morphologyPaths = _buildMorphologyPaths(parameters, nodes, selection);
+
         auto context = MorphologyCircuitBuilder::Context{
-            selection.flatten(),
+            std::move(ids),
             std::move(morphologyPaths),
             std::move(positions),
             std::move(rotations),
             morphologyParams,
             std::make_unique<sonataloader::SonataColorData>(std::move(nodes))};
-
-        auto model = std::make_shared<brayns::Model>(ModelType::neurons);
 
         updater.beginStage("Morphology load", selection.flatSize());
         MorphologyCircuitBuilder::build(*model, std::move(context), updater);
@@ -148,6 +173,12 @@ private:
         const bbp::sonata::Selection &selection)
     {
         auto morphologies = sonataloader::Cells::getMorphologies(nodes, selection);
+
+        if (morphologies.empty())
+        {
+            return {};
+        }
+
         auto extension = MorphologyExtension::find(parameters, morphologies.front());
         auto builder = sonataloader::MorphologyPath(parameters.morphology_folder, extension);
 
@@ -204,12 +235,6 @@ std::vector<std::shared_ptr<brayns::Model>> CellPlacementLoader::loadFile(const 
     auto path = std::string(request.path);
     auto &progress = request.progress;
     auto &params = request.params;
-
-    auto filename = std::filesystem::path(path).filename().string();
-    if (filename != "circuit.morphologies.h5")
-    {
-        throw brayns::InvalidParamsException("Invalid filename: '" + filename + "'");
-    }
 
     brayns::Log::info("[CE] {}: loading {}.", getName(), path);
     auto timer = brayns::Timer();

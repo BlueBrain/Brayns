@@ -33,7 +33,11 @@ class TestCellPlacementLoader(unittest.TestCase):
             extension="ext",
             ids=[1, 2, 3],
             morphology=brayns.Morphology(
-                load_soma=True, load_dendrites=True, load_axon=True
+                load_soma=True,
+                load_dendrites=True,
+                load_axon=True,
+                resampling=2,
+                subsampling=1,
             ),
         )
         self.assertEqual(

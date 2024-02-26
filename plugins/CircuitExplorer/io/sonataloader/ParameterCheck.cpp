@@ -214,36 +214,6 @@ private:
 
     const sonataloader::Config &_config;
 };
-
-class MorphologyChecker
-{
-public:
-    explicit MorphologyChecker(const sl::Config &config):
-        _config(config)
-    {
-    }
-
-    void check(const SonataNodePopulationParameters &params)
-    {
-        auto populationType = sl::PopulationType::getNodeType(params.node_population, _config);
-        if (populationType != sl::NodeNames::biophysical && populationType != sl::NodeNames::astrocyte)
-        {
-            return;
-        }
-
-        auto &neuronParameters = params.neuron_morphology_parameters;
-        auto soma = neuronParameters.load_soma;
-        auto axon = neuronParameters.load_axon;
-        auto dend = neuronParameters.load_dendrites;
-        if (!soma && !axon && !dend)
-        {
-            throw std::invalid_argument("No morphology sections enabled for " + params.node_population);
-        }
-    }
-
-private:
-    const sl::Config &_config;
-};
 } // namespace
 
 namespace sonataloader
@@ -258,13 +228,11 @@ void ParameterCheck::checkInput(const Config &config, const SonataLoaderParamete
 
     auto nodeChecker = NodeChecker(config);
     auto edgeChecker = EdgeChecker(config);
-    auto morphologyChecker = MorphologyChecker(config);
 
     for (auto &population : populations)
     {
         nodeChecker.check(population);
         edgeChecker.check(population);
-        morphologyChecker.check(population);
     }
 }
 } // namespace sonataloader

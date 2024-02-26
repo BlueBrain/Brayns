@@ -64,7 +64,7 @@ void BiophysicalPopulationLoader::load(NodeLoadContext &context) const
     auto axon = morphParams.load_axon;
     auto dend = morphParams.load_dendrites;
 
-    if (soma && !axon && !dend)
+    if (!soma && !axon && !dend)
     {
         SomaImporter::import(context);
         return;

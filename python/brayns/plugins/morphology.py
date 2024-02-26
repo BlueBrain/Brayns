@@ -17,6 +17,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, ClassVar
@@ -44,9 +46,11 @@ class GeometryType(Enum):
 class Morphology:
     """Describe how to load a morphology.
 
+    If no sections are selected (default), a sphere of ``radius_multiplier`` is used.
+
     :param radius_multiplier: Radius scaling, defaults to 1.
     :type radius_multiplier: float, optional
-    :param load_soma: Wether to load somas, defaults to True.
+    :param load_soma: Wether to load somas, defaults to False.
     :type load_soma: bool, optional
     :param load_axon: Wether to load axons, defaults to False.
     :type load_axon: bool, optional
@@ -54,18 +58,27 @@ class Morphology:
     :type load_dendrites: bool, optional
     :param geometry_type: How to load geometries, defaults to smooth.
     :type geometry_type: GeometryType, optional
-    :param resampling: Min cos of angle between segments to merge them.
-    :type resampling: float
+    :param resampling: Min cos of angle between two segments to merge them.
+    :type resampling: float, optional
     :param subsampling: Step factor to skip morphology samples.
-    :type subsampling: int
+    :type subsampling: int, optional
     """
 
+    @staticmethod
+    def full() -> Morphology:
+        """Return settings to load all sections of a morphology.
+
+        Returns:
+            Morphology: Settings for full morphology loading.
+        """
+        return Morphology(load_soma=True, load_dendrites=True, load_axon=True)
+
     radius_multiplier: float = 1.0
-    load_soma: bool = True
+    load_soma: bool = False
     load_axon: bool = False
     load_dendrites: bool = False
     geometry_type: GeometryType = GeometryType.SMOOTH
-    resampling: float = 2
+    resampling: float = 1
     subsampling: int = 1
 
 
@@ -100,7 +113,7 @@ class MorphologyLoader(Loader):
     H5: ClassVar[str] = "h5"
     ASC: ClassVar[str] = "asc"
 
-    morphology: Morphology = field(default_factory=Morphology)
+    morphology: Morphology = field(default_factory=Morphology.full)
 
     @classmethod
     @property

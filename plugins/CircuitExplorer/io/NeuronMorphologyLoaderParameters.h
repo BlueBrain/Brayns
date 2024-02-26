@@ -77,7 +77,7 @@ struct JsonAdapter<NeuronMorphologyLoaderParameters> : ObjectAdapter<NeuronMorph
                 [](auto &object) { return object.load_soma; },
                 [](auto &object, auto value) { object.load_soma = value; })
             .description("Load the soma section of the neuron")
-            .defaultValue(true);
+            .defaultValue(false);
         builder
             .getset(
                 "load_axon",
@@ -105,7 +105,7 @@ struct JsonAdapter<NeuronMorphologyLoaderParameters> : ObjectAdapter<NeuronMorph
                 [](auto &object) { return object.resampling; },
                 [](auto &object, auto value) { object.resampling = value; })
             .description("Minimum angle cosine between 2 segments to merge them (disabled if > 1)")
-            .defaultValue(0.9);
+            .defaultValue(1.0);
         builder
             .getset(
                 "subsampling",

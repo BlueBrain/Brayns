@@ -29,23 +29,25 @@ from .morphology import Morphology, serialize_morphology
 
 @dataclass
 class CellPlacementLoader(Loader):
-    """circuit.morhpologies.h5 file loader.
+    """Partial circuit loader.
 
-    Loads morphology circuits from the circuit builder intermediate files.
+    Loads the cells from the circuit builder intermediate files.
+
+    To load morphologies, a base folder must be specified as the H5 file only contains filenames.
 
     :param morphologies_folder: Path to the folder containing the morphologies.
     :type morphologies_folder: str
     :param density: Density of morphologies to load [0-1].
-    :type density: float
-    :param extension: Optional morphology file extension to load.
+    :type density: float, optional
+    :param extension: Morphology file extension (will be guessed from folder if empty).
     :type extension: str | None, optional
     :param ids: IDs of the nodes to load, overrides density if not None.
     :type ids: list[str] | None, optional
-    :param morphology: Morphology loading settings.
+    :param morphology: Morphology settings.
     :type morphology: Morphology, optional
     """
 
-    morphologies_folder: str
+    morphologies_folder: str = ""
     density: float = 1.0
     extension: str | None = None
     ids: list[int] | None = None
@@ -58,9 +60,10 @@ class CellPlacementLoader(Loader):
 
     def get_properties(self) -> dict[str, Any]:
         message: dict[str, Any] = {
-            "morphology_folder": self.morphologies_folder,
             "morphology_parameters": serialize_morphology(self.morphology),
         }
+        if self.morphologies_folder:
+            message["morphology_folder"] = self.morphologies_folder
         if self.extension is not None:
             message["extension"] = self.extension
         if self.density != 1.0:
