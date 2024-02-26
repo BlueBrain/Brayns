@@ -105,7 +105,7 @@ struct JsonAdapter<NeuronMorphologyLoaderParameters> : ObjectAdapter<NeuronMorph
                 [](auto &object) { return object.resampling; },
                 [](auto &object, auto value) { object.resampling = value; })
             .description("Minimum angle cosine between 2 segments to merge them (disabled if > 1)")
-            .defaultValue(1.0);
+            .defaultValue(2.0);
         builder
             .getset(
                 "subsampling",

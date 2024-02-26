@@ -186,7 +186,7 @@ class TestSonataLoader(unittest.TestCase):
                         "load_axon": False,
                         "load_dendrites": False,
                         "geometry_type": "smooth",
-                        "resampling": 1,
+                        "resampling": 2,
                         "subsampling": 1,
                     },
                     "vasculature_geometry_parameters": {
