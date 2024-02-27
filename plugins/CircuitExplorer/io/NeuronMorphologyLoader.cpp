@@ -21,6 +21,8 @@
 #include <brayns/utils/Log.h>
 #include <brayns/utils/Timer.h>
 
+#include <brayns/network/jsonrpc/JsonRpcException.h>
+
 #include <brayns/engine/colormethods/SolidColorMethod.h>
 #include <brayns/engine/components/Geometries.h>
 #include <brayns/engine/systems/GenericBoundsSystem.h>
@@ -140,6 +142,11 @@ std::vector<std::shared_ptr<brayns::Model>> NeuronMorphologyLoader::loadFile(con
     auto path = std::string(request.path);
     auto &progress = request.progress;
     auto &params = request.params;
+
+    if (!params.load_soma && !params.load_dendrites && !params.load_axon)
+    {
+        throw brayns::InvalidParamsException("Nothing to load on the morphology");
+    }
 
     brayns::Timer timer;
 

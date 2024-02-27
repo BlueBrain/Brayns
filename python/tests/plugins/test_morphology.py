@@ -60,6 +60,8 @@ class TestMorphologyLoader(unittest.TestCase):
                 load_axon=True,
                 load_dendrites=True,
                 geometry_type=brayns.GeometryType.ORIGINAL,
+                resampling=2,
+                subsampling=1,
             )
         )
         properties = {

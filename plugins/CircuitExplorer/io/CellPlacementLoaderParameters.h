@@ -46,7 +46,8 @@ struct JsonAdapter<CellPlacementLoaderParameters> : ObjectAdapter<CellPlacementL
                 "morphology_folder",
                 [](auto &object) -> auto & { return object.morphology_folder; },
                 [](auto &object, auto value) { object.morphology_folder = std::move(value); })
-            .description("Path to morphology folder");
+            .description("Path to morphology folder")
+            .required(false);
         builder
             .getset(
                 "extension",
