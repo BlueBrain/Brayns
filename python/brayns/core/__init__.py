@@ -63,6 +63,7 @@ from .light import (
     DirectionalLight,
     Light,
     QuadLight,
+    SphereLight,
     add_light,
     clear_lights,
 )
@@ -244,6 +245,7 @@ __all__ = [
     "Simulation",
     "Snapshot",
     "Sphere",
+    "SphereLight",
     "StaticFramebuffer",
     "stop",
     "TimeUnit",

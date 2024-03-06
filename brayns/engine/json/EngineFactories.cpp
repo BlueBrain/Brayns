@@ -52,6 +52,7 @@ public:
         factory.addType<brayns::AmbientLight>();
         factory.addType<brayns::DirectionalLight>();
         factory.addType<brayns::QuadLight>();
+        factory.addType<brayns::SphereLight>();
     }
 
     static void initMaterials(brayns::EngineFactory<brayns::Material> &factory)

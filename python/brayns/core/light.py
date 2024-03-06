@@ -160,6 +160,37 @@ class QuadLight(Light):
         }
 
 
+@dataclass
+class SphereLight(Light):
+    """Sphere light or point light if radius = 0.
+
+    :param position: Light position, defaults to origin.
+    :type position: Vector3, optional
+    :param radius: Sphere radius, defaults to zero (point light).
+    :type radius: float, optional
+    """
+
+    position: Vector3 = Vector3.zero
+    radius: float = 0.0
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        """Return light name.
+
+        :return: Light name.
+        :rtype: str
+        """
+        return "sphere"
+
+    def get_additional_properties(self) -> dict[str, Any]:
+        """Low level API to serialize to JSON."""
+        return {
+            "position": list(self.position),
+            "radius": self.radius,
+        }
+
+
 def add_light(instance: Instance, light: Light) -> Model:
     """Add a given light to an instance and return its model.
 

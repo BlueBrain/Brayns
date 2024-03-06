@@ -69,4 +69,19 @@ std::string AddLightQuadEntrypoint::getDescription() const
 {
     return "Add a quad light which iluminates the scene on a specific area";
 }
+
+AddLightSphereEntrypoint::AddLightSphereEntrypoint(ModelManager &models):
+    AddLightEntrypoint(models)
+{
+}
+
+std::string AddLightSphereEntrypoint::getMethod() const
+{
+    return "add-light-sphere";
+}
+
+std::string AddLightSphereEntrypoint::getDescription() const
+{
+    return "Add a sphere or a point light (radius = 0)";
+}
 } // namespace brayns

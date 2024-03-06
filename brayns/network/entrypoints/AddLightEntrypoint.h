@@ -88,4 +88,13 @@ public:
     virtual std::string getMethod() const override;
     virtual std::string getDescription() const override;
 };
+
+class AddLightSphereEntrypoint : public AddLightEntrypoint<SphereLight>
+{
+public:
+    explicit AddLightSphereEntrypoint(ModelManager &models);
+
+    virtual std::string getMethod() const override;
+    virtual std::string getDescription() const override;
+};
 } // namespace brayns
