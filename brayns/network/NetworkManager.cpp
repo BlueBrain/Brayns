@@ -101,6 +101,7 @@ public:
         builder.add<brayns::AddLightAmbientEntrypoint>(models);
         builder.add<brayns::AddLightDirectionalEntrypoint>(models);
         builder.add<brayns::AddLightQuadEntrypoint>(models);
+        builder.add<brayns::AddLightSphereEntrypoint>(models);
         builder.add<brayns::AddModelEntrypoint>(models, loaders, simulation, token);
         builder.add<brayns::AddPlanesEntrypoint>(models);
         builder.add<brayns::AddSpheresEntrypoint>(models);

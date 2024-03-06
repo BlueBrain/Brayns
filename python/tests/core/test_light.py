@@ -78,3 +78,16 @@ class TestLight(unittest.TestCase):
                 "edge2": [0, 1, 0],
             },
         )
+
+    def test_sphere(self) -> None:
+        self.assertEqual(brayns.SphereLight.name, "sphere")
+        test = brayns.SphereLight()
+        self.assertEqual(
+            test.get_properties(),
+            {
+                "intensity": 1,
+                "color": [1, 1, 1],
+                "position": [0, 0, 0],
+                "radius": 0,
+            },
+        )

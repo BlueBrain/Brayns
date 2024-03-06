@@ -65,6 +65,15 @@ class TestLight(SimpleTestCase):
         )
         self.run_tests(light)
 
+    def test_sphere_light(self) -> None:
+        light = brayns.SphereLight(
+            intensity=10,
+            color=brayns.Color3.red,
+            position=brayns.Vector3(1, 1, 1),
+            radius=1,
+        )
+        self.run_tests(light)
+
     def run_tests(self, light: brayns.Light) -> None:
         model = brayns.add_light(self.instance, light)
         self.assertTrue(model.visible)

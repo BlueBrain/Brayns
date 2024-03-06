@@ -23,6 +23,7 @@
 #include <brayns/engine/light/types/AmbientLight.h>
 #include <brayns/engine/light/types/DirectionalLight.h>
 #include <brayns/engine/light/types/QuadLight.h>
+#include <brayns/engine/light/types/SphereLight.h>
 
 #include <brayns/json/Json.h>
 
@@ -109,6 +110,31 @@ struct JsonAdapter<QuadLight> : ObjectAdapter<QuadLight>
                 [](auto &object, const auto &value) { object.edge2 = value; })
             .description("Edge 2 XYZ")
             .defaultValue(Vector3f(0, 0, 1));
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonAdapter<SphereLight> : ObjectAdapter<SphereLight>
+{
+    static JsonObjectInfo reflect()
+    {
+        auto builder = Builder("SphereLight");
+        LightAdapter::reflect(builder);
+        builder
+            .getset(
+                "position",
+                [](auto &object) -> auto & { return object.position; },
+                [](auto &object, const auto &value) { object.position = value; })
+            .description("Light position XYZ")
+            .defaultValue(Vector3f(0));
+        builder
+            .getset(
+                "radius",
+                [](auto &object) -> auto & { return object.radius; },
+                [](auto &object, const auto &value) { object.radius = value; })
+            .description("Sphere radius")
+            .defaultValue(0.0f);
         return builder.build();
     }
 };
