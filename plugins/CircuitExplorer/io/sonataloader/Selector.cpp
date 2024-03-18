@@ -33,21 +33,27 @@ public:
         const std::vector<std::string> &nodeSets)
     {
         auto nodePopulation = config.getNodes(population);
-        if (!nodeSets.empty())
-        {
-            bbp::sonata::Selection result({});
-            auto &nodeSetsPath = config.getNodesetsPath();
-            auto nodeSetFile = bbp::sonata::NodeSets::fromFile(nodeSetsPath);
-            for (auto &nodeSetName : nodeSets)
-            {
-                auto newSelection = nodeSetFile.materialize(nodeSetName, nodePopulation);
-                result = result | newSelection;
-            }
 
-            return result;
+        if (nodeSets.empty())
+        {
+            return nodePopulation.selectAll();
         }
 
-        return nodePopulation.selectAll();
+        auto allNodeSets = config.getNodeSets();
+
+        if (!allNodeSets)
+        {
+            throw std::invalid_argument("No node sets specified");
+        }
+
+        auto selection = bbp::sonata::Selection({});
+        for (auto &nodeSetName : nodeSets)
+        {
+            auto newSelection = allNodeSets->materialize(nodeSetName, nodePopulation);
+            selection = selection | newSelection;
+        }
+
+        return selection;
     }
 };
 
