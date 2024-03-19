@@ -19,6 +19,7 @@
 #pragma once
 
 #include <bbp/sonata/config.h>
+#include <bbp/sonata/node_sets.h>
 
 #include <filesystem>
 #include <optional>
@@ -59,10 +60,10 @@ public:
     const std::string &getConfigAsJson() const noexcept;
 
     /**
-     * @brief Path to the nodesets file.
-     * @return const std::string&
+     * @brief Extract node sets if any.
+     * @return std::optional<bbp::sonata::NodeSets>
      */
-    const std::string &getNodesetsPath() const;
+    std::optional<bbp::sonata::NodeSets> getNodeSets() const;
 
     /**
      * @brief Returns the population object of the given population name.

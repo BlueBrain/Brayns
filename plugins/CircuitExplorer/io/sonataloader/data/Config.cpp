@@ -129,9 +129,33 @@ const std::string &Config::getConfigAsJson() const noexcept
     return _config.getExpandedJSON();
 }
 
-const std::string &Config::getNodesetsPath() const
+std::optional<bbp::sonata::NodeSets> Config::getNodeSets() const
 {
-    return _config.getNodeSetsPath();
+    auto circuit = _config.getNodeSetsPath();
+
+    if (circuit.empty() && !_simConfig)
+    {
+        return std::nullopt;
+    }
+
+    if (!_simConfig)
+    {
+        return bbp::sonata::NodeSets::fromFile(circuit);
+    }
+
+    auto &simulation = _simConfig->getNodeSetsFile();
+
+    if (circuit.empty())
+    {
+        return bbp::sonata::NodeSets::fromFile(simulation);
+    }
+
+    auto base = bbp::sonata::NodeSets::fromFile(circuit);
+    auto extension = bbp::sonata::NodeSets::fromFile(simulation);
+
+    base.update(extension);
+
+    return base;
 }
 
 bbp::sonata::NodePopulation Config::getNodes(const std::string &name) const

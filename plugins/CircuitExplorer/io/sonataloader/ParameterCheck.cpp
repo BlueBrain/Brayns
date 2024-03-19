@@ -60,15 +60,26 @@ private:
     void _checkNodeSets(const SonataNodePopulationParameters &params)
     {
         auto &nodeSets = params.node_sets;
+
         if (nodeSets.empty())
         {
             return;
         }
 
-        auto &nsPath = _config.getNodesetsPath();
-        if (!std::filesystem::is_regular_file(nsPath))
+        auto allNodeSets = _config.getNodeSets();
+
+        if (!allNodeSets)
         {
-            throw std::invalid_argument("Cannot access nodesets file at " + nsPath);
+            throw std::invalid_argument("No node sets in config");
+        }
+
+        auto names = allNodeSets->names();
+        for (const auto &nodeSet : nodeSets)
+        {
+            if (!names.contains(nodeSet))
+            {
+                throw std::invalid_argument("Invalid node set: '" + nodeSet + "'");
+            }
         }
     }
 
