@@ -22,7 +22,7 @@
 
 websockets==10.3
 pyright==1.1.331
-black==23.9.1
+black==24.3.0
 flake8==6.1.0
 sphinx-bluebrain-theme==0.4.2
 sphinx-jsonschema==1.19.1
