@@ -3135,6 +3135,255 @@ Add a quad light which iluminates the scene on a specific area.
 
 ----
 
+add-light-sphere
+~~~~~~~~~~~~~~~~
+
+Add a sphere or a point light (radius = 0).
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "color": {
+                "description": "Light color RGB normalized",
+                "type": "array",
+                "default": [
+                    1,
+                    1,
+                    1
+                ],
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "intensity": {
+                "description": "Light intensity",
+                "type": "number",
+                "default": 1,
+                "minimum": 0
+            },
+            "position": {
+                "description": "Light position XYZ",
+                "type": "array",
+                "default": [
+                    0,
+                    0,
+                    0
+                ],
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 3,
+                "maxItems": 3
+            },
+            "radius": {
+                "description": "Sphere radius",
+                "type": "number",
+                "default": 0
+            }
+        },
+        "additionalProperties": false
+    }
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "bounds": {
+                "title": "Bounds",
+                "description": "Model bounds",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "max": {
+                        "description": "Top front right corner XYZ",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "min": {
+                        "description": "Bottom back left corner XYZ",
+                        "type": "array",
+                        "readOnly": true,
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "required": [
+                    "max",
+                    "min"
+                ],
+                "additionalProperties": false
+            },
+            "info": {
+                "title": "ModelInfo",
+                "description": "Model-specific info",
+                "type": "object",
+                "readOnly": true,
+                "properties": {
+                    "base_transform": {
+                        "title": "Transform",
+                        "description": "Model transform",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "rotation": {
+                                "description": "Rotation XYZW",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 4,
+                                "maxItems": 4
+                            },
+                            "scale": {
+                                "description": "Scale XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            },
+                            "translation": {
+                                "description": "Translation XYZ",
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                },
+                                "minItems": 3,
+                                "maxItems": 3
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+                    "load_info": {
+                        "title": "LoadInfo",
+                        "description": "Model load info",
+                        "type": "object",
+                        "readOnly": true,
+                        "properties": {
+                            "load_parameters": {
+                                "description": "Loader settings",
+                                "readOnly": true
+                            },
+                            "loader_name": {
+                                "description": "Loader name",
+                                "type": "string",
+                                "readOnly": true
+                            },
+                            "path": {
+                                "description": "File path in case of file load type",
+                                "type": "string",
+                                "readOnly": true
+                            },
+                            "source": {
+                                "description": "Model load source",
+                                "type": "string",
+                                "readOnly": true,
+                                "enum": [
+                                    "from_file",
+                                    "from_blob",
+                                    "none"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "load_parameters",
+                            "loader_name",
+                            "path",
+                            "source"
+                        ],
+                        "additionalProperties": false
+                    },
+                    "metadata": {
+                        "description": "Model-specific metadata",
+                        "type": "object",
+                        "readOnly": true,
+                        "additionalProperties": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "additionalProperties": false
+            },
+            "is_visible": {
+                "description": "Wether the model is being rendered or not",
+                "type": "boolean"
+            },
+            "model_id": {
+                "description": "Model ID",
+                "type": "integer",
+                "readOnly": true,
+                "minimum": 0
+            },
+            "model_type": {
+                "description": "Model type",
+                "type": "string",
+                "readOnly": true
+            },
+            "transform": {
+                "title": "Transform",
+                "description": "Model transform",
+                "type": "object",
+                "properties": {
+                    "rotation": {
+                        "description": "Rotation XYZW",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 4,
+                        "maxItems": 4
+                    },
+                    "scale": {
+                        "description": "Scale XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    },
+                    "translation": {
+                        "description": "Translation XYZ",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "minItems": 3,
+                        "maxItems": 3
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "required": [
+            "bounds",
+            "info",
+            "model_id",
+            "model_type"
+        ],
+        "additionalProperties": false
+    }
+
+----
+
 add-model
 ~~~~~~~~~
 
