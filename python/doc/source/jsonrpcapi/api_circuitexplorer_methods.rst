@@ -69,7 +69,7 @@ This loader does not support loading binary data using 'upload-model'.
                     "load_soma": {
                         "description": "Load the soma section of the neuron",
                         "type": "boolean",
-                        "default": true
+                        "default": false
                     },
                     "radius_multiplier": {
                         "description": "Parameter to multiply all morphology sample radii by",
@@ -80,7 +80,7 @@ This loader does not support loading binary data using 'upload-model'.
                     "resampling": {
                         "description": "Minimum angle cosine between 2 segments to merge them (disabled if > 1)",
                         "type": "number",
-                        "default": 0.9
+                        "default": 2
                     },
                     "subsampling": {
                         "description": "Skip factor when converting samples into geometry (disabled if <= 1)",
@@ -190,7 +190,7 @@ This loader does not support loading binary data using 'upload-model'.
                     "load_soma": {
                         "description": "Load the soma section of the neuron",
                         "type": "boolean",
-                        "default": true
+                        "default": false
                     },
                     "radius_multiplier": {
                         "description": "Parameter to multiply all morphology sample radii by",
@@ -201,7 +201,7 @@ This loader does not support loading binary data using 'upload-model'.
                     "resampling": {
                         "description": "Minimum angle cosine between 2 segments to merge them (disabled if > 1)",
                         "type": "number",
-                        "default": 0.9
+                        "default": 2
                     },
                     "subsampling": {
                         "description": "Skip factor when converting samples into geometry (disabled if <= 1)",
@@ -220,9 +220,6 @@ This loader does not support loading binary data using 'upload-model'.
                 "maximum": 1
             }
         },
-        "required": [
-            "morphology_folder"
-        ],
         "additionalProperties": false
     }
 
@@ -265,7 +262,7 @@ This loader does not support loading binary data using 'upload-model'.
             "load_soma": {
                 "description": "Load the soma section of the neuron",
                 "type": "boolean",
-                "default": true
+                "default": false
             },
             "radius_multiplier": {
                 "description": "Parameter to multiply all morphology sample radii by",
@@ -276,7 +273,7 @@ This loader does not support loading binary data using 'upload-model'.
             "resampling": {
                 "description": "Minimum angle cosine between 2 segments to merge them (disabled if > 1)",
                 "type": "number",
-                "default": 0.9
+                "default": 2
             },
             "subsampling": {
                 "description": "Skip factor when converting samples into geometry (disabled if <= 1)",
@@ -380,7 +377,7 @@ This loader does not support loading binary data using 'upload-model'.
                                 "load_soma": {
                                     "description": "Load the soma section of the neuron",
                                     "type": "boolean",
-                                    "default": true
+                                    "default": false
                                 },
                                 "radius_multiplier": {
                                     "description": "Parameter to multiply all morphology sample radii by",
@@ -391,7 +388,7 @@ This loader does not support loading binary data using 'upload-model'.
                                 "resampling": {
                                     "description": "Minimum angle cosine between 2 segments to merge them (disabled if > 1)",
                                     "type": "number",
-                                    "default": 0.9
+                                    "default": 2
                                 },
                                 "subsampling": {
                                     "description": "Skip factor when converting samples into geometry (disabled if <= 1)",
@@ -462,6 +459,7 @@ This loader does not support loading binary data using 'upload-model'.
                             "title": "VasculatureGeometrySettings",
                             "description": "Settings for vasculature geometry load (ignored for any non-vasculature population",
                             "type": "object",
+                            "default": {},
                             "properties": {
                                 "radius_multiplier": {
                                     "description": "Factor to multiply all vasculature sample radii",

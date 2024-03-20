@@ -15,7 +15,7 @@ light
 -----
 
 .. automodule:: brayns.core.light
-    :members: add_light, AmbientLight, clear_lights, DirectionalLight, Light, QuadLight
+    :members: add_light, AmbientLight, clear_lights, DirectionalLight, Light, QuadLight, SphereLight
     :undoc-members:
     :show-inheritance:
 
