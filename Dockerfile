@@ -16,7 +16,6 @@ RUN apt-get update \
    cmake \
    git \
    ninja-build \
-   libboost1.74-all-dev \
    libhdf5-serial-dev \
    pkg-config \
    wget \
@@ -81,7 +80,7 @@ RUN mkdir ${OPENVKL_SRC} \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
    -DBUILD_EXAMPLES=OFF \
    -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc \
-   && ninja -j4 install 
+   && ninja -j4 install
 
 # Install OSPRay
 ARG OSPRAY_TAG=v2.10.5
@@ -118,11 +117,7 @@ RUN cd ${BRAYNS_SRC} \
    && CMAKE_PREFIX_PATH=${DIST_PATH} \
    cmake ..  \
    -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
-   -DBRAYNS_DTI_ENABLED=ON \
    -DBRAYNS_ATLASEXPLORER_ENABLED=ON \
-   -DBRAYNS_CYLINDRICCAMERA_ENABLED=ON \
-   -DBRAYNS_MOLECULEEXPLORER_ENABLED=ON \
-   -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 
@@ -135,13 +130,6 @@ ARG DIST_PATH=/app/dist
 
 RUN apt-get update \
    && apt-get -y --no-install-recommends install \
-   libboost-filesystem1.74.0 \
-   libboost-date-time1.74.0 \ 
-   libboost-iostreams1.74.0 \
-   libboost-program-options1.74.0 \
-   libboost-regex1.74.0 \
-   libboost-system1.74.0 \
-   libboost-serialization1.74.0 \
    libgomp1 \
    libhdf5-103 \
    libssl-dev \
@@ -154,10 +142,7 @@ RUN apt-get update \
 # 2. create a new image layer containing the
 #    /app/dist directory of this new container
 #    Equivalent to the `docker copy` command.
-ARG BOOST_LIB=/usr/local/lib
-
 COPY --from=builder ${DIST_PATH} ${DIST_PATH}
-COPY --from=builder ${BOOST_LIB} ${BOOST_LIB}
 
 # Add binaries from dist to the PATH
 ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib:${BOOST_LIB}:/${DIST_PATH}/lib/intel64/gcc4.8

@@ -23,7 +23,7 @@
 #include <io/NeuronMorphologyLoaderParameters.h>
 
 /**
- * @brief Imports a circuit from a BBP's BlueConfig/CircuitConfig file
+ * @brief Imports a circuit from a morphology file.
  */
 class NeuronMorphologyLoader : public brayns::Loader<NeuronMorphologyLoaderParameters>
 {

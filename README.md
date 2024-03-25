@@ -12,11 +12,8 @@ Brayns comes with a main application for its usage:
 
 Brayns also comes with some already-made plugins:
 
-* **CircuitExplorer**: The main plugin used at BBP. Allows for neuronal circuit visualization and simulation rendering.
-* **DTI**: A diffuse-tensor imaging visualization plugin.
+* **CircuitExplorer**: Allows for Sonata circuit visualization and simulation rendering.
 * **AtlasExplorer**: A plugin capable of interpreting and render NRRD volumes.
-* **CylindricCamera**: A plugin that adds a cylindric camera projection for inmersive environments.
-* **MoleculeExplorer**: A plugin that adds support for XYZ and PDB files.
 
 ## Building
 
@@ -71,10 +68,7 @@ The following cmake options (shown with their default value) can be used during 
 * **BRAYNS_TESTS_ENABLED** (Default ON) - Activate unit tests
 * **BRAYNS_SERVICE_ENABLED** (Default ON) - Activate braynsService app
 * **BRAYNS_CIRCUITEXPLORER_ENABLED** (Default ON) - Activate CircuitExplorer plugin
-* **BRAYNS_DTI_ENABLED** (Default OFF) - Activate Diffusion-Tensor Imaging plugin
 * **BRAYNS_ATLASEXPLORER_ENABLED** - (Default OFF) Activate AtlasExplorer plugin
-* **BRAYNS_CYLINDIRCCAMERA_ENABLED** - (Default OFF) Activate Cylindric Camera projection plugin
-* **BRAYNS_MOLECULEEXPLORER_ENABLED** (Default ON) - Activate MoleculeExplorer plugin
 
 
 ## Running
@@ -91,13 +85,13 @@ The ***--uri*** parameter allows to specify an address and a port to bind to. In
 
 This command will launch the braynsService app with only core functionality. To also add the functionality of any plugin, the ***--plugin*** option can be used to load plugins:
 
-    $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsMoleculeExplorer
+    $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsAtlasExplorer
 
 The name that must be used when specifying a plugin will depend on the name of the library of the plugin (stripping the extension **.so** from it)
 
 ### Using the Docker image
 
-Brayns is available as a docker image at https://hub.docker.com/r/bluebrain/brayns. The image allows to launch the braynsService application. 
+Brayns is available as a docker image at https://hub.docker.com/r/bluebrain/brayns. The image allows to launch the braynsService application.
 
 It is built with every commit merged into the main repository branch (develop), and deployed into docker hub as brayns:latest. Furthermore, when a new release is made, and a new tag created, an additional image is built and deployed with the same tag.
 

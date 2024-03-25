@@ -36,16 +36,6 @@ class NetworkParameters : public AbstractParameters
 {
 public:
     /**
-     * @brief Check if the client mode is enabled.
-     *
-     * Default: false.
-     *
-     * @return true Client mode.
-     * @return false Server mode.
-     */
-    bool isClient() const noexcept;
-
-    /**
      * @brief Check if SSL is enabled.
      *
      * Default: false.
@@ -118,7 +108,6 @@ public:
     virtual void build(ArgvBuilder &builder) override;
 
 private:
-    bool _client = false;
     bool _secure = false;
     size_t _maxClients = 2;
     std::string _uri;

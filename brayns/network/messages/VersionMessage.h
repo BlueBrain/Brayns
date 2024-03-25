@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <string_view>
+
 #include <brayns/json/Json.h>
 
 namespace brayns
@@ -30,7 +32,7 @@ struct VersionMessage
     int major = 0;
     int minor = 0;
     int patch = 0;
-    std::string revision;
+    std::string_view pre_release;
 };
 
 template<>
@@ -42,11 +44,8 @@ struct JsonAdapter<VersionMessage> : ObjectAdapter<VersionMessage>
         builder.get("major", [](auto &object) { return object.major; }).description("Major version");
         builder.get("minor", [](auto &object) { return object.minor; }).description("Minor version");
         builder.get("patch", [](auto &object) { return object.patch; }).description("Patch version");
-        builder
-            .get(
-                "revision",
-                [](auto &object) -> auto & { return object.revision; })
-            .description("SCM revision");
+        builder.get("pre_release", [](auto &object) { return object.pre_release; })
+            .description("Pre-release (empty for production)");
         return builder.build();
     }
 };

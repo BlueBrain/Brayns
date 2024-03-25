@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <string_view>
 #include <type_traits>
 
 #include <brayns/json/JsonAdapter.h>
@@ -39,12 +40,10 @@ namespace brayns
 template<typename T>
 struct PrimitiveAdapter
 {
-    static constexpr auto type = JsonTypeInfo::getType<T>();
-
     static JsonSchema getSchema()
     {
         auto schema = JsonSchema();
-        schema.type = type;
+        schema.type = JsonTypeInfo::getType<T>();
         if constexpr (std::is_unsigned_v<T>)
         {
             schema.minimum = 0.0;
@@ -61,6 +60,10 @@ struct PrimitiveAdapter
         else if constexpr (std::is_floating_point_v<T>)
         {
             json = _checkInfAndNan(value);
+        }
+        else if constexpr (std::is_same_v<T, std::string_view>)
+        {
+            json = std::string(value);
         }
         else
         {
@@ -219,6 +222,15 @@ struct JsonAdapter<double> : PrimitiveAdapter<double>
  */
 template<>
 struct JsonAdapter<std::string> : PrimitiveAdapter<std::string>
+{
+};
+
+/**
+ * @brief JSON handling for string.
+ *
+ */
+template<>
+struct JsonAdapter<std::string_view> : PrimitiveAdapter<std::string_view>
 {
 };
 } // namespace brayns

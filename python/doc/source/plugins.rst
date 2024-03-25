@@ -18,10 +18,10 @@ names are the name of the dynamic libraries (.so) implementing it.
 
 .. code-block:: console
 
-    $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsDTI
+    $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsAtlasExplorer
 
 Here we load plugins by linking dynamically against braynsCircuitExplorer.so
-and braynsDTI.so (always available).
+and braynsAtlasExplorer.so (always available).
 
 Brayns comes with built-in plugins that are always available and can be loaded
 at runtime.
@@ -32,10 +32,8 @@ Circuit Explorer plugin
 The Circuit Explorer plugin is the main Brayns plugin for neuroscientific
 visualization. It provides Brayns with extra features, such as:
 
-* Load neuronal circuits and simulations based on CircuitConfig / BlueConfig.
 * Load SONATA multi-population networks and simulations.
 * Load morphology files (Ascii, SWC or H5).
-* Load BlueConfig/SONATA multi-population hybrid circuits.
 
 For further information on the Circuit Explorer's JSON-RPC API, refer to
 :ref:`apicircuitexplorer-label`.
@@ -61,36 +59,3 @@ the following argument in the command line:
 .. code-block:: console
 
     --plugin braynsAtlasExplorer
-
-Diffusion Tensor Imaging plugin (DTI)
--------------------------------------
-
-The DTI plugin adds functionality to load streamlines into Brayns, as well as to
-attach a spike report simulation to them to be visualized.
-
-To load the DTI plugin when launching the Brayns backend service, use the
-following argument in the command line:
-
-.. code-block:: console
-
-    --plugin braynsDTI
-
-Cylindric camera plugin
------------------------
-
-This is a simple plugin to add support for cylindric camera. This camera fixes
-the distorsion of curved screen (i.e. OpenDeck).
-
-.. code-block:: console
-
-    --plugin braynsCylindricCamera
-
-Molecule Explorer plugin
-------------------------
-
-This is a plugin to add support for loading XYZ (point clouds) and PDB
-(protein) files.
-
-.. code-block:: console
-
-    --plugin braynsMoleculeExplorer

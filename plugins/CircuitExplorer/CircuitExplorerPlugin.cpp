@@ -24,7 +24,6 @@
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
 #include <brayns/utils/Log.h>
 
-#include <io/BBPLoader.h>
 #include <io/CellPlacementLoader.h>
 #include <io/NeuronMorphologyLoader.h>
 #include <io/SonataLoader.h>
@@ -38,7 +37,6 @@ CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
     auto &registry = api.getLoaderRegistry();
     auto loaders = brayns::LoaderRegistryBuilder(name, registry);
 
-    loaders.add<BBPLoader>();
     loaders.add<CellPlacementLoader>();
     loaders.add<NeuronMorphologyLoader>();
     loaders.add<SonataLoader>();

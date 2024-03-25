@@ -32,8 +32,8 @@ ubuntu-clangformat-check:
   extends: .cmake-ubuntu
   stage: test
   variables:
-    APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev libboost-all-dev zlib1g-dev libbz2-dev python3.9
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_DTI_ENABLED=ON -DBRAYNS_ATLASEXPLORER_ENABLED=ON -DBRAYNS_CYLINDRICCAMERA_ENABLED=ON -DBRAYNS_MOLECULEEXPLORER_ENABLED=ON -DPython3_EXECUTABLE=/usr/bin/python3.9 -DISPC_EXECUTABLE=/app/ispc-v1.18.0-linux/bin/ispc
+    APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev zlib1g-dev libbz2-dev python3.9
+    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_ATLASEXPLORER_ENABLED=ON -DPython3_EXECUTABLE=/usr/bin/python3.9
     KUBERNETES_CPU_LIMIT: 5
     KUBERNETES_CPU_REQUEST: 5
     KUBERNETES_MEMORY_LIMIT: 8Gi
@@ -96,7 +96,7 @@ ubuntu-clangformat-check:
 
     # Install OSPRay
     # https://github.com/ospray/ospray/releases
-    - OSPRAY_TAG=v2.10.5
+    - OSPRAY_TAG=v2.10.6
     - OSPRAY_SRC=/app/ospray
 
     - mkdir -p ${OSPRAY_SRC}

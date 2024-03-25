@@ -18,35 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-namespace brayns
-{
-
 #define BRAYNS_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
 #define BRAYNS_VERSION_MINOR @PROJECT_VERSION_MINOR@
 #define BRAYNS_VERSION_PATCH @PROJECT_VERSION_PATCH@
-#define BRAYNS_GIT_HASH "@BRAYNS_GIT_HASH@"
-
-class Version
-{
-public:
-    static int getMajor() noexcept
-    {
-        return BRAYNS_VERSION_MAJOR;
-    }
-
-    static int getMinor() noexcept
-    {
-        return BRAYNS_VERSION_MINOR;
-    }
-
-    static int getPatch() noexcept
-    {
-        return BRAYNS_VERSION_PATCH;
-    }
-
-    static const char* getCommitHash() noexcept
-    {
-        return BRAYNS_GIT_HASH;
-    }
-};
-}
+#define BRAYNS_VERSION_PRE_RELEASE "@BRAYNS_PRE_RELEASE@"

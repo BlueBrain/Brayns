@@ -23,11 +23,6 @@
 
 namespace brayns
 {
-bool NetworkParameters::isClient() const noexcept
-{
-    return _client;
-}
-
 bool NetworkParameters::isSecure() const noexcept
 {
     return _secure;
@@ -70,7 +65,6 @@ const std::string &NetworkParameters::getCALocation() const noexcept
 
 void NetworkParameters::build(ArgvBuilder &builder)
 {
-    builder.add("client", _client, "Enable client mode");
     builder.add("secure", _secure, "Enable SSL");
     builder.add("max-clients", _maxClients, "Max simultaneous connections");
     builder.add("uri", _uri, "Server URI (host:port)");

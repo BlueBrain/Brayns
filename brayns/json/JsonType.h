@@ -23,6 +23,7 @@
 
 #include <map>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 
@@ -151,7 +152,7 @@ public:
         {
             return JsonType::Number;
         }
-        else if constexpr (std::is_same_v<T, std::string>)
+        else if constexpr (std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>)
         {
             return JsonType::String;
         }

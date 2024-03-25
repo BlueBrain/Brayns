@@ -36,10 +36,10 @@ std::string VersionEntrypoint::getDescription() const
 void VersionEntrypoint::onRequest(const Request &request)
 {
     VersionMessage message;
-    message.major = Version::getMajor();
-    message.minor = Version::getMinor();
-    message.patch = Version::getPatch();
-    message.revision = Version::getCommitHash();
+    message.major = BRAYNS_VERSION_MAJOR;
+    message.minor = BRAYNS_VERSION_MINOR;
+    message.patch = BRAYNS_VERSION_PATCH;
+    message.pre_release = BRAYNS_VERSION_PRE_RELEASE;
     request.reply(message);
 }
 } // namespace brayns
