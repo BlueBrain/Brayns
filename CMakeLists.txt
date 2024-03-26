@@ -10,7 +10,6 @@
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
 # CMake configuration
-set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -20,31 +19,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(Brayns VERSION 3.7.0)
 
-# Extra CMake scripts
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
-
 # Options
 option(BRAYNS_TESTS_ENABLED "Activate unit testing" ON)
 option(BRAYNS_SERVICE_ENABLED "Activate Brayns Service" ON)
 option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" OFF)
-option(BRAYNS_DTI_ENABLED "Activate Diffusion-Transfer Imaging plugin" OFF)
 option(BRAYNS_ATLASEXPLORER_ENABLED "Activate Atlas explorer plugin" OFF)
-option(BRAYNS_CYLINDRICCAMERA_ENABLED "Activate Cylindric projection camera" OFF)
-option(BRAYNS_MOLECULEEXPLORER_ENABLED "Activate MoleculeExplorer plugin" OFF)
 
 # Core dependencies
-find_package(Git REQUIRED)
 find_package(OpenMP REQUIRED)
-find_package(ospray 2.10 REQUIRED)
-find_package(rkcommon 1.10 REQUIRED)
+find_package(ospray REQUIRED)
+find_package(rkcommon REQUIRED)
 find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
 find_package(ZLIB REQUIRED)
 
 # Set up version
-include(GitUtils)
-set(BRAYNS_GIT_HASH "Not found")
-get_commit_hash(BRAYNS_GIT_HASH)
+set(BRAYNS_PRE_RELEASE "")
 set(BRAYNS_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
+if(NOT ${BRAYNS_PRE_RELEASE} EQUAL "")
+    set(BRAYNS_VERSION "${BRAYNS_VERSION}-${BRAYNS_PRE_RELEASE}")
+endif()
 
 # Brayns targets compile options
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")

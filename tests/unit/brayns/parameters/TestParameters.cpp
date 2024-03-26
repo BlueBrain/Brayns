@@ -85,8 +85,6 @@ TEST_CASE("Parameters")
     {
         auto cmd = std::vector<const char *>{
             "executable",
-            "--client",
-            "true",
             "--secure",
             "true",
             "--max-clients",
@@ -108,7 +106,6 @@ TEST_CASE("Parameters")
         auto parameters = brayns::ParametersManager(argc, argv);
 
         auto &network = parameters.getNetworkParameters();
-        CHECK(network.isClient());
         CHECK(network.isSecure());
         CHECK(network.getMaxClients() == 123);
         CHECK(network.getUri() == "0.0.0.0:7777");

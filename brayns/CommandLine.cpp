@@ -22,6 +22,7 @@
 #include "CommandLine.h"
 
 #include <sstream>
+#include <string_view>
 
 #include <brayns/Version.h>
 
@@ -51,12 +52,20 @@ public:
     static std::string format()
     {
         std::ostringstream stream;
+
         stream << "Brayns version ";
-        stream << brayns::Version::getMajor() << ".";
-        stream << brayns::Version::getMinor() << ".";
-        stream << brayns::Version::getPatch();
-        stream << " (" << brayns::Version::getCommitHash() << ")";
+        stream << BRAYNS_VERSION_MAJOR << ".";
+        stream << BRAYNS_VERSION_MINOR << ".";
+        stream << BRAYNS_VERSION_PATCH;
+
+        auto preRelease = std::string_view(BRAYNS_VERSION_PRE_RELEASE);
+        if (!preRelease.empty())
+        {
+            stream << '-' << preRelease;
+        }
+
         stream << " Copyright (c) 2015-2024 EPFL/Blue Brain Project";
+
         return stream.str();
     }
 };

@@ -21,6 +21,7 @@
 
 #include "Brayns.h"
 
+#include <string_view>
 #include <thread>
 
 #include <brayns/Version.h>
@@ -51,12 +52,15 @@ private:
 
     static void _logVersion()
     {
+        auto preRelease = std::string_view(BRAYNS_VERSION_PRE_RELEASE);
+        auto dash = std::string_view(preRelease.empty() ? "" : "-");
         brayns::Log::info(
-            "Brayns version {}.{}.{} ({}) Copyright (c) 2015-2024, EPFL/Blue Brain Project.",
-            brayns::Version::getMajor(),
-            brayns::Version::getMinor(),
-            brayns::Version::getPatch(),
-            brayns::Version::getCommitHash());
+            "Brayns version {}.{}.{}{}{} Copyright (c) 2015-2024, EPFL/Blue Brain Project.",
+            BRAYNS_VERSION_MAJOR,
+            BRAYNS_VERSION_MINOR,
+            BRAYNS_VERSION_PATCH,
+            dash,
+            preRelease);
     }
 
     static void _logParameters(brayns::ParametersManager &parameters)

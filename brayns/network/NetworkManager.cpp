@@ -24,11 +24,9 @@
 #include <brayns/utils/Log.h>
 
 #include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/network/socket/ClientSocket.h>
 #include <brayns/network/socket/ServerSocket.h>
 #include <brayns/network/task/TaskDispatcher.h>
 
-#include <brayns/network/entrypoints/AddClipPlaneEntrypoint.h>
 #include <brayns/network/entrypoints/AddClippingGeometryEntrypoint.h>
 #include <brayns/network/entrypoints/AddGeometryEntrypoint.h>
 #include <brayns/network/entrypoints/AddLightEntrypoint.h>
@@ -97,7 +95,6 @@ public:
         builder.add<brayns::AddClippingCapsulesEntrypoint>(models);
         builder.add<brayns::AddClippingPlanesEntrypoint>(models);
         builder.add<brayns::AddClippingSpheresEntrypoint>(models);
-        builder.add<brayns::AddClipPlaneEntrypoint>(models);
         builder.add<brayns::AddLightAmbientEntrypoint>(models);
         builder.add<brayns::AddLightDirectionalEntrypoint>(models);
         builder.add<brayns::AddLightQuadEntrypoint>(models);
@@ -183,17 +180,6 @@ public:
     {
         auto &manager = api.getParametersManager();
         auto &parameters = manager.getNetworkParameters();
-        return createSocket(parameters, std::move(listener));
-    }
-
-    static std::unique_ptr<brayns::ISocket> createSocket(
-        const brayns::NetworkParameters &parameters,
-        std::unique_ptr<brayns::ISocketListener> listener)
-    {
-        if (parameters.isClient())
-        {
-            return std::make_unique<brayns::ClientSocket>(parameters, std::move(listener));
-        }
         return std::make_unique<brayns::ServerSocket>(parameters, std::move(listener));
     }
 };

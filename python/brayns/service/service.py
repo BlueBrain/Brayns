@@ -64,9 +64,6 @@ class Plugin(Enum):
 
     CIRCUIT_EXPLORER = "braynsCircuitExplorer"
     ATLAS_EXPLORER = "braynsAtlasExplorer"
-    CYLINDRIC_CAMERA = "braynsCylindricCamera"
-    DTI = "braynsDTI"
-    MOLECULE_EXPLORER = "braynsMoleculeExplorer"
 
     @classmethod
     @property

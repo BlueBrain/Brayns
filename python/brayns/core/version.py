@@ -60,14 +60,14 @@ class Version:
     :type minor: int
     :param patch: Patch part.
     :type patch: int
-    :param revision: Commit hash.
-    :type revision: str
+    :param pre_release: Pre-release (empty in prod).
+    :type pre_release: str
     """
 
     major: int
     minor: int
     patch: int
-    revision: str
+    pre_release: str
 
     @property
     def release(self) -> tuple[int, int, int]:
@@ -128,5 +128,5 @@ def _deserialize_version(message: dict[str, Any]) -> Version:
         major=message["major"],
         minor=message["minor"],
         patch=message["patch"],
-        revision=message["revision"],
+        pre_release=message["pre_release"],
     )

@@ -46,7 +46,7 @@ class TestVersion(unittest.TestCase):
             version.check("5.6.7")
 
     def mock_version(self) -> brayns.Version:
-        return brayns.Version(major=0, minor=1, patch=2, revision="3")
+        return brayns.Version(major=0, minor=1, patch=2, pre_release="3")
 
     def mock_version_message(self) -> dict[str, Any]:
-        return {"major": 0, "minor": 1, "patch": 2, "revision": "3"}
+        return {"major": 0, "minor": 1, "patch": 2, "pre_release": "3"}

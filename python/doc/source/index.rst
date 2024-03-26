@@ -15,7 +15,7 @@ communication with classes and functions and hide low level JSON-RPC messages.
 
 This API (websocket or Python) has the following features:
 
-- Load models into brayns (circuits, DTIs, meshes, volumes, ...).
+- Load models into brayns (circuits, meshes, volumes, ...).
 - Load and/or attach simulations to models (compartment and spike reports).
 - Modify their visual appearance (color, simulation color ramp, ...).
 - Tune the renderers to achieve different visual results.

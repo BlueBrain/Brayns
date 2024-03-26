@@ -11,14 +11,6 @@ atlas
     :undoc-members:
     :show-inheritance:
 
-bbp
----
-
-.. automodule:: brayns.plugins.bbp
-    :members: BbpCells, BbpLoader, BbpReport, BbpReportType
-    :undoc-members:
-    :show-inheritance:
-
 cell_placement
 --------------
 
@@ -32,22 +24,6 @@ circuit
 
 .. automodule:: brayns.plugins.circuit
     :members: CircuitColorMethod, get_circuit_ids, set_circuit_thickness
-    :undoc-members:
-    :show-inheritance:
-
-cylindric_camera
-----------------
-
-.. automodule:: brayns.plugins.cylindric_camera
-    :members: CylindricProjection
-    :undoc-members:
-    :show-inheritance:
-
-dti
----
-
-.. automodule:: brayns.plugins.dti
-    :members: DtiLoader
     :undoc-members:
     :show-inheritance:
 
@@ -67,26 +43,10 @@ nrrd
     :undoc-members:
     :show-inheritance:
 
-protein
--------
-
-.. automodule:: brayns.plugins.protein
-    :members: ProteinColorScheme, ProteinLoader
-    :undoc-members:
-    :show-inheritance:
-
 sonata
 ------
 
 .. automodule:: brayns.plugins.sonata
     :members: SonataEdgePopulation, SonataLoader, SonataNodePopulation, SonataNodes, SonataReport, SonataReportType
-    :undoc-members:
-    :show-inheritance:
-
-xyz
----
-
-.. automodule:: brayns.plugins.xyz
-    :members: XyzLoader
     :undoc-members:
     :show-inheritance:

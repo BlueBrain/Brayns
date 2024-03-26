@@ -47,20 +47,12 @@ class ApiTestCase(unittest.TestCase):
         return result
 
     @property
-    def bbp_circuit(self) -> str:
-        return os.environ["BRAYNS_TEST_BBP_CIRCUIT"]
-
-    @property
     def sonata_circuit(self) -> str:
         return os.environ["BRAYNS_TEST_SONATA_CIRCUIT"]
 
     @property
     def morphology_file(self) -> str:
         return os.environ["BRAYNS_TEST_MORPHOLOGY"]
-
-    @property
-    def dti_file(self) -> str:
-        return os.environ["BRAYNS_TEST_DTI_FILE"]
 
     @property
     def nrrd_folder(self) -> Path:

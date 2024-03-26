@@ -66,6 +66,10 @@ TEST_CASE("JsonAdapters")
     {
         auto schema = brayns::Json::getSchema<std::string>();
         CHECK_EQ(schema.type, brayns::JsonType::String);
+        schema = brayns::Json::getSchema<std::string_view>();
+        CHECK_EQ(schema.type, brayns::JsonType::String);
+        auto json = brayns::Json::stringify(std::string_view("test"));
+        CHECK_EQ(json, "\"test\"");
     }
     SUBCASE("Array")
     {

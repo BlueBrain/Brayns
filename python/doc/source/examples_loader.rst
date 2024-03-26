@@ -16,7 +16,7 @@ A simulation can change the model color or radius depending on the global
 current simulation frame, the backend doesn't perform any update on this.
 
 Models can be built from different file formats. The support to parse and load
-different files (SONATA, BlueConfig, DTI, ...) is added by plugins
+different files (Sonata, NRRD) is added by plugins
 :ref:`plugins-label`. By default, Brayns only supports mesh loading without
 plugins.
 
@@ -24,23 +24,26 @@ Loader
 ------
 
 Loaders contain the settings to load specific file formats. They are mostly
-contained in the ``braynsCircuitExplorer`` plugin (SONATA, BBP) for the backend
-support and in ``SonataLoader`` and ``BbpLoader`` for the Python API.
+contained in the ``braynsCircuitExplorer`` plugin for the backend
+support and in ``SonataLoader`` and for the Python API.
 
-Here in this example, we will load a file at BBP format (BlueConfig).
+Here in this example, we will load a file at Sonata format (JSON config file).
 
 .. code-block:: python
 
-    loader = brayns.BbpLoader(
-        cells=brayns.BbpCells.from_density(0.01),
-        report=brayns.BbpReport.compartment('soma'),
-        morphology=brayns.Morphology(
-            radius_multiplier=10,
-            load_soma=True,
-            load_axon=False,
-            load_dendrites=True,
-            geometry_type=brayns.GeometryType.SMOOTH,
-        )
+    loader = brayns.SonataLoader(
+        populations=[
+            brayns.SonataNodePopulation(
+                name="root__neurons",
+                nodes=brayns.SonataNodes.from_density(0.01),
+                report=brayns.SonataReport.compartment("soma"),
+                morphology=brayns.Morphology(
+                    radius_multiplier=2,
+                    load_soma=True,
+                    load_dendrites=True,
+                ),
+            )
+        ]
     )
 
 Here we won't get too much in the details of the parameters as they depend on
@@ -97,7 +100,7 @@ retreive them.
 
 .. code-block:: python
 
-    circuit_path = 'path/to/BlueConfig'
+    circuit_path = 'path/to/circuit_config.json'
 
     models = loader.load_models(instance, circuit_path)
 
