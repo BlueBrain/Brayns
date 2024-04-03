@@ -16,8 +16,7 @@ target_include_directories(braynsCircuitExplorer PUBLIC
     "$<INSTALL_INTERFACE:include>")
 
 target_link_libraries(braynsCircuitExplorer PRIVATE
-    braynsPluginAPI
-    braynsNetwork
+    brayns
     sonata::sonata_shared
     MorphIO::morphio
     HighFive

@@ -93,8 +93,7 @@ namespace brayns
 {
 Brayns::Brayns(int argc, const char **argv):
     _parametersManager(argc, argv),
-    _engine(_parametersManager),
-    _pluginManager(*this)
+    _engine(_parametersManager)
 {
     LoggingStartup::run(_parametersManager);
 
@@ -106,15 +105,11 @@ Brayns::Brayns(int argc, const char **argv):
         Log::info("Initializing network manager.");
         _network = std::make_unique<NetworkManager>(*this);
     }
-
-    Log::info("Loading plugins.");
-    _pluginManager.loadPlugins();
 }
 
 Brayns::~Brayns()
 {
     _loaderRegistry = {};
-    _pluginManager.destroyPlugins();
 }
 
 void Brayns::commitAndRender()

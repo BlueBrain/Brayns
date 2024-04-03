@@ -25,6 +25,14 @@
 #include <brayns/utils/Log.h>
 #include <brayns/utils/Timer.h>
 
+#ifdef BRAYNS_CIRCUIT_EXPLORER_ENABLED
+    #include <CircuitExplorerPlugin.h>
+#endif
+
+#ifdef BRAYNS_ATLAS_EXPLORER_ENABLED
+    #include <AtlasExplorerPlugin.h>
+#endif
+
 int main(int argc, const char **argv)
 {
     try
@@ -46,6 +54,14 @@ int main(int argc, const char **argv)
         }
 
         auto instance = brayns::Brayns(argc, argv);
+
+#ifdef BRAYNS_CIRCUIT_EXPLORER_ENABLED
+        brayns::loadCircuitExplorer(instance);
+#endif
+
+#ifdef BRAYNS_ATLAS_EXPLORER_ENABLED
+        brayns::loadAtlasExplorer(instance);
+#endif
 
         brayns::Log::info("Starting Brayns service.");
 

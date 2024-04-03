@@ -30,12 +30,14 @@
 #include <network/entrypoints/GetCircuitIdsEntrypoint.h>
 #include <network/entrypoints/SetCircuitThicknessEntrypoint.h>
 
-CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
+namespace brayns
+{
+void loadCircuitExplorer(PluginAPI &api)
 {
     auto name = "Circuit Explorer";
 
     auto &registry = api.getLoaderRegistry();
-    auto loaders = brayns::LoaderRegistryBuilder(name, registry);
+    auto loaders = LoaderRegistryBuilder(name, registry);
 
     loaders.add<CellPlacementLoader>();
     loaders.add<NeuronMorphologyLoader>();
@@ -49,14 +51,9 @@ CircuitExplorerPlugin::CircuitExplorerPlugin(brayns::PluginAPI &api)
     auto &engine = api.getEngine();
     auto &scene = engine.getScene();
     auto &models = scene.getModels();
-    auto entrypoints = brayns::EntrypointBuilder(name, *interface);
+    auto entrypoints = EntrypointBuilder(name, *interface);
 
     entrypoints.add<GetCircuitIdsEntrypoint>(models);
     entrypoints.add<SetCircuitThicknessEntrypoint>(models);
 }
-
-extern "C" std::unique_ptr<brayns::IPlugin> brayns_create_plugin(brayns::PluginAPI &api)
-{
-    brayns::Log::info("[CE] Loading Circuit Explorer plugin.");
-    return std::make_unique<CircuitExplorerPlugin>(api);
 }

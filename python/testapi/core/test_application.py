@@ -27,7 +27,6 @@ from testapi.simple_test_case import SimpleTestCase
 class TestApplication(SimpleTestCase):
     def test_get_application(self) -> None:
         application = brayns.get_application(self.instance)
-        self.assertEqual(application.plugins, brayns.Plugin.all)
         self.assertIsInstance(application.resolution, brayns.Resolution)
 
     def test_set_resolution_and_get(self) -> None:

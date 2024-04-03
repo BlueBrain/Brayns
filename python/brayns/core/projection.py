@@ -29,7 +29,7 @@ T = TypeVar("T", bound="Projection")
 
 
 class Projection(ABC):
-    """Base class of all supported camera projections (plugin dependent).
+    """Base class of all supported camera projections.
 
     All camera projections defined in the package inherit from this class.
 

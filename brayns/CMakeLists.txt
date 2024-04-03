@@ -12,7 +12,6 @@ add_subdirectory(io)
 add_subdirectory(json)
 add_subdirectory(network)
 add_subdirectory(parameters)
-add_subdirectory(pluginapi)
 add_subdirectory(utils)
 
 file(GLOB BRAYNS_HEADERS RELATIVE ${CMAKE_CURRENT_LIST_DIR} *.h)
@@ -31,7 +30,7 @@ target_link_libraries(brayns PUBLIC
 
 target_link_libraries(brayns PRIVATE
     braynsIO
-    braynsPluginAPI
+    braynsUtils
 )
 
 target_compile_options(brayns PRIVATE ${BRAYNS_COMPILE_OPTIONS})

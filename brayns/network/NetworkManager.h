@@ -21,12 +21,12 @@
 
 #pragma once
 
+#include <brayns/PluginAPI.h>
+
 #include <brayns/network/client/ClientManager.h>
 #include <brayns/network/entrypoint/EntrypointRegistry.h>
 #include <brayns/network/socket/ISocket.h>
 #include <brayns/network/task/TaskManager.h>
-
-#include <brayns/pluginapi/PluginAPI.h>
 
 #include "INetworkInterface.h"
 #include "NetworkMonitor.h"

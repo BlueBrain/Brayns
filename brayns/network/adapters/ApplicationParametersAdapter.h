@@ -34,11 +34,6 @@ struct JsonAdapter<ApplicationParameters> : ObjectAdapter<ApplicationParameters>
     {
         auto builder = Builder("ApplicationParameters");
         builder
-            .get(
-                "plugins",
-                [](auto &object) -> auto & { return object.getPlugins(); })
-            .description("Plugins loaded when the application was started");
-        builder
             .getset(
                 "viewport",
                 [](auto &object) -> auto & { return object.getWindowSize(); },

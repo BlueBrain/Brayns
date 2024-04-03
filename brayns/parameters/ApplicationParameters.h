@@ -36,13 +36,6 @@ class ApplicationParameters : public AbstractParameters
 {
 public:
     /**
-     * @brief Get the list of loaded plugins with argv.
-     *
-     * @return const std::vector<std::string>& Plugins loaded with argv.
-     */
-    const std::vector<std::string> &getPlugins() const noexcept;
-
-    /**
      * @brief Returns the system's log level
      *
      * @return LogLevel Log level.
@@ -69,7 +62,6 @@ public:
     virtual void build(ArgvBuilder &builder) override;
 
 private:
-    std::vector<std::string> _plugins;
     LogLevel _logLevel = LogLevel::Info;
     Vector2ui _windowSize = {800, 600};
 };

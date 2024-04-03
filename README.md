@@ -4,16 +4,9 @@
 
 Brayns is a large-scale scientific visualization platform. It is based on Intel OSPRAY to perform CPU Ray-tracing, which allows it to take full advantage of the underlying hardware where it runs.
 
-It is based on a extension-plugin architecture. The core provides basic functionalities that can be reused and/or extended on plugins, which are independent and can be loaded or disabled at start-up. This simplifies the process of adding support for new scientific visualization use cases, without compromising the reliability of the rest of the software.
-
 Brayns comes with a main application for its usage:
 
  * **braynsService**: A rendering backend which can be accessed over the internet and streams images to the connected clients.
-
-Brayns also comes with some already-made plugins:
-
-* **CircuitExplorer**: Allows for Sonata circuit visualization and simulation rendering.
-* **AtlasExplorer**: A plugin capable of interpreting and render NRRD volumes.
 
 ## Building
 
@@ -47,9 +40,7 @@ Brayns uses further dependencies, but if they are not present on the system, it 
 * stb (https://github.com/nothings/stb)
 * tinyexr (https://github.com/syoyo/tinyexr/tree/v1.0.1)
 * libsonata 0.1.22 (https://github.com/BlueBrain/libsonata/tree/v0.1.22)
-* MVDTool 2.4.4 (https://github.com/BlueBrain/MVDTool/tree/v2.4.4)
 * MorphIO 3.3.5 (https://github.com/BlueBrain/MorphIO/tree/v3.3.5)
-* Brion 3.3.14 (https://github.com/BlueBrain/Brion/tree/3.3.14)
 
 ### Build command
 
@@ -61,19 +52,19 @@ Once the given dependencies are installed, Brayns can be cloned and built as fol
       -DCMAKE_PREFIX_PATH=/path/to/OSPRay/cmake/config/folder
     $ make -j
 
-This will build the core of Brayns, the braynsService application, the CircuitExplorer plugin and the unit tests.
+This will build the core of Brayns, the braynsService application, the CircuitExplorer and AtlasExplorer plugins and the unit tests.
 
 The following cmake options (shown with their default value) can be used during CMake build run to customize the components to build as *-DVARIABLE=ON|OFF* :
 
 * **BRAYNS_TESTS_ENABLED** (Default ON) - Activate unit tests
 * **BRAYNS_SERVICE_ENABLED** (Default ON) - Activate braynsService app
 * **BRAYNS_CIRCUITEXPLORER_ENABLED** (Default ON) - Activate CircuitExplorer plugin
-* **BRAYNS_ATLASEXPLORER_ENABLED** - (Default OFF) Activate AtlasExplorer plugin
+* **BRAYNS_ATLASEXPLORER_ENABLED** - (Default ON) Activate AtlasExplorer plugin
 
 
 ## Running
 
-**Important:** All the libraries on which Brayns depends must be reachable through the **LD_LIBRARY_PATH** environmental variable, including plugin libraries.
+**Important:** All the dynamic libraries on which Brayns depends must be reachable through the **LD_LIBRARY_PATH** environmental variable.
 
 ### braynsService application
 
@@ -83,11 +74,9 @@ To run the braynsService app, execute the following command (The command assumes
 
 The ***--uri*** parameter allows to specify an address and a port to bind to. In the example, the service is binding to all available addresses and the port 5000.
 
-This command will launch the braynsService app with only core functionality. To also add the functionality of any plugin, the ***--plugin*** option can be used to load plugins:
+Use the following command to get more details about command line arguments.
 
-    $ braynsService --uri 0.0.0.0:5000 --plugin braynsCircuitExplorer --plugin braynsAtlasExplorer
-
-The name that must be used when specifying a plugin will depend on the name of the library of the plugin (stripping the extension **.so** from it)
+    $ braynsService --help
 
 ### Using the Docker image
 
@@ -103,7 +92,7 @@ To run it, simply execute the following command:
 
     $ docker run -ti --rm -p 5000:5000 bluebrain/brayns --uri 0.0.0.0:5000
 
-Additional parameters, such as ***--plugin***, can be specified in a similar fashion as in the **braynsService** application.
+Additional parameters, can be specified in a similar fashion as in the **braynsService** application.
 
 ## Python and JSON-RPC API
 

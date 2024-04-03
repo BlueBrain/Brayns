@@ -185,15 +185,7 @@ from .plugins import (
     get_circuit_ids,
     set_circuit_thickness,
 )
-from .service import (
-    LogLevel,
-    Manager,
-    Plugin,
-    Process,
-    Service,
-    SslServerContext,
-    start,
-)
+from .service import LogLevel, Manager, Process, Service, SslServerContext, start
 from .utils import (
     Axis,
     Bounds,
@@ -356,7 +348,6 @@ __all__ = [
     "Plane",
     "PlaneEquation",
     "PlasticMaterial",
-    "Plugin",
     "PrincipledMaterial",
     "Process",
     "ProductionRenderer",

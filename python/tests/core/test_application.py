@@ -45,12 +45,10 @@ class TestApplication(unittest.TestCase):
 
     def mock_application(self) -> brayns.Application:
         return brayns.Application(
-            plugins=["test1", "test2"],
             resolution=brayns.Resolution.full_hd,
         )
 
     def mock_application_message(self) -> dict[str, Any]:
         return {
-            "plugins": ["test1", "test2"],
             "viewport": [1920, 1080],
         }

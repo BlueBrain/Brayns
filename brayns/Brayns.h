@@ -24,11 +24,12 @@
 
 #include <memory>
 
-#include <brayns/PluginManager.h>
 #include <brayns/engine/core/Engine.h>
 #include <brayns/io/LoaderRegistry.h>
 #include <brayns/network/NetworkManager.h>
 #include <brayns/parameters/ParametersManager.h>
+
+#include "PluginAPI.h"
 
 namespace brayns
 {
@@ -94,7 +95,6 @@ private:
     ParametersManager _parametersManager;
     LoaderRegistry _loaderRegistry;
     Engine _engine;
-    PluginManager _pluginManager;
     std::unique_ptr<NetworkManager> _network;
 };
 } // namespace brayns
