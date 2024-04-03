@@ -116,8 +116,7 @@ RUN cd ${BRAYNS_SRC} \
    && cd build \
    && CMAKE_PREFIX_PATH=${DIST_PATH} \
    cmake ..  \
-   -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON \
-   -DBRAYNS_ATLASEXPLORER_ENABLED=ON \
+   -DBRAYNS_TESTS_ENABLED=OFF \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 
@@ -151,13 +150,13 @@ ENV PATH ${DIST_PATH}/bin:$PATH
 # Expose a port from the container
 # For more ports, use the `--expose` flag when running the container,
 # see https://docs.docker.com/engine/reference/run/#expose-incoming-ports for docs.
-EXPOSE 8200
+EXPOSE 5000
 
-# When running `docker run -ti --rm -p 8200:8200 brayns`,
+# When running `docker run -ti --rm -p 5000:5000 brayns`,
 # this will be the cmd that will be executed (+ the CLI options from CMD).
 # To ssh into the container (or override the default entry) use:
-# `docker run -ti --rm --entrypoint bash -p 8200:8200 brayns`
+# `docker run -ti --rm --entrypoint bash -p 5000:5000 brayns`
 # See https://docs.docker.com/engine/reference/run/#entrypoint-default-command-to-execute-at-runtime
 # for more docs
 ENTRYPOINT ["braynsService"]
-CMD ["--uri", "0.0.0.0:8200", "--plugin", "braynsCircuitExplorer"]
+CMD ["--uri", "0.0.0.0:5000"]

@@ -35,10 +35,6 @@ class TestService(unittest.TestCase):
             ),
             max_clients=2,
             log_level=brayns.LogLevel.CRITICAL,
-            plugins=[
-                brayns.Plugin.ATLAS_EXPLORER.value,
-                brayns.Plugin.CIRCUIT_EXPLORER.value,
-            ],
             executable="service",
         )
         test = service.get_command_line()
@@ -50,10 +46,6 @@ class TestService(unittest.TestCase):
             "2",
             "--log-level",
             "critical",
-            "--plugin",
-            brayns.Plugin.ATLAS_EXPLORER.value,
-            "--plugin",
-            brayns.Plugin.CIRCUIT_EXPLORER.value,
             "--secure",
             "true",
             "--private-key-file",

@@ -29,13 +29,10 @@ from brayns.utils import Resolution
 class Application:
     """Store the application parameters of an instance.
 
-    :param plugins: List of plugins loaded in the instance.
-    :type plugins: list[str]
     :param resolution: Framebuffer resolution.
     :type resolution: Resolution
     """
 
-    plugins: list[str]
     resolution: Resolution
 
 
@@ -74,6 +71,5 @@ def stop(instance: Instance) -> None:
 
 def _deserialize_application(message: dict[str, Any]) -> Application:
     return Application(
-        plugins=message["plugins"],
         resolution=Resolution(*message["viewport"]),
     )

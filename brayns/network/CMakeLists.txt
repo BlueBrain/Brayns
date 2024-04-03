@@ -15,12 +15,9 @@ target_include_directories(braynsNetwork PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(braynsNetwork PRIVATE
-    braynsPluginAPI
-)
-
 target_link_libraries(braynsNetwork PUBLIC
     braynsIO
+    braynsUtils
     Poco::Foundation
     Poco::Net
     Poco::NetSSL

@@ -42,7 +42,7 @@ public:
     virtual void registerEntrypoint(EntrypointRef entrypoint) = 0;
 
     /**
-     * @brief Can be used to poll requests from an entrypoint or plugin.
+     * @brief Can be used to poll requests from an entrypoint.
      *
      * @note The network manager already calls it on each update.
      */

@@ -61,5 +61,3 @@ add_dependencies(tests Brayns-tests)
 add_dependencies(Brayns-tests Brayns-cpptests)
 
 add_dependencies(Brayns-cpptests ${TEST_TARGET_LIST})
-
-add_library(DynamicLibTest files/libraries/DynamicLibLibrary.cpp)

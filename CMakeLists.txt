@@ -22,8 +22,8 @@ project(Brayns VERSION 3.7.0)
 # Options
 option(BRAYNS_TESTS_ENABLED "Activate unit testing" ON)
 option(BRAYNS_SERVICE_ENABLED "Activate Brayns Service" ON)
-option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate CircuitExplorer plugin" OFF)
-option(BRAYNS_ATLASEXPLORER_ENABLED "Activate Atlas explorer plugin" OFF)
+option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate circuit explorer" ON)
+option(BRAYNS_ATLASEXPLORER_ENABLED "Activate atlas explorer" ON)
 
 # Core dependencies
 find_package(OpenMP REQUIRED)

@@ -26,12 +26,11 @@ Provides mainly helpers to generate the command line.
 
 from .manager import Manager, start
 from .process import Process
-from .service import LogLevel, Plugin, Service, SslServerContext
+from .service import LogLevel, Service, SslServerContext
 
 __all__ = [
     "LogLevel",
     "Manager",
-    "Plugin",
     "Process",
     "Service",
     "SslServerContext",

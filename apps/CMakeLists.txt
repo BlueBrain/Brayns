@@ -10,6 +10,16 @@ add_executable(braynsService braynsService.cpp)
 
 target_link_libraries(braynsService PRIVATE brayns)
 
+if(BRAYNS_CIRCUITEXPLORER_ENABLED)
+    target_link_libraries(braynsService PRIVATE braynsCircuitExplorer)
+    target_compile_definitions(braynsService PRIVATE "BRAYNS_CIRCUIT_EXPLORER_ENABLED")
+endif()
+
+if(BRAYNS_ATLASEXPLORER_ENABLED)
+    target_link_libraries(braynsService PRIVATE braynsAtlasExplorer)
+    target_compile_definitions(braynsService PRIVATE "BRAYNS_ATLAS_EXPLORER_ENABLED")
+endif()
+
 install(TARGETS braynsService
     EXPORT braynsService-targets
     RUNTIME DESTINATION bin

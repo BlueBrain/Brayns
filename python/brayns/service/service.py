@@ -53,25 +53,6 @@ class LogLevel(Enum):
     OFF = "off"
 
 
-class Plugin(Enum):
-    """All built-in plugins for braynsService.
-
-    Plugins are loaded when the backend instance is started and cannot be
-    changed afterward.
-
-    The value is the name of the plugin dynamic library (.so).
-    """
-
-    CIRCUIT_EXPLORER = "braynsCircuitExplorer"
-    ATLAS_EXPLORER = "braynsAtlasExplorer"
-
-    @classmethod
-    @property
-    def all(cls) -> list[str]:
-        """Shortcut to get all the plugin names."""
-        return [plugin.value for plugin in Plugin]
-
-
 @dataclass
 class Service:
     """Class used to start a braynsService subprocess.
@@ -98,8 +79,6 @@ class Service:
     :type max_clients: int, optional
     :param log_level: Process log level, defaults to LogLevel.WARN.
     :type log_level: LogLevel, optional
-    :param plugins: Plugins to load, defaults to all built-in plugins.
-    :type plugins: list[str], optional
     :param executable: braynsService executable, defaults to 'braynService'.
     :type executable: str, optional
     :param env: Subprocess environment variables, default to empty.
@@ -110,7 +89,6 @@ class Service:
     ssl_context: SslServerContext | None = None
     max_clients: int = 1
     log_level: LogLevel = LogLevel.WARN
-    plugins: list[str] = field(default_factory=lambda: Plugin.all)
     executable: str = "braynsService"
     env: dict[str, str] = field(default_factory=dict)
 
@@ -128,7 +106,6 @@ class Service:
             str(self.max_clients),
             "--log-level",
             self.log_level.value,
-            *_get_plugins_args(self.plugins),
         ]
         if self.ssl_context is not None:
             args.append("--secure")
@@ -147,10 +124,6 @@ class Service:
         """
         args = self.get_command_line()
         return Process(args, self.env)
-
-
-def _get_plugins_args(plugins: list[str]) -> list[str]:
-    return [arg for plugin in plugins for arg in ("--plugin", plugin)]
 
 
 def _get_ssl_args(context: SslServerContext) -> list[str]:

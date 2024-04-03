@@ -62,16 +62,7 @@ TEST_CASE("Parameters")
     }
     SUBCASE("Application parameters")
     {
-        auto cmd = std::vector<const char *>{
-            "executable",
-            "--window-size",
-            "500, 500",
-            "--plugin",
-            "A",
-            "--plugin",
-            "B",
-            "--log-level",
-            "debug"};
+        auto cmd = std::vector<const char *>{"executable", "--window-size", "500, 500", "--log-level", "debug"};
         auto argc = static_cast<int>(cmd.size());
         auto argv = cmd.data();
         auto parameters = brayns::ParametersManager(argc, argv);
@@ -79,7 +70,6 @@ TEST_CASE("Parameters")
 
         CHECK(application.getWindowSize() == brayns::Vector2ui(500));
         CHECK(application.getLogLevel() == brayns::LogLevel::Debug);
-        CHECK(application.getPlugins() == std::vector<std::string>{"A", "B"});
     }
     SUBCASE("Network parameters")
     {

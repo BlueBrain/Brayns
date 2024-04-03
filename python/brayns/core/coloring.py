@@ -25,7 +25,7 @@ from brayns.utils import Color4
 
 
 class ColorMethod:
-    """Core coloring methods available without plugins."""
+    """Core coloring methods."""
 
     SOLID: ClassVar[str] = "solid"
     GEOMETRY: ClassVar[str] = "primitive"

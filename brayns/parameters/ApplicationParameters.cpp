@@ -21,11 +21,6 @@
 
 namespace brayns
 {
-const std::vector<std::string> &ApplicationParameters::getPlugins() const noexcept
-{
-    return _plugins;
-}
-
 LogLevel ApplicationParameters::getLogLevel() const noexcept
 {
     return _logLevel;
@@ -43,7 +38,6 @@ void ApplicationParameters::setWindowSize(const Vector2ui &size) noexcept
 
 void ApplicationParameters::build(ArgvBuilder &builder)
 {
-    builder.add("plugin", _plugins, "Plugins libraries to load").composable();
     builder.add("log-level", _logLevel, "Log level");
     builder.add("window-size", _windowSize, "Viewport size").minimum(64);
 }
