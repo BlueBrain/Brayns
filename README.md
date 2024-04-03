@@ -4,7 +4,7 @@
 
 Brayns is a large-scale scientific visualization platform. It is based on Intel OSPRAY to perform CPU Ray-tracing, which allows it to take full advantage of the underlying hardware where it runs.
 
-Brayns comes with a main application for its usage:
+Brayns comes with a main application:
 
  * **braynsService**: A rendering backend which can be accessed over the internet and streams images to the connected clients.
 
