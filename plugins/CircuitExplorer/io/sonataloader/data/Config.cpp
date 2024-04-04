@@ -225,14 +225,7 @@ std::string Config::getReportPath(const std::string &reportName) const
     {
         throw std::runtime_error("No simulation configuration available");
     }
-
-    auto reports = _simConfig->listReportNames();
-    if (reports.find(reportName) == reports.end())
-    {
-        throw std::invalid_argument("The report does not exists in the network");
-    }
-
-    auto basePath = ReportPathResolver::resolveBasePath(*_simConfig);
-    return (basePath / std::filesystem::path(reportName + ".h5")).lexically_normal().string();
+    auto &report = _simConfig->getReport(reportName);
+    return report.fileName;
 }
 } // namespace sonataloader
