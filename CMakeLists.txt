@@ -82,7 +82,23 @@ install(
     NAMESPACE brayns::
 )
 
+include(CMakePackageConfigHelpers)
+
+configure_package_config_file(
+    cmake/BraynsConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/BraynsConfig.cmake
+    INSTALL_DESTINATION cmake
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/BraynsConfigVersion.cmake
+    VERSION ${BRAYNS_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
 install(
-    FILES BraynsConfig.cmake
+    FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/BraynsConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/BraynsConfigVersion.cmake
     DESTINATION cmake
 )

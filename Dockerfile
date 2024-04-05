@@ -108,7 +108,6 @@ ARG BRAYNS_SRC=/app/brayns
 WORKDIR /app
 ADD . ${BRAYNS_SRC}
 
-
 # Install Brayns
 # https://github.com/BlueBrain/Brayns
 RUN cd ${BRAYNS_SRC} \

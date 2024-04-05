@@ -2,4 +2,4 @@
 .vs
 .vscode
 build
-deps
+install

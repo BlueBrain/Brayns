@@ -6,22 +6,24 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-add_executable(braynsService braynsService.cpp)
+add_executable(service service.cpp)
 
-target_link_libraries(braynsService PRIVATE brayns::core)
+set_target_properties(service PROPERTIES OUTPUT_NAME braynsService)
+
+target_link_libraries(service PRIVATE brayns::core)
 
 if(BRAYNS_ENABLE_CIRCUITS)
-    target_link_libraries(braynsService PRIVATE brayns::circuits)
-    target_compile_definitions(braynsService PRIVATE "BRAYNS_CIRCUIT_EXPLORER_ENABLED")
+    target_link_libraries(service PRIVATE brayns::circuits)
+    target_compile_definitions(service PRIVATE "BRAYNS_CIRCUIT_EXPLORER_ENABLED")
 endif()
 
 if(BRAYNS_ENABLE_ATLAS)
-    target_link_libraries(braynsService PRIVATE brayns::atlas)
-    target_compile_definitions(braynsService PRIVATE "BRAYNS_ATLAS_EXPLORER_ENABLED")
+    target_link_libraries(service PRIVATE brayns::atlas)
+    target_compile_definitions(service PRIVATE "BRAYNS_ATLAS_EXPLORER_ENABLED")
 endif()
 
 install(
-    TARGETS braynsService
+    TARGETS service
     EXPORT BraynsTargets
     RUNTIME DESTINATION bin
 )

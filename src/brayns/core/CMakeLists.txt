@@ -6,6 +6,8 @@
 
 brayns_library(core)
 
+set_target_properties(core PROPERTIES OUTPUT_NAME braynsCore)
+
 target_link_libraries(
     core
     PUBLIC

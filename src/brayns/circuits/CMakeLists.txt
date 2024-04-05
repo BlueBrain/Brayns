@@ -6,6 +6,8 @@
 
 brayns_library(circuits)
 
+set_target_properties(circuits PROPERTIES OUTPUT_NAME braynsCircuits)
+
 target_link_libraries(
     circuits
     PUBLIC

@@ -6,6 +6,8 @@
 
 brayns_library(atlas)
 
+set_target_properties(atlas PROPERTIES OUTPUT_NAME braynsAtlas)
+
 target_include_directories(atlas PRIVATE ${ZLIB_INCLUDE_DIRS} ${BZIP2_INCLUDE_DIRS})
 
 target_link_libraries(
