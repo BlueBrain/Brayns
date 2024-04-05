@@ -21,10 +21,10 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/network/client/ClientRef.h>
-#include <brayns/network/client/ClientRequest.h>
-#include <brayns/network/client/ClientSender.h>
-#include <brayns/network/websocket/IWebSocket.h>
+#include <brayns/core/network/client/ClientRef.h>
+#include <brayns/core/network/client/ClientRequest.h>
+#include <brayns/core/network/client/ClientSender.h>
+#include <brayns/core/network/websocket/IWebSocket.h>
 
 #include "MockWebSocket.h"
 

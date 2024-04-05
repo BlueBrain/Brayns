@@ -20,12 +20,12 @@
 
 #include <doctest/doctest.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
-#include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/geometry/types/Sphere.h>
-#include <brayns/engine/model/ModelInstance.h>
-#include <brayns/engine/systems/GenericBoundsSystem.h>
+#include <brayns/core/engine/components/Geometries.h>
+#include <brayns/core/engine/geometry/types/Sphere.h>
+#include <brayns/core/engine/model/ModelInstance.h>
+#include <brayns/core/engine/systems/GenericBoundsSystem.h>
 
 TEST_CASE("ModelInstance")
 {

@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/utils/binary/ByteConverter.h>
+#include <brayns/core/utils/binary/ByteConverter.h>
 
 #include <doctest/doctest.h>
 

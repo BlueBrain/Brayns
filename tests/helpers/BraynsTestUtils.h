@@ -20,24 +20,24 @@
 
 #pragma once
 
-#include <brayns/Brayns.h>
+#include <brayns/core/Brayns.h>
 
-#include <brayns/engine/camera/projections/Orthographic.h>
-#include <brayns/engine/camera/projections/Perspective.h>
-#include <brayns/engine/colormethods/SolidColorMethod.h>
-#include <brayns/engine/components/ColorRamp.h>
-#include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/components/Lights.h>
-#include <brayns/engine/components/Volumes.h>
-#include <brayns/engine/geometry/types/Box.h>
-#include <brayns/engine/light/types/AmbientLight.h>
-#include <brayns/engine/light/types/DirectionalLight.h>
-#include <brayns/engine/scene/ModelsOperations.h>
-#include <brayns/engine/systems/GenericBoundsSystem.h>
-#include <brayns/engine/systems/GeometryDataSystem.h>
-#include <brayns/engine/systems/VolumeDataSystem.h>
+#include <brayns/core/engine/camera/projections/Orthographic.h>
+#include <brayns/core/engine/camera/projections/Perspective.h>
+#include <brayns/core/engine/colormethods/SolidColorMethod.h>
+#include <brayns/core/engine/components/ColorRamp.h>
+#include <brayns/core/engine/components/Geometries.h>
+#include <brayns/core/engine/components/Lights.h>
+#include <brayns/core/engine/components/Volumes.h>
+#include <brayns/core/engine/geometry/types/Box.h>
+#include <brayns/core/engine/light/types/AmbientLight.h>
+#include <brayns/core/engine/light/types/DirectionalLight.h>
+#include <brayns/core/engine/scene/ModelsOperations.h>
+#include <brayns/core/engine/systems/GenericBoundsSystem.h>
+#include <brayns/core/engine/systems/GeometryDataSystem.h>
+#include <brayns/core/engine/systems/VolumeDataSystem.h>
 
-#include <brayns/io/LoaderFormat.h>
+#include <brayns/core/io/LoaderFormat.h>
 
 /**
  * @brief Encapsulates some utilities used across all the tests

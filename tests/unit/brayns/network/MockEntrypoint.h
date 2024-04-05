@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/network/entrypoint/Entrypoint.h>
+#include <brayns/core/network/entrypoint/Entrypoint.h>
 
 class MockEntrypoint : public brayns::Entrypoint<int, int>
 {

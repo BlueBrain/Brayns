@@ -8,23 +8,20 @@
 
 add_executable(braynsService braynsService.cpp)
 
-target_link_libraries(braynsService PRIVATE brayns)
+target_link_libraries(braynsService PRIVATE brayns::core)
 
-if(BRAYNS_CIRCUITEXPLORER_ENABLED)
-    target_link_libraries(braynsService PRIVATE braynsCircuitExplorer)
+if(BRAYNS_ENABLE_CIRCUITS)
+    target_link_libraries(braynsService PRIVATE brayns::circuits)
     target_compile_definitions(braynsService PRIVATE "BRAYNS_CIRCUIT_EXPLORER_ENABLED")
 endif()
 
-if(BRAYNS_ATLASEXPLORER_ENABLED)
-    target_link_libraries(braynsService PRIVATE braynsAtlasExplorer)
+if(BRAYNS_ENABLE_ATLAS)
+    target_link_libraries(braynsService PRIVATE brayns::atlas)
     target_compile_definitions(braynsService PRIVATE "BRAYNS_ATLAS_EXPLORER_ENABLED")
 endif()
 
-install(TARGETS braynsService
-    EXPORT braynsService-targets
+install(
+    TARGETS braynsService
+    EXPORT BraynsTargets
     RUNTIME DESTINATION bin
-)
-
-install(EXPORT braynsService-targets
-    DESTINATION share/CMake
 )

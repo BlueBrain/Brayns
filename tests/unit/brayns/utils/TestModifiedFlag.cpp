@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/utils/ModifiedFlag.h>
+#include <brayns/core/utils/ModifiedFlag.h>
 
 #include <doctest/doctest.h>
 

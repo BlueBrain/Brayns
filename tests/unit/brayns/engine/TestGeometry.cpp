@@ -20,11 +20,11 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/geometry/Geometry.h>
-#include <brayns/engine/geometry/types/Box.h>
-#include <brayns/engine/geometry/types/Sphere.h>
+#include <brayns/core/engine/geometry/Geometry.h>
+#include <brayns/core/engine/geometry/types/Box.h>
+#include <brayns/core/engine/geometry/types/Sphere.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 TEST_CASE("Geometry")
 {

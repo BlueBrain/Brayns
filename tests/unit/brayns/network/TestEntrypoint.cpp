@@ -19,8 +19,8 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/network/entrypoint/EntrypointFinder.h>
+#include <brayns/core/network/entrypoint/EntrypointBuilder.h>
+#include <brayns/core/network/entrypoint/EntrypointFinder.h>
 
 #include "MockEntrypoint.h"
 #include "MockInterface.h"

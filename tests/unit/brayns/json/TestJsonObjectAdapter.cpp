@@ -20,7 +20,7 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/json/Json.h>
+#include <brayns/core/json/Json.h>
 
 struct Internal
 {

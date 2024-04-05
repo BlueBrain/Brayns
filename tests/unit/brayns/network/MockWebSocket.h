@@ -20,8 +20,8 @@
 #include <stdexcept>
 #include <string>
 
-#include <brayns/network/client/ClientRef.h>
-#include <brayns/network/websocket/IWebSocket.h>
+#include <brayns/core/network/client/ClientRef.h>
+#include <brayns/core/network/websocket/IWebSocket.h>
 
 struct OutputPacket
 {

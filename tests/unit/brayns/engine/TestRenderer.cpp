@@ -20,11 +20,11 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/renderer/Renderer.h>
-#include <brayns/engine/renderer/types/Interactive.h>
-#include <brayns/engine/renderer/types/Production.h>
+#include <brayns/core/engine/renderer/Renderer.h>
+#include <brayns/core/engine/renderer/types/Interactive.h>
+#include <brayns/core/engine/renderer/types/Production.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 TEST_CASE("Renderer")
 {

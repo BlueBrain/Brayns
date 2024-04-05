@@ -20,7 +20,7 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/parameters/ParametersManager.h>
+#include <brayns/core/parameters/ParametersManager.h>
 
 TEST_CASE("Parameters")
 {

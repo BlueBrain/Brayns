@@ -21,7 +21,7 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/network/jsonrpc/JsonRpcParser.h>
+#include <brayns/core/network/jsonrpc/JsonRpcParser.h>
 
 #include "MockWebSocket.h"
 

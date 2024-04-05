@@ -20,17 +20,17 @@
 
 #include <iostream>
 
-#include <brayns/Brayns.h>
-#include <brayns/CommandLine.h>
-#include <brayns/utils/Log.h>
-#include <brayns/utils/Timer.h>
+#include <brayns/core/Brayns.h>
+#include <brayns/core/CommandLine.h>
+#include <brayns/core/utils/Log.h>
+#include <brayns/core/utils/Timer.h>
 
 #ifdef BRAYNS_CIRCUIT_EXPLORER_ENABLED
-    #include <CircuitExplorerPlugin.h>
+    #include <brayns/circuits/CircuitExplorerPlugin.h>
 #endif
 
 #ifdef BRAYNS_ATLAS_EXPLORER_ENABLED
-    #include <AtlasExplorerPlugin.h>
+    #include <brayns/atlas/AtlasExplorerPlugin.h>
 #endif
 
 int main(int argc, const char **argv)

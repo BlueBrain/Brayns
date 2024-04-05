@@ -20,8 +20,8 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/components/Transform.h>
-#include <brayns/engine/model/SystemsView.h>
+#include <brayns/core/engine/components/Transform.h>
+#include <brayns/core/engine/model/SystemsView.h>
 
 namespace
 {

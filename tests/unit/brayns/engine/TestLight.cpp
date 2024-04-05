@@ -20,12 +20,12 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/light/Light.h>
-#include <brayns/engine/light/types/AmbientLight.h>
-#include <brayns/engine/light/types/DirectionalLight.h>
-#include <brayns/engine/light/types/QuadLight.h>
+#include <brayns/core/engine/light/Light.h>
+#include <brayns/core/engine/light/types/AmbientLight.h>
+#include <brayns/core/engine/light/types/DirectionalLight.h>
+#include <brayns/core/engine/light/types/QuadLight.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 TEST_CASE("Light Casting")
 {

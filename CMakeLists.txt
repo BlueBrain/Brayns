@@ -4,59 +4,85 @@
 # Cyrille Favreau <cyrille.favreau@epfl.ch>
 # Grigori Chevtchenko <grigori.chevtchenko@epfl.ch>
 # Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+# Adrien Fleury <adrien.fleury@epfl.ch>
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
 cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
 
-# CMake configuration
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(BUILD_SHARED_LIBS ON)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
-project(Brayns VERSION 3.7.0)
+include(BraynsVersion)
 
-# Options
-option(BRAYNS_TESTS_ENABLED "Activate unit testing" ON)
-option(BRAYNS_SERVICE_ENABLED "Activate Brayns Service" ON)
-option(BRAYNS_CIRCUITEXPLORER_ENABLED "Activate circuit explorer" ON)
-option(BRAYNS_ATLASEXPLORER_ENABLED "Activate atlas explorer" ON)
+project(Brayns VERSION ${BRAYNS_VERSION})
 
-# Core dependencies
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BRAYNS_ENABLE_CIRCUITS "Build circuit support" ON)
+option(BRAYNS_ENABLE_ATLAS "Build atlas support" ON)
+option(BRAYNS_ENABLE_APPS "Build applications" ON)
+option(BRAYNS_ENABLE_TESTS "Build unit tests" ON)
+option(BRAYNS_ENABLE_DEPS "Downloads automatically dependencies" ON)
+
 find_package(OpenMP REQUIRED)
 find_package(ospray REQUIRED)
 find_package(rkcommon REQUIRED)
 find_package(Poco QUIET COMPONENTS Foundation JSON Net NetSSL)
 find_package(ZLIB REQUIRED)
 
-# Set up version
-set(BRAYNS_PRE_RELEASE "")
-set(BRAYNS_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-
-if(NOT ${BRAYNS_PRE_RELEASE} EQUAL "")
-    set(BRAYNS_VERSION "${BRAYNS_VERSION}-${BRAYNS_PRE_RELEASE}")
+if(BRAYNS_ENABLE_CIRCUITS)
+    find_package(HDF5 REQUIRED)
+    find_package(HighFive QUIET)
+    find_package(sonata QUIET)
+    find_package(MorphIO QUIET)
 endif()
 
-# Brayns targets compile options
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-set(BRAYNS_COMPILE_OPTIONS -Wall -Wextra -Wconversion -pedantic-errors -Werror)
+if(BRAYNS_ENABLE_ATLAS)
+    find_package(BZip2 REQUIRED)
+endif()
 
-# Downloadable dependencies
-add_subdirectory(deps)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# BRAYNS core
-add_subdirectory(brayns)
+set(CMAKE_INSTALL_LIBDIR lib)
+set(CMAKE_INSTALL_BINDIR bin)
+set(CMAKE_INSTALL_INCLUDEDIR include)
 
-# BRAYNS apps
-add_subdirectory(apps)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# BRAYNS plugins
-add_subdirectory(plugins)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# BRAYNS tests
-if(BRAYNS_TESTS_ENABLED)
+if(MSVC)
+    add_compile_options(/W4 /WX)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic -Wconversion -Werror)
+endif()
+
+add_subdirectory(src)
+
+if(BRAYNS_ENABLE_APPS)
+    add_subdirectory(apps)
+endif()
+
+if(BRAYNS_ENABLE_TESTS)
+    include(CTest)
     add_subdirectory(tests)
 endif()
+
+if(BRAYNS_ENABLE_DEPS)
+    add_subdirectory(deps)
+endif()
+
+install(
+    EXPORT BraynsTargets
+    FILE BraynsTargets.cmake
+    DESTINATION cmake
+    NAMESPACE brayns::
+)
+
+install(
+    FILES BraynsConfig.cmake
+    DESTINATION cmake
+)

@@ -3,3 +3,5 @@ spdlog/
 stb/
 doctest/
 tinyexr/
+libsonata/
+MorphIO/

@@ -20,7 +20,7 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/json/JsonType.h>
+#include <brayns/core/json/JsonType.h>
 
 TEST_CASE("JsonTypeInfo")
 {
