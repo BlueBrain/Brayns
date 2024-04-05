@@ -57,7 +57,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(MSVC)
     add_compile_options(/W4 /WX)
 else()
-    add_compile_options(-Wall -Wextra -Wpedantic -Wconversion -Werror)
+    add_compile_options(-Wall -Wextra -Wconversion -Werror)
+endif()
+
+if(BRAYNS_ENABLE_DEPS)
+    add_subdirectory(deps)
 endif()
 
 add_subdirectory(src)
@@ -71,34 +75,4 @@ if(BRAYNS_ENABLE_TESTS)
     add_subdirectory(tests)
 endif()
 
-if(BRAYNS_ENABLE_DEPS)
-    add_subdirectory(deps)
-endif()
-
-install(
-    EXPORT BraynsTargets
-    FILE BraynsTargets.cmake
-    DESTINATION cmake
-    NAMESPACE brayns::
-)
-
-include(CMakePackageConfigHelpers)
-
-configure_package_config_file(
-    cmake/BraynsConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/BraynsConfig.cmake
-    INSTALL_DESTINATION cmake
-)
-
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/BraynsConfigVersion.cmake
-    VERSION ${BRAYNS_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-
-install(
-    FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/BraynsConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/BraynsConfigVersion.cmake
-    DESTINATION cmake
-)
+include(BraynsPackage)

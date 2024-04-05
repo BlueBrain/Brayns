@@ -6,6 +6,8 @@
 
 include(BraynsLibrary)
 
+add_subdirectory(brayns/core)
+
 if(BRAYNS_ENABLE_ATLAS)
     add_subdirectory(brayns/atlas)
 endif()
@@ -13,5 +15,3 @@ endif()
 if(BRAYNS_ENABLE_CIRCUIT)
     add_subdirectory(brayns/circuit)
 endif()
-
-add_subdirectory(brayns/core)
