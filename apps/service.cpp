@@ -26,7 +26,7 @@
 #include <brayns/core/utils/Timer.h>
 
 #ifdef BRAYNS_CIRCUIT_EXPLORER_ENABLED
-    #include <brayns/circuits/CircuitExplorerPlugin.h>
+    #include <brayns/circuit/CircuitExplorerPlugin.h>
 #endif
 
 #ifdef BRAYNS_ATLAS_EXPLORER_ENABLED

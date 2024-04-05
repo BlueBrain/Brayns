@@ -10,8 +10,8 @@ if(BRAYNS_ENABLE_ATLAS)
     add_subdirectory(brayns/atlas)
 endif()
 
-if(BRAYNS_ENABLE_CIRCUITS)
-    add_subdirectory(brayns/circuits)
+if(BRAYNS_ENABLE_CIRCUIT)
+    add_subdirectory(brayns/circuit)
 endif()
 
 add_subdirectory(brayns/core)

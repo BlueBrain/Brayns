@@ -12,8 +12,8 @@ set_target_properties(service PROPERTIES OUTPUT_NAME braynsService)
 
 target_link_libraries(service PRIVATE brayns::core)
 
-if(BRAYNS_ENABLE_CIRCUITS)
-    target_link_libraries(service PRIVATE brayns::circuits)
+if(BRAYNS_ENABLE_CIRCUIT)
+    target_link_libraries(service PRIVATE brayns::circuit)
     target_compile_definitions(service PRIVATE "BRAYNS_CIRCUIT_EXPLORER_ENABLED")
 endif()
 
