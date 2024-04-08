@@ -20,9 +20,9 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/scene/ModelManager.h>
+#include <brayns/core/engine/scene/ModelManager.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 TEST_CASE("ModelManager")
 {

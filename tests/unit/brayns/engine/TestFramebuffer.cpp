@@ -20,11 +20,11 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/framebuffer/Framebuffer.h>
-#include <brayns/engine/framebuffer/types/ProgressiveFrameHandler.h>
-#include <brayns/engine/framebuffer/types/StaticFrameHandler.h>
+#include <brayns/core/engine/framebuffer/Framebuffer.h>
+#include <brayns/core/engine/framebuffer/types/ProgressiveFrameHandler.h>
+#include <brayns/core/engine/framebuffer/types/StaticFrameHandler.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 TEST_CASE("Progressive frame handler")
 {

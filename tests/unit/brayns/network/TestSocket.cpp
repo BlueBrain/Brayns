@@ -19,7 +19,7 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/network/socket/SocketManager.h>
+#include <brayns/core/network/socket/SocketManager.h>
 
 #include "MockWebSocket.h"
 

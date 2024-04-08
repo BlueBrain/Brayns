@@ -18,11 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/camera/Camera.h>
-#include <brayns/engine/camera/projections/Orthographic.h>
-#include <brayns/engine/camera/projections/Perspective.h>
+#include <brayns/core/engine/camera/Camera.h>
+#include <brayns/core/engine/camera/projections/Orthographic.h>
+#include <brayns/core/engine/camera/projections/Perspective.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 #include <doctest/doctest.h>
 

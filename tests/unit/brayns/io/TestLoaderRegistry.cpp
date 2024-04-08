@@ -20,11 +20,11 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/io/Loader.h>
-#include <brayns/io/LoaderFormat.h>
-#include <brayns/io/LoaderRegistry.h>
+#include <brayns/core/io/Loader.h>
+#include <brayns/core/io/LoaderFormat.h>
+#include <brayns/core/io/LoaderRegistry.h>
 
-#include <brayns/json/Json.h>
+#include <brayns/core/json/Json.h>
 
 namespace
 {

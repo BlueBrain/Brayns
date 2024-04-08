@@ -21,8 +21,8 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/network/jsonrpc/JsonRpcException.h>
-#include <brayns/network/task/TaskManager.h>
+#include <brayns/core/network/jsonrpc/JsonRpcException.h>
+#include <brayns/core/network/task/TaskManager.h>
 
 #include "MockWebSocket.h"
 

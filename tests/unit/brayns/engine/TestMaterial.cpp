@@ -20,11 +20,11 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/material/Material.h>
-#include <brayns/engine/material/types/CarPaint.h>
-#include <brayns/engine/material/types/Phong.h>
+#include <brayns/core/engine/material/Material.h>
+#include <brayns/core/engine/material/types/CarPaint.h>
+#include <brayns/core/engine/material/types/Phong.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 TEST_CASE("Material")
 {

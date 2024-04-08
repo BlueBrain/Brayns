@@ -1,5 +1,7 @@
+doctest/
+libsonata/
+MorphIO/
 poco/
 spdlog/
 stb/
-doctest/
 tinyexr/

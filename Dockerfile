@@ -108,7 +108,6 @@ ARG BRAYNS_SRC=/app/brayns
 WORKDIR /app
 ADD . ${BRAYNS_SRC}
 
-
 # Install Brayns
 # https://github.com/BlueBrain/Brayns
 RUN cd ${BRAYNS_SRC} \
@@ -116,7 +115,7 @@ RUN cd ${BRAYNS_SRC} \
    && cd build \
    && CMAKE_PREFIX_PATH=${DIST_PATH} \
    cmake ..  \
-   -DBRAYNS_TESTS_ENABLED=OFF \
+   -DBRAYNS_ENABLE_TESTS=OFF \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 

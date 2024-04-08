@@ -20,10 +20,10 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/volume/Volume.h>
-#include <brayns/engine/volume/types/RegularVolume.h>
+#include <brayns/core/engine/volume/Volume.h>
+#include <brayns/core/engine/volume/types/RegularVolume.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 TEST_CASE("Volume")
 {

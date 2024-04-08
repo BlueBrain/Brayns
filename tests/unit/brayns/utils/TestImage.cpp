@@ -17,11 +17,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/utils/image/Image.h>
-#include <brayns/utils/image/ImageCodecRegistry.h>
-#include <brayns/utils/image/ImageDecoder.h>
-#include <brayns/utils/image/ImageEncoder.h>
-#include <brayns/utils/image/ImageFormat.h>
+#include <brayns/core/utils/image/Image.h>
+#include <brayns/core/utils/image/ImageCodecRegistry.h>
+#include <brayns/core/utils/image/ImageDecoder.h>
+#include <brayns/core/utils/image/ImageEncoder.h>
+#include <brayns/core/utils/image/ImageFormat.h>
 
 #include <doctest/doctest.h>
 

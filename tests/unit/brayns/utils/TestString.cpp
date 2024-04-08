@@ -17,14 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/utils/string/StringCase.h>
-#include <brayns/utils/string/StringCounter.h>
-#include <brayns/utils/string/StringExtractor.h>
-#include <brayns/utils/string/StringInfo.h>
-#include <brayns/utils/string/StringJoiner.h>
-#include <brayns/utils/string/StringParser.h>
-#include <brayns/utils/string/StringSplitter.h>
-#include <brayns/utils/string/StringTrimmer.h>
+#include <brayns/core/utils/string/StringCase.h>
+#include <brayns/core/utils/string/StringCounter.h>
+#include <brayns/core/utils/string/StringExtractor.h>
+#include <brayns/core/utils/string/StringInfo.h>
+#include <brayns/core/utils/string/StringJoiner.h>
+#include <brayns/core/utils/string/StringParser.h>
+#include <brayns/core/utils/string/StringSplitter.h>
+#include <brayns/core/utils/string/StringTrimmer.h>
 
 #include <doctest/doctest.h>
 

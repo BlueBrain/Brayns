@@ -20,7 +20,7 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/model/Components.h>
+#include <brayns/core/engine/model/Components.h>
 
 TEST_CASE("Components")
 {

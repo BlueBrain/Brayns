@@ -18,16 +18,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/engine/colormethods/PrimitiveColorMethod.h>
-#include <brayns/engine/colormethods/SolidColorMethod.h>
-#include <brayns/engine/components/ColorList.h>
-#include <brayns/engine/components/ColorSolid.h>
-#include <brayns/engine/components/Geometries.h>
-#include <brayns/engine/components/GeometryViews.h>
-#include <brayns/engine/geometry/types/Sphere.h>
-#include <brayns/engine/model/Components.h>
+#include <brayns/core/engine/colormethods/PrimitiveColorMethod.h>
+#include <brayns/core/engine/colormethods/SolidColorMethod.h>
+#include <brayns/core/engine/components/ColorList.h>
+#include <brayns/core/engine/components/ColorSolid.h>
+#include <brayns/core/engine/components/Geometries.h>
+#include <brayns/core/engine/components/GeometryViews.h>
+#include <brayns/core/engine/geometry/types/Sphere.h>
+#include <brayns/core/engine/model/Components.h>
 
-#include <tests/unit/PlaceholderEngine.h>
+#include <unit/PlaceholderEngine.h>
 
 #include <doctest/doctest.h>
 

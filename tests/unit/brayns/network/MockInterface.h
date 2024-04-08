@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/network/INetworkInterface.h>
+#include <brayns/core/network/INetworkInterface.h>
 
 class MockInterface : public brayns::INetworkInterface
 {

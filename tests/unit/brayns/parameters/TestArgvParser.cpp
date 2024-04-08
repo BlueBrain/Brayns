@@ -20,9 +20,9 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/parameters/argv/ArgvBuilder.h>
-#include <brayns/parameters/argv/ArgvParser.h>
-#include <brayns/utils/EnumInfo.h>
+#include <brayns/core/parameters/argv/ArgvBuilder.h>
+#include <brayns/core/parameters/argv/ArgvParser.h>
+#include <brayns/core/utils/EnumInfo.h>
 
 namespace
 {

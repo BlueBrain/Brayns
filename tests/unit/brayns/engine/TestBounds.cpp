@@ -20,7 +20,7 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/engine/components/Bounds.h>
+#include <brayns/core/engine/components/Bounds.h>
 
 TEST_CASE("Bounds")
 {

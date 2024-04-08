@@ -32,7 +32,7 @@ brayns-spack-test:
   script:
     - export BRAYNS_TMP_DIR=$SHMDIR
     - cd ${SPACK_BUILD_DIR}
-    - spack build-env ${SPACK_FULL_SPEC} -- ninja tests
+    - spack build-env ${SPACK_FULL_SPEC} -- ninja test
 
 brayns-python-venv:
   extends: .spack_test

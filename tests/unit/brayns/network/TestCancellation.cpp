@@ -22,8 +22,8 @@
 
 #include <doctest/doctest.h>
 
-#include <brayns/network/common/CancellationToken.h>
-#include <brayns/network/common/ProgressHandler.h>
+#include <brayns/core/network/common/CancellationToken.h>
+#include <brayns/core/network/common/ProgressHandler.h>
 
 #include "MockInterface.h"
 
