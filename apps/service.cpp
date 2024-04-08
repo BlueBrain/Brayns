@@ -25,8 +25,8 @@
 #include <brayns/core/utils/Log.h>
 #include <brayns/core/utils/Timer.h>
 
-#ifdef BRAYNS_ENABLE_CIRCUIT
-    #include <brayns/circuit/CircuitExplorerPlugin.h>
+#ifdef BRAYNS_ENABLE_CIRCUITS
+    #include <brayns/circuits/CircuitExplorerPlugin.h>
 #endif
 
 #ifdef BRAYNS_ENABLE_ATLAS
@@ -55,7 +55,7 @@ int main(int argc, const char **argv)
 
         auto instance = brayns::Brayns(argc, argv);
 
-#ifdef BRAYNS_ENABLE_CIRCUIT
+#ifdef BRAYNS_ENABLE_CIRCUITS
         brayns::loadCircuitExplorer(instance);
 #endif
 

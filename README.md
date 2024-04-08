@@ -58,7 +58,7 @@ The following cmake options (shown with their default value) can be used during 
 
 * **BRAYNS_ENABLE_TESTS** (Default ON) - Activate unit tests.
 * **BRAYNS_ENABLE_SERVICE** (Default ON) - Activate braynsService app.
-* **BRAYNS_ENABLE_CIRCUIT** (Default ON) - Activate circuit support.
+* **BRAYNS_ENABLE_CIRCUITS** (Default ON) - Activate circuit support.
 * **BRAYNS_ENABLE_ATLAS** - (Default ON) Activate atlas support.
 
 

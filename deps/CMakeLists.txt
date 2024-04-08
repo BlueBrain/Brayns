@@ -152,7 +152,7 @@ endif()
 # =============================================================================
 # libsonata
 # =============================================================================
-if(BRAYNS_ENABLE_CIRCUIT AND NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
+if(BRAYNS_ENABLE_CIRCUITS AND NOT sonata_FOUND AND NOT TARGET sonata::sonata_shared)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/libsonata")
         message(STATUS "Downloading libsonata from submodules")
         FetchContent_Declare(
@@ -178,7 +178,7 @@ endif()
 # =============================================================================
 # MorphIO
 # =============================================================================
-if(BRAYNS_ENABLE_CIRCUIT AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio)
+if(BRAYNS_ENABLE_CIRCUITS AND NOT MorphIO_FOUND AND NOT TARGET MorphIO::morphio)
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/MorphIO")
         message(STATUS "Downloading MorphIO from submodules")
         FetchContent_Declare(
