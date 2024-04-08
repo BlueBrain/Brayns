@@ -76,4 +76,4 @@ if(BRAYNS_ENABLE_TESTS)
 endif()
 
 include(BraynsPackage)
-brayns_package(cmake)
+brayns_package(${CMAKE_INSTALL_LIBDIR}/cmake/brayns)
