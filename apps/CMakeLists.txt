@@ -14,16 +14,16 @@ target_link_libraries(service PRIVATE brayns::core)
 
 if(BRAYNS_ENABLE_CIRCUIT)
     target_link_libraries(service PRIVATE brayns::circuit)
-    target_compile_definitions(service PRIVATE "BRAYNS_CIRCUIT_EXPLORER_ENABLED")
+    target_compile_definitions(service PRIVATE "BRAYNS_ENABLE_CIRCUIT")
 endif()
 
 if(BRAYNS_ENABLE_ATLAS)
     target_link_libraries(service PRIVATE brayns::atlas)
-    target_compile_definitions(service PRIVATE "BRAYNS_ATLAS_EXPLORER_ENABLED")
+    target_compile_definitions(service PRIVATE "BRAYNS_ENABLE_ATLAS")
 endif()
 
 install(
     TARGETS service
     EXPORT BraynsTargets
-    RUNTIME DESTINATION bin
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

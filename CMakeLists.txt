@@ -76,3 +76,4 @@ if(BRAYNS_ENABLE_TESTS)
 endif()
 
 include(BraynsPackage)
+brayns_package(cmake)

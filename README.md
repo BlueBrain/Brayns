@@ -52,14 +52,14 @@ Once the given dependencies are installed, Brayns can be cloned and built as fol
       -DCMAKE_PREFIX_PATH=/path/to/OSPRay/cmake/config/folder
     $ make -j
 
-This will build the core of Brayns, the braynsService application, the CircuitExplorer and AtlasExplorer plugins and the unit tests.
+This will build the core of Brayns, the braynsService application, the circuit and atlas libraries and the unit tests.
 
 The following cmake options (shown with their default value) can be used during CMake build run to customize the components to build as *-DVARIABLE=ON|OFF* :
 
-* **BRAYNS_TESTS_ENABLED** (Default ON) - Activate unit tests
-* **BRAYNS_SERVICE_ENABLED** (Default ON) - Activate braynsService app
-* **BRAYNS_CIRCUITEXPLORER_ENABLED** (Default ON) - Activate CircuitExplorer plugin
-* **BRAYNS_ATLASEXPLORER_ENABLED** - (Default ON) Activate AtlasExplorer plugin
+* **BRAYNS_ENABLE_TESTS** (Default ON) - Activate unit tests.
+* **BRAYNS_ENABLE_SERVICE** (Default ON) - Activate braynsService app.
+* **BRAYNS_ENABLE_CIRCUIT** (Default ON) - Activate circuit support.
+* **BRAYNS_ENABLE_ATLAS** - (Default ON) Activate atlas support.
 
 
 ## Running

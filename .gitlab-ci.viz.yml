@@ -33,7 +33,7 @@ ubuntu-clangformat-check:
   stage: test
   variables:
     APT_PACKAGES: git libhdf5-serial-dev libtbb-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev zlib1g-dev libbz2-dev python3.9
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist -DBRAYNS_CIRCUITEXPLORER_ENABLED=ON -DBRAYNS_ATLASEXPLORER_ENABLED=ON -DPython3_EXECUTABLE=/usr/bin/python3.9
+    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist
     KUBERNETES_CPU_LIMIT: 5
     KUBERNETES_CPU_REQUEST: 5
     KUBERNETES_MEMORY_LIMIT: 8Gi

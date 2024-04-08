@@ -25,11 +25,11 @@
 #include <brayns/core/utils/Log.h>
 #include <brayns/core/utils/Timer.h>
 
-#ifdef BRAYNS_CIRCUIT_EXPLORER_ENABLED
+#ifdef BRAYNS_ENABLE_CIRCUIT
     #include <brayns/circuit/CircuitExplorerPlugin.h>
 #endif
 
-#ifdef BRAYNS_ATLAS_EXPLORER_ENABLED
+#ifdef BRAYNS_ENABLE_ATLAS
     #include <brayns/atlas/AtlasExplorerPlugin.h>
 #endif
 
@@ -55,11 +55,11 @@ int main(int argc, const char **argv)
 
         auto instance = brayns::Brayns(argc, argv);
 
-#ifdef BRAYNS_CIRCUIT_EXPLORER_ENABLED
+#ifdef BRAYNS_ENABLE_CIRCUIT
         brayns::loadCircuitExplorer(instance);
 #endif
 
-#ifdef BRAYNS_ATLAS_EXPLORER_ENABLED
+#ifdef BRAYNS_ENABLE_ATLAS
         brayns::loadAtlasExplorer(instance);
 #endif
 
