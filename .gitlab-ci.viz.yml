@@ -49,12 +49,12 @@ ubuntu-clangformat-check:
     - OSPRAY_SRC=/app/ospray
 
     - mkdir -p ${OSPRAY_SRC}
-    - git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
-    - pushd ${OSPRAY_SRC} \
-    - git checkout ${OSPRAY_TAG} \
-    - mkdir -p build \
-    - pushd build \
-    - cmake ../scripts/superbuild -DCMAKE_BUILD_TYPE=Release -DINSTALL_IN_SEPARATE_DIRECTORIES=OFF -DBUILD_GLFW=OFF -DBUILD_OIDN=OFF -DBUILD_OSPRAY_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
+    - git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC}
+    - pushd ${OSPRAY_SRC}
+    - git checkout ${OSPRAY_TAG}
+    - mkdir -p build
+    - pushd build
+    - cmake ../scripts/superbuild -DCMAKE_BUILD_TYPE=Release -DINSTALL_IN_SEPARATE_DIRECTORIES=OFF -DBUILD_GLFW=OFF -DBUILD_OIDN=OFF -DBUILD_OSPRAY_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
     - cmake --build .
     - popd
     - popd
