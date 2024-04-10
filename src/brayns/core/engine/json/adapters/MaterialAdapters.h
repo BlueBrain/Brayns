@@ -22,7 +22,6 @@
 
 #include <brayns/core/engine/material/types/CarPaint.h>
 #include <brayns/core/engine/material/types/Emissive.h>
-#include <brayns/core/engine/material/types/Ghost.h>
 #include <brayns/core/engine/material/types/Glass.h>
 #include <brayns/core/engine/material/types/Matte.h>
 #include <brayns/core/engine/material/types/Metal.h>
@@ -75,15 +74,6 @@ struct JsonAdapter<Emissive> : ObjectAdapter<Emissive>
             .minimum(0)
             .required(false);
         return builder.build();
-    }
-};
-
-template<>
-struct JsonAdapter<Ghost> : ObjectAdapter<Ghost>
-{
-    static JsonObjectInfo reflect()
-    {
-        return JsonObjectInfo{"Ghost", {}};
     }
 };
 

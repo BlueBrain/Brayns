@@ -27,81 +27,24 @@ RUN apt-get update \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Get ISPC
-ARG ISPC_VERSION=1.18.0
-ARG ISPC_DIR=ispc-v${ISPC_VERSION}-linux
-ARG ISPC_PATH=/app/ispc-v1.18.0-linux
-RUN mkdir -p ${ISPC_PATH} \
-   && wget https://github.com/ispc/ispc/releases/download/v1.18.0/${ISPC_DIR}.tar.gz \
-   && tar zxvf ${ISPC_DIR}.tar.gz -C ${ISPC_PATH} --strip-components=1 \
-   && rm -rf ${ISPC_PATH}/${ISPC_DIR}/examples
-
-# Add ispc bin to the PATH
-ENV PATH $PATH:${ISPC_PATH}
-
-RUN mkdir -p ${DIST_PATH}
-
-# Install One TBB
-ARG ONETBB_VERSION=2021.5.0
-ARG ONETBB_FILE=oneapi-tbb-${ONETBB_VERSION}-lin.tgz
-RUN wget https://github.com/oneapi-src/oneTBB/releases/download/v${ONETBB_VERSION}/${ONETBB_FILE} \
-   && tar zxvf ${ONETBB_FILE} -C ${DIST_PATH} --strip-components=1
-
-# Install embree
-ARG EMBREE_VERSION=3.13.3
-ARG EMBREE_FILE=embree-${EMBREE_VERSION}.x86_64.linux.tar.gz
-RUN wget https://github.com/embree/embree/releases/download/v${EMBREE_VERSION}/${EMBREE_FILE} \
-   && tar zxvf ${EMBREE_FILE} -C ${DIST_PATH} --strip-components=1 \
-   && rm -rf ${DIST_PATH}/bin ${DIST_PATH}/doc
-
-# Install rk common
-ARG RKCOMMON_VERSION=v1.10.0
-ARG RKCOMMON_SRC=/app/rkcommon
-RUN mkdir ${RKCOMMON_SRC} \
-   && git clone https://github.com/ospray/rkcommon ${RKCOMMON_SRC} \
-   && cd ${RKCOMMON_SRC} \
-   && git checkout ${RKCOMMON_VERSION} \
-   && mkdir build \
-   && cd build \
-   && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=${DIST_PATH} -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   && ninja -j4 install
-
-# Install open vkl
-ARG OPENVKL_VERSION=v1.3.0
-ARG OPENVKL_SRC=/app/openvkl
-RUN mkdir ${OPENVKL_SRC} \
-   && git clone https://github.com/openvkl/openvkl ${OPENVKL_SRC} \
-   && cd ${OPENVKL_SRC} \
-   && git checkout ${OPENVKL_VERSION} \
-   && mkdir build \
-   && cd build \
-   && cmake .. -GNinja -DCMAKE_BUILD_TYPE=Release \
-   -DCMAKE_PREFIX_PATH=${DIST_PATH} \
-   -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   -DBUILD_EXAMPLES=OFF \
-   -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc \
-   && ninja -j4 install
-
 # Install OSPRay
-ARG OSPRAY_TAG=v2.10.5
+ARG OSPRAY_TAG=v3.1.0
 ARG OSPRAY_SRC=/app/ospray
 
 RUN mkdir -p ${OSPRAY_SRC} \
-   && git clone https://github.com/BlueBrain/ospray.git ${OSPRAY_SRC} \
+   && git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC} \
    && cd ${OSPRAY_SRC} \
    && git checkout ${OSPRAY_TAG} \
    && mkdir -p build \
    && cd build \
-   && CMAKE_PREFIX_PATH=${DIST_PATH} cmake .. -GNinja \
-   -DOSPRAY_ENABLE_APPS_TUTORIALS=OFF \
-   -DOSPRAY_ENABLE_APPS_BENCHMARK=OFF \
-   -DOSPRAY_ENABLE_APPS_EXAMPLES=OFF \
-   -DOSPRAY_ENABLE_APPS_TESTING=OFF \
-   -DOSPRAY_APPS_ENABLE_GLM=OFF \
-   -DOSPRAY_MODULE_DENOISER=OFF \
+   && cmake ../scripts/superbuild \
+   -DCMAKE_BUILD_TYPE=Release \
+   -DINSTALL_IN_SEPARATE_DIRECTORIES=OFF \
+   -DBUILD_GLFW=OFF \
+   -DBUILD_OIDN=OFF \
+   -DBUILD_OSPRAY_APPS=OFF \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   -DISPC_EXECUTABLE=${ISPC_PATH}/bin/ispc \
-   && ninja -j4 install
+   && cmake --build .
 
 # Set working dir and copy Brayns assets
 ARG BRAYNS_SRC=/app/brayns
@@ -113,13 +56,15 @@ ADD . ${BRAYNS_SRC}
 RUN cd ${BRAYNS_SRC} \
    && mkdir -p build \
    && cd build \
-   && CMAKE_PREFIX_PATH=${DIST_PATH} \
-   cmake ..  \
+   && cmake ..  \
+   -GNinja \
+   -DCMAKE_PREFIX_PATH=${DIST_PATH} \
    -DBRAYNS_ENABLE_TESTS=OFF \
    -DCMAKE_BUILD_TYPE=Release \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
 
-RUN cd ${BRAYNS_SRC}/build && make -j4 install \
+RUN cd ${BRAYNS_SRC}/build \
+   && ninja -j4 install \
    && rm -rf ${DIST_PATH}/include ${DIST_PATH}/cmake ${DIST_PATH}/share
 
 # Final image, containing only Brayns and libraries required to run it
@@ -143,7 +88,7 @@ RUN apt-get update \
 COPY --from=builder ${DIST_PATH} ${DIST_PATH}
 
 # Add binaries from dist to the PATH
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib:${BOOST_LIB}:/${DIST_PATH}/lib/intel64/gcc4.8
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:${DIST_PATH}/lib:/${DIST_PATH}/lib/intel64/gcc4.8
 ENV PATH ${DIST_PATH}/bin:$PATH
 
 # Expose a port from the container

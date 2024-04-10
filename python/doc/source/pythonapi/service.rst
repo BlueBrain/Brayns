@@ -7,7 +7,7 @@ service
 -------
 
 .. automodule:: brayns.service.service
-    :members: LogLevel, Plugin, Service, SslServerContext
+    :members: LogLevel, Service, SslServerContext
     :undoc-members:
     :show-inheritance:
 

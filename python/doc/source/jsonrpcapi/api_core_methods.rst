@@ -4251,14 +4251,6 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
     {
         "type": "object",
         "properties": {
-            "plugins": {
-                "description": "Plugins loaded when the application was started",
-                "type": "array",
-                "readOnly": true,
-                "items": {
-                    "type": "string"
-                }
-            },
             "viewport": {
                 "description": "Framebuffer resolution in pixels",
                 "type": "array",
@@ -4270,9 +4262,6 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "maxItems": 2
             }
         },
-        "required": [
-            "plugins"
-        ],
         "additionalProperties": false
     }
 
@@ -4732,41 +4721,6 @@ Returns the material of the given model as a emissive material, if possible.
                 "minimum": 0
             }
         },
-        "additionalProperties": false
-    }
-
-----
-
-get-material-ghost
-~~~~~~~~~~~~~~~~~~
-
-Returns the material of the given model as a ghost material, if possible.
-
-**Params**:
-
-.. jsonschema::
-
-    {
-        "type": "object",
-        "properties": {
-            "id": {
-                "description": "Model ID",
-                "type": "integer",
-                "minimum": 0
-            }
-        },
-        "required": [
-            "id"
-        ],
-        "additionalProperties": false
-    }
-
-**Result**:
-
-.. jsonschema::
-
-    {
-        "type": "object",
         "additionalProperties": false
     }
 
@@ -5823,7 +5777,7 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
 get-version
 ~~~~~~~~~~~
 
-Get Brayns instance version.
+Get Brayns version.
 
 **Params**:
 
@@ -5836,6 +5790,11 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
     {
         "type": "object",
         "properties": {
+            "copyright": {
+                "description": "Copyright statement",
+                "type": "string",
+                "readOnly": true
+            },
             "major": {
                 "description": "Major version",
                 "type": "integer",
@@ -5852,16 +5811,23 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "readOnly": true
             },
             "pre_release": {
-                "description": "Pre-release (empty for production)",
+                "description": "Pre-release",
+                "type": "integer",
+                "readOnly": true
+            },
+            "tag": {
+                "description": "Full tag major.minor.path[-preRelease]",
                 "type": "string",
                 "readOnly": true
             }
         },
         "required": [
+            "copyright",
             "major",
             "minor",
             "patch",
-            "pre_release"
+            "pre_release",
+            "tag"
         ],
         "additionalProperties": false
     }
@@ -6442,14 +6408,6 @@ Set the current state of the application parameters.
     {
         "type": "object",
         "properties": {
-            "plugins": {
-                "description": "Plugins loaded when the application was started",
-                "type": "array",
-                "readOnly": true,
-                "items": {
-                    "type": "string"
-                }
-            },
             "viewport": {
                 "description": "Framebuffer resolution in pixels",
                 "type": "array",
@@ -6461,9 +6419,6 @@ Set the current state of the application parameters.
                 "maxItems": 2
             }
         },
-        "required": [
-            "plugins"
-        ],
         "additionalProperties": false
     }
 
@@ -6809,44 +6764,6 @@ Updates the material of the given model to an emisive material. This material is
                         "minimum": 0
                     }
                 },
-                "additionalProperties": false
-            },
-            "model_id": {
-                "description": "ID of the model to apply the material",
-                "type": "integer",
-                "minimum": 0
-            }
-        },
-        "required": [
-            "material",
-            "model_id"
-        ],
-        "additionalProperties": false
-    }
-
-**Result**:
-
-This entrypoint has no result, the "result" field is still present but is always
-null.
-
-----
-
-set-material-ghost
-~~~~~~~~~~~~~~~~~~
-
-Updates the material of the given model to a ghost material. The ghost effect is only visible with the interactive renderer..
-
-**Params**:
-
-.. jsonschema::
-
-    {
-        "type": "object",
-        "properties": {
-            "material": {
-                "title": "Ghost",
-                "description": "Material parameters",
-                "type": "object",
                 "additionalProperties": false
             },
             "model_id": {

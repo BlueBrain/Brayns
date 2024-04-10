@@ -47,7 +47,7 @@ material
 --------
 
 .. automodule:: brayns.core.material
-    :members: CarPaintMaterial, EmissiveMaterial, get_material_name, get_material, GhostMaterial, GlassMaterial, Material, MatteMaterial, MetalMaterial, PhongMaterial, PlasticMaterial, PrincipledMaterial, set_material
+    :members: CarPaintMaterial, EmissiveMaterial, get_material_name, get_material, GlassMaterial, Material, MatteMaterial, MetalMaterial, PhongMaterial, PlasticMaterial, PrincipledMaterial, set_material
     :undoc-members:
     :show-inheritance:
 

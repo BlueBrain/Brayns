@@ -74,9 +74,6 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(test.intensity, 2)
         self.assertEqual(test.color, brayns.Color3.red)
 
-    def test_ghost(self) -> None:
-        self.assertEqual(brayns.GhostMaterial.name, "ghost")
-
     def test_glass(self) -> None:
         self.assertEqual(brayns.GlassMaterial.name, "glass")
         test = brayns.GlassMaterial(2.5)
