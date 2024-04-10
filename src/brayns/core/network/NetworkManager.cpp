@@ -123,7 +123,6 @@ public:
         builder.add<brayns::GetLoadersEntrypoint>(loaders);
         builder.add<brayns::GetMaterialCarPaint>(models);
         builder.add<brayns::GetMaterialEmissive>(models);
-        builder.add<brayns::GetMaterialGhost>(models);
         builder.add<brayns::GetMaterialGlass>(models);
         builder.add<brayns::GetMaterialMatte>(models);
         builder.add<brayns::GetMaterialMetal>(models);
@@ -152,7 +151,6 @@ public:
         builder.add<brayns::SetColorRampEntrypoint>(models);
         builder.add<brayns::SetMaterialCarPaint>(models);
         builder.add<brayns::SetMaterialEmissive>(models);
-        builder.add<brayns::SetMaterialGhost>(models);
         builder.add<brayns::SetMaterialGlass>(models);
         builder.add<brayns::SetMaterialMatte>(models);
         builder.add<brayns::SetMaterialMetal>(models);

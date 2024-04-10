@@ -159,29 +159,6 @@ class GlassMaterial(Material):
 
 
 @dataclass
-class GhostMaterial(Material):
-    """Ghost material."""
-
-    @classmethod
-    @property
-    def name(cls) -> str:
-        """Get the material name.
-
-        :return: Material name
-        :rtype: str
-        """
-        return "ghost"
-
-    def get_properties(self) -> dict[str, Any]:
-        """Low level API to serialize to JSON."""
-        return {}
-
-    def update_properties(self, message: dict[str, Any]) -> None:
-        """Low level API to deserialize from JSON."""
-        pass
-
-
-@dataclass
 class MatteMaterial(Material):
     """Matte material.
 

@@ -38,10 +38,6 @@ class TestMaterial(SimpleTestCase):
         )
         self.run_tests(material)
 
-    def test_ghost(self) -> None:
-        material = brayns.GhostMaterial()
-        self.run_tests(material)
-
     def test_glass(self) -> None:
         material = brayns.GlassMaterial(
             refraction_index=2,

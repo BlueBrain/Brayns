@@ -47,7 +47,7 @@ public:
     Material(MaterialType data = MaterialType()):
         _handleName(MaterialTraits<MaterialType>::handleName),
         _materialName(MaterialTraits<MaterialType>::name),
-        _handle("", _handleName),
+        _handle(_handleName),
         _data(std::make_unique<Data<MaterialType>>(std::move(data)))
     {
         _data->pushTo(_handle);
