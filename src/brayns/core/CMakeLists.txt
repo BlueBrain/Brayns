@@ -8,19 +8,24 @@ brayns_library(core)
 
 set_target_properties(core PROPERTIES OUTPUT_NAME braynsCore)
 
+target_include_directories(
+    core
+    SYSTEM
+    PRIVATE
+    deps
+)
+
 target_link_libraries(
     core
     PUBLIC
     OpenMP::OpenMP_CXX
-    rkcommon::rkcommon
-    spdlog::spdlog
+    ospray::ospray
     Poco::Foundation
     Poco::JSON
     Poco::Net
     Poco::NetSSL
-    ospray::ospray
+    rkcommon::rkcommon
+    spdlog::spdlog
     PRIVATE
-    stb
-    tinyexr
     ${ZLIB_LIBRARIES}
 )

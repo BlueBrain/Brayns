@@ -14,17 +14,8 @@ ubuntu-clangformat-check:
   script:
     - apt update && apt install -y git clang-format-15
     - cd $CI_PROJECT_DIR
-    - CLANG_FORMAT_EXTENSIONS="\.[cmh]$|\.[chi]pp$"
-    - if [ -f .clang-format ]; then
-    - if find . | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-15 -style=file -fallback-style=none -output-replacements-xml | grep "<replacement " >/dev/null ; then
-    - echo "clang-format check failed - commit does not match coding style"
-    - find . | grep -E "$CLANG_FORMAT_EXTENSIONS" | xargs -n1 clang-format-15 -i -style=file -fallback-style=none
-    - git diff
-    - exit 1
-    - else
-    - echo "clang-format check successful"
-    - fi
-    - fi
+    - SOURCES=$(bash scripts/find_sources.sh)
+    - clang-format-15 --dry-run --Werror $SOURCES
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
 
@@ -41,10 +32,8 @@ ubuntu-clangformat-check:
     NUM_COMPILE_JOBS: 5
     DIST_PATH: /app/dist
   before_script:
-    - apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y $APT_BASE_PACKAGES $APT_PACKAGES
+    - apt update && DEBIAN_FRONTEND=noninteractive apt install -y $APT_BASE_PACKAGES $APT_PACKAGES
 
-    # Install OSPRay
-    # https://github.com/ospray/ospray/releases
     - OSPRAY_TAG=v3.1.0
     - OSPRAY_SRC=/app/ospray
 
