@@ -9,7 +9,7 @@ apt-get update && apt-get -y --no-install-recommends install \
    cmake \
    git \
    ninja-build \
-   libhdf5-serial-dev \
+   libhdf5-dev \
    wget \
    ca-certificates \
    libssl-dev \
