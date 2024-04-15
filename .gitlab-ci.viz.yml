@@ -10,7 +10,6 @@ ubuntu-clangformat-check:
   stage: test
   image:
     name: ubuntu:22.04
-    entrypoint: [""]
   script:
     - apt update && apt install -y git clang-format-15
     - cd $CI_PROJECT_DIR
@@ -18,51 +17,6 @@ ubuntu-clangformat-check:
     - clang-format-15 --dry-run --Werror $SOURCES
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
-
-.ubuntu-cpp-build:
-  extends: .cmake-ubuntu
-  stage: test
-  variables:
-    APT_PACKAGES: git libhdf5-serial-dev pkg-config wget ca-certificates libssl-dev libwebsockets-dev zlib1g-dev libbz2-dev python3.9
-    CMAKE_ARGS: -DCMAKE_PREFIX_PATH=/app/dist
-    KUBERNETES_CPU_LIMIT: 5
-    KUBERNETES_CPU_REQUEST: 5
-    KUBERNETES_MEMORY_LIMIT: 8Gi
-    KUBERNETES_MEMORY_REQUEST: 8Gi
-    NUM_COMPILE_JOBS: 5
-    DIST_PATH: /app/dist
-  before_script:
-    - apt update && DEBIAN_FRONTEND=noninteractive apt install -y $APT_BASE_PACKAGES $APT_PACKAGES
-
-    - OSPRAY_TAG=v3.1.0
-    - OSPRAY_SRC=/app/ospray
-
-    - mkdir -p ${OSPRAY_SRC}
-    - git clone https://github.com/ospray/ospray.git ${OSPRAY_SRC}
-    - pushd ${OSPRAY_SRC}
-    - git checkout ${OSPRAY_TAG}
-    - mkdir -p build
-    - pushd build
-    - cmake ../scripts/superbuild -DCMAKE_BUILD_TYPE=Release -DINSTALL_IN_SEPARATE_DIRECTORIES=OFF -DBUILD_GLFW=OFF -DBUILD_OIDN=OFF -DBUILD_OSPRAY_APPS=OFF -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
-    - cmake --build .
-    - popd
-    - popd
-
-    - cd $CI_PROJECT_DIR
-  rules:
-    - if: $GITHUB_PULL_REQUEST_ID
-
-ubuntu-cpp-release-build:
-  extends: .ubuntu-cpp-build
-  stage: test
-  variables:
-    CMAKE_BUILD_TYPE: Release
-
-ubuntu-cpp-debug-build:
-  extends: .ubuntu-cpp-build
-  stage: test
-  variables:
-    CMAKE_BUILD_TYPE: Debug
 
 docker-build:
   variables:
