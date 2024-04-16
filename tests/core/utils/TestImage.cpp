@@ -23,7 +23,7 @@
 #include <brayns/core/utils/image/ImageEncoder.h>
 #include <brayns/core/utils/image/ImageFormat.h>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 #include <filesystem>
 

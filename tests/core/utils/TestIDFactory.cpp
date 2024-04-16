@@ -19,7 +19,7 @@
 
 #include <brayns/core/utils/IDFactory.h>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 TEST_CASE("ID factory")
 {

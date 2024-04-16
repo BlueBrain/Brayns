@@ -13,33 +13,7 @@ ubuntu-clangformat-check:
   script:
     - apt update && apt install -y git clang-format-15
     - cd $CI_PROJECT_DIR
-    - SOURCES=$(bash scripts/find_sources.sh)
+    - SOURCES=$(find apps src tests \( -name "*.h" -or -name "*.cpp" \))
     - clang-format-15 --dry-run --Werror $SOURCES
   rules:
     - if: $GITHUB_PULL_REQUEST_ID
-
-docker-build:
-  variables:
-    KUBERNETES_CPU_LIMIT: 4
-    KUBERNETES_CPU_REQUEST: 4
-    KUBERNETES_MEMORY_LIMIT: 8Gi
-    KUBERNETES_MEMORY_REQUEST: 8Gi
-  extends: .build-image-using-kaniko
-  before_script:
-    # We need to overwrite CI_REGISTRY variable so it does not point to CI/CD variable:
-    # "https://index.docker.io/v1/". Otherwise we run into 401 Unauthorized as
-    # CI_REGISTRY_PASSWORD is a protected variable i.e. not available for regular CI jobs.
-    # And as per https://gitlab.com/gitlab-org/gitlab-runner/-/issues/3555:
-    # we cannot overwrite predefined CI/CD variables in "variables" section, hence the hack
-    - export CI_REGISTRY=""
-  rules:
-    - if: $GITHUB_PULL_REQUEST_ID
-
-docker-publish-to-dockerhub:
-  variables:
-    KUBERNETES_CPU_LIMIT: 4
-    KUBERNETES_CPU_REQUEST: 4
-    KUBERNETES_MEMORY_LIMIT: 8Gi
-    KUBERNETES_MEMORY_REQUEST: 8Gi
-    CI_REGISTRY_IMAGE: bluebrain/brayns
-  extends: .publish-image-using-kaniko

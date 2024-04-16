@@ -29,7 +29,7 @@
 
 #include "PlaceholderEngine.h"
 
-#include "TestCase.h"
+#include <doctest.h>
 
 TEST_CASE("Primitive color method")
 {

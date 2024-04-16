@@ -15,6 +15,7 @@ ARG BRAYNS_SRC=/app/Brayns
 # Copy Brayns assets
 COPY apps ${BRAYNS_SRC}/apps
 COPY cmake ${BRAYNS_SRC}/cmake
+COPY deps ${BRAYNS_SRC}/deps
 COPY scripts/superbuild/CMakeLists.txt ${BRAYNS_SRC}/scripts/superbuild/CMakeLists.txt
 COPY scripts/install_packages.sh ${BRAYNS_SRC}/scripts/install_packages.sh
 COPY src ${BRAYNS_SRC}/src

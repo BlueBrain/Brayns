@@ -20,7 +20,7 @@
 #include <memory>
 #include <string>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 #include <brayns/core/network/common/CancellationToken.h>
 #include <brayns/core/network/common/ProgressHandler.h>

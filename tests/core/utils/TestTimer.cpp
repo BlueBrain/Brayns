@@ -19,7 +19,7 @@
 
 #include <brayns/core/utils/Timer.h>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 #include <thread>
 

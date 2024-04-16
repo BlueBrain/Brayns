@@ -60,6 +60,7 @@ else()
     add_compile_options(-Wall -Wextra -Wconversion -Werror)
 endif()
 
+add_subdirectory(deps)
 add_subdirectory(src)
 
 if(BRAYNS_ENABLE_APPS)

@@ -26,7 +26,7 @@
 #include <brayns/core/utils/string/StringSplitter.h>
 #include <brayns/core/utils/string/StringTrimmer.h>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 #include <stdexcept>
 

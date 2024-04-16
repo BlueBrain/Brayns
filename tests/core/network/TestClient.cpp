@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 #include <brayns/core/network/client/ClientRef.h>
 #include <brayns/core/network/client/ClientRequest.h>

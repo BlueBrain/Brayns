@@ -8,13 +8,6 @@ brayns_library(core)
 
 set_target_properties(core PROPERTIES OUTPUT_NAME braynsCore)
 
-target_include_directories(
-    core
-    SYSTEM
-    PRIVATE
-    deps
-)
-
 target_link_libraries(
     core
     PUBLIC
@@ -28,4 +21,6 @@ target_link_libraries(
     spdlog::spdlog
     PRIVATE
     ${ZLIB_LIBRARIES}
+    stb
+    tinyexr
 )

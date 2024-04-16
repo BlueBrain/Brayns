@@ -22,7 +22,7 @@
 #include <brayns/core/utils/parsing/Parser.h>
 #include <brayns/core/utils/parsing/TokenExtractor.h>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 TEST_CASE("Chunk extractor")
 {

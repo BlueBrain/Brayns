@@ -19,7 +19,7 @@
 
 #include <brayns/core/utils/ModifiedFlag.h>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 TEST_CASE("Modified flag")
 {

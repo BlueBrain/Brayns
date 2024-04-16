@@ -19,7 +19,7 @@
 
 #include <brayns/core/utils/binary/ByteConverter.h>
 
-#include "TestCase.h"
+#include <doctest.h>
 
 TEST_CASE("Raw bytes")
 {

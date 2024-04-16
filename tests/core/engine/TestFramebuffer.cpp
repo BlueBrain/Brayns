@@ -18,7 +18,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TestCase.h"
+#include <doctest.h>
 
 #include <brayns/core/engine/framebuffer/Framebuffer.h>
 #include <brayns/core/engine/framebuffer/types/ProgressiveFrameHandler.h>
