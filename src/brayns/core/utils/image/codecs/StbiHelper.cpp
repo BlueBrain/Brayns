@@ -33,8 +33,6 @@
 
 #include <brayns/core/utils/parsing/Parser.h>
 
-#pragma GCC diagnostic pop
-
 namespace
 {
 using namespace brayns;

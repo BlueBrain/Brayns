@@ -12,15 +12,15 @@ target_link_libraries(
     core
     PUBLIC
     OpenMP::OpenMP_CXX
-    rkcommon::rkcommon
-    spdlog::spdlog
+    ospray::ospray
     Poco::Foundation
     Poco::JSON
     Poco::Net
     Poco::NetSSL
-    ospray::ospray
+    rkcommon::rkcommon
+    spdlog::spdlog
     PRIVATE
+    ${ZLIB_LIBRARIES}
     stb
     tinyexr
-    ${ZLIB_LIBRARIES}
 )

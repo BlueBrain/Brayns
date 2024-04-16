@@ -6,7 +6,7 @@
 #
 # This file is part of Brayns <https://github.com/BlueBrain/Brayns>
 
-file(GLOB_RECURSE TEST_SOURCES unit/Test*.cpp)
+file(GLOB_RECURSE TEST_SOURCES core/Test*.cpp)
 
 foreach(TEST_SOURCE ${TEST_SOURCES})
     get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WLE)

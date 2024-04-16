@@ -1,0 +1,122 @@
+# Copyright (c) 2015-2024, EPFL/Blue Brain Project
+# All rights reserved. Do not distribute without permission.
+# Responsible Author: Adrien Fleury <adrien.fleury@epfl.ch>
+#
+# This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+
+cmake_minimum_required(VERSION 3.15 FATAL_ERROR)
+
+project(BraynsSuperbuild)
+
+option(CMAKE_BUILD_TYPE "CMake build type" Release)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BRAYNS_ENABLE_INSTALL "Install Brayns with dependencies" OFF)
+
+include(ExternalProject)
+
+ExternalProject_Add(
+    libsonata
+    GIT_REPOSITORY https://github.com/BlueBrain/libsonata.git
+    GIT_TAG v0.1.25
+    GIT_SHALLOW ON
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+    -DEXTLIB_FROM_SUBMODULES=ON
+    -DSONATA_TESTS=OFF
+)
+
+ExternalProject_Add(
+    morphio
+    GIT_REPOSITORY https://github.com/BlueBrain/morphio.git
+    GIT_TAG v3.3.7
+    GIT_SHALLOW ON
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+    -DBUILD_BINDINGS=OFF
+    -DMORPHIO_TESTS=OFF
+)
+
+ExternalProject_Add(
+    ospray
+    GIT_REPOSITORY https://github.com/ospray/ospray.git
+    GIT_TAG v3.1.0
+    GIT_SHALLOW ON
+    SOURCE_SUBDIR scripts/superbuild
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DINSTALL_IN_SEPARATE_DIRECTORIES=OFF
+    -DBUILD_TBB_FROM_SOURCE=ON
+    -DBUILD_EMBREE_FROM_SOURCE=ON
+    -DBUILD_GLFW=OFF
+    -DBUILD_OSPRAY_APPS=OFF
+    -DBUILD_OIDN=OFF
+    INSTALL_COMMAND ""
+)
+
+ExternalProject_Add(
+    poco
+    GIT_REPOSITORY https://github.com/pocoproject/poco.git
+    GIT_TAG poco-1.13.3-release
+    GIT_SHALLOW ON
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+    -DENABLE_JWT=OFF
+    -DENABLE_APACHECONNECTOR=OFF
+    -DENABLE_DATA=OFF
+    -DENABLE_DATA_MYSQL=OFF
+    -DENABLE_DATA_POSTGRESQL=OFF
+    -DENABLE_DATA_ODBC=OFF
+    -DENABLE_ENCODINGS=OFF
+    -DENABLE_ENCODINGS_COMPILER=OFF
+    -DENABLE_XML=OFF
+    -DENABLE_MONGODB=OFF
+    -DENABLE_DATA_SQLITE=OFF
+    -DENABLE_REDIS=OFF
+    -DENABLE_PROMETHEUS=OFF
+    -DENABLE_PDF=OFF
+    -DENABLE_UTIL=OFF
+    -DENABLE_ZIP=OFF
+    -DENABLE_PAGECOMPILER=OFF
+    -DENABLE_PAGECOMPILER_FILE2PAGE=OFF
+    -DENABLE_ACTIVERECORD=OFF
+    -DENABLE_ACTIVERECORD_COMPILER=OFF
+)
+
+ExternalProject_Add(
+    spdlog
+    GIT_REPOSITORY https://github.com/gabime/spdlog.git
+    GIT_TAG v1.13.0
+    GIT_SHALLOW ON
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+)
+
+if(BRAYNS_ENABLE_INSTALL)
+    ExternalProject_Add(
+        Brayns
+        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../..
+        CMAKE_ARGS
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+        -DBRAYNS_ENABLE_TESTS=OFF
+    )
+    ExternalProject_Add_StepDependencies(
+        Brayns
+        configure
+        libsonata
+        morphio
+        ospray
+        poco
+        spdlog
+    )
+endif()
