@@ -34,7 +34,7 @@
 #include <brayns/core/utils/Log.h>
 #include <brayns/core/utils/Timer.h>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <array>
 #include <filesystem>

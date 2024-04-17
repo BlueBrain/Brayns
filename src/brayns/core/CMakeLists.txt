@@ -11,6 +11,7 @@ set_target_properties(core PROPERTIES OUTPUT_NAME braynsCore)
 target_link_libraries(
     core
     PUBLIC
+    fmt::fmt
     OpenMP::OpenMP_CXX
     ospray::ospray
     Poco::Foundation
@@ -18,7 +19,6 @@ target_link_libraries(
     Poco::Net
     Poco::NetSSL
     rkcommon::rkcommon
-    spdlog::spdlog
     PRIVATE
     ${ZLIB_LIBRARIES}
     stb

@@ -25,7 +25,7 @@
 #include <brayns/core/engine/components/ColorSolid.h>
 #include <brayns/core/engine/components/GeometryViews.h>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 namespace
 {

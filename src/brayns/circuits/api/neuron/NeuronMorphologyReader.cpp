@@ -18,7 +18,7 @@
 
 #include "NeuronMorphologyReader.h"
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <morphio/morphology.h>
 #include <morphio/section.h>

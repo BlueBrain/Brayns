@@ -27,7 +27,7 @@
 #include <type_traits>
 #include <unordered_map>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/JSONException.h>

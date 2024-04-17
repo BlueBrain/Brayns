@@ -21,9 +21,10 @@
 
 #pragma once
 
-#define SPDLOG_HEADER_ONLY
-#include <spdlog/fmt/ostr.h>
-#include <spdlog/spdlog.h>
+#include <string>
+#include <string_view>
+
+#include <fmt/format.h>
 
 #include <brayns/core/utils/EnumInfo.h>
 
@@ -35,14 +36,14 @@ namespace brayns
  */
 enum class LogLevel
 {
-    Trace = spdlog::level::trace,
-    Debug = spdlog::level::debug,
-    Info = spdlog::level::info,
-    Warn = spdlog::level::warn,
-    Error = spdlog::level::err,
-    Critical = spdlog::level::critical,
-    Off = spdlog::level::off,
-    Count = spdlog::level::n_levels
+    Trace,
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Critical,
+    Off,
+    Count,
 };
 
 template<>
@@ -78,7 +79,12 @@ public:
     template<typename... Args>
     static void log(LogLevel level, fmt::format_string<Args...> format, Args &&...args)
     {
-        _logger->log(spdlog::level::level_enum(level), format, std::forward<Args>(args)...);
+        if (level < _level)
+        {
+            return;
+        }
+        auto message = fmt::format(format, std::forward<Args>(args)...);
+        _handleMessage(level, message);
     }
 
     /**
@@ -160,6 +166,8 @@ public:
     }
 
 private:
-    static std::shared_ptr<spdlog::logger> _logger;
+    static inline LogLevel _level = LogLevel::Info;
+
+    static void _handleMessage(LogLevel level, std::string_view message);
 };
 } // namespace brayns
