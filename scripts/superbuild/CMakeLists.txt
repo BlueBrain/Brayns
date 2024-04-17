@@ -113,10 +113,10 @@ if(BRAYNS_ENABLE_INSTALL)
     ExternalProject_Add_StepDependencies(
         Brayns
         configure
+        fmt
         libsonata
         morphio
         ospray
         poco
-        spdlog
     )
 endif()
