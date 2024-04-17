@@ -26,7 +26,7 @@
 #include <variant>
 #include <vector>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 namespace brayns
 {

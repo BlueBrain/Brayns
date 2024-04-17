@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <brayns/core/network/websocket/InputPacket.h>
 

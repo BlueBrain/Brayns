@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <unordered_set>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 namespace
 {

@@ -24,7 +24,7 @@
 #include <functional>
 #include <typeindex>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <brayns/core/json/JsonAdapter.h>
 

@@ -23,7 +23,7 @@
 #include <brayns/circuits/io/sonataloader/data/Names.h>
 #include <brayns/circuits/io/sonataloader/data/PopulationType.h>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <filesystem>
 #include <unordered_set>

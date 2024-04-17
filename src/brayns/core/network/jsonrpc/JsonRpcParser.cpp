@@ -21,7 +21,7 @@
 
 #include "JsonRpcParser.h"
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <brayns/core/json/Json.h>
 

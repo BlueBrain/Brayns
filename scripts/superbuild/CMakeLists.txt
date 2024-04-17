@@ -15,6 +15,17 @@ option(BRAYNS_ENABLE_INSTALL "Install Brayns with dependencies" OFF)
 include(ExternalProject)
 
 ExternalProject_Add(
+    fmt
+    GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+    GIT_TAG 10.2.1
+    GIT_SHALLOW ON
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+)
+
+ExternalProject_Add(
     libsonata
     GIT_REPOSITORY https://github.com/BlueBrain/libsonata.git
     GIT_TAG v0.1.25
@@ -89,17 +100,6 @@ ExternalProject_Add(
     -DENABLE_ACTIVERECORD_COMPILER=OFF
 )
 
-ExternalProject_Add(
-    spdlog
-    GIT_REPOSITORY https://github.com/gabime/spdlog.git
-    GIT_TAG v1.13.0
-    GIT_SHALLOW ON
-    CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-)
-
 if(BRAYNS_ENABLE_INSTALL)
     ExternalProject_Add(
         Brayns
@@ -113,10 +113,10 @@ if(BRAYNS_ENABLE_INSTALL)
     ExternalProject_Add_StepDependencies(
         Brayns
         configure
+        fmt
         libsonata
         morphio
         ospray
         poco
-        spdlog
     )
 endif()

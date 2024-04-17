@@ -23,7 +23,7 @@
 
 #include <cassert>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <brayns/core/utils/Log.h>
 

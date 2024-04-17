@@ -25,7 +25,7 @@
 #include <brayns/core/utils/string/StringInfo.h>
 #include <brayns/core/utils/string/StringParser.h>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <stdexcept>

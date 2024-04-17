@@ -24,7 +24,7 @@
 #include <functional>
 #include <memory>
 
-#include <spdlog/fmt/fmt.h>
+#include <fmt/format.h>
 
 #include <brayns/core/network/websocket/IWebSocket.h>
 

@@ -25,7 +25,7 @@
 #include <brayns/core/utils/string/StringSplitter.h>
 #include <brayns/core/utils/string/StringTrimmer.h>
 
-#include <spdlog/fmt/bundled/printf.h>
+#include <fmt/printf.h>
 
 namespace
 {

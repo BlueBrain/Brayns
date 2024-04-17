@@ -21,26 +21,7 @@
 
 #include "Log.h"
 
-#include <spdlog/sinks/stdout_color_sinks.h>
-
-namespace
-{
-class LoggerFactory
-{
-public:
-    static std::shared_ptr<spdlog::logger> createLogger()
-    {
-        auto logger = spdlog::stdout_color_mt("Brayns");
-        logger->set_pattern("%^[%l][%T] %v%$");
-#ifdef NDEBUG
-        logger->set_level(spdlog::level::info);
-#else
-        logger->set_level(spdlog::level::debug);
-#endif
-        return logger;
-    }
-};
-} // namespace
+#include <iostream>
 
 namespace brayns
 {
@@ -60,7 +41,7 @@ EnumMap<LogLevel> EnumReflector<LogLevel>::reflect()
 
 void Log::setLevel(LogLevel level)
 {
-    _logger->set_level(spdlog::level::level_enum(level));
+    _level = level;
 }
 
 void Log::disable()
@@ -68,5 +49,10 @@ void Log::disable()
     setLevel(LogLevel::Off);
 }
 
-std::shared_ptr<spdlog::logger> Log::_logger = LoggerFactory::createLogger();
+void Log::_handleMessage(LogLevel level, std::string_view message)
+{
+    auto &levelName = EnumInfo::getName(level);
+    auto record = fmt::format("[Brayns][{}] {}", levelName, message);
+    std::cout << record << '\n';
+}
 } // namespace brayns
