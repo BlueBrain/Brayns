@@ -21,6 +21,8 @@
 
 #include "Geometry.h"
 
+#include <string>
+
 #include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace

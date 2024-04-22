@@ -26,6 +26,7 @@
 #include <brayns/core/utils/Logger.h>
 
 #include "Geometry.h"
+#include "Light.h"
 #include "Volume.h"
 
 namespace brayns
@@ -52,6 +53,12 @@ public:
 
     VolumeModel createVolumeModel(ospray::cpp::Volume volume);
     GeometryModel createGeometryModel(ospray::cpp::Geometry geometry);
+
+    DistantLight createDistantLight();
+    SphereLight createSphereLight();
+    SpotLight createSpotLight();
+    QuadLight createQuadLight();
+    AmbientLight createAmbientLight();
 
 private:
     ospray::cpp::Device _device;

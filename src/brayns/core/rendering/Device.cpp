@@ -92,6 +92,36 @@ GeometryModel Device::createGeometryModel(ospray::cpp::Geometry geometry)
     return GeometryModel(std::move(model));
 }
 
+DistantLight Device::createDistantLight()
+{
+    auto light = ospray::cpp::Light("distant");
+    return DistantLight(std::move(light));
+}
+
+SphereLight Device::createSphereLight()
+{
+    auto light = ospray::cpp::Light("sphere");
+    return SphereLight(std::move(light));
+}
+
+SpotLight Device::createSpotLight()
+{
+    auto light = ospray::cpp::Light("spot");
+    return SpotLight(std::move(light));
+}
+
+QuadLight Device::createQuadLight()
+{
+    auto light = ospray::cpp::Light("quad");
+    return QuadLight(std::move(light));
+}
+
+AmbientLight Device::createAmbientLight()
+{
+    auto light = ospray::cpp::Light("ambient");
+    return AmbientLight(std::move(light));
+}
+
 Device createDevice(Logger &logger)
 {
     auto currentDevice = ospray::cpp::Device::current();
