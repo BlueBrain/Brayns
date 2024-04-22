@@ -31,12 +31,14 @@ namespace math = rkcommon::math;
 /**
  * Vector definitions
  */
+using Vector2ui = math::vec2ui;
 using Vector2i = math::vec2i;
 using Vector2l = math::vec2l;
+
+using Vector3ui = math::vec3ui;
 using Vector3i = math::vec3i;
 using Vector3l = math::vec3l;
 
-using Vector2ui = math::vec2ui;
 using Vector2ul = math::vec2ul;
 using Vector3ul = math::vec3ul;
 

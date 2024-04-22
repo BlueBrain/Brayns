@@ -38,6 +38,60 @@ Device::~Device()
     }
 }
 
+StructuredRegularVolume Device::createStructuredRegularVolume()
+{
+    auto volume = ospray::cpp::Volume("structuredRegular");
+    return StructuredRegularVolume(std::move(volume));
+}
+
+MeshGeometry Device::createMesh()
+{
+    auto geometry = ospray::cpp::Geometry("mesh");
+    return MeshGeometry(std::move(geometry));
+}
+
+SphereGeometry Device::createSpheres()
+{
+    auto geometry = ospray::cpp::Geometry("sphere");
+    return SphereGeometry(std::move(geometry));
+}
+
+CurveGeometry Device::createCurve()
+{
+    auto geometry = ospray::cpp::Geometry("curve");
+    return CurveGeometry(std::move(geometry));
+}
+
+BoxGeometry Device::createBoxes()
+{
+    auto geometry = ospray::cpp::Geometry("box");
+    return BoxGeometry(std::move(geometry));
+}
+
+PlaneGeometry Device::createPlanes()
+{
+    auto geometry = ospray::cpp::Geometry("plane");
+    return PlaneGeometry(std::move(geometry));
+}
+
+IsosurfaceGeometry Device::createIsoSurfaces()
+{
+    auto geometry = ospray::cpp::Geometry("isosurface");
+    return IsosurfaceGeometry(std::move(geometry));
+}
+
+VolumeModel Device::createVolumeModel(ospray::cpp::Volume volume)
+{
+    auto model = ospray::cpp::VolumetricModel(volume);
+    return VolumeModel(std::move(model));
+}
+
+GeometryModel Device::createGeometryModel(ospray::cpp::Geometry geometry)
+{
+    auto model = ospray::cpp::GeometricModel(geometry);
+    return GeometryModel(std::move(model));
+}
+
 Device createDevice(Logger &logger)
 {
     auto currentDevice = ospray::cpp::Device::current();

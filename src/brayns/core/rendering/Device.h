@@ -21,11 +21,12 @@
 
 #pragma once
 
-#include <memory>
-
 #include <ospray/ospray_cpp.h>
 
 #include <brayns/core/utils/Logger.h>
+
+#include "Geometry.h"
+#include "Volume.h"
 
 namespace brayns
 {
@@ -39,6 +40,18 @@ public:
     Device(Device &&) = default;
     Device &operator=(const Device &) = delete;
     Device &operator=(Device &&) = default;
+
+    StructuredRegularVolume createStructuredRegularVolume();
+
+    MeshGeometry createMesh();
+    SphereGeometry createSpheres();
+    CurveGeometry createCurve();
+    BoxGeometry createBoxes();
+    PlaneGeometry createPlanes();
+    IsosurfaceGeometry createIsoSurfaces();
+
+    VolumeModel createVolumeModel(ospray::cpp::Volume volume);
+    GeometryModel createGeometryModel(ospray::cpp::Geometry geometry);
 
 private:
     ospray::cpp::Device _device;

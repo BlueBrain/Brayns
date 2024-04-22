@@ -48,6 +48,7 @@ const std::string boxKey = "box";
 const std::string planeCoefficientsKey = "plane.coefficients";
 const std::string planeBoundsKey = "plane.bounds";
 
+const std::string volumeKey = "volume";
 const std::string isovalueKey = "isovalue";
 }
 
@@ -73,7 +74,7 @@ void GeometryModel::invertNormals(bool inverted)
     _model.setParam(invertNormalsKey, inverted);
 }
 
-void GeometryModel::setPerPrimitiveColors(const std::vector<Color4> &colors)
+void GeometryModel::setPrimitiveColors(const std::vector<Color4> &colors)
 {
     _model.setParam(colorKey, ospray::cpp::SharedData(colors));
 }
@@ -103,27 +104,27 @@ ospray::cpp::Geometry MeshGeometry::getHandle() const
     return _geometry;
 }
 
-void MeshGeometry::setPositions(const std::vector<Vector3> &positions)
+void MeshGeometry::setVertexPositions(const std::vector<Vector3> &positions)
 {
     _geometry.setParam(vertexPositionKey, ospray::cpp::SharedData(positions));
 }
 
-void MeshGeometry::setNormals(const std::vector<Vector3> &normals)
+void MeshGeometry::setVertexNormals(const std::vector<Vector3> &normals)
 {
     _geometry.setParam(vertexNormalKey, ospray::cpp::SharedData(normals));
 }
 
-void MeshGeometry::setColors(const std::vector<Color4> &colors)
+void MeshGeometry::setVertexColors(const std::vector<Color4> &colors)
 {
     _geometry.setParam(vertexColorKey, ospray::cpp::SharedData(colors));
 }
 
-void MeshGeometry::setTriangleIndices(const std::vector<Vector3ui> &indices)
+void MeshGeometry::setTriangleIndices(const std::vector<Index3> &indices)
 {
     _geometry.setParam(indexKey, ospray::cpp::SharedData(indices));
 }
 
-void MeshGeometry::setQuadIndices(const std::vector<Vector4ui> &indices)
+void MeshGeometry::setQuadIndices(const std::vector<Index4> &indices)
 {
     _geometry.setParam(indexKey, ospray::cpp::SharedData(indices));
 }
@@ -178,12 +179,12 @@ ospray::cpp::Geometry CurveGeometry::getHandle() const
     return _geometry;
 }
 
-void CurveGeometry::setControlPoints(const std::vector<PositionRadius> &controlPoints)
+void CurveGeometry::setVertexPositionsAndRadii(const std::vector<PositionRadius> &positionsRadii)
 {
-    _geometry.setParam(vertexPositionRadiusKey, ospray::cpp::SharedData(controlPoints));
+    _geometry.setParam(vertexPositionRadiusKey, ospray::cpp::SharedData(positionsRadii));
 }
 
-void CurveGeometry::setPerControlPointColors(const std::vector<Color4> &colors)
+void CurveGeometry::setVertexColors(const std::vector<Color4> &colors)
 {
     _geometry.setParam(vertexColorKey, ospray::cpp::SharedData(colors));
 }
@@ -261,6 +262,11 @@ IsosurfaceGeometry::IsosurfaceGeometry(ospray::cpp::Geometry geometry):
 ospray::cpp::Geometry IsosurfaceGeometry::getHandle() const
 {
     return _geometry;
+}
+
+void IsosurfaceGeometry::setVolume(ospray::cpp::Volume volume)
+{
+    _geometry.setParam(volumeKey, volume);
 }
 
 void IsosurfaceGeometry::setIsovalues(const std::vector<float> &values)

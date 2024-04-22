@@ -28,18 +28,24 @@
 
 namespace brayns
 {
-using Vector3ui = rkcommon::math::vec3ui;
-using Vector4ui = rkcommon::math::vec3ui;
+using Index3 = rkcommon::math::vec3ui;
+using Index4 = rkcommon::math::vec4ui;
 
+using Size3 = rkcommon::math::vec3ul;
+
+using Vector2 = rkcommon::math::vec2f;
 using Vector3 = rkcommon::math::vec3f;
 using Vector4 = rkcommon::math::vec4f;
 
+using Box1 = rkcommon::math::box1f;
+using Box2 = rkcommon::math::box2f;
 using Box3 = rkcommon::math::box3f;
 
-using Color4 = rkcommon::math::vec4f;
 using Color3 = rkcommon::math::vec3f;
+using Color4 = rkcommon::math::vec4f;
 
 using Quaternion = rkcommon::math::quaternionf;
+
 using Affine3 = rkcommon::math::AffineSpace3f;
 
 struct Transform

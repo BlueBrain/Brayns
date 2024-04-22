@@ -21,8 +21,7 @@
 
 #pragma once
 
-#include <cassert>
-#include <typeindex>
+#include <cstdint>
 #include <vector>
 
 #include <ospray/ospray_cpp.h>
@@ -39,7 +38,7 @@ public:
     ospray::cpp::GeometricModel getHandle() const;
     void setId(std::uint32_t id);
     void invertNormals(bool inverted);
-    void setPerPrimitiveColors(const std::vector<Color4> &colors);
+    void setPrimitiveColors(const std::vector<Color4> &colors);
     void setColor(const Color4 &color);
     void removeColors();
     void commit();
@@ -54,11 +53,11 @@ public:
     explicit MeshGeometry(ospray::cpp::Geometry geometry);
 
     ospray::cpp::Geometry getHandle() const;
-    void setPositions(const std::vector<Vector3> &positions);
-    void setNormals(const std::vector<Vector3> &normals);
-    void setColors(const std::vector<Color4> &colors);
-    void setTriangleIndices(const std::vector<Vector3ui> &indices);
-    void setQuadIndices(const std::vector<Vector4ui> &indices);
+    void setVertexPositions(const std::vector<Vector3> &positions);
+    void setVertexNormals(const std::vector<Vector3> &normals);
+    void setVertexColors(const std::vector<Color4> &colors);
+    void setTriangleIndices(const std::vector<Index3> &indices);
+    void setQuadIndices(const std::vector<Index4> &indices);
     void setQuadSoup(bool quadSoup);
     void commit();
 
@@ -103,8 +102,8 @@ public:
     explicit CurveGeometry(ospray::cpp::Geometry geometry);
 
     ospray::cpp::Geometry getHandle() const;
-    void setControlPoints(const std::vector<PositionRadius> &controlPoints);
-    void setPerControlPointColors(const std::vector<Color4> &colors);
+    void setVertexPositionsAndRadii(const std::vector<PositionRadius> &positionsRadii);
+    void setVertexColors(const std::vector<Color4> &colors);
     void setIndices(const std::vector<std::uint32_t> &indices);
     void setType(CurveType type);
     void setBasis(CurveBasis basis);
@@ -147,6 +146,7 @@ public:
     explicit IsosurfaceGeometry(ospray::cpp::Geometry geometry);
 
     ospray::cpp::Geometry getHandle() const;
+    void setVolume(ospray::cpp::Volume volume);
     void setIsovalues(const std::vector<float> &values);
     void setIsovalue(float value);
     void commit();
