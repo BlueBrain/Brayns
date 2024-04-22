@@ -40,7 +40,7 @@ public:
         {
         case brayns::LogLevel::Off:
             return OSPLogLevel::OSP_LOG_NONE;
-        case brayns::LogLevel::Critical:
+        case brayns::LogLevel::Fatal:
         case brayns::LogLevel::Error:
             return OSPLogLevel::OSP_LOG_ERROR;
         case brayns::LogLevel::Warn:
@@ -49,7 +49,6 @@ public:
             return OSPLogLevel::OSP_LOG_INFO;
         case brayns::LogLevel::Debug:
         case brayns::LogLevel::Trace:
-        case brayns::LogLevel::Count:
             return OSPLogLevel::OSP_LOG_DEBUG;
         }
 

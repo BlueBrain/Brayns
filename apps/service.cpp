@@ -73,12 +73,12 @@ int main(int argc, const char **argv)
     }
     catch (const std::exception &e)
     {
-        brayns::Log::critical("Fatal error: '{}'.", e.what());
+        brayns::Log::fatal("Fatal error: '{}'.", e.what());
         return 1;
     }
     catch (...)
     {
-        brayns::Log::critical("Unknown fatal error.");
+        brayns::Log::fatal("Unknown fatal error.");
         return 1;
     }
 

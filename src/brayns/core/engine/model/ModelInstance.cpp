@@ -130,16 +130,16 @@ bool ModelInstance::commit()
 
 TransformMatrix ModelInstance::_getFullTransform() const noexcept
 {
-    auto matrix = _transform.toMatrix();
+    auto matrix = toAffine(_transform);
 
     auto &components = _model->getComponents();
     auto baseTransform = components.find<Transform>();
     if (baseTransform)
     {
-        matrix = matrix * baseTransform->toMatrix();
+        matrix = matrix * toAffine(*baseTransform);
     }
 
-    return matrix;
+    return TransformMatrix(matrix);
 }
 
 void ModelInstance::_updateTransform()

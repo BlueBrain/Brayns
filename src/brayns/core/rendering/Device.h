@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,8 +21,28 @@
 
 #pragma once
 
-#include <brayns/core/utils/MathTypes.h>
+#include <memory>
+
+#include <ospray/ospray_cpp.h>
+
+#include <brayns/core/utils/Logger.h>
 
 namespace brayns
 {
-} // namespace brayns
+class Device
+{
+public:
+    explicit Device(ospray::cpp::Device device);
+    ~Device();
+
+    Device(const Device &) = delete;
+    Device(Device &&) = default;
+    Device &operator=(const Device &) = delete;
+    Device &operator=(Device &&) = default;
+
+private:
+    ospray::cpp::Device _device;
+};
+
+Device createDevice(Logger &logger);
+}

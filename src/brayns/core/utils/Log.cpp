@@ -23,25 +23,22 @@
 
 #include <iostream>
 
-namespace brayns
+namespace
 {
-EnumMap<LogLevel> EnumReflector<LogLevel>::reflect()
+using namespace brayns;
+
+Logger consoleLogger()
 {
-    return {
-        {"trace", LogLevel::Trace},
-        {"debug", LogLevel::Debug},
-        {"info", LogLevel::Info},
-        {"warn", LogLevel::Warn},
-        {"warning", LogLevel::Warn},
-        {"error", LogLevel::Error},
-        {"critical", LogLevel::Critical},
-        {"off", LogLevel::Off},
-    };
+    auto handler = [](const auto &record) { std::cout << toString(record) << '\n'; };
+    return Logger("Brayns", LogLevel::Info, handler);
+}
 }
 
+namespace brayns
+{
 void Log::setLevel(LogLevel level)
 {
-    _level = level;
+    _logger.setLevel(level);
 }
 
 void Log::disable()
@@ -49,10 +46,5 @@ void Log::disable()
     setLevel(LogLevel::Off);
 }
 
-void Log::_handleMessage(LogLevel level, std::string_view message)
-{
-    auto &levelName = EnumInfo::getName(level);
-    auto record = fmt::format("[Brayns][{}] {}", levelName, message);
-    std::cout << record << '\n';
-}
+Logger Log::_logger = consoleLogger();
 } // namespace brayns

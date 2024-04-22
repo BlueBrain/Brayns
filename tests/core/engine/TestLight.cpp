@@ -41,7 +41,8 @@ TEST_CASE("Light bounds")
     BRAYNS_TESTS_PLACEHOLDER_ENGINE
 
     auto noTransform = brayns::TransformMatrix();
-    auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)}.toMatrix();
+    auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)};
+    auto matrix = brayns::toAffine(transform);
 
     auto emptyBounds = brayns::Bounds();
 
@@ -51,7 +52,7 @@ TEST_CASE("Light bounds")
         auto ambientBounds = ambientLight.computeBounds(noTransform);
         CHECK(ambientBounds.getMax() == emptyBounds.getMax());
         CHECK(ambientBounds.getMin() == emptyBounds.getMin());
-        ambientBounds = ambientLight.computeBounds(transform);
+        ambientBounds = ambientLight.computeBounds(matrix);
         CHECK(ambientBounds.getMax() == emptyBounds.getMax());
         CHECK(ambientBounds.getMin() == emptyBounds.getMin());
     }
@@ -61,7 +62,7 @@ TEST_CASE("Light bounds")
         auto directionalBounds = directionalLight.computeBounds(noTransform);
         CHECK(directionalBounds.getMax() == emptyBounds.getMax());
         CHECK(directionalBounds.getMin() == emptyBounds.getMin());
-        directionalBounds = directionalLight.computeBounds(transform);
+        directionalBounds = directionalLight.computeBounds(matrix);
         CHECK(directionalBounds.getMax() == emptyBounds.getMax());
         CHECK(directionalBounds.getMin() == emptyBounds.getMin());
     }
@@ -71,7 +72,7 @@ TEST_CASE("Light bounds")
         auto quadBounds = quadLight.computeBounds(noTransform);
         CHECK(quadBounds.getMin() == brayns::Vector3f(0.f));
         CHECK(quadBounds.getMax() == brayns::Vector3f(1.f, 0.f, 1.f));
-        quadBounds = quadLight.computeBounds(transform);
+        quadBounds = quadLight.computeBounds(matrix);
         CHECK(quadBounds.getMin() == brayns::Vector3f(100.f, 0.f, 0.f));
         CHECK(quadBounds.getMax() == brayns::Vector3f(101.f, 0.f, 1.f));
     }

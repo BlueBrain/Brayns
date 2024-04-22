@@ -22,18 +22,4 @@
 
 namespace brayns
 {
-TransformMatrix Transform::toMatrix() const noexcept
-{
-    return TransformMatrix(translation, rotation, scale);
-}
-
-bool Transform::operator==(const Transform &other) const noexcept
-{
-    return translation == other.translation && rotation == other.rotation && scale == other.scale;
-}
-
-bool Transform::operator!=(const Transform &other) const noexcept
-{
-    return !(*this == other);
-}
 } // namespace brayns

@@ -105,7 +105,8 @@ TEST_CASE("Systems")
         auto systems = brayns::Systems();
         systems.setBoundsSystem<MockBoundsSystem>();
         auto view = brayns::SystemsView(systems, components);
-        auto matrix = brayns::Transform{.translation = brayns::Vector3f(0.f, 0.f, 100.f)}.toMatrix();
+        auto transform = brayns::Transform{.translation = brayns::Vector3f(0.f, 0.f, 100.f)};
+        auto matrix = brayns::toAffine(transform);
 
         CHECK(!components.has<brayns::Vector3f>());
 

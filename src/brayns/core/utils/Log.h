@@ -21,37 +21,12 @@
 
 #pragma once
 
-#include <string>
-#include <string_view>
-
 #include <fmt/format.h>
 
-#include <brayns/core/utils/EnumInfo.h>
+#include "Logger.h"
 
 namespace brayns
 {
-/**
- * @brief Available log levels.
- *
- */
-enum class LogLevel
-{
-    Trace,
-    Debug,
-    Info,
-    Warn,
-    Error,
-    Critical,
-    Off,
-    Count,
-};
-
-template<>
-struct EnumReflector<LogLevel>
-{
-    static EnumMap<LogLevel> reflect();
-};
-
 class Log
 {
 public:
@@ -79,12 +54,7 @@ public:
     template<typename... Args>
     static void log(LogLevel level, fmt::format_string<Args...> format, Args &&...args)
     {
-        if (level < _level)
-        {
-            return;
-        }
-        auto message = fmt::format(format, std::forward<Args>(args)...);
-        _handleMessage(level, message);
+        _logger.log(level, format, std::forward<Args>(args)...);
     }
 
     /**
@@ -153,21 +123,19 @@ public:
     }
 
     /**
-     * @brief Log the given message with optional arguments and critical level.
+     * @brief Log the given message with optional arguments and fatal level.
      *
      * @tparam Args Arguments types.
      * @param format Message format.
      * @param args Arguments to format.
      */
     template<typename... Args>
-    static void critical(fmt::format_string<Args...> format, Args &&...args)
+    static void fatal(fmt::format_string<Args...> format, Args &&...args)
     {
-        log(LogLevel::Critical, format, std::forward<Args>(args)...);
+        log(LogLevel::Fatal, format, std::forward<Args>(args)...);
     }
 
 private:
-    static inline LogLevel _level = LogLevel::Info;
-
-    static void _handleMessage(LogLevel level, std::string_view message);
+    static Logger _logger;
 };
 } // namespace brayns
