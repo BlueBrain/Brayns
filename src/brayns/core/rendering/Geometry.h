@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <cstdint>
 #include <vector>
 
 #include <ospray/ospray_cpp.h>
@@ -29,7 +28,6 @@
 #include <brayns/core/utils/Math.h>
 
 #include "Object.h"
-#include "Volume.h"
 
 namespace brayns
 {
@@ -44,12 +42,12 @@ class GeometryModel : public Object<ospray::cpp::GeometricModel>
 public:
     using Object::Object;
 
-    void setGeometry(const BaseGeometry &geometry);
-    void setId(std::uint32_t id);
-    void invertNormals(bool inverted);
+    void setGeometry(const ospray::cpp::Geometry &geometry);
     void setPrimitiveColors(const std::vector<Color4> &colors);
     void setColor(const Color4 &color);
     void removeColors();
+    void invertNormals(bool inverted);
+    void setId(std::uint32_t id);
 };
 
 class MeshGeometry : public BaseGeometry
@@ -137,7 +135,7 @@ public:
 
     static inline const std::string name = "isosurface";
 
-    void setVolume(const BaseVolume &volume);
+    void setVolume(const ospray::cpp::Volume &volume);
     void setIsovalues(const std::vector<float> &values);
     void setIsovalue(float value);
 };

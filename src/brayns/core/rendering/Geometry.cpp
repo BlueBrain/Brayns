@@ -25,19 +25,9 @@
 
 namespace brayns
 {
-void GeometryModel::setGeometry(const BaseGeometry &geometry)
+void GeometryModel::setGeometry(const ospray::cpp::Geometry &geometry)
 {
-    setParam("geometry", geometry.getHandle());
-}
-
-void GeometryModel::setId(std::uint32_t id)
-{
-    setParam("id", id);
-}
-
-void GeometryModel::invertNormals(bool inverted)
-{
-    setParam("invertNormals", inverted);
+    setParam("geometry", geometry);
 }
 
 void GeometryModel::setPrimitiveColors(const std::vector<Color4> &colors)
@@ -53,6 +43,16 @@ void GeometryModel::setColor(const Color4 &color)
 void GeometryModel::removeColors()
 {
     removeParam("color");
+}
+
+void GeometryModel::invertNormals(bool inverted)
+{
+    setParam("invertNormals", inverted);
+}
+
+void GeometryModel::setId(std::uint32_t id)
+{
+    setParam("id", id);
 }
 
 void MeshGeometry::setVertexPositions(const std::vector<Vector3> &positions)
@@ -140,9 +140,9 @@ void PlaneGeometry::setBounds(const std::vector<Box3> &bounds)
     setParam("plane.bounds", ospray::cpp::SharedData(bounds));
 }
 
-void IsosurfaceGeometry::setVolume(const BaseVolume &volume)
+void IsosurfaceGeometry::setVolume(const ospray::cpp::Volume &volume)
 {
-    setParam("volume", volume.getHandle());
+    setParam("volume", volume);
 }
 
 void IsosurfaceGeometry::setIsovalues(const std::vector<float> &values)

@@ -21,9 +21,42 @@
 
 #pragma once
 
+#include <vector>
+
 #include <ospray/ospray_cpp.h>
+
+#include <brayns/core/utils/Math.h>
+
+#include "Object.h"
 
 namespace brayns
 {
+class Group : public Object<ospray::cpp::Group>
+{
+public:
+    using Object::Object;
 
+    void setVolumes(const std::vector<ospray::cpp::VolumetricModel> &models);
+    void setGeometries(const std::vector<ospray::cpp::GeometricModel> &models);
+    void setClippingGeometries(const std::vector<ospray::cpp::GeometricModel> &models);
+    void setLights(const std::vector<ospray::cpp::Light> &lights);
+};
+
+class Instance : public Object<ospray::cpp::Instance>
+{
+public:
+    using Object::Object;
+
+    void setGroup(const ospray::cpp::Group &group);
+    void setTransform(const Affine3 &transform);
+    void setId(std::uint32_t id);
+};
+
+class Scene : public Object<ospray::cpp::World>
+{
+public:
+    using Object::Object;
+
+    void setInstances(const std::vector<ospray::cpp::Instance> &instances);
+};
 }

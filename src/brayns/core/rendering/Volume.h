@@ -60,9 +60,9 @@ class VolumeModel : public Object<ospray::cpp::VolumetricModel>
 public:
     using Object::Object;
 
-    void setVolume(const BaseVolume &volume);
+    void setVolume(const ospray::cpp::Volume &volume);
+    void setTransferFunction(const ospray::cpp::TransferFunction &function);
     void setId(std::uint32_t id);
-    void setTransferFunction(const BaseTransferFunction &function);
 };
 
 enum class VoxelDataType

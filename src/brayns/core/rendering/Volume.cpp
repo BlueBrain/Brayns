@@ -40,19 +40,19 @@ void LinearTransferFunction::setScalarRange(Box1 range)
     setParam("value", range);
 }
 
-void VolumeModel::setVolume(const BaseVolume &volume)
+void VolumeModel::setVolume(const ospray::cpp::Volume &volume)
 {
-    setParam("volume", volume.getHandle());
+    setParam("volume", volume);
+}
+
+void VolumeModel::setTransferFunction(const ospray::cpp::TransferFunction &function)
+{
+    setParam("transferFunction", function);
 }
 
 void VolumeModel::setId(std::uint32_t id)
 {
     setParam("id", id);
-}
-
-void VolumeModel::setTransferFunction(const BaseTransferFunction &function)
-{
-    setParam("transferFunction", function.getHandle());
 }
 
 void StructuredRegularVolume::setData(const VolumeData &data)
