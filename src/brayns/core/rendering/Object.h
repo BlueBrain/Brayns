@@ -21,42 +21,44 @@
 
 #pragma once
 
-#include <ospray/ospray_cpp.h>
-
-#include <brayns/core/utils/Logger.h>
-
-#include "Geometry.h"
-#include "Light.h"
-#include "Volume.h"
+#include <string>
 
 namespace brayns
 {
-class Device
+template<typename T>
+class Object
 {
 public:
-    explicit Device(ospray::cpp::Device device);
-    ~Device();
+    using HandleType = T;
 
-    Device(const Device &) = delete;
-    Device(Device &&) = default;
-    Device &operator=(const Device &) = delete;
-    Device &operator=(Device &&) = default;
-
-    GeometryModel createGeometryModel();
-    VolumeModel createVolumeModel();
-
-    template<typename ObjectType>
-    ObjectType create()
+    explicit Object(HandleType handle):
+        _handle(std::move(handle))
     {
-        using HandleType = typename ObjectType::HandleType;
-        auto &name = ObjectType::name;
-        auto handle = HandleType(name);
-        return ObjectType(std::move(handle));
+    }
+
+    const HandleType &getHandle() const
+    {
+        return _handle;
+    }
+
+    void commit()
+    {
+        _handle.commit();
+    }
+
+protected:
+    template<typename U>
+    void setParam(const std::string &key, const U &value)
+    {
+        _handle.setParam(key, value);
+    }
+
+    void removeParam(const std::string &key)
+    {
+        _handle.removeParam(key);
     }
 
 private:
-    ospray::cpp::Device _device;
+    HandleType _handle;
 };
-
-Device createDevice(Logger &logger);
 }

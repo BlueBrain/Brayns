@@ -21,124 +21,87 @@
 
 #include "Light.h"
 
-#include <string>
-
 #include <ospray/ospray_cpp/ext/rkcommon.h>
-
-namespace
-{
-const std::string colorKey = "color";
-const std::string intensityKey = "intensity";
-const std::string visibleKey = "visible";
-
-const std::string directionKey = "direction";
-const std::string angularDiameterKey = "angularDiameter";
-
-const std::string positionKey = "position";
-const std::string radiusKey = "radius";
-
-const std::string openingAngleKey = "openingAngle";
-const std::string penumbraAngleKey = "penumbraAngle";
-const std::string innerRadiusKey = "innerRadius";
-
-const std::string edge1Key = "edge1";
-const std::string edge2Key = "edge2";
-}
 
 namespace brayns
 {
-BaseLight::BaseLight(ospray::cpp::Light light):
-    _light(std::move(light))
-{
-}
-
-ospray::cpp::Light BaseLight::getHandle() const
-{
-    return _light;
-}
-
 void BaseLight::setColor(const Color3 &color)
 {
-    _light.setParam(colorKey, color);
+    setParam("color", color);
 }
 
 void BaseLight::setIntensity(float intensity)
 {
-    _light.setParam(intensityKey, intensity);
+    setParam("intensity", intensity);
 }
 
 void BaseLight::setVisible(bool visible)
 {
-    _light.setParam(visibleKey, visible);
-}
-
-void BaseLight::commit()
-{
-    _light.commit();
+    setParam("visible", visible);
 }
 
 void DistantLight::setDirection(const Vector3 &direction)
 {
-    _light.setParam(directionKey, direction);
+    setParam("direction", direction);
 }
 
 void DistantLight::setAngularDiameter(float degrees)
 {
-    _light.setParam(angularDiameterKey, degrees);
+    setParam("angularDiameter", degrees);
 }
 
 void SphereLight::setPosition(const Vector3 &position)
 {
-    _light.setParam(positionKey, position);
+    setParam("position", position);
 }
 
 void SphereLight::setRadius(float radius)
 {
-    _light.setParam(radiusKey, radius);
+    setParam("radius", radius);
 }
 
 void SpotLight::setPosition(const Vector3 &position)
 {
-    _light.setParam(positionKey, position);
+    setParam("position", position);
 }
 
 void SpotLight::setDirection(const Vector3 &direction)
 {
-    _light.setParam(directionKey, direction);
+    setParam("direction", direction);
 }
 
 void SpotLight::setOpeningAngle(float degrees)
 {
-    _light.setParam(openingAngleKey, degrees);
+    setParam("openingAngle", degrees);
 }
 
 void SpotLight::setPenumbraAngle(float degrees)
 {
-    _light.setParam(penumbraAngleKey, degrees);
+    setParam("penumbraAngle", degrees);
 }
 
 void SpotLight::setOuterRadius(float radius)
 {
-    _light.setParam(radiusKey, radius);
+    setParam("radius", radius);
 }
 
 void SpotLight::setInnerRadius(float radius)
 {
-    _light.setParam(innerRadiusKey, radius);
+    setParam("innerRadius", radius);
 }
 
 void QuadLight::setPosition(const Vector3 &position)
 {
-    _light.setParam(positionKey, position);
+    setParam("position", position);
 }
 
 void QuadLight::setEdge1(const Vector3 &edge)
 {
-    _light.setParam(edge1Key, edge);
+    setParam("edge1", edge);
 }
 
 void QuadLight::setEdge2(const Vector3 &edge)
 {
-    _light.setParam(edge2Key, edge);
+    setParam("edge2", edge);
 }
 }

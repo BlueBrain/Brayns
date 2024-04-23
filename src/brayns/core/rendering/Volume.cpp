@@ -21,123 +21,65 @@
 
 #include "Volume.h"
 
-#include <string>
-
 #include <ospray/ospray_cpp/ext/rkcommon.h>
-
-namespace
-{
-const std::string colorKey = "color";
-const std::string opacityKey = "opacity";
-const std::string valueKey = "value";
-
-const std::string idKey = "id";
-const std::string transferFunctionKey = "transferFunction";
-
-const std::string dataKey = "data";
-const std::string cellCenteredKey = "cellCentered";
-const std::string gridOriginKey = "gridOrigin";
-const std::string gridSpacingKey = "gridSpacing";
-const std::string filterKey = "filter";
-}
 
 namespace brayns
 {
-TransferFunction::TransferFunction(ospray::cpp::TransferFunction function):
-    _function(std::move(function))
+void LinearTransferFunction::setColors(const std::vector<Color3> &colors)
 {
+    setParam("color", ospray::cpp::SharedData(colors));
 }
 
-ospray::cpp::TransferFunction TransferFunction::getHandle() const
+void LinearTransferFunction::setOpacities(const std::vector<float> &opacities)
 {
-    return _function;
+    setParam("opacity", ospray::cpp::SharedData(opacities));
 }
 
-void TransferFunction::setColors(const std::vector<Color3> &colors)
+void LinearTransferFunction::setScalarRange(Box1 range)
 {
-    _function.setParam(colorKey, ospray::cpp::SharedData(colors));
+    setParam("value", range);
 }
 
-void TransferFunction::setOpacities(const std::vector<float> &opacities)
+void VolumeModel::setVolume(const BaseVolume &volume)
 {
-    _function.setParam(opacityKey, ospray::cpp::SharedData(opacities));
-}
-
-void TransferFunction::setScalarRange(Box1 range)
-{
-    _function.setParam(valueKey, range);
-}
-
-void TransferFunction::commit()
-{
-    _function.commit();
-}
-
-VolumeModel::VolumeModel(ospray::cpp::VolumetricModel model):
-    _model(std::move(model))
-{
-}
-
-ospray::cpp::VolumetricModel VolumeModel::getHandle() const
-{
-    return _model;
+    setParam("volume", volume.getHandle());
 }
 
 void VolumeModel::setId(std::uint32_t id)
 {
-    _model.setParam(idKey, id);
+    setParam("id", id);
 }
 
-void VolumeModel::setTransferFunction(ospray::cpp::TransferFunction function)
+void VolumeModel::setTransferFunction(const BaseTransferFunction &function)
 {
-    _model.setParam(transferFunctionKey, function);
-}
-
-void VolumeModel::commit()
-{
-    _model.commit();
-}
-
-StructuredRegularVolume::StructuredRegularVolume(ospray::cpp::Volume volume):
-    _volume(std::move(volume))
-{
-}
-
-ospray::cpp::Volume StructuredRegularVolume::getHandle() const
-{
-    return _volume;
+    setParam("transferFunction", function.getHandle());
 }
 
 void StructuredRegularVolume::setData(const VolumeData &data)
 {
     auto format = static_cast<OSPDataType>(data.type);
     auto shared = ospray::cpp::SharedData(data.data, format, data.size);
-    _volume.setParam(dataKey, shared);
+    setParam("data", shared);
 }
 
 void StructuredRegularVolume::setType(VolumeType type)
 {
     auto cellCentered = type == VolumeType::CellCentered;
-    _volume.setParam(cellCenteredKey, cellCentered);
+    setParam("cellCentered", cellCentered);
 }
 
 void StructuredRegularVolume::setOrigin(const Vector3 &origin)
 {
-    _volume.setParam(gridOriginKey, origin);
+    setParam("gridOrigin", origin);
 }
 
 void StructuredRegularVolume::setSpacing(const Vector3 &spacing)
 {
-    _volume.setParam(gridSpacingKey, spacing);
+    setParam("gridSpacing", spacing);
 }
 
 void StructuredRegularVolume::setFilter(VolumeFilter filter)
 {
-    _volume.setParam(filterKey, static_cast<OSPVolumeFilter>(filter));
-}
-
-void StructuredRegularVolume::commit()
-{
-    _volume.commit();
+    setParam("filter", static_cast<OSPVolumeFilter>(filter));
 }
 }

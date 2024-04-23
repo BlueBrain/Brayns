@@ -25,27 +25,26 @@
 
 #include <brayns/core/utils/Math.h>
 
+#include "Object.h"
+
 namespace brayns
 {
-class BaseLight
+class BaseLight : public Object<ospray::cpp::Light>
 {
 public:
-    explicit BaseLight(ospray::cpp::Light light);
+    using Object::Object;
 
-    ospray::cpp::Light getHandle() const;
     void setColor(const Color3 &color);
     void setIntensity(float intensity);
     void setVisible(bool visible);
-    void commit();
-
-protected:
-    ospray::cpp::Light _light;
 };
 
 class DistantLight : public BaseLight
 {
 public:
     using BaseLight::BaseLight;
+
+    static inline const std::string name = "distant";
 
     void setDirection(const Vector3 &direction);
     void setAngularDiameter(float degrees);
@@ -56,6 +55,8 @@ class SphereLight : public BaseLight
 public:
     using BaseLight::BaseLight;
 
+    static inline const std::string name = "sphere";
+
     void setPosition(const Vector3 &position);
     void setRadius(float radius);
 };
@@ -64,6 +65,8 @@ class SpotLight : public BaseLight
 {
 public:
     using BaseLight::BaseLight;
+
+    static inline const std::string name = "spot";
 
     void setPosition(const Vector3 &position);
     void setDirection(const Vector3 &direction);
@@ -78,6 +81,8 @@ class QuadLight : public BaseLight
 public:
     using BaseLight::BaseLight;
 
+    static inline const std::string name = "quad";
+
     void setPosition(const Vector3 &position);
     void setEdge1(const Vector3 &edge);
     void setEdge2(const Vector3 &edge);
@@ -87,5 +92,7 @@ class AmbientLight : public BaseLight
 {
 public:
     using BaseLight::BaseLight;
+
+    static inline const std::string name = "ambient";
 };
 }

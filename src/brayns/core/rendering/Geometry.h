@@ -28,56 +28,55 @@
 
 #include <brayns/core/utils/Math.h>
 
+#include "Object.h"
+#include "Volume.h"
+
 namespace brayns
 {
-class GeometryModel
+class BaseGeometry : public Object<ospray::cpp::Geometry>
 {
 public:
-    explicit GeometryModel(ospray::cpp::GeometricModel model);
+    using Object::Object;
+};
 
-    ospray::cpp::GeometricModel getHandle() const;
+class GeometryModel : public Object<ospray::cpp::GeometricModel>
+{
+public:
+    using Object::Object;
+
+    void setGeometry(const BaseGeometry &geometry);
     void setId(std::uint32_t id);
     void invertNormals(bool inverted);
     void setPrimitiveColors(const std::vector<Color4> &colors);
     void setColor(const Color4 &color);
     void removeColors();
-    void commit();
-
-private:
-    ospray::cpp::GeometricModel _model;
 };
 
-class MeshGeometry
+class MeshGeometry : public BaseGeometry
 {
 public:
-    explicit MeshGeometry(ospray::cpp::Geometry geometry);
+    using BaseGeometry::BaseGeometry;
 
-    ospray::cpp::Geometry getHandle() const;
+    static inline const std::string name = "mesh";
+
     void setVertexPositions(const std::vector<Vector3> &positions);
     void setVertexNormals(const std::vector<Vector3> &normals);
     void setVertexColors(const std::vector<Color4> &colors);
     void setTriangleIndices(const std::vector<Index3> &indices);
     void setQuadIndices(const std::vector<Index4> &indices);
     void setQuadSoup(bool quadSoup);
-    void commit();
-
-private:
-    ospray::cpp::Geometry _geometry;
 };
 
-class SphereGeometry
+class SphereGeometry : public BaseGeometry
 {
 public:
-    explicit SphereGeometry(ospray::cpp::Geometry geometry);
+    using BaseGeometry::BaseGeometry;
 
-    ospray::cpp::Geometry getHandle() const;
+    static inline const std::string name = "sphere";
+
     void setPositions(const std::vector<Vector3> &positions);
     void setRadii(const std::vector<float> radii);
     void setRadius(float radius);
-    void commit();
-
-private:
-    ospray::cpp::Geometry _geometry;
 };
 
 using PositionRadius = Vector4;
@@ -96,62 +95,50 @@ enum class CurveBasis
     BSpline = OSP_BSPLINE,
 };
 
-class CurveGeometry
+class CurveGeometry : public BaseGeometry
 {
 public:
-    explicit CurveGeometry(ospray::cpp::Geometry geometry);
+    using BaseGeometry::BaseGeometry;
 
-    ospray::cpp::Geometry getHandle() const;
+    static inline const std::string name = "curve";
+
     void setVertexPositionsAndRadii(const std::vector<PositionRadius> &positionsRadii);
     void setVertexColors(const std::vector<Color4> &colors);
     void setIndices(const std::vector<std::uint32_t> &indices);
     void setType(CurveType type);
     void setBasis(CurveBasis basis);
-    void commit();
-
-private:
-    ospray::cpp::Geometry _geometry;
 };
 
-class BoxGeometry
+class BoxGeometry : public BaseGeometry
 {
 public:
-    explicit BoxGeometry(ospray::cpp::Geometry geometry);
+    using BaseGeometry::BaseGeometry;
 
-    ospray::cpp::Geometry getHandle() const;
+    static inline const std::string name = "box";
+
     void setBoxes(const std::vector<Box3> &boxes);
-    void commit();
-
-private:
-    ospray::cpp::Geometry _geometry;
 };
 
-class PlaneGeometry
+class PlaneGeometry : public BaseGeometry
 {
 public:
-    explicit PlaneGeometry(ospray::cpp::Geometry geometry);
+    using BaseGeometry::BaseGeometry;
 
-    ospray::cpp::Geometry getHandle() const;
+    static inline const std::string name = "plane";
+
     void setCoefficients(const std::vector<Vector4> &coefficients);
     void setBounds(const std::vector<Box3> &bounds);
-    void commit();
-
-private:
-    ospray::cpp::Geometry _geometry;
 };
 
-class IsosurfaceGeometry
+class IsosurfaceGeometry : public BaseGeometry
 {
 public:
-    explicit IsosurfaceGeometry(ospray::cpp::Geometry geometry);
+    using BaseGeometry::BaseGeometry;
 
-    ospray::cpp::Geometry getHandle() const;
-    void setVolume(ospray::cpp::Volume volume);
+    static inline const std::string name = "isosurface";
+
+    void setVolume(const BaseVolume &volume);
     void setIsovalues(const std::vector<float> &values);
     void setIsovalue(float value);
-    void commit();
-
-private:
-    ospray::cpp::Geometry _geometry;
 };
 }

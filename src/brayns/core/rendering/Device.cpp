@@ -38,88 +38,18 @@ Device::~Device()
     }
 }
 
-StructuredRegularVolume Device::createStructuredRegularVolume()
+GeometryModel Device::createGeometryModel()
 {
-    auto volume = ospray::cpp::Volume("structuredRegular");
-    return StructuredRegularVolume(std::move(volume));
+    auto geometry = ospray::cpp::Geometry();
+    auto handle = ospray::cpp::GeometricModel(geometry);
+    return GeometryModel(std::move(handle));
 }
 
-MeshGeometry Device::createMesh()
+VolumeModel brayns::Device::createVolumeModel()
 {
-    auto geometry = ospray::cpp::Geometry("mesh");
-    return MeshGeometry(std::move(geometry));
-}
-
-SphereGeometry Device::createSpheres()
-{
-    auto geometry = ospray::cpp::Geometry("sphere");
-    return SphereGeometry(std::move(geometry));
-}
-
-CurveGeometry Device::createCurve()
-{
-    auto geometry = ospray::cpp::Geometry("curve");
-    return CurveGeometry(std::move(geometry));
-}
-
-BoxGeometry Device::createBoxes()
-{
-    auto geometry = ospray::cpp::Geometry("box");
-    return BoxGeometry(std::move(geometry));
-}
-
-PlaneGeometry Device::createPlanes()
-{
-    auto geometry = ospray::cpp::Geometry("plane");
-    return PlaneGeometry(std::move(geometry));
-}
-
-IsosurfaceGeometry Device::createIsoSurfaces()
-{
-    auto geometry = ospray::cpp::Geometry("isosurface");
-    return IsosurfaceGeometry(std::move(geometry));
-}
-
-VolumeModel Device::createVolumeModel(ospray::cpp::Volume volume)
-{
-    auto model = ospray::cpp::VolumetricModel(volume);
-    return VolumeModel(std::move(model));
-}
-
-GeometryModel Device::createGeometryModel(ospray::cpp::Geometry geometry)
-{
-    auto model = ospray::cpp::GeometricModel(geometry);
-    return GeometryModel(std::move(model));
-}
-
-DistantLight Device::createDistantLight()
-{
-    auto light = ospray::cpp::Light("distant");
-    return DistantLight(std::move(light));
-}
-
-SphereLight Device::createSphereLight()
-{
-    auto light = ospray::cpp::Light("sphere");
-    return SphereLight(std::move(light));
-}
-
-SpotLight Device::createSpotLight()
-{
-    auto light = ospray::cpp::Light("spot");
-    return SpotLight(std::move(light));
-}
-
-QuadLight Device::createQuadLight()
-{
-    auto light = ospray::cpp::Light("quad");
-    return QuadLight(std::move(light));
-}
-
-AmbientLight Device::createAmbientLight()
-{
-    auto light = ospray::cpp::Light("ambient");
-    return AmbientLight(std::move(light));
+    auto volume = ospray::cpp::Volume();
+    auto handle = ospray::cpp::VolumetricModel(volume);
+    return VolumeModel(std::move(handle));
 }
 
 Device createDevice(Logger &logger)

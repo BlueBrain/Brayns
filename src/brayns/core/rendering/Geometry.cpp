@@ -21,268 +21,137 @@
 
 #include "Geometry.h"
 
-#include <string>
-
 #include <ospray/ospray_cpp/ext/rkcommon.h>
-
-namespace
-{
-const std::string colorKey = "color";
-const std::string idKey = "id";
-const std::string invertNormalsKey = "invertNormals";
-
-const std::string vertexPositionKey = "vertex.position";
-const std::string vertexNormalKey = "vertex.normal";
-const std::string vertexColorKey = "vertex.color";
-const std::string quadSoupKey = "quadSoup";
-
-const std::string spherePositionKey = "sphere.position";
-const std::string sphereRadiusKey = "sphere.radius";
-const std::string radiusKey = "radius";
-
-const std::string vertexPositionRadiusKey = "vertex.position_radius";
-const std::string indexKey = "index";
-const std::string typeKey = "type";
-const std::string basisKey = "basis";
-
-const std::string boxKey = "box";
-
-const std::string planeCoefficientsKey = "plane.coefficients";
-const std::string planeBoundsKey = "plane.bounds";
-
-const std::string volumeKey = "volume";
-const std::string isovalueKey = "isovalue";
-}
 
 namespace brayns
 {
-GeometryModel::GeometryModel(ospray::cpp::GeometricModel model):
-    _model(std::move(model))
+void GeometryModel::setGeometry(const BaseGeometry &geometry)
 {
-}
-
-ospray::cpp::GeometricModel GeometryModel::getHandle() const
-{
-    return _model;
+    setParam("geometry", geometry.getHandle());
 }
 
 void GeometryModel::setId(std::uint32_t id)
 {
-    _model.setParam(idKey, id);
+    setParam("id", id);
 }
 
 void GeometryModel::invertNormals(bool inverted)
 {
-    _model.setParam(invertNormalsKey, inverted);
+    setParam("invertNormals", inverted);
 }
 
 void GeometryModel::setPrimitiveColors(const std::vector<Color4> &colors)
 {
-    _model.setParam(colorKey, ospray::cpp::SharedData(colors));
+    setParam("color", ospray::cpp::SharedData(colors));
 }
 
 void GeometryModel::setColor(const Color4 &color)
 {
-    _model.setParam(colorKey, color);
+    setParam("color", color);
 }
 
 void GeometryModel::removeColors()
 {
-    _model.removeParam(colorKey);
-}
-
-void GeometryModel::commit()
-{
-    _model.commit();
-}
-
-MeshGeometry::MeshGeometry(ospray::cpp::Geometry geometry):
-    _geometry(std::move(geometry))
-{
-}
-
-ospray::cpp::Geometry MeshGeometry::getHandle() const
-{
-    return _geometry;
+    removeParam("color");
 }
 
 void MeshGeometry::setVertexPositions(const std::vector<Vector3> &positions)
 {
-    _geometry.setParam(vertexPositionKey, ospray::cpp::SharedData(positions));
+    setParam("vertex.position", ospray::cpp::SharedData(positions));
 }
 
 void MeshGeometry::setVertexNormals(const std::vector<Vector3> &normals)
 {
-    _geometry.setParam(vertexNormalKey, ospray::cpp::SharedData(normals));
+    setParam("vertex.normal", ospray::cpp::SharedData(normals));
 }
 
 void MeshGeometry::setVertexColors(const std::vector<Color4> &colors)
 {
-    _geometry.setParam(vertexColorKey, ospray::cpp::SharedData(colors));
+    setParam("vertex.color", ospray::cpp::SharedData(colors));
 }
 
 void MeshGeometry::setTriangleIndices(const std::vector<Index3> &indices)
 {
-    _geometry.setParam(indexKey, ospray::cpp::SharedData(indices));
+    setParam("index", ospray::cpp::SharedData(indices));
 }
 
 void MeshGeometry::setQuadIndices(const std::vector<Index4> &indices)
 {
-    _geometry.setParam(indexKey, ospray::cpp::SharedData(indices));
+    setParam("index", ospray::cpp::SharedData(indices));
 }
 
 void MeshGeometry::setQuadSoup(bool quadSoup)
 {
-    _geometry.setParam(quadSoupKey, quadSoup);
-}
-
-void MeshGeometry::commit()
-{
-    _geometry.commit();
-}
-
-SphereGeometry::SphereGeometry(ospray::cpp::Geometry geometry):
-    _geometry(std::move(geometry))
-{
-}
-
-ospray::cpp::Geometry SphereGeometry::getHandle() const
-{
-    return _geometry;
+    setParam("quadSoup", quadSoup);
 }
 
 void SphereGeometry::setPositions(const std::vector<Vector3> &positions)
 {
-    _geometry.setParam(spherePositionKey, ospray::cpp::SharedData(positions));
+    setParam("sphere.position", ospray::cpp::SharedData(positions));
 }
 
 void SphereGeometry::setRadii(const std::vector<float> radii)
 {
-    _geometry.setParam(sphereRadiusKey, ospray::cpp::SharedData(radii));
+    setParam("sphere.radius", ospray::cpp::SharedData(radii));
 }
 
 void SphereGeometry::setRadius(float radius)
 {
-    _geometry.setParam(radiusKey, radius);
-}
-
-void SphereGeometry::commit()
-{
-    _geometry.commit();
-}
-
-CurveGeometry::CurveGeometry(ospray::cpp::Geometry geometry):
-    _geometry(std::move(geometry))
-{
-}
-
-ospray::cpp::Geometry CurveGeometry::getHandle() const
-{
-    return _geometry;
+    setParam("radius", radius);
 }
 
 void CurveGeometry::setVertexPositionsAndRadii(const std::vector<PositionRadius> &positionsRadii)
 {
-    _geometry.setParam(vertexPositionRadiusKey, ospray::cpp::SharedData(positionsRadii));
+    setParam("vertex.position_radius", ospray::cpp::SharedData(positionsRadii));
 }
 
 void CurveGeometry::setVertexColors(const std::vector<Color4> &colors)
 {
-    _geometry.setParam(vertexColorKey, ospray::cpp::SharedData(colors));
+    setParam("vertex.color", ospray::cpp::SharedData(colors));
 }
 
 void CurveGeometry::setIndices(const std::vector<std::uint32_t> &indices)
 {
-    _geometry.setParam(indexKey, ospray::cpp::SharedData(indices));
+    setParam("index", ospray::cpp::SharedData(indices));
 }
 
 void CurveGeometry::setType(CurveType type)
 {
-    _geometry.setParam(typeKey, static_cast<unsigned int>(type));
+    setParam("type", static_cast<unsigned int>(type));
 }
 
 void CurveGeometry::setBasis(CurveBasis basis)
 {
-    _geometry.setParam(basisKey, static_cast<unsigned int>(basis));
-}
-
-void CurveGeometry::commit()
-{
-    _geometry.commit();
-}
-
-BoxGeometry::BoxGeometry(ospray::cpp::Geometry geometry):
-    _geometry(std::move(geometry))
-{
-}
-
-ospray::cpp::Geometry BoxGeometry::getHandle() const
-{
-    return _geometry;
+    setParam("basis", static_cast<unsigned int>(basis));
 }
 
 void BoxGeometry::setBoxes(const std::vector<Box3> &boxes)
 {
-    _geometry.setParam(boxKey, ospray::cpp::SharedData(boxes));
-}
-
-void BoxGeometry::commit()
-{
-    _geometry.commit();
-}
-
-PlaneGeometry::PlaneGeometry(ospray::cpp::Geometry geometry):
-    _geometry(std::move(geometry))
-{
-}
-
-ospray::cpp::Geometry PlaneGeometry::getHandle() const
-{
-    return _geometry;
+    setParam("box", ospray::cpp::SharedData(boxes));
 }
 
 void PlaneGeometry::setCoefficients(const std::vector<Vector4> &coefficients)
 {
-    _geometry.setParam(planeCoefficientsKey, ospray::cpp::SharedData(coefficients));
+    setParam("plane.coefficients", ospray::cpp::SharedData(coefficients));
 }
 
 void PlaneGeometry::setBounds(const std::vector<Box3> &bounds)
 {
-    _geometry.setParam(planeBoundsKey, ospray::cpp::SharedData(bounds));
+    setParam("plane.bounds", ospray::cpp::SharedData(bounds));
 }
 
-void PlaneGeometry::commit()
+void IsosurfaceGeometry::setVolume(const BaseVolume &volume)
 {
-    _geometry.commit();
-}
-
-IsosurfaceGeometry::IsosurfaceGeometry(ospray::cpp::Geometry geometry):
-    _geometry(std::move(geometry))
-{
-}
-
-ospray::cpp::Geometry IsosurfaceGeometry::getHandle() const
-{
-    return _geometry;
-}
-
-void IsosurfaceGeometry::setVolume(ospray::cpp::Volume volume)
-{
-    _geometry.setParam(volumeKey, volume);
+    setParam("volume", volume.getHandle());
 }
 
 void IsosurfaceGeometry::setIsovalues(const std::vector<float> &values)
 {
-    _geometry.setParam(isovalueKey, ospray::cpp::SharedData(values));
+    setParam("isovalue", ospray::cpp::SharedData(values));
 }
 
 void IsosurfaceGeometry::setIsovalue(float value)
 {
-    _geometry.setParam(isovalueKey, value);
-}
-
-void IsosurfaceGeometry::commit()
-{
-    _geometry.commit();
+    setParam("isovalue", value);
 }
 }

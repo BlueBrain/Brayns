@@ -27,35 +27,42 @@
 
 #include <brayns/core/utils/Math.h>
 
+#include "Object.h"
+
 namespace brayns
 {
-class TransferFunction
+class BaseTransferFunction : public Object<ospray::cpp::TransferFunction>
 {
 public:
-    explicit TransferFunction(ospray::cpp::TransferFunction function);
+    using Object::Object;
+};
 
-    ospray::cpp::TransferFunction getHandle() const;
+class LinearTransferFunction : public BaseTransferFunction
+{
+public:
+    using BaseTransferFunction::BaseTransferFunction;
+
+    static inline const std::string name = "piecewiseLinear";
+
     void setColors(const std::vector<Color3> &colors);
     void setOpacities(const std::vector<float> &opacities);
     void setScalarRange(Box1 range);
-    void commit();
-
-private:
-    ospray::cpp::TransferFunction _function;
 };
 
-class VolumeModel
+class BaseVolume : public Object<ospray::cpp::Volume>
 {
 public:
-    explicit VolumeModel(ospray::cpp::VolumetricModel model);
+    using Object::Object;
+};
 
-    ospray::cpp::VolumetricModel getHandle() const;
+class VolumeModel : public Object<ospray::cpp::VolumetricModel>
+{
+public:
+    using Object::Object;
+
+    void setVolume(const BaseVolume &volume);
     void setId(std::uint32_t id);
-    void setTransferFunction(ospray::cpp::TransferFunction function);
-    void commit();
-
-private:
-    ospray::cpp::VolumetricModel _model;
+    void setTransferFunction(const BaseTransferFunction &function);
 };
 
 enum class VoxelDataType
@@ -88,20 +95,17 @@ enum class VolumeFilter
     Cubic = OSP_VOLUME_FILTER_CUBIC,
 };
 
-class StructuredRegularVolume
+class StructuredRegularVolume : public BaseVolume
 {
 public:
-    explicit StructuredRegularVolume(ospray::cpp::Volume volume);
+    using BaseVolume::BaseVolume;
 
-    ospray::cpp::Volume getHandle() const;
+    static inline const std::string name = "structuredRegular";
+
     void setData(const VolumeData &data);
     void setType(VolumeType type);
     void setOrigin(const Vector3 &origin);
     void setSpacing(const Vector3 &spacing);
     void setFilter(VolumeFilter filter);
-    void commit();
-
-private:
-    ospray::cpp::Volume _volume;
 };
 }
