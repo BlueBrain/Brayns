@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <ospray/ospray_cpp.h>
 
 #include <brayns/core/utils/Logger.h>
@@ -41,12 +43,6 @@ class Device
 {
 public:
     explicit Device(ospray::cpp::Device device);
-    ~Device();
-
-    Device(const Device &) = delete;
-    Device(Device &&) = default;
-    Device &operator=(const Device &) = delete;
-    Device &operator=(Device &&) = default;
 
     GeometryModel createGeometryModel();
     VolumeModel createVolumeModel();
@@ -69,5 +65,19 @@ private:
     ospray::cpp::Device _device;
 };
 
-Device createDevice(Logger &logger);
+class GraphicsApi
+{
+public:
+    GraphicsApi() = default;
+    ~GraphicsApi();
+
+    GraphicsApi(const GraphicsApi &other) = delete;
+    GraphicsApi(GraphicsApi &&other) = delete;
+    GraphicsApi &operator=(const GraphicsApi &other) = delete;
+    GraphicsApi &operator=(GraphicsApi &&other) = delete;
+
+    Device createDevice(Logger &logger);
+};
+
+std::unique_ptr<GraphicsApi> loadGraphicsApi();
 }

@@ -30,14 +30,6 @@ Device::Device(ospray::cpp::Device device):
 {
 }
 
-Device::~Device()
-{
-    if (_device.handle() != nullptr)
-    {
-        ospShutdown();
-    }
-}
-
 GeometryModel Device::createGeometryModel()
 {
     auto geometry = ospray::cpp::Geometry();
@@ -88,19 +80,17 @@ RenderTask Device::render(const RenderSettings &settings)
     return RenderTask(future);
 }
 
-Device createDevice(Logger &logger)
+GraphicsApi::~GraphicsApi()
+{
+    ospShutdown();
+}
+
+Device GraphicsApi::createDevice(Logger &logger)
 {
     auto currentDevice = ospray::cpp::Device::current();
     if (currentDevice.handle() != nullptr)
     {
         throw std::invalid_argument("OSPRay only accepts one device created at a time");
-    }
-
-    auto error = ospLoadModule("cpu");
-    if (error != OSP_NO_ERROR)
-    {
-        auto message = fmt::format("Failed to load CPU module (code = {})", static_cast<int>(error));
-        throw std::runtime_error(message);
     }
 
     auto device = ospray::cpp::Device("cpu");
@@ -125,5 +115,16 @@ Device createDevice(Logger &logger)
     device.setCurrent();
 
     return Device(std::move(device));
+}
+
+std::unique_ptr<GraphicsApi> loadGraphicsApi()
+{
+    auto error = ospLoadModule("cpu");
+    if (error != OSP_NO_ERROR)
+    {
+        auto message = fmt::format("Failed to load OSPRay CPU module (code = {})", static_cast<int>(error));
+        throw std::runtime_error(message);
+    }
+    return std::make_unique<GraphicsApi>();
 }
 }
