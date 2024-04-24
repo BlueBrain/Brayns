@@ -23,47 +23,23 @@
 
 #include <ospray/ospray_cpp.h>
 
-#include <brayns/core/utils/Logger.h>
+#include <brayns/core/utils/Math.h>
 
-#include "Camera.h"
-#include "Framebuffer.h"
-#include "Geometry.h"
-#include "Light.h"
-#include "Material.h"
-#include "Volume.h"
-#include "World.h"
+#include "Object.h"
 
 namespace brayns
 {
-class Device
+class BaseMaterial : public Object<ospray::cpp::Material>
 {
 public:
-    explicit Device(ospray::cpp::Device device);
-    ~Device();
-
-    Device(const Device &) = delete;
-    Device(Device &&) = default;
-    Device &operator=(const Device &) = delete;
-    Device &operator=(Device &&) = default;
-
-    GeometryModel createGeometryModel();
-    VolumeModel createVolumeModel();
-    Group createGroup();
-    World createWorld();
-    FrameBuffer createFramebuffer(const FramebufferSettings &settings);
-
-    template<typename ObjectType>
-    ObjectType create()
-    {
-        using HandleType = typename ObjectType::HandleType;
-        auto &name = ObjectType::name;
-        auto handle = HandleType(name);
-        return ObjectType(std::move(handle));
-    }
-
-private:
-    ospray::cpp::Device _device;
+    using Object::Object;
 };
 
-Device createDevice(Logger &logger);
+class ObjMaterial : public BaseMaterial
+{
+public:
+    using BaseMaterial::BaseMaterial;
+
+    static inline const std::string name = "obj";
+};
 }

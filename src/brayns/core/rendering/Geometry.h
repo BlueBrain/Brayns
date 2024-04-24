@@ -43,6 +43,8 @@ public:
     using Object::Object;
 
     void setGeometry(const ospray::cpp::Geometry &geometry);
+    void setMaterial(std::uint32_t rendererIndex);
+    void setPrimitiveMaterials(const std::vector<std::uint32_t> &rendererIndices);
     void setPrimitiveColors(const std::vector<Color4> &colors);
     void setColor(const Color4 &color);
     void removeColors();

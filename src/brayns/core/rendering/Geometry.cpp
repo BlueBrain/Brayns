@@ -30,6 +30,16 @@ void GeometryModel::setGeometry(const ospray::cpp::Geometry &geometry)
     setParam("geometry", geometry);
 }
 
+void GeometryModel::setMaterial(std::uint32_t rendererIndex)
+{
+    setParam("material", rendererIndex);
+}
+
+void GeometryModel::setPrimitiveMaterials(const std::vector<std::uint32_t> &rendererIndices)
+{
+    setParam("material", ospray::cpp::SharedData(rendererIndices));
+}
+
 void GeometryModel::setPrimitiveColors(const std::vector<Color4> &colors)
 {
     setParam("color", ospray::cpp::SharedData(colors));
