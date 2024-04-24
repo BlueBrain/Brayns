@@ -30,6 +30,7 @@
 #include "Geometry.h"
 #include "Light.h"
 #include "Material.h"
+#include "Render.h"
 #include "Renderer.h"
 #include "Volume.h"
 #include "World.h"
@@ -52,6 +53,8 @@ public:
     Group createGroup();
     World createWorld();
     FrameBuffer createFramebuffer(const FramebufferSettings &settings);
+
+    RenderTask render(const RenderSettings &settings);
 
     template<typename ObjectType>
     ObjectType create()

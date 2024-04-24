@@ -81,6 +81,13 @@ FrameBuffer Device::createFramebuffer(const FramebufferSettings &settings)
     return FrameBuffer(handle);
 }
 
+RenderTask Device::render(const RenderSettings &settings)
+{
+    auto &[framebuffer, renderer, camera, world] = settings;
+    auto future = framebuffer.renderFrame(renderer, camera, world);
+    return RenderTask(future);
+}
+
 Device createDevice(Logger &logger)
 {
     auto currentDevice = ospray::cpp::Device::current();
