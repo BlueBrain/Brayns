@@ -21,48 +21,42 @@
 
 #pragma once
 
+#include <vector>
+
 #include <ospray/ospray_cpp.h>
 
-#include <brayns/core/utils/Logger.h>
+#include <brayns/core/utils/Math.h>
 
-#include "Camera.h"
-#include "Framebuffer.h"
-#include "Geometry.h"
-#include "Light.h"
-#include "Volume.h"
-#include "World.h"
+#include "Object.h"
 
 namespace brayns
 {
-class Device
+class Group : public Object<ospray::cpp::Group>
 {
 public:
-    explicit Device(ospray::cpp::Device device);
-    ~Device();
+    using Object::Object;
 
-    Device(const Device &) = delete;
-    Device(Device &&) = default;
-    Device &operator=(const Device &) = delete;
-    Device &operator=(Device &&) = default;
-
-    GeometryModel createGeometryModel();
-    VolumeModel createVolumeModel();
-    Group createGroup();
-    World createWorld();
-    FrameBuffer createFramebuffer(const FramebufferSettings &settings);
-
-    template<typename ObjectType>
-    ObjectType create()
-    {
-        using HandleType = typename ObjectType::HandleType;
-        auto &name = ObjectType::name;
-        auto handle = HandleType(name);
-        return ObjectType(std::move(handle));
-    }
-
-private:
-    ospray::cpp::Device _device;
+    void setVolumes(const std::vector<ospray::cpp::VolumetricModel> &models);
+    void setGeometries(const std::vector<ospray::cpp::GeometricModel> &models);
+    void setClippingGeometries(const std::vector<ospray::cpp::GeometricModel> &models);
+    void setLights(const std::vector<ospray::cpp::Light> &lights);
 };
 
-Device createDevice(Logger &logger);
+class Instance : public Object<ospray::cpp::Instance>
+{
+public:
+    using Object::Object;
+
+    void setGroup(const ospray::cpp::Group &group);
+    void setTransform(const Affine3 &transform);
+    void setId(std::uint32_t id);
+};
+
+class World : public Object<ospray::cpp::World>
+{
+public:
+    using Object::Object;
+
+    void setInstances(const std::vector<ospray::cpp::Instance> &instances);
+};
 }

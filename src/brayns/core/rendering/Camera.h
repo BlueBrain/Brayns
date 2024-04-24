@@ -31,32 +31,34 @@
 
 namespace brayns
 {
-class Group : public Object<ospray::cpp::Group>
+class BaseCamera : public Object<ospray::cpp::Camera>
 {
 public:
     using Object::Object;
 
-    void setVolumes(const std::vector<ospray::cpp::VolumetricModel> &models);
-    void setGeometries(const std::vector<ospray::cpp::GeometricModel> &models);
-    void setClippingGeometries(const std::vector<ospray::cpp::GeometricModel> &models);
-    void setLights(const std::vector<ospray::cpp::Light> &lights);
-};
-
-class Instance : public Object<ospray::cpp::Instance>
-{
-public:
-    using Object::Object;
-
-    void setGroup(const ospray::cpp::Group &group);
     void setTransform(const Affine3 &transform);
-    void setId(std::uint32_t id);
+    void setNearClip(float distance);
 };
 
-class Scene : public Object<ospray::cpp::World>
+class PerspectiveCamera : public BaseCamera
 {
 public:
-    using Object::Object;
+    using BaseCamera::BaseCamera;
 
-    void setInstances(const std::vector<ospray::cpp::Instance> &instances);
+    static inline const std::string name = "perspective";
+
+    void setFovy(float degrees);
+    void setAspectRatio(float aspect);
+};
+
+class OrthographicCamera : public BaseCamera
+{
+public:
+    using BaseCamera::BaseCamera;
+
+    static inline const std::string name = "orthographic";
+
+    void setHeight(float height);
+    void setAspectRatio(float aspect);
 };
 }

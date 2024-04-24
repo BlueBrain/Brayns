@@ -52,6 +52,18 @@ VolumeModel brayns::Device::createVolumeModel()
     return VolumeModel(std::move(handle));
 }
 
+Group Device::createGroup()
+{
+    auto handle = ospray::cpp::Group();
+    return Group(std::move(handle));
+}
+
+World Device::createWorld()
+{
+    auto handle = ospray::cpp::World();
+    return World(std::move(handle));
+}
+
 FrameBuffer Device::createFramebuffer(const FramebufferSettings &settings)
 {
     auto width = static_cast<int>(settings.width);

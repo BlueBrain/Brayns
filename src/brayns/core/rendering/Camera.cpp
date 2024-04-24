@@ -19,49 +19,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Scene.h"
+#include "Camera.h"
 
 #include <ospray/ospray_cpp/ext/rkcommon.h>
 
 namespace brayns
 {
-void Group::setVolumes(const std::vector<ospray::cpp::VolumetricModel> &models)
-{
-    setParam("volume", ospray::cpp::SharedData(models));
-}
-
-void Group::setGeometries(const std::vector<ospray::cpp::GeometricModel> &models)
-{
-    setParam("geometry", ospray::cpp::SharedData(models));
-}
-
-void Group::setClippingGeometries(const std::vector<ospray::cpp::GeometricModel> &models)
-{
-    setParam("clippingGeometry", ospray::cpp::SharedData(models));
-}
-
-void Group::setLights(const std::vector<ospray::cpp::Light> &lights)
-{
-    setParam("light", ospray::cpp::SharedData(lights));
-}
-
-void Instance::setGroup(const ospray::cpp::Group &group)
-{
-    setParam("group", group);
-}
-
-void Instance::setTransform(const Affine3 &transform)
+void BaseCamera::setTransform(const Affine3 &transform)
 {
     setParam("transform", transform);
 }
 
-void Instance::setId(std::uint32_t id)
+void BaseCamera::setNearClip(float distance)
 {
-    setParam("id", id);
+    setParam("nearClip", distance);
 }
 
-void Scene::setInstances(const std::vector<ospray::cpp::Instance> &instances)
+void PerspectiveCamera::setFovy(float degrees)
 {
-    setParam("instance", ospray::cpp::SharedData(instances));
+    setParam("fovy", degrees);
+}
+
+void PerspectiveCamera::setAspectRatio(float aspect)
+{
+    setParam("aspect", aspect);
+}
+
+void OrthographicCamera::setHeight(float height)
+{
+    setParam("height", height);
+}
+
+void OrthographicCamera::setAspectRatio(float aspect)
+{
+    setParam("aspect", aspect);
 }
 }
