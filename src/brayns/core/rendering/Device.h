@@ -30,6 +30,7 @@
 #include "Geometry.h"
 #include "Light.h"
 #include "Material.h"
+#include "Renderer.h"
 #include "Volume.h"
 #include "World.h"
 
