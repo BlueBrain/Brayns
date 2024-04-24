@@ -25,4 +25,28 @@
 
 namespace brayns
 {
+void ObjMaterial::setDiffuseColor(const Color3 &color)
+{
+    setParam("kd", color);
+}
+
+void ObjMaterial::setSpecularColor(const Color3 &color)
+{
+    setParam("ks", color);
+}
+
+void ObjMaterial::setShininess(float exponent)
+{
+    setParam("ns", exponent);
+}
+
+void ObjMaterial::setOpacity(float opacity)
+{
+    setParam("d", opacity);
+}
+
+void ObjMaterial::setTransparencyFilter(const Color3 &color)
+{
+    setParam("tf", color);
+}
 }

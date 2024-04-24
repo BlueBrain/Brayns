@@ -41,5 +41,11 @@ public:
     using BaseMaterial::BaseMaterial;
 
     static inline const std::string name = "obj";
+
+    void setDiffuseColor(const Color3 &color);
+    void setSpecularColor(const Color3 &color);
+    void setShininess(float exponent);
+    void setOpacity(float opacity);
+    void setTransparencyFilter(const Color3 &color);
 };
 }
