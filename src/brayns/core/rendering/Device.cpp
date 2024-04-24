@@ -52,6 +52,23 @@ VolumeModel brayns::Device::createVolumeModel()
     return VolumeModel(std::move(handle));
 }
 
+FrameBuffer Device::createFramebuffer(const FramebufferSettings &settings)
+{
+    auto width = static_cast<int>(settings.width);
+    auto height = static_cast<int>(settings.height);
+    auto format = static_cast<OSPFrameBufferFormat>(settings.format);
+    auto channels = static_cast<int>(OSP_FB_NONE);
+
+    for (auto channel : settings.channels)
+    {
+        channels |= static_cast<OSPFrameBufferChannel>(channel);
+    }
+
+    auto handle = ospray::cpp::FrameBuffer(width, height, format, channels);
+
+    return FrameBuffer(handle);
+}
+
 Device createDevice(Logger &logger)
 {
     auto currentDevice = ospray::cpp::Device::current();

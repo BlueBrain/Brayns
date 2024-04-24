@@ -19,46 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
-
-#include <ospray/ospray_cpp.h>
-
-#include <brayns/core/utils/Logger.h>
-
 #include "Framebuffer.h"
-#include "Geometry.h"
-#include "Light.h"
-#include "Volume.h"
 
 namespace brayns
 {
-class Device
+const void *brayns::FrameBuffer::map(Channel channel)
 {
-public:
-    explicit Device(ospray::cpp::Device device);
-    ~Device();
+    return getHandle().map(static_cast<OSPFrameBufferChannel>(channel));
+}
 
-    Device(const Device &) = delete;
-    Device(Device &&) = default;
-    Device &operator=(const Device &) = delete;
-    Device &operator=(Device &&) = default;
+void FrameBuffer::unmap(const void *data)
+{
+    return getHandle().unmap(const_cast<void *>(data));
+}
 
-    GeometryModel createGeometryModel();
-    VolumeModel createVolumeModel();
-    FrameBuffer createFramebuffer(const FramebufferSettings &settings);
+void FrameBuffer::resetAccumulation()
+{
+    getHandle().resetAccumulation();
+}
 
-    template<typename ObjectType>
-    ObjectType create()
-    {
-        using HandleType = typename ObjectType::HandleType;
-        auto &name = ObjectType::name;
-        auto handle = HandleType(name);
-        return ObjectType(std::move(handle));
-    }
+float FrameBuffer::getVariance()
+{
+    return getHandle().variance();
+}
 
-private:
-    ospray::cpp::Device _device;
-};
-
-Device createDevice(Logger &logger);
+void FrameBuffer::setImageOperation(const ospray::cpp::ImageOperation &operation)
+{
+    setParam("imageOperation", operation);
+}
 }

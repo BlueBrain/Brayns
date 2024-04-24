@@ -117,12 +117,12 @@ void CurveGeometry::setIndices(const std::vector<std::uint32_t> &indices)
 
 void CurveGeometry::setType(CurveType type)
 {
-    setParam("type", static_cast<unsigned int>(type));
+    setParam("type", static_cast<OSPCurveType>(type));
 }
 
 void CurveGeometry::setBasis(CurveBasis basis)
 {
-    setParam("basis", static_cast<unsigned int>(basis));
+    setParam("basis", static_cast<OSPCurveBasis>(basis));
 }
 
 void BoxGeometry::setBoxes(const std::vector<Box3> &boxes)
