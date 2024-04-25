@@ -21,18 +21,16 @@
 
 #include "Volume.h"
 
-#include <ospray/ospray_cpp/ext/rkcommon.h>
-
 namespace brayns
 {
-void LinearTransferFunction::setColors(const std::vector<Color3> &colors)
+void LinearTransferFunction::setColors(SharedArray<Color3> colors)
 {
-    setParam("color", ospray::cpp::SharedData(colors));
+    setParam("color", toSharedData(colors));
 }
 
-void LinearTransferFunction::setOpacities(const std::vector<float> &opacities)
+void LinearTransferFunction::setOpacities(SharedArray<float> opacities)
 {
-    setParam("opacity", ospray::cpp::SharedData(opacities));
+    setParam("opacity", toSharedData(opacities));
 }
 
 void LinearTransferFunction::setScalarRange(Box1 range)
@@ -40,17 +38,17 @@ void LinearTransferFunction::setScalarRange(Box1 range)
     setParam("value", range);
 }
 
-void VolumeModel::setVolume(const ospray::cpp::Volume &volume)
+void VolumetricModel::setVolume(const BaseVolume &volume)
 {
-    setParam("volume", volume);
+    setParam("volume", volume.getHandle());
 }
 
-void VolumeModel::setTransferFunction(const ospray::cpp::TransferFunction &function)
+void VolumetricModel::setTransferFunction(const BaseTransferFunction &function)
 {
-    setParam("transferFunction", function);
+    setParam("transferFunction", function.getHandle());
 }
 
-void VolumeModel::setId(std::uint32_t id)
+void VolumetricModel::setId(std::uint32_t id)
 {
     setParam("id", id);
 }

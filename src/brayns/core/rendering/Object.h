@@ -21,22 +21,28 @@
 
 #pragma once
 
+#include <span>
 #include <string>
+
+#include <ospray/ospray_cpp.h>
+#include <ospray/ospray_cpp/ext/rkcommon.h>
+
+#include <brayns/core/utils/Math.h>
 
 namespace brayns
 {
-template<typename T>
+template<typename HandleType>
 class Object
 {
 public:
-    using HandleType = T;
+    using Handle = HandleType;
 
-    explicit Object(HandleType handle):
+    explicit Object(Handle handle):
         _handle(std::move(handle))
     {
     }
 
-    const HandleType &getHandle() const
+    const Handle &getHandle() const
     {
         return _handle;
     }
@@ -46,11 +52,15 @@ public:
         _handle.commit();
     }
 
-protected:
-    template<typename U>
-    void setParam(const std::string &key, const U &value)
+    explicit operator bool() const
     {
-        _handle.setParam(key, value);
+        return static_cast<bool>(_handle);
+    }
+
+protected:
+    Box3 getBounds()
+    {
+        return _handle.template getBounds<Box3>();
     }
 
     void removeParam(const std::string &key)
@@ -58,7 +68,44 @@ protected:
         _handle.removeParam(key);
     }
 
+    template<typename U>
+    void setParam(const std::string &key, const U &value)
+    {
+        _handle.setParam(key, value);
+    }
+
 private:
-    HandleType _handle;
+    Handle _handle;
 };
+
+template<typename T>
+using SharedArray = std::span<T>;
+
+template<typename T>
+ospray::cpp::SharedData toSharedData(SharedArray<T> data)
+{
+    return ospray::cpp::SharedData(data.data(), data.size());
+}
+
+template<typename T>
+using CopiedArray = std::span<T>;
+
+template<typename T>
+ospray::cpp::CopiedData toCopiedData(CopiedArray<T> data)
+{
+    return ospray::cpp::CopiedData(data.data(), data.size());
+}
+
+template<typename T>
+std::vector<typename T::Handle> extractHandles(CopiedArray<T> objects)
+{
+    auto handles = std::vector<typename T::Handle>();
+    handles.reserve(objects.size());
+    for (const auto &object : objects)
+    {
+        auto &handle = object.getHandle();
+        handles.push_back(handle);
+    }
+    return handles;
+}
 }

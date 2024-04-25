@@ -21,8 +21,6 @@
 
 #include "Material.h"
 
-#include <ospray/ospray_cpp/ext/rkcommon.h>
-
 namespace brayns
 {
 void ObjMaterial::setDiffuseColor(const Color3 &color)

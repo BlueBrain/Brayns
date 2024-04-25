@@ -21,25 +21,23 @@
 
 #pragma once
 
-#include <vector>
-
-#include <ospray/ospray_cpp.h>
-
-#include <brayns/core/utils/Math.h>
-
+#include "Geometry.h"
+#include "Light.h"
 #include "Object.h"
+#include "Volume.h"
 
 namespace brayns
 {
 class Group : public Object<ospray::cpp::Group>
 {
 public:
+    using Object::getBounds;
     using Object::Object;
 
-    void setVolumes(const std::vector<ospray::cpp::VolumetricModel> &models);
-    void setGeometries(const std::vector<ospray::cpp::GeometricModel> &models);
-    void setClippingGeometries(const std::vector<ospray::cpp::GeometricModel> &models);
-    void setLights(const std::vector<ospray::cpp::Light> &lights);
+    void setVolumes(CopiedArray<VolumetricModel> models);
+    void setGeometries(CopiedArray<GeometricModel> models);
+    void setClippingGeometries(CopiedArray<GeometricModel> models);
+    void setLights(CopiedArray<BaseLight> lights);
 };
 
 class Instance : public Object<ospray::cpp::Instance>
@@ -47,7 +45,7 @@ class Instance : public Object<ospray::cpp::Instance>
 public:
     using Object::Object;
 
-    void setGroup(const ospray::cpp::Group &group);
+    void setGroup(const Group &group);
     void setTransform(const Affine3 &transform);
     void setId(std::uint32_t id);
 };
@@ -57,6 +55,6 @@ class World : public Object<ospray::cpp::World>
 public:
     using Object::Object;
 
-    void setInstances(const std::vector<ospray::cpp::Instance> &instances);
+    void setInstances(CopiedArray<Instance> instances);
 };
 }

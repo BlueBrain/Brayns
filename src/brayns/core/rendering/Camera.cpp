@@ -21,8 +21,6 @@
 
 #include "Camera.h"
 
-#include <ospray/ospray_cpp/ext/rkcommon.h>
-
 namespace brayns
 {
 void BaseCamera::setTransform(const Affine3 &transform)

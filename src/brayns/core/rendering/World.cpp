@@ -21,33 +21,35 @@
 
 #include "World.h"
 
-#include <ospray/ospray_cpp/ext/rkcommon.h>
-
 namespace brayns
 {
-void Group::setVolumes(const std::vector<ospray::cpp::VolumetricModel> &models)
+void Group::setVolumes(CopiedArray<VolumetricModel> models)
 {
-    setParam("volume", ospray::cpp::SharedData(models));
+    auto handles = extractHandles(models);
+    setParam("volume", ospray::cpp::CopiedData(handles));
 }
 
-void Group::setGeometries(const std::vector<ospray::cpp::GeometricModel> &models)
+void Group::setGeometries(CopiedArray<GeometricModel> models)
 {
-    setParam("geometry", ospray::cpp::SharedData(models));
+    auto handles = extractHandles(models);
+    setParam("geometry", ospray::cpp::CopiedData(handles));
 }
 
-void Group::setClippingGeometries(const std::vector<ospray::cpp::GeometricModel> &models)
+void Group::setClippingGeometries(CopiedArray<GeometricModel> models)
 {
-    setParam("clippingGeometry", ospray::cpp::SharedData(models));
+    auto handles = extractHandles(models);
+    setParam("clippingGeometry", ospray::cpp::CopiedData(handles));
 }
 
-void Group::setLights(const std::vector<ospray::cpp::Light> &lights)
+void Group::setLights(CopiedArray<BaseLight> lights)
 {
-    setParam("light", ospray::cpp::SharedData(lights));
+    auto handles = extractHandles(lights);
+    setParam("light", ospray::cpp::CopiedData(handles));
 }
 
-void Instance::setGroup(const ospray::cpp::Group &group)
+void Instance::setGroup(const Group &group)
 {
-    setParam("group", group);
+    setParam("group", group.getHandle());
 }
 
 void Instance::setTransform(const Affine3 &transform)
@@ -60,8 +62,9 @@ void Instance::setId(std::uint32_t id)
     setParam("id", id);
 }
 
-void World::setInstances(const std::vector<ospray::cpp::Instance> &instances)
+void World::setInstances(CopiedArray<Instance> instances)
 {
-    setParam("instance", ospray::cpp::SharedData(instances));
+    auto handles = extractHandles(instances);
+    setParam("instance", ospray::cpp::CopiedData(handles));
 }
 }

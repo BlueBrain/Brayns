@@ -21,27 +21,36 @@
 
 #pragma once
 
-#include "Object.h"
+#include <memory>
+
+#include <brayns/core/utils/Logger.h>
+
+#include "Device.h"
 
 namespace brayns
 {
-class BaseMaterial : public Object<ospray::cpp::Material>
+class GraphicsApi
 {
 public:
-    using Object::Object;
+    class Loader
+    {
+    public:
+        Loader() = default;
+        ~Loader();
+
+        Loader(const Loader &other) = delete;
+        Loader(Loader &&other) = delete;
+        Loader &operator=(const Loader &other) = delete;
+        Loader &operator=(Loader &&other) = delete;
+    };
+
+    explicit GraphicsApi(std::unique_ptr<Loader> loader);
+
+    Device createDevice(Logger &logger);
+
+private:
+    std::unique_ptr<Loader> _loader;
 };
 
-class ObjMaterial : public BaseMaterial
-{
-public:
-    using BaseMaterial::BaseMaterial;
-
-    static inline const std::string name = "obj";
-
-    void setDiffuseColor(const Color3 &color);
-    void setSpecularColor(const Color3 &color);
-    void setShininess(float exponent);
-    void setOpacity(float opacity);
-    void setTransparencyFilter(const Color3 &color);
-};
+GraphicsApi loadGraphicsApi();
 }

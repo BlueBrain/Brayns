@@ -21,8 +21,6 @@
 
 #include "Light.h"
 
-#include <ospray/ospray_cpp/ext/rkcommon.h>
-
 namespace brayns
 {
 void BaseLight::setColor(const Color3 &color)

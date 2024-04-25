@@ -21,8 +21,6 @@
 
 #include "Renderer.h"
 
-#include <ospray/ospray_cpp/ext/rkcommon.h>
-
 namespace brayns
 {
 void BaseRenderer::setPixelSamples(std::size_t count)
@@ -50,9 +48,10 @@ void BaseRenderer::setBackgroundColor(const Color4 &color)
     setParam("backgroundColor", color);
 }
 
-void BaseRenderer::setMaterials(const std::vector<ospray::cpp::Material> &materials)
+void BaseRenderer::setMaterials(CopiedArray<BaseMaterial> materials)
 {
-    setParam("material", ospray::cpp::SharedData(materials));
+    auto handles = extractHandles(materials);
+    setParam("material", ospray::cpp::CopiedData(handles));
 }
 
 void BaseRenderer::setPixelFilter(PixelFilter filter)

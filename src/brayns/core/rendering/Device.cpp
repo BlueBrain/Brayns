@@ -21,8 +21,6 @@
 
 #include "Device.h"
 
-#include <fmt/format.h>
-
 namespace brayns
 {
 Device::Device(ospray::cpp::Device device):
@@ -30,24 +28,31 @@ Device::Device(ospray::cpp::Device device):
 {
 }
 
-GeometryModel Device::createGeometryModel()
+GeometricModel Device::createGeometryModel()
 {
     auto geometry = ospray::cpp::Geometry();
     auto handle = ospray::cpp::GeometricModel(geometry);
-    return GeometryModel(std::move(handle));
+    return GeometricModel(std::move(handle));
 }
 
-VolumeModel brayns::Device::createVolumeModel()
+VolumetricModel brayns::Device::createVolumeModel()
 {
     auto volume = ospray::cpp::Volume();
     auto handle = ospray::cpp::VolumetricModel(volume);
-    return VolumeModel(std::move(handle));
+    return VolumetricModel(std::move(handle));
 }
 
 Group Device::createGroup()
 {
     auto handle = ospray::cpp::Group();
     return Group(std::move(handle));
+}
+
+Instance Device::createInstance()
+{
+    auto group = ospray::cpp::Group();
+    auto handle = ospray::cpp::Instance(group);
+    return Instance(std::move(handle));
 }
 
 World Device::createWorld()
@@ -75,56 +80,11 @@ FrameBuffer Device::createFramebuffer(const FramebufferSettings &settings)
 
 RenderTask Device::render(const RenderSettings &settings)
 {
-    auto &[framebuffer, renderer, camera, world] = settings;
+    auto &framebuffer = settings.framebuffer.getHandle();
+    auto &renderer = settings.renderer.getHandle();
+    auto &camera = settings.camera.getHandle();
+    auto &world = settings.world.getHandle();
     auto future = framebuffer.renderFrame(renderer, camera, world);
     return RenderTask(future);
-}
-
-GraphicsApi::~GraphicsApi()
-{
-    ospShutdown();
-}
-
-Device GraphicsApi::createDevice(Logger &logger)
-{
-    auto currentDevice = ospray::cpp::Device::current();
-    if (currentDevice.handle() != nullptr)
-    {
-        throw std::invalid_argument("OSPRay only accepts one device created at a time");
-    }
-
-    auto device = ospray::cpp::Device("cpu");
-
-    device.setParam("logLevel", OSP_LOG_DEBUG);
-
-    auto errorCallback = [](auto *userData, auto code, const auto *message)
-    {
-        auto &logger = *static_cast<Logger *>(userData);
-        logger.error("Device error (code = {}): {}", static_cast<int>(code), message);
-    };
-    ospDeviceSetErrorCallback(device.handle(), errorCallback, &logger);
-
-    auto statusCallback = [](auto *userData, const auto *message)
-    {
-        auto &logger = *static_cast<Logger *>(userData);
-        logger.debug("Device status: {}", message);
-    };
-    ospDeviceSetStatusCallback(device.handle(), statusCallback, &logger);
-
-    device.commit();
-    device.setCurrent();
-
-    return Device(std::move(device));
-}
-
-std::unique_ptr<GraphicsApi> loadGraphicsApi()
-{
-    auto error = ospLoadModule("cpu");
-    if (error != OSP_NO_ERROR)
-    {
-        auto message = fmt::format("Failed to load OSPRay CPU module (code = {})", static_cast<int>(error));
-        throw std::runtime_error(message);
-    }
-    return std::make_unique<GraphicsApi>();
 }
 }

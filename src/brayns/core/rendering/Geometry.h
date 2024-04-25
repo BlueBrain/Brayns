@@ -21,31 +21,28 @@
 
 #pragma once
 
-#include <vector>
-
-#include <ospray/ospray_cpp.h>
-
-#include <brayns/core/utils/Math.h>
-
 #include "Object.h"
+#include "Volume.h"
 
 namespace brayns
 {
 class BaseGeometry : public Object<ospray::cpp::Geometry>
 {
 public:
+    using Object::getBounds;
     using Object::Object;
 };
 
-class GeometryModel : public Object<ospray::cpp::GeometricModel>
+class GeometricModel : public Object<ospray::cpp::GeometricModel>
 {
 public:
+    using Object::getBounds;
     using Object::Object;
 
-    void setGeometry(const ospray::cpp::Geometry &geometry);
+    void setGeometry(const BaseGeometry &geometry);
     void setMaterial(std::uint32_t rendererIndex);
-    void setPrimitiveMaterials(const std::vector<std::uint32_t> &rendererIndices);
-    void setPrimitiveColors(const std::vector<Color4> &colors);
+    void setPrimitiveMaterials(SharedArray<std::uint32_t> rendererIndices);
+    void setPrimitiveColors(SharedArray<Color4> colors);
     void setColor(const Color4 &color);
     void removeColors();
     void invertNormals(bool inverted);
@@ -59,11 +56,11 @@ public:
 
     static inline const std::string name = "mesh";
 
-    void setVertexPositions(const std::vector<Vector3> &positions);
-    void setVertexNormals(const std::vector<Vector3> &normals);
-    void setVertexColors(const std::vector<Color4> &colors);
-    void setTriangleIndices(const std::vector<Index3> &indices);
-    void setQuadIndices(const std::vector<Index4> &indices);
+    void setVertexPositions(SharedArray<Vector3> positions);
+    void setVertexNormals(SharedArray<Vector3> normals);
+    void setVertexColors(SharedArray<Color4> colors);
+    void setTriangleIndices(SharedArray<Index3> indices);
+    void setQuadIndices(SharedArray<Index4> indices);
     void setQuadSoup(bool quadSoup);
 };
 
@@ -74,8 +71,8 @@ public:
 
     static inline const std::string name = "sphere";
 
-    void setPositions(const std::vector<Vector3> &positions);
-    void setRadii(const std::vector<float> radii);
+    void setPositions(SharedArray<Vector3> positions);
+    void setRadii(SharedArray<float> radii);
     void setRadius(float radius);
 };
 
@@ -92,7 +89,7 @@ enum class CurveBasis
 {
     Linear = OSP_LINEAR,
     Bezier = OSP_BEZIER,
-    BSpline = OSP_BSPLINE,
+    Bspline = OSP_BSPLINE,
 };
 
 class CurveGeometry : public BaseGeometry
@@ -102,9 +99,9 @@ public:
 
     static inline const std::string name = "curve";
 
-    void setVertexPositionsAndRadii(const std::vector<PositionRadius> &positionsRadii);
-    void setVertexColors(const std::vector<Color4> &colors);
-    void setIndices(const std::vector<std::uint32_t> &indices);
+    void setVertexPositionsAndRadii(SharedArray<PositionRadius> positionsRadii);
+    void setVertexColors(SharedArray<Color4> colors);
+    void setIndices(SharedArray<std::uint32_t> indices);
     void setType(CurveType type);
     void setBasis(CurveBasis basis);
 };
@@ -116,7 +113,7 @@ public:
 
     static inline const std::string name = "box";
 
-    void setBoxes(const std::vector<Box3> &boxes);
+    void setBoxes(SharedArray<Box3> boxes);
 };
 
 class PlaneGeometry : public BaseGeometry
@@ -126,8 +123,8 @@ public:
 
     static inline const std::string name = "plane";
 
-    void setCoefficients(const std::vector<Vector4> &coefficients);
-    void setBounds(const std::vector<Box3> &bounds);
+    void setCoefficients(SharedArray<Vector4> coefficients);
+    void setBounds(SharedArray<Box3> bounds);
 };
 
 class IsosurfaceGeometry : public BaseGeometry
@@ -137,8 +134,8 @@ public:
 
     static inline const std::string name = "isosurface";
 
-    void setVolume(const ospray::cpp::Volume &volume);
-    void setIsovalues(const std::vector<float> &values);
+    void setVolume(const BaseVolume &volume);
+    void setIsovalues(SharedArray<float> values);
     void setIsovalue(float value);
 };
 }

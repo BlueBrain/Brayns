@@ -21,10 +21,6 @@
 
 #pragma once
 
-#include <vector>
-
-#include <ospray/ospray_cpp.h>
-
 #include "Object.h"
 
 namespace brayns
@@ -67,8 +63,8 @@ struct FramebufferSettings
 {
     std::size_t width;
     std::size_t height;
-    FramebufferFormat format;
-    std::vector<Channel> channels;
+    FramebufferFormat format = FramebufferFormat::Srgba8;
+    std::vector<Channel> channels = {Channel::Color};
 };
 
 class FrameBuffer : public Object<ospray::cpp::FrameBuffer>
@@ -80,6 +76,6 @@ public:
     void unmap(const void *data);
     void resetAccumulation();
     float getVariance();
-    void setImageOperation(const ospray::cpp::ImageOperation &operation);
+    void setImageOperations(CopiedArray<ImageOperation> operations);
 };
 }

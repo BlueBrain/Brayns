@@ -43,8 +43,9 @@ float FrameBuffer::getVariance()
     return getHandle().variance();
 }
 
-void FrameBuffer::setImageOperation(const ospray::cpp::ImageOperation &operation)
+void FrameBuffer::setImageOperations(CopiedArray<ImageOperation> operations)
 {
-    setParam("imageOperation", operation);
+    auto handles = extractHandles(operations);
+    setParam("imageOperation", ospray::cpp::CopiedData(handles));
 }
 }

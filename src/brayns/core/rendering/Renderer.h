@@ -21,11 +21,9 @@
 
 #pragma once
 
-#include <ospray/ospray_cpp.h>
-
-#include <brayns/core/utils/Math.h>
-
 #include "Object.h"
+
+#include "Material.h"
 
 namespace brayns
 {
@@ -48,7 +46,7 @@ public:
     void setMinSampleContribution(float intensity);
     void setVarianceThreshold(float threshold);
     void setBackgroundColor(const Color4 &color);
-    void setMaterials(const std::vector<ospray::cpp::Material> &materials);
+    void setMaterials(CopiedArray<BaseMaterial> materials);
     void setPixelFilter(PixelFilter filter);
 };
 

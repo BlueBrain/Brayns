@@ -21,20 +21,20 @@
 
 #pragma once
 
-#include <vector>
-
-#include <ospray/ospray_cpp.h>
-
+#include "Camera.h"
+#include "Framebuffer.h"
 #include "Object.h"
+#include "Renderer.h"
+#include "World.h"
 
 namespace brayns
 {
 struct RenderSettings
 {
-    ospray::cpp::FrameBuffer framebuffer;
-    ospray::cpp::Renderer renderer;
-    ospray::cpp::Camera camera;
-    ospray::cpp::World world;
+    FrameBuffer framebuffer;
+    BaseRenderer renderer;
+    BaseCamera camera;
+    World world;
 };
 
 class RenderTask : public Object<ospray::cpp::Future>

@@ -21,11 +21,7 @@
 
 #pragma once
 
-#include <memory>
-
 #include <ospray/ospray_cpp.h>
-
-#include <brayns/core/utils/Logger.h>
 
 #include "Camera.h"
 #include "Framebuffer.h"
@@ -44,9 +40,10 @@ class Device
 public:
     explicit Device(ospray::cpp::Device device);
 
-    GeometryModel createGeometryModel();
-    VolumeModel createVolumeModel();
+    GeometricModel createGeometryModel();
+    VolumetricModel createVolumeModel();
     Group createGroup();
+    Instance createInstance();
     World createWorld();
     FrameBuffer createFramebuffer(const FramebufferSettings &settings);
 
@@ -55,7 +52,7 @@ public:
     template<typename ObjectType>
     ObjectType create()
     {
-        using HandleType = typename ObjectType::HandleType;
+        using HandleType = typename ObjectType::Handle;
         auto &name = ObjectType::name;
         auto handle = HandleType(name);
         return ObjectType(std::move(handle));
@@ -64,20 +61,4 @@ public:
 private:
     ospray::cpp::Device _device;
 };
-
-class GraphicsApi
-{
-public:
-    GraphicsApi() = default;
-    ~GraphicsApi();
-
-    GraphicsApi(const GraphicsApi &other) = delete;
-    GraphicsApi(GraphicsApi &&other) = delete;
-    GraphicsApi &operator=(const GraphicsApi &other) = delete;
-    GraphicsApi &operator=(GraphicsApi &&other) = delete;
-
-    Device createDevice(Logger &logger);
-};
-
-std::unique_ptr<GraphicsApi> loadGraphicsApi();
 }

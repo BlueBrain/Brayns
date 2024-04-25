@@ -21,12 +21,6 @@
 
 #pragma once
 
-#include <vector>
-
-#include <ospray/ospray_cpp.h>
-
-#include <brayns/core/utils/Math.h>
-
 #include "Object.h"
 
 namespace brayns
@@ -44,24 +38,26 @@ public:
 
     static inline const std::string name = "piecewiseLinear";
 
-    void setColors(const std::vector<Color3> &colors);
-    void setOpacities(const std::vector<float> &opacities);
+    void setColors(SharedArray<Color3> colors);
+    void setOpacities(SharedArray<float> opacities);
     void setScalarRange(Box1 range);
 };
 
 class BaseVolume : public Object<ospray::cpp::Volume>
 {
 public:
+    using Object::getBounds;
     using Object::Object;
 };
 
-class VolumeModel : public Object<ospray::cpp::VolumetricModel>
+class VolumetricModel : public Object<ospray::cpp::VolumetricModel>
 {
 public:
+    using Object::getBounds;
     using Object::Object;
 
-    void setVolume(const ospray::cpp::Volume &volume);
-    void setTransferFunction(const ospray::cpp::TransferFunction &function);
+    void setVolume(const BaseVolume &volume);
+    void setTransferFunction(const BaseTransferFunction &function);
     void setId(std::uint32_t id);
 };
 

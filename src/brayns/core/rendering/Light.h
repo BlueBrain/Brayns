@@ -21,10 +21,6 @@
 
 #pragma once
 
-#include <ospray/ospray_cpp.h>
-
-#include <brayns/core/utils/Math.h>
-
 #include "Object.h"
 
 namespace brayns

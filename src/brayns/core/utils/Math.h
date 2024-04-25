@@ -41,8 +41,8 @@ using Box1 = rkcommon::math::box1f;
 using Box2 = rkcommon::math::box2f;
 using Box3 = rkcommon::math::box3f;
 
-using Color3 = rkcommon::math::vec3f;
-using Color4 = rkcommon::math::vec4f;
+using Color3 = Vector3;
+using Color4 = Vector4;
 
 using Quaternion = rkcommon::math::quaternionf;
 
@@ -59,9 +59,9 @@ struct Transform
 
 inline Affine3 toAffine(const Transform &transform)
 {
+    auto &translation = transform.translation;
     auto rotation = rkcommon::math::LinearSpace3f(transform.rotation);
     auto scale = rkcommon::math::LinearSpace3f::scale(transform.scale);
-    auto &translation = transform.translation;
     return Affine3(rotation * scale, translation);
 }
 }
