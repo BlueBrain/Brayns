@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <concepts>
 #include <memory>
 
 #include <ospray/ospray_cpp.h>
@@ -50,7 +51,7 @@ public:
     Framebuffer createFramebuffer(const FramebufferSettings &settings);
     RenderTask render(const RenderSettings &settings);
 
-    template<typename CameraType>
+    template<std::derived_from<Camera> CameraType>
     CameraType createCamera()
     {
         const auto &name = CameraType::name;
@@ -58,7 +59,7 @@ public:
         return CameraType(handle);
     }
 
-    template<typename ImageOperationType>
+    template<std::derived_from<ImageOperation> ImageOperationType>
     ImageOperationType createImageOperation()
     {
         const auto &name = ImageOperationType::name;
@@ -66,7 +67,7 @@ public:
         return ImageOperationType(handle);
     }
 
-    template<typename GeometryType>
+    template<std::derived_from<Geometry> GeometryType>
     GeometryType createGeometry()
     {
         const auto &name = GeometryType::name;
@@ -74,7 +75,7 @@ public:
         return GeometryType(handle);
     }
 
-    template<typename LightType>
+    template<std::derived_from<Light> LightType>
     LightType createLight()
     {
         const auto &name = LightType::name;
@@ -82,7 +83,7 @@ public:
         return LightType(handle);
     }
 
-    template<typename MaterialType>
+    template<std::derived_from<Material> MaterialType>
     MaterialType createMaterial()
     {
         const auto &name = MaterialType::name;
@@ -90,7 +91,7 @@ public:
         return MaterialType(handle);
     }
 
-    template<typename RendererType>
+    template<std::derived_from<Renderer> RendererType>
     RendererType createRenderer()
     {
         const auto &name = RendererType::name;
@@ -98,7 +99,7 @@ public:
         return RendererType(handle);
     }
 
-    template<typename TransferFunctionType>
+    template<std::derived_from<TransferFunction> TransferFunctionType>
     TransferFunctionType createTransferFunction()
     {
         const auto &name = TransferFunctionType::name;
@@ -106,7 +107,7 @@ public:
         return TransferFunctionType(handle);
     }
 
-    template<typename VolumeType>
+    template<std::derived_from<Volume> VolumeType>
     VolumeType createVolume()
     {
         const auto &name = VolumeType::name;
