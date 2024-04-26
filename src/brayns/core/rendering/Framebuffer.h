@@ -21,22 +21,23 @@
 
 #pragma once
 
-#include "Object.h"
+#include "Data.h"
+#include "Managed.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-class ImageOperation : public Object<ospray::cpp::ImageOperation>
+class ImageOperation : public Managed<OSPImageOperation>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 };
 
 class ToneMapper : public ImageOperation
 {
 public:
-    using ImageOperation::ImageOperation;
-
     static inline const std::string name = "tonemapper";
+
+    using ImageOperation::ImageOperation;
 };
 
 enum class FramebufferFormat
@@ -46,7 +47,7 @@ enum class FramebufferFormat
     Rgba32f = OSP_FB_RGBA32F,
 };
 
-enum class Channel
+enum class FramebufferChannel
 {
     Color = OSP_FB_COLOR,
     Depth = OSP_FB_DEPTH,
@@ -64,18 +65,25 @@ struct FramebufferSettings
     std::size_t width;
     std::size_t height;
     FramebufferFormat format = FramebufferFormat::Srgba8;
-    std::vector<Channel> channels = {Channel::Color};
+    std::vector<FramebufferChannel> channels = {FramebufferChannel::Color};
 };
 
-class FrameBuffer : public Object<ospray::cpp::FrameBuffer>
+class Framebuffer : public Managed<OSPFrameBuffer>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 
-    const void *map(Channel channel);
+    const void *map(FramebufferChannel channel);
     void unmap(const void *data);
     void resetAccumulation();
     float getVariance();
-    void setImageOperations(CopiedArray<ImageOperation> operations);
+    void setImageOperations(SharedArray<ImageOperation> operations);
 };
+}
+
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ImageOperation, OSP_IMAGE_OPERATION)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ToneMapper, OSP_IMAGE_OPERATION)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Framebuffer, OSP_FRAMEBUFFER)
 }

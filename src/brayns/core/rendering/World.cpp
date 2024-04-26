@@ -21,30 +21,26 @@
 
 #include "World.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-void Group::setVolumes(CopiedArray<VolumetricModel> models)
+void Group::setVolumes(SharedArray<VolumetricModel> models)
 {
-    auto handles = extractHandles(models);
-    setParam("volume", ospray::cpp::CopiedData(handles));
+    setParam("volume", toSharedData(models));
 }
 
-void Group::setGeometries(CopiedArray<GeometricModel> models)
+void Group::setGeometries(SharedArray<GeometricModel> models)
 {
-    auto handles = extractHandles(models);
-    setParam("geometry", ospray::cpp::CopiedData(handles));
+    setParam("geometry", toSharedData(models));
 }
 
-void Group::setClippingGeometries(CopiedArray<GeometricModel> models)
+void Group::setClippingGeometries(SharedArray<GeometricModel> models)
 {
-    auto handles = extractHandles(models);
-    setParam("clippingGeometry", ospray::cpp::CopiedData(handles));
+    setParam("clippingGeometry", toSharedData(models));
 }
 
-void Group::setLights(CopiedArray<BaseLight> lights)
+void Group::setLights(SharedArray<Light> lights)
 {
-    auto handles = extractHandles(lights);
-    setParam("light", ospray::cpp::CopiedData(handles));
+    setParam("light", toSharedData(lights));
 }
 
 void Instance::setGroup(const Group &group)
@@ -62,9 +58,8 @@ void Instance::setId(std::uint32_t id)
     setParam("id", id);
 }
 
-void World::setInstances(CopiedArray<Instance> instances)
+void World::setInstances(SharedArray<Instance> instances)
 {
-    auto handles = extractHandles(instances);
-    setParam("instance", ospray::cpp::CopiedData(handles));
+    setParam("instance", toSharedData(instances));
 }
 }

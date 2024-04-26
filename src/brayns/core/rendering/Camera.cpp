@@ -21,14 +21,14 @@
 
 #include "Camera.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-void BaseCamera::setTransform(const Affine3 &transform)
+void Camera::setTransform(const Affine3 &transform)
 {
     setParam("transform", transform);
 }
 
-void BaseCamera::setNearClip(float distance)
+void Camera::setNearClip(float distance)
 {
     setParam("nearClip", distance);
 }

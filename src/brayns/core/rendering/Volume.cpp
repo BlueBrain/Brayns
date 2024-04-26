@@ -21,7 +21,7 @@
 
 #include "Volume.h"
 
-namespace brayns
+namespace brayns::experimental
 {
 void LinearTransferFunction::setColors(SharedArray<Color3> colors)
 {
@@ -38,12 +38,12 @@ void LinearTransferFunction::setScalarRange(Box1 range)
     setParam("value", range);
 }
 
-void VolumetricModel::setVolume(const BaseVolume &volume)
+void VolumetricModel::setVolume(const Volume &volume)
 {
     setParam("volume", volume.getHandle());
 }
 
-void VolumetricModel::setTransferFunction(const BaseTransferFunction &function)
+void VolumetricModel::setTransferFunction(const TransferFunction &function)
 {
     setParam("transferFunction", function.getHandle());
 }
@@ -60,9 +60,9 @@ void StructuredRegularVolume::setData(const VolumeData &data)
     setParam("data", shared);
 }
 
-void StructuredRegularVolume::setType(VolumeType type)
+void StructuredRegularVolume::setStructure(VolumeStructure structure)
 {
-    auto cellCentered = type == VolumeType::CellCentered;
+    auto cellCentered = structure == VolumeStructure::CellCentered;
     setParam("cellCentered", cellCentered);
 }
 

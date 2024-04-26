@@ -21,70 +21,69 @@
 
 #include "Device.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-Device::Device(ospray::cpp::Device device):
-    _device(std::move(device))
+Device::Device(OSPDevice handle):
+    _handle(handle)
 {
 }
 
-GeometricModel Device::createGeometryModel()
+GeometricModel Device::createGeometricModel()
 {
-    auto geometry = ospray::cpp::Geometry();
-    auto handle = ospray::cpp::GeometricModel(geometry);
-    return GeometricModel(std::move(handle));
+    auto handle = ospNewGeometricModel();
+    return GeometricModel(handle);
 }
 
-VolumetricModel brayns::Device::createVolumeModel()
+VolumetricModel Device::createVolumetricModel()
 {
-    auto volume = ospray::cpp::Volume();
-    auto handle = ospray::cpp::VolumetricModel(volume);
-    return VolumetricModel(std::move(handle));
+    auto handle = ospNewVolumetricModel();
+    return VolumetricModel(handle);
 }
 
 Group Device::createGroup()
 {
-    auto handle = ospray::cpp::Group();
-    return Group(std::move(handle));
+    auto handle = ospNewGroup();
+    return Group(handle);
 }
 
 Instance Device::createInstance()
 {
-    auto group = ospray::cpp::Group();
-    auto handle = ospray::cpp::Instance(group);
-    return Instance(std::move(handle));
+    auto handle = ospNewInstance();
+    return Instance(handle);
 }
 
 World Device::createWorld()
 {
-    auto handle = ospray::cpp::World();
-    return World(std::move(handle));
+    auto handle = ospNewWorld();
+    return World(handle);
 }
 
-FrameBuffer Device::createFramebuffer(const FramebufferSettings &settings)
+Framebuffer Device::createFramebuffer(const FramebufferSettings &settings)
 {
     auto width = static_cast<int>(settings.width);
     auto height = static_cast<int>(settings.height);
     auto format = static_cast<OSPFrameBufferFormat>(settings.format);
-    auto channels = static_cast<int>(OSP_FB_NONE);
-
+    auto channels = static_cast<std::uint32_t>(OSP_FB_NONE);
     for (auto channel : settings.channels)
     {
         channels |= static_cast<OSPFrameBufferChannel>(channel);
     }
-
-    auto handle = ospray::cpp::FrameBuffer(width, height, format, channels);
-
-    return FrameBuffer(handle);
+    auto handle = ospNewFrameBuffer(width, height, format, channels);
+    return Framebuffer(handle);
 }
 
 RenderTask Device::render(const RenderSettings &settings)
 {
-    auto &framebuffer = settings.framebuffer.getHandle();
-    auto &renderer = settings.renderer.getHandle();
-    auto &camera = settings.camera.getHandle();
-    auto &world = settings.world.getHandle();
-    auto future = framebuffer.renderFrame(renderer, camera, world);
+    auto framebuffer = settings.framebuffer.getHandle();
+    auto renderer = settings.renderer.getHandle();
+    auto camera = settings.camera.getHandle();
+    auto world = settings.world.getHandle();
+    auto future = ospRenderFrame(framebuffer, renderer, camera, world);
     return RenderTask(future);
+}
+
+void Device::Deleter::operator()(OSPDevice device) const
+{
+    ospDeviceRelease(device);
 }
 }

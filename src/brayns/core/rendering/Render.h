@@ -23,27 +23,28 @@
 
 #include "Camera.h"
 #include "Framebuffer.h"
-#include "Object.h"
+#include "Managed.h"
 #include "Renderer.h"
 #include "World.h"
 
-namespace brayns
+namespace brayns::experimental
 {
 struct RenderSettings
 {
-    FrameBuffer framebuffer;
-    BaseRenderer renderer;
-    BaseCamera camera;
+    Framebuffer framebuffer;
+    Renderer renderer;
+    Camera camera;
     World world;
 };
 
-class RenderTask : public Object<ospray::cpp::Future>
+class RenderTask : public Managed<OSPFuture>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 
-    float getProgress();
+    bool isReady() const;
+    float getProgress() const;
     void cancel();
-    void wait();
+    float waitAndGetDuration();
 };
 }

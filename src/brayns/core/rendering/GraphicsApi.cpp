@@ -23,7 +23,7 @@
 
 #include <fmt/format.h>
 
-namespace brayns
+namespace brayns::experimental
 {
 GraphicsApi::Loader::~Loader()
 {
@@ -37,35 +37,38 @@ GraphicsApi::GraphicsApi(std::unique_ptr<Loader> loader):
 
 Device GraphicsApi::createDevice(Logger &logger)
 {
-    auto currentDevice = ospray::cpp::Device::current();
-    if (currentDevice.handle() != nullptr)
+    auto currentDevice = ospGetCurrentDevice();
+    if (currentDevice != nullptr)
     {
         throw std::invalid_argument("OSPRay only accepts one device created at a time");
     }
 
-    auto device = ospray::cpp::Device("cpu");
+    auto device = ospNewDevice();
 
-    device.setParam("logLevel", OSP_LOG_DEBUG);
-    device.setParam("warnAsError", true);
+    auto logLevel = OSP_LOG_DEBUG;
+    ospDeviceSetParam(device, "logLevel", OSP_UINT, &logLevel);
+
+    auto warnAsError = true;
+    ospDeviceSetParam(device, "warnAsError", OSP_BOOL, &warnAsError);
 
     auto errorCallback = [](auto *userData, auto code, const auto *message)
     {
         auto &logger = *static_cast<Logger *>(userData);
         logger.error("Device error (code = {}): {}", static_cast<int>(code), message);
     };
-    ospDeviceSetErrorCallback(device.handle(), errorCallback, &logger);
+    ospDeviceSetErrorCallback(device, errorCallback, &logger);
 
     auto statusCallback = [](auto *userData, const auto *message)
     {
         auto &logger = *static_cast<Logger *>(userData);
         logger.debug("Device status: {}", message);
     };
-    ospDeviceSetStatusCallback(device.handle(), statusCallback, &logger);
+    ospDeviceSetStatusCallback(device, statusCallback, &logger);
 
-    device.commit();
-    device.setCurrent();
+    ospDeviceCommit(device);
+    ospSetCurrentDevice(device);
 
-    return Device(std::move(device));
+    return Device(device);
 }
 
 GraphicsApi loadGraphicsApi()

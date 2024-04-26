@@ -21,22 +21,22 @@
 
 #pragma once
 
-#include "Object.h"
+#include "Managed.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-class BaseMaterial : public Object<ospray::cpp::Material>
+class Material : public Managed<OSPMaterial>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 };
 
-class ObjMaterial : public BaseMaterial
+class ObjMaterial : public Material
 {
 public:
-    using BaseMaterial::BaseMaterial;
-
     static inline const std::string name = "obj";
+
+    using Material::Material;
 
     void setDiffuseColor(const Color3 &color);
     void setSpecularColor(const Color3 &color);
@@ -44,4 +44,10 @@ public:
     void setOpacity(float opacity);
     void setTransparencyFilter(const Color3 &color);
 };
+}
+
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Material, OSP_MATERIAL)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ObjMaterial, OSP_MATERIAL)
 }

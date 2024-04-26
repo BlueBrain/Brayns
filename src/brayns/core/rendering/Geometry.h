@@ -21,25 +21,24 @@
 
 #pragma once
 
-#include "Object.h"
+#include "Data.h"
+#include "Managed.h"
 #include "Volume.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-class BaseGeometry : public Object<ospray::cpp::Geometry>
+class Geometry : public Managed<OSPGeometry>
 {
 public:
-    using Object::getBounds;
-    using Object::Object;
+    using Managed::Managed;
 };
 
-class GeometricModel : public Object<ospray::cpp::GeometricModel>
+class GeometricModel : public Managed<OSPGeometricModel>
 {
 public:
-    using Object::getBounds;
-    using Object::Object;
+    using Managed::Managed;
 
-    void setGeometry(const BaseGeometry &geometry);
+    void setGeometry(const Geometry &geometry);
     void setMaterial(std::uint32_t rendererIndex);
     void setPrimitiveMaterials(SharedArray<std::uint32_t> rendererIndices);
     void setPrimitiveColors(SharedArray<Color4> colors);
@@ -49,12 +48,12 @@ public:
     void setId(std::uint32_t id);
 };
 
-class MeshGeometry : public BaseGeometry
+class Mesh : public Geometry
 {
 public:
-    using BaseGeometry::BaseGeometry;
-
     static inline const std::string name = "mesh";
+
+    using Geometry::Geometry;
 
     void setVertexPositions(SharedArray<Vector3> positions);
     void setVertexNormals(SharedArray<Vector3> normals);
@@ -64,12 +63,12 @@ public:
     void setQuadSoup(bool quadSoup);
 };
 
-class SphereGeometry : public BaseGeometry
+class Spheres : public Geometry
 {
 public:
-    using BaseGeometry::BaseGeometry;
-
     static inline const std::string name = "sphere";
+
+    using Geometry::Geometry;
 
     void setPositions(SharedArray<Vector3> positions);
     void setRadii(SharedArray<float> radii);
@@ -92,12 +91,12 @@ enum class CurveBasis
     Bspline = OSP_BSPLINE,
 };
 
-class CurveGeometry : public BaseGeometry
+class Curve : public Geometry
 {
 public:
-    using BaseGeometry::BaseGeometry;
-
     static inline const std::string name = "curve";
+
+    using Geometry::Geometry;
 
     void setVertexPositionsAndRadii(SharedArray<PositionRadius> positionsRadii);
     void setVertexColors(SharedArray<Color4> colors);
@@ -106,36 +105,48 @@ public:
     void setBasis(CurveBasis basis);
 };
 
-class BoxGeometry : public BaseGeometry
+class Boxes : public Geometry
 {
 public:
-    using BaseGeometry::BaseGeometry;
-
     static inline const std::string name = "box";
+
+    using Geometry::Geometry;
 
     void setBoxes(SharedArray<Box3> boxes);
 };
 
-class PlaneGeometry : public BaseGeometry
+class Planes : public Geometry
 {
 public:
-    using BaseGeometry::BaseGeometry;
-
     static inline const std::string name = "plane";
+
+    using Geometry::Geometry;
 
     void setCoefficients(SharedArray<Vector4> coefficients);
     void setBounds(SharedArray<Box3> bounds);
 };
 
-class IsosurfaceGeometry : public BaseGeometry
+class Isosurfaces : public Geometry
 {
 public:
-    using BaseGeometry::BaseGeometry;
-
     static inline const std::string name = "isosurface";
 
-    void setVolume(const BaseVolume &volume);
+    using Geometry::Geometry;
+
+    void setVolume(const Volume &volume);
     void setIsovalues(SharedArray<float> values);
     void setIsovalue(float value);
 };
+}
+
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Geometry, OSP_GEOMETRY)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::GeometricModel, OSP_GEOMETRIC_MODEL)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Mesh, OSP_GEOMETRY)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Spheres, OSP_GEOMETRY)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Curve, OSP_GEOMETRY)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Boxes, OSP_GEOMETRY)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Planes, OSP_GEOMETRY)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Isosurfaces, OSP_GEOMETRY)
 }

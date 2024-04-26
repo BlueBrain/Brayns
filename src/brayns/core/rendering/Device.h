@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include <ospray/ospray_cpp.h>
 
 #include "Camera.h"
@@ -33,32 +35,91 @@
 #include "Volume.h"
 #include "World.h"
 
-namespace brayns
+namespace brayns::experimental
 {
 class Device
 {
 public:
-    explicit Device(ospray::cpp::Device device);
+    explicit Device(OSPDevice handle);
 
-    GeometricModel createGeometryModel();
-    VolumetricModel createVolumeModel();
+    GeometricModel createGeometricModel();
+    VolumetricModel createVolumetricModel();
     Group createGroup();
     Instance createInstance();
     World createWorld();
-    FrameBuffer createFramebuffer(const FramebufferSettings &settings);
-
+    Framebuffer createFramebuffer(const FramebufferSettings &settings);
     RenderTask render(const RenderSettings &settings);
 
-    template<typename ObjectType>
-    ObjectType create()
+    template<typename CameraType>
+    CameraType createCamera()
     {
-        using HandleType = typename ObjectType::Handle;
-        auto &name = ObjectType::name;
-        auto handle = HandleType(name);
-        return ObjectType(std::move(handle));
+        const auto &name = CameraType::name;
+        auto handle = ospNewCamera(name.c_str());
+        return CameraType(handle);
+    }
+
+    template<typename ImageOperationType>
+    ImageOperationType createImageOperation()
+    {
+        const auto &name = ImageOperationType::name;
+        auto handle = ospNewImageOperation(name.c_str());
+        return ImageOperationType(handle);
+    }
+
+    template<typename GeometryType>
+    GeometryType createGeometry()
+    {
+        const auto &name = GeometryType::name;
+        auto handle = ospNewGeometry(name.c_str());
+        return GeometryType(handle);
+    }
+
+    template<typename LightType>
+    LightType createLight()
+    {
+        const auto &name = LightType::name;
+        auto handle = ospNewLight(name.c_str());
+        return LightType(handle);
+    }
+
+    template<typename MaterialType>
+    MaterialType createMaterial()
+    {
+        const auto &name = MaterialType::name;
+        auto handle = ospNewMaterial(name.c_str());
+        return MaterialType(handle);
+    }
+
+    template<typename RendererType>
+    RendererType createRenderer()
+    {
+        const auto &name = RendererType::name;
+        auto handle = ospNewRenderer(name.c_str());
+        return RendererType(handle);
+    }
+
+    template<typename TransferFunctionType>
+    TransferFunctionType createTransferFunction()
+    {
+        const auto &name = TransferFunctionType::name;
+        auto handle = ospNewTransferFunction(name.c_str());
+        return TransferFunctionType(handle);
+    }
+
+    template<typename VolumeType>
+    VolumeType createVolume()
+    {
+        const auto &name = VolumeType::name;
+        auto handle = ospNewVolume(name.c_str());
+        return VolumeType(handle);
     }
 
 private:
-    ospray::cpp::Device _device;
+    struct Deleter
+    {
+        void operator()(OSPDevice device) const;
+    };
+
+    std::unique_ptr<osp::Device, Deleter> _handle;
 };
 }

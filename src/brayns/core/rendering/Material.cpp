@@ -21,7 +21,7 @@
 
 #include "Material.h"
 
-namespace brayns
+namespace brayns::experimental
 {
 void ObjMaterial::setDiffuseColor(const Color3 &color)
 {

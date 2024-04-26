@@ -21,23 +21,30 @@
 
 #include "Render.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-float RenderTask::getProgress()
+bool RenderTask::isReady() const
 {
-    auto handle = getHandle().handle();
+    auto handle = getHandle();
+    return ospIsReady(handle);
+}
+
+float RenderTask::getProgress() const
+{
+    auto handle = getHandle();
     return ospGetProgress(handle);
 }
 
 void RenderTask::cancel()
 {
-    auto handle = getHandle().handle();
+    auto handle = getHandle();
     ospCancel(handle);
 }
 
-void RenderTask::wait()
+float RenderTask::waitAndGetDuration()
 {
-    auto handle = getHandle().handle();
+    auto handle = getHandle();
     ospWait(handle);
+    return ospGetTaskDuration(handle);
 }
 }

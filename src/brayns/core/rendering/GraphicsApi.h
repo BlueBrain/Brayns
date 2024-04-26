@@ -27,7 +27,7 @@
 
 #include "Device.h"
 
-namespace brayns
+namespace brayns::experimental
 {
 class GraphicsApi
 {

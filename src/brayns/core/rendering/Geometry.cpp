@@ -21,11 +21,9 @@
 
 #include "Geometry.h"
 
-#include <ospray/ospray_cpp/ext/rkcommon.h>
-
-namespace brayns
+namespace brayns::experimental
 {
-void GeometricModel::setGeometry(const BaseGeometry &geometry)
+void GeometricModel::setGeometry(const Geometry &geometry)
 {
     setParam("geometry", geometry.getHandle());
 }
@@ -65,102 +63,102 @@ void GeometricModel::setId(std::uint32_t id)
     setParam("id", id);
 }
 
-void MeshGeometry::setVertexPositions(SharedArray<Vector3> positions)
+void Mesh::setVertexPositions(SharedArray<Vector3> positions)
 {
     setParam("vertex.position", toSharedData(positions));
 }
 
-void MeshGeometry::setVertexNormals(SharedArray<Vector3> normals)
+void Mesh::setVertexNormals(SharedArray<Vector3> normals)
 {
     setParam("vertex.normal", toSharedData(normals));
 }
 
-void MeshGeometry::setVertexColors(SharedArray<Color4> colors)
+void Mesh::setVertexColors(SharedArray<Color4> colors)
 {
     setParam("vertex.color", toSharedData(colors));
 }
 
-void MeshGeometry::setTriangleIndices(SharedArray<Index3> indices)
+void Mesh::setTriangleIndices(SharedArray<Index3> indices)
 {
     setParam("index", toSharedData(indices));
 }
 
-void MeshGeometry::setQuadIndices(SharedArray<Index4> indices)
+void Mesh::setQuadIndices(SharedArray<Index4> indices)
 {
     setParam("index", toSharedData(indices));
 }
 
-void MeshGeometry::setQuadSoup(bool quadSoup)
+void Mesh::setQuadSoup(bool quadSoup)
 {
     setParam("quadSoup", quadSoup);
 }
 
-void SphereGeometry::setPositions(SharedArray<Vector3> positions)
+void Spheres::setPositions(SharedArray<Vector3> positions)
 {
     setParam("sphere.position", toSharedData(positions));
 }
 
-void SphereGeometry::setRadii(SharedArray<float> radii)
+void Spheres::setRadii(SharedArray<float> radii)
 {
     setParam("sphere.radius", toSharedData(radii));
 }
 
-void SphereGeometry::setRadius(float radius)
+void Spheres::setRadius(float radius)
 {
     setParam("radius", radius);
 }
 
-void CurveGeometry::setVertexPositionsAndRadii(SharedArray<PositionRadius> positionsRadii)
+void Curve::setVertexPositionsAndRadii(SharedArray<PositionRadius> positionsRadii)
 {
     setParam("vertex.position_radius", toSharedData(positionsRadii));
 }
 
-void CurveGeometry::setVertexColors(SharedArray<Color4> colors)
+void Curve::setVertexColors(SharedArray<Color4> colors)
 {
     setParam("vertex.color", toSharedData(colors));
 }
 
-void CurveGeometry::setIndices(SharedArray<std::uint32_t> indices)
+void Curve::setIndices(SharedArray<std::uint32_t> indices)
 {
     setParam("index", toSharedData(indices));
 }
 
-void CurveGeometry::setType(CurveType type)
+void Curve::setType(CurveType type)
 {
     setParam("type", static_cast<OSPCurveType>(type));
 }
 
-void CurveGeometry::setBasis(CurveBasis basis)
+void Curve::setBasis(CurveBasis basis)
 {
     setParam("basis", static_cast<OSPCurveBasis>(basis));
 }
 
-void BoxGeometry::setBoxes(SharedArray<Box3> boxes)
+void Boxes::setBoxes(SharedArray<Box3> boxes)
 {
     setParam("box", toSharedData(boxes));
 }
 
-void PlaneGeometry::setCoefficients(SharedArray<Vector4> coefficients)
+void Planes::setCoefficients(SharedArray<Vector4> coefficients)
 {
     setParam("plane.coefficients", toSharedData(coefficients));
 }
 
-void PlaneGeometry::setBounds(SharedArray<Box3> bounds)
+void Planes::setBounds(SharedArray<Box3> bounds)
 {
     setParam("plane.bounds", toSharedData(bounds));
 }
 
-void IsosurfaceGeometry::setVolume(const BaseVolume &volume)
+void Isosurfaces::setVolume(const Volume &volume)
 {
     setParam("volume", volume.getHandle());
 }
 
-void IsosurfaceGeometry::setIsovalues(SharedArray<float> values)
+void Isosurfaces::setIsovalues(SharedArray<float> values)
 {
     setParam("isovalue", toSharedData(values));
 }
 
-void IsosurfaceGeometry::setIsovalue(float value)
+void Isosurfaces::setIsovalue(float value)
 {
     setParam("isovalue", value);
 }

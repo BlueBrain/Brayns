@@ -21,40 +21,39 @@
 
 #include "Renderer.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-void BaseRenderer::setPixelSamples(std::size_t count)
+void Renderer::setPixelSamples(std::size_t count)
 {
     setParam("pixelSamples", static_cast<int>(count));
 }
 
-void BaseRenderer::setMaxRayRecursion(std::size_t depth)
+void Renderer::setMaxRayRecursion(std::size_t depth)
 {
     setParam("maxPathLength", static_cast<int>(depth));
 }
 
-void BaseRenderer::setMinSampleContribution(float intensity)
+void Renderer::setMinSampleContribution(float intensity)
 {
     setParam("minContribution", intensity);
 }
 
-void BaseRenderer::setVarianceThreshold(float threshold)
+void Renderer::setVarianceThreshold(float threshold)
 {
     setParam("varianceThreshold", threshold);
 }
 
-void BaseRenderer::setBackgroundColor(const Color4 &color)
+void Renderer::setBackgroundColor(const Color4 &color)
 {
     setParam("backgroundColor", color);
 }
 
-void BaseRenderer::setMaterials(CopiedArray<BaseMaterial> materials)
+void Renderer::setMaterials(SharedArray<Material> materials)
 {
-    auto handles = extractHandles(materials);
-    setParam("material", ospray::cpp::CopiedData(handles));
+    setParam("material", toSharedData(materials));
 }
 
-void BaseRenderer::setPixelFilter(PixelFilter filter)
+void Renderer::setPixelFilter(PixelFilter filter)
 {
     setParam("pixelFilter", static_cast<OSPPixelFilterType>(filter));
 }

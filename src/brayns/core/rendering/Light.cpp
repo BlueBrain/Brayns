@@ -21,19 +21,19 @@
 
 #include "Light.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-void BaseLight::setColor(const Color3 &color)
+void Light::setColor(const Color3 &color)
 {
     setParam("color", color);
 }
 
-void BaseLight::setIntensity(float intensity)
+void Light::setIntensity(float intensity)
 {
     setParam("intensity", intensity);
 }
 
-void BaseLight::setVisible(bool visible)
+void Light::setVisible(bool visible)
 {
     setParam("visible", visible);
 }

@@ -28,13 +28,14 @@
 #include <brayns/core/rendering/GraphicsApi.h>
 
 using namespace brayns;
+using namespace brayns::experimental;
 
 TEST_CASE("Render")
 {
+    auto error = std::string();
+
     auto level = LogLevel::Error;
-    level = LogLevel::Debug;
-    // auto handler = [&](const auto &record) { throw std::runtime_error(std::string(record.message)); };
-    auto handler = [&](const auto &record) { std::cout << record.message << '\n'; };
+    auto handler = [&](const auto &record) { error = record.message; };
     auto logger = Logger("Test", level, handler);
 
     auto api = loadGraphicsApi();
@@ -44,7 +45,7 @@ TEST_CASE("Render")
     auto width = 480;
     auto height = 360;
 
-    auto toneMapper = device.create<ToneMapper>();
+    auto toneMapper = device.createImageOperation<ToneMapper>();
     toneMapper.commit();
 
     auto imageOperations = std::vector<ImageOperation>{toneMapper};
@@ -52,51 +53,61 @@ TEST_CASE("Render")
     auto framebuffer = device.createFramebuffer({
         .width = std::size_t(width),
         .height = std::size_t(height),
+        .format = FramebufferFormat::Srgba8,
+        .channels = {FramebufferChannel::Color},
     });
     framebuffer.setImageOperations(imageOperations);
     framebuffer.commit();
 
-    auto material = device.create<ObjMaterial>();
+    auto material = device.createMaterial<ObjMaterial>();
+    material.setDiffuseColor({1, 1, 1});
+    material.setSpecularColor({0, 0, 0});
+    material.setTransparencyFilter({0, 0, 0});
+    material.setShininess(10);
     material.commit();
 
-    auto materials = std::vector<BaseMaterial>{material};
+    auto materials = std::vector<Material>{material};
 
-    auto renderer = device.create<ScivisRenderer>();
+    auto renderer = device.createRenderer<ScivisRenderer>();
+    renderer.setBackgroundColor({1, 1, 1, 1});
     renderer.enableShadows(true);
     renderer.setPixelSamples(1);
     renderer.setAoSamples(0);
     renderer.setMaterials(materials);
     renderer.commit();
 
-    auto camera = device.create<PerspectiveCamera>();
+    auto camera = device.createCamera<PerspectiveCamera>();
     camera.setAspectRatio(float(width) / float(height));
     camera.setFovy(45);
     camera.setTransform(toAffine({.translation = {0, 0, -1}}));
+    camera.setNearClip(0);
     camera.commit();
 
     auto positions = std::vector<Vector3>{{0, 0, 3}, {1, 0, 3}, {1, 1, 3}};
     auto radii = std::vector<float>{0.25F, 0.25F, 0.25F};
     auto colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}};
 
-    auto spheres = device.create<SphereGeometry>();
+    auto spheres = device.createGeometry<Spheres>();
     spheres.setPositions(positions);
     spheres.setRadii(radii);
     spheres.commit();
 
-    auto model = device.createGeometryModel();
+    auto model = device.createGeometricModel();
     model.setGeometry(spheres);
     model.setPrimitiveColors(colors);
-    model.setId(0);
     model.setMaterial(0);
+    model.setId(0);
     model.commit();
 
     auto models = std::vector<GeometricModel>{model};
 
-    auto light = device.create<AmbientLight>();
+    auto light = device.createLight<AmbientLight>();
     light.setIntensity(1);
+    light.setColor({1, 1, 1});
+    light.setVisible(true);
     light.commit();
 
-    auto lights = std::vector<BaseLight>{light};
+    auto lights = std::vector<Light>{light};
 
     auto group = device.createGroup();
     group.setGeometries(models);
@@ -115,19 +126,27 @@ TEST_CASE("Render")
     world.setInstances(instances);
     world.commit();
 
+    CHECK_EQ(world.getBounds(), instance.getBounds());
+    CHECK_EQ(world.getBounds(), group.getBounds());
+
     auto task = device.render({
         .framebuffer = framebuffer,
         .renderer = renderer,
         .camera = camera,
         .world = world,
     });
-    task.wait();
+    auto duration = task.waitAndGetDuration();
 
-    auto data = framebuffer.map(Channel::Color);
+    CHECK(duration > 0);
+    CHECK(task.getProgress() == 1);
+
+    auto data = framebuffer.map(FramebufferChannel::Color);
     rkcommon::utility::writePPM(
         "/home/acfleury/source/repos/Brayns/test.ppm",
         width,
         height,
         static_cast<const std::uint32_t *>(data));
     framebuffer.unmap(data);
+
+    CHECK(error.empty());
 }

@@ -21,48 +21,48 @@
 
 #pragma once
 
-#include "Object.h"
+#include "Managed.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-class BaseLight : public Object<ospray::cpp::Light>
+class Light : public Managed<OSPLight>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 
     void setColor(const Color3 &color);
     void setIntensity(float intensity);
     void setVisible(bool visible);
 };
 
-class DistantLight : public BaseLight
+class DistantLight : public Light
 {
 public:
-    using BaseLight::BaseLight;
-
     static inline const std::string name = "distant";
+
+    using Light::Light;
 
     void setDirection(const Vector3 &direction);
     void setAngularDiameter(float degrees);
 };
 
-class SphereLight : public BaseLight
+class SphereLight : public Light
 {
 public:
-    using BaseLight::BaseLight;
-
     static inline const std::string name = "sphere";
+
+    using Light::Light;
 
     void setPosition(const Vector3 &position);
     void setRadius(float radius);
 };
 
-class SpotLight : public BaseLight
+class SpotLight : public Light
 {
 public:
-    using BaseLight::BaseLight;
-
     static inline const std::string name = "spot";
+
+    using Light::Light;
 
     void setPosition(const Vector3 &position);
     void setDirection(const Vector3 &direction);
@@ -72,23 +72,33 @@ public:
     void setInnerRadius(float radius);
 };
 
-class QuadLight : public BaseLight
+class QuadLight : public Light
 {
 public:
-    using BaseLight::BaseLight;
-
     static inline const std::string name = "quad";
+
+    using Light::Light;
 
     void setPosition(const Vector3 &position);
     void setEdge1(const Vector3 &edge);
     void setEdge2(const Vector3 &edge);
 };
 
-class AmbientLight : public BaseLight
+class AmbientLight : public Light
 {
 public:
-    using BaseLight::BaseLight;
-
     static inline const std::string name = "ambient";
+
+    using Light::Light;
 };
+}
+
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Light, OSP_LIGHT)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::DistantLight, OSP_LIGHT)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::SphereLight, OSP_LIGHT)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::SpotLight, OSP_LIGHT)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::QuadLight, OSP_LIGHT)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::AmbientLight, OSP_LIGHT)
 }

@@ -21,38 +21,45 @@
 
 #pragma once
 
-#include "Object.h"
+#include "Managed.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-class BaseCamera : public Object<ospray::cpp::Camera>
+class Camera : public Managed<OSPCamera>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 
     void setTransform(const Affine3 &transform);
     void setNearClip(float distance);
 };
 
-class PerspectiveCamera : public BaseCamera
+class PerspectiveCamera : public Camera
 {
 public:
-    using BaseCamera::BaseCamera;
-
     static inline const std::string name = "perspective";
+
+    using Camera::Camera;
 
     void setFovy(float degrees);
     void setAspectRatio(float aspect);
 };
 
-class OrthographicCamera : public BaseCamera
+class OrthographicCamera : public Camera
 {
 public:
-    using BaseCamera::BaseCamera;
-
     static inline const std::string name = "orthographic";
+
+    using Camera::Camera;
 
     void setHeight(float height);
     void setAspectRatio(float aspect);
 };
+}
+
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Camera, OSP_CAMERA)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::PerspectiveCamera, OSP_CAMERA)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::OrthographicCamera, OSP_CAMERA)
 }

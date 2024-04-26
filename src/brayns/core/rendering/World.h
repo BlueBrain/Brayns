@@ -21,40 +21,50 @@
 
 #pragma once
 
+#include "Data.h"
 #include "Geometry.h"
 #include "Light.h"
-#include "Object.h"
+#include "Managed.h"
 #include "Volume.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-class Group : public Object<ospray::cpp::Group>
+class Group : public Managed<OSPGroup>
 {
 public:
-    using Object::getBounds;
-    using Object::Object;
+    using Managed::getBounds;
+    using Managed::Managed;
 
-    void setVolumes(CopiedArray<VolumetricModel> models);
-    void setGeometries(CopiedArray<GeometricModel> models);
-    void setClippingGeometries(CopiedArray<GeometricModel> models);
-    void setLights(CopiedArray<BaseLight> lights);
+    void setVolumes(SharedArray<VolumetricModel> models);
+    void setGeometries(SharedArray<GeometricModel> models);
+    void setClippingGeometries(SharedArray<GeometricModel> models);
+    void setLights(SharedArray<Light> lights);
 };
 
-class Instance : public Object<ospray::cpp::Instance>
+class Instance : public Managed<OSPInstance>
 {
 public:
-    using Object::Object;
+    using Managed::getBounds;
+    using Managed::Managed;
 
     void setGroup(const Group &group);
     void setTransform(const Affine3 &transform);
     void setId(std::uint32_t id);
 };
 
-class World : public Object<ospray::cpp::World>
+class World : public Managed<OSPWorld>
 {
 public:
-    using Object::Object;
+    using Managed::getBounds;
+    using Managed::Managed;
 
-    void setInstances(CopiedArray<Instance> instances);
+    void setInstances(SharedArray<Instance> instances);
 };
+}
+
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Group, OSP_GROUP)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Instance, OSP_INSTANCE)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::World, OSP_WORLD)
 }

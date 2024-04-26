@@ -19,36 +19,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Framebuffer.h"
+#pragma once
+
+#include <span>
+
+#include <ospray/ospray_cpp.h>
 
 namespace brayns::experimental
 {
-const void *Framebuffer::map(FramebufferChannel channel)
-{
-    auto handle = getHandle();
-    return ospMapFrameBuffer(handle, static_cast<OSPFrameBufferChannel>(channel));
-}
+template<typename T>
+using SharedArray = std::span<T>;
 
-void Framebuffer::unmap(const void *data)
+template<typename T>
+ospray::cpp::SharedData toSharedData(SharedArray<T> data)
 {
-    auto handle = getHandle();
-    ospUnmapFrameBuffer(data, handle);
-}
-
-void Framebuffer::resetAccumulation()
-{
-    auto handle = getHandle();
-    ospResetAccumulation(handle);
-}
-
-float Framebuffer::getVariance()
-{
-    auto handle = getHandle();
-    return ospGetVariance(handle);
-}
-
-void Framebuffer::setImageOperations(SharedArray<ImageOperation> operations)
-{
-    setParam("imageOperation", toSharedData(operations));
+    return ospray::cpp::SharedData(data.data(), data.size());
 }
 }

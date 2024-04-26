@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "Object.h"
-
+#include "Data.h"
+#include "Managed.h"
 #include "Material.h"
 
-namespace brayns
+namespace brayns::experimental
 {
 enum class PixelFilter
 {
@@ -36,38 +36,38 @@ enum class PixelFilter
     BlackmanHarris = OSP_PIXELFILTER_BLACKMAN_HARRIS,
 };
 
-class BaseRenderer : public Object<ospray::cpp::Renderer>
+class Renderer : public Managed<OSPRenderer>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 
     void setPixelSamples(std::size_t count);
     void setMaxRayRecursion(std::size_t depth);
     void setMinSampleContribution(float intensity);
     void setVarianceThreshold(float threshold);
     void setBackgroundColor(const Color4 &color);
-    void setMaterials(CopiedArray<BaseMaterial> materials);
+    void setMaterials(SharedArray<Material> materials);
     void setPixelFilter(PixelFilter filter);
 };
 
-class AmbientOcclusionRenderer : public BaseRenderer
+class AmbientOcclusionRenderer : public Renderer
 {
 public:
-    using BaseRenderer::BaseRenderer;
-
     static inline const std::string name = "ao";
+
+    using Renderer::Renderer;
 
     void setAoSamples(std::size_t count);
     void setAoDistance(float distance);
     void setAoIntensity(float intensity);
 };
 
-class ScivisRenderer : public BaseRenderer
+class ScivisRenderer : public Renderer
 {
 public:
-    using BaseRenderer::BaseRenderer;
-
     static inline const std::string name = "scivis";
+
+    using Renderer::Renderer;
 
     void enableShadows(bool enable);
     void setAoSamples(std::size_t count);
@@ -75,11 +75,19 @@ public:
     void showLights(bool show);
 };
 
-class PathTracer : public BaseRenderer
+class PathTracer : public Renderer
 {
 public:
-    using BaseRenderer::BaseRenderer;
-
     static inline const std::string name = "pathtracer";
+
+    using Renderer::Renderer;
 };
+}
+
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Renderer, OSP_RENDERER)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::AmbientOcclusionRenderer, OSP_RENDERER)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ScivisRenderer, OSP_RENDERER)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::PathTracer, OSP_RENDERER)
 }
