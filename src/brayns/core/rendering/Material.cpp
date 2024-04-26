@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,10 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Material.h"
 
-#include <brayns/core/utils/MathTypes.h>
-
-namespace brayns
+namespace brayns::experimental
 {
-} // namespace brayns
+void ObjMaterial::setDiffuseColor(const Color3 &color)
+{
+    setParam("kd", color);
+}
+
+void ObjMaterial::setSpecularColor(const Color3 &color)
+{
+    setParam("ks", color);
+}
+
+void ObjMaterial::setShininess(float exponent)
+{
+    setParam("ns", exponent);
+}
+
+void ObjMaterial::setOpacity(float opacity)
+{
+    setParam("d", opacity);
+}
+
+void ObjMaterial::setTransparencyFilter(const Color3 &color)
+{
+    setParam("tf", color);
+}
+}

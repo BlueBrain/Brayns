@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,8 +21,30 @@
 
 #pragma once
 
-#include <brayns/core/utils/MathTypes.h>
+#include "Camera.h"
+#include "Framebuffer.h"
+#include "Managed.h"
+#include "Renderer.h"
+#include "World.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-} // namespace brayns
+struct RenderSettings
+{
+    Framebuffer framebuffer;
+    Renderer renderer;
+    Camera camera;
+    World world;
+};
+
+class RenderTask : public Managed<OSPFuture>
+{
+public:
+    using Managed::Managed;
+
+    bool isReady() const;
+    float getProgress() const;
+    void cancel();
+    float waitAndGetDuration();
+};
+}

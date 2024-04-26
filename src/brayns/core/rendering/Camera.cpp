@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,10 +19,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Camera.h"
 
-#include <brayns/core/utils/MathTypes.h>
-
-namespace brayns
+namespace brayns::experimental
 {
-} // namespace brayns
+void Camera::setTransform(const Affine3 &transform)
+{
+    setParam("transform", transform);
+}
+
+void Camera::setNearClip(float distance)
+{
+    setParam("nearClip", distance);
+}
+
+void PerspectiveCamera::setFovy(float degrees)
+{
+    setParam("fovy", degrees);
+}
+
+void PerspectiveCamera::setAspectRatio(float aspect)
+{
+    setParam("aspect", aspect);
+}
+
+void OrthographicCamera::setHeight(float height)
+{
+    setParam("height", height);
+}
+
+void OrthographicCamera::setAspectRatio(float aspect)
+{
+    setParam("aspect", aspect);
+}
+}

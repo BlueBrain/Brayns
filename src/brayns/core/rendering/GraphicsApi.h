@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,8 +21,36 @@
 
 #pragma once
 
-#include <brayns/core/utils/MathTypes.h>
+#include <memory>
 
-namespace brayns
+#include <brayns/core/utils/Logger.h>
+
+#include "Device.h"
+
+namespace brayns::experimental
 {
-} // namespace brayns
+class GraphicsApi
+{
+public:
+    class Loader
+    {
+    public:
+        Loader() = default;
+        ~Loader();
+
+        Loader(const Loader &other) = delete;
+        Loader(Loader &&other) = delete;
+        Loader &operator=(const Loader &other) = delete;
+        Loader &operator=(Loader &&other) = delete;
+    };
+
+    explicit GraphicsApi(std::unique_ptr<Loader> loader);
+
+    Device createDevice(Logger &logger);
+
+private:
+    std::unique_ptr<Loader> _loader;
+};
+
+GraphicsApi loadGraphicsApi();
+}

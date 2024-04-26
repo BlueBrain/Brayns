@@ -68,8 +68,9 @@ TEST_CASE("Volume")
         CHECK(min == brayns::Vector3f(0.f));
         CHECK(max == brayns::Vector3f(5.f));
 
-        auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)}.toMatrix();
-        bounds = volume.computeBounds(transform);
+        auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)};
+        auto matrix = brayns::toAffine(transform);
+        bounds = volume.computeBounds(matrix);
         min = bounds.getMin();
         max = bounds.getMax();
         CHECK(min == brayns::Vector3f(100.f, 0.f, 0.f));

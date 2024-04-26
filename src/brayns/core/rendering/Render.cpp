@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,10 +19,32 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Render.h"
 
-#include <brayns/core/utils/MathTypes.h>
-
-namespace brayns
+namespace brayns::experimental
 {
-} // namespace brayns
+bool RenderTask::isReady() const
+{
+    auto handle = getHandle();
+    return ospIsReady(handle);
+}
+
+float RenderTask::getProgress() const
+{
+    auto handle = getHandle();
+    return ospGetProgress(handle);
+}
+
+void RenderTask::cancel()
+{
+    auto handle = getHandle();
+    ospCancel(handle);
+}
+
+float RenderTask::waitAndGetDuration()
+{
+    auto handle = getHandle();
+    ospWait(handle);
+    return ospGetTaskDuration(handle);
+}
+}

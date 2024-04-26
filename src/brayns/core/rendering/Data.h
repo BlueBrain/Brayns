@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,8 +21,18 @@
 
 #pragma once
 
-#include <brayns/core/utils/MathTypes.h>
+#include <span>
 
-namespace brayns
+#include <ospray/ospray_cpp.h>
+
+namespace brayns::experimental
 {
-} // namespace brayns
+template<typename T>
+using SharedArray = std::span<T>;
+
+template<typename T>
+ospray::cpp::SharedData toSharedData(SharedArray<T> data)
+{
+    return ospray::cpp::SharedData(data.data(), data.size());
+}
+}

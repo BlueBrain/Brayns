@@ -19,32 +19,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Log.h"
+#pragma once
 
-#include <iostream>
+#include "Managed.h"
 
-namespace
+namespace brayns::experimental
 {
-using namespace brayns;
-
-Logger consoleLogger()
+class Camera : public Managed<OSPCamera>
 {
-    auto handler = [](const auto &record) { std::cout << toString(record) << '\n'; };
-    return Logger("Brayns", LogLevel::Info, handler);
+public:
+    using Managed::Managed;
+
+    void setTransform(const Affine3 &transform);
+    void setNearClip(float distance);
+};
+
+class PerspectiveCamera : public Camera
+{
+public:
+    static inline const std::string name = "perspective";
+
+    using Camera::Camera;
+
+    void setFovy(float degrees);
+    void setAspectRatio(float aspect);
+};
+
+class OrthographicCamera : public Camera
+{
+public:
+    static inline const std::string name = "orthographic";
+
+    using Camera::Camera;
+
+    void setHeight(float height);
+    void setAspectRatio(float aspect);
+};
 }
-}
 
-namespace brayns
+namespace ospray
 {
-void Log::setLevel(LogLevel level)
-{
-    _logger.setLevel(level);
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Camera, OSP_CAMERA)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::PerspectiveCamera, OSP_CAMERA)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::OrthographicCamera, OSP_CAMERA)
 }
-
-void Log::disable()
-{
-    setLevel(LogLevel::Off);
-}
-
-Logger Log::_logger = consoleLogger();
-} // namespace brayns

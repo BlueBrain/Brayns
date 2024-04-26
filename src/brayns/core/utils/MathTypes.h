@@ -20,14 +20,9 @@
 
 #pragma once
 
-// Rkcommon simd math code has big precission issues
-// And previous math lib (glm) was being used without simd anyway
-#define RKCOMMON_NO_SIMD
-#include <rkcommon/math/AffineSpace.h>
-#include <rkcommon/math/Quaternion.h>
-#include <rkcommon/math/vec.h>
-
 #include <concepts>
+
+#include "Math.h"
 
 namespace brayns
 {
@@ -36,24 +31,20 @@ namespace math = rkcommon::math;
 /**
  * Vector definitions
  */
+using Vector2ui = math::vec2ui;
 using Vector2i = math::vec2i;
 using Vector2l = math::vec2l;
+
+using Vector3ui = math::vec3ui;
 using Vector3i = math::vec3i;
 using Vector3l = math::vec3l;
 
-using Vector2ui = math::vec2ui;
 using Vector2ul = math::vec2ul;
-using Vector3ui = math::vec3ui;
 using Vector3ul = math::vec3ul;
 
 using Vector2f = math::vec2f;
 using Vector3f = math::vec3f;
 using Vector4f = math::vec4f;
-
-/**
- * Quaternion definitions
- */
-using Quaternion = math::quaternionf;
 
 /**
  * AABB definitions
@@ -67,6 +58,11 @@ class TransformMatrix
 {
 public:
     TransformMatrix() = default;
+
+    TransformMatrix(const math::AffineSpace3f &value):
+        affine(value)
+    {
+    }
 
     TransformMatrix(const Vector3f &translation, const Quaternion &rotation, const Vector3f &scale):
         affine(math::LinearSpace3f(rotation) * math::LinearSpace3f::scale(scale), translation)

@@ -19,32 +19,47 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Log.h"
+#include "World.h"
 
-#include <iostream>
-
-namespace
+namespace brayns::experimental
 {
-using namespace brayns;
-
-Logger consoleLogger()
+void Group::setVolumes(SharedArray<VolumetricModel> models)
 {
-    auto handler = [](const auto &record) { std::cout << toString(record) << '\n'; };
-    return Logger("Brayns", LogLevel::Info, handler);
-}
+    setParam("volume", toSharedData(models));
 }
 
-namespace brayns
+void Group::setGeometries(SharedArray<GeometricModel> models)
 {
-void Log::setLevel(LogLevel level)
-{
-    _logger.setLevel(level);
+    setParam("geometry", toSharedData(models));
 }
 
-void Log::disable()
+void Group::setClippingGeometries(SharedArray<GeometricModel> models)
 {
-    setLevel(LogLevel::Off);
+    setParam("clippingGeometry", toSharedData(models));
 }
 
-Logger Log::_logger = consoleLogger();
-} // namespace brayns
+void Group::setLights(SharedArray<Light> lights)
+{
+    setParam("light", toSharedData(lights));
+}
+
+void Instance::setGroup(const Group &group)
+{
+    setParam("group", group.getHandle());
+}
+
+void Instance::setTransform(const Affine3 &transform)
+{
+    setParam("transform", transform);
+}
+
+void Instance::setId(std::uint32_t id)
+{
+    setParam("id", id);
+}
+
+void World::setInstances(SharedArray<Instance> instances)
+{
+    setParam("instance", toSharedData(instances));
+}
+}

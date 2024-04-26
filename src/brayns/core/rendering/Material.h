@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,8 +21,33 @@
 
 #pragma once
 
-#include <brayns/core/utils/MathTypes.h>
+#include "Managed.h"
 
-namespace brayns
+namespace brayns::experimental
 {
-} // namespace brayns
+class Material : public Managed<OSPMaterial>
+{
+public:
+    using Managed::Managed;
+};
+
+class ObjMaterial : public Material
+{
+public:
+    static inline const std::string name = "obj";
+
+    using Material::Material;
+
+    void setDiffuseColor(const Color3 &color);
+    void setSpecularColor(const Color3 &color);
+    void setShininess(float exponent);
+    void setOpacity(float opacity);
+    void setTransparencyFilter(const Color3 &color);
+};
+}
+
+namespace ospray
+{
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Material, OSP_MATERIAL)
+OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ObjMaterial, OSP_MATERIAL)
+}

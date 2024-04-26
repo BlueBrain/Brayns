@@ -83,8 +83,10 @@ TEST_CASE("Geometry")
         CHECK(min == brayns::Vector3f(-10.f));
         CHECK(max == brayns::Vector3f(10.f));
 
-        auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)}.toMatrix();
-        bounds = geometry.computeBounds(transform);
+        auto transform = brayns::Transform{.translation = brayns::Vector3f(100.f, 0.f, 0.f)};
+        auto matrix = brayns::toAffine(transform);
+
+        bounds = geometry.computeBounds(matrix);
         min = bounds.getMin();
         max = bounds.getMax();
         CHECK(min == brayns::Vector3f(90.f, -10.f, -10.f));

@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Cyrille Favreau <cyrille.favreau@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,10 +19,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Framebuffer.h"
 
-#include <brayns/core/utils/MathTypes.h>
-
-namespace brayns
+namespace brayns::experimental
 {
-} // namespace brayns
+const void *Framebuffer::map(FramebufferChannel channel)
+{
+    auto handle = getHandle();
+    return ospMapFrameBuffer(handle, static_cast<OSPFrameBufferChannel>(channel));
+}
+
+void Framebuffer::unmap(const void *data)
+{
+    auto handle = getHandle();
+    ospUnmapFrameBuffer(data, handle);
+}
+
+void Framebuffer::resetAccumulation()
+{
+    auto handle = getHandle();
+    ospResetAccumulation(handle);
+}
+
+float Framebuffer::getVariance()
+{
+    auto handle = getHandle();
+    return ospGetVariance(handle);
+}
+
+void Framebuffer::setImageOperations(SharedArray<ImageOperation> operations)
+{
+    setParam("imageOperation", toSharedData(operations));
+}
+}
