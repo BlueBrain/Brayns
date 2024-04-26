@@ -141,11 +141,23 @@ TEST_CASE("Render")
     CHECK(task.getProgress() == 1);
 
     auto data = framebuffer.map(FramebufferChannel::Color);
-    rkcommon::utility::writePPM(
-        "/home/acfleury/source/repos/Brayns/test.ppm",
+
+    /*rkcommon::utility::writePPM(
+        "test.ppm",
         width,
         height,
-        static_cast<const std::uint32_t *>(data));
+        static_cast<const std::uint32_t *>(data));*/
+
+    auto pixels = static_cast<const std::uint32_t *>(data);
+
+    auto sum = std::uint32_t(0);
+    for (auto i = 0; i < width * height; ++i)
+    {
+        sum += pixels[i];
+    }
+
+    CHECK(sum > 0);
+
     framebuffer.unmap(data);
 
     CHECK(error.empty());
