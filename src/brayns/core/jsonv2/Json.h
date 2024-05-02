@@ -29,5 +29,6 @@
 #include "types/Arrays.h"
 #include "types/Enums.h"
 #include "types/Maps.h"
+#include "types/Math.h"
 #include "types/Primitives.h"
 #include "types/Variants.h"

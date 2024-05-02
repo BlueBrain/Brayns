@@ -52,6 +52,6 @@ bool isArray(const JsonValue &json);
 bool isObject(const JsonValue &json);
 const JsonArray &getArray(const JsonValue &json);
 const JsonObject &getObject(const JsonValue &json);
-std::string stringify(const JsonValue &json);
+std::string stringifyToJson(const JsonValue &json);
 JsonValue parseJson(const std::string &data);
 }

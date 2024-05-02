@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <brayns/core/utils/MathTypes.h>
+#include <brayns/core/utils/Math.h>
 
 #include "Primitives.h"
 
@@ -56,7 +56,7 @@ struct JsonMathReflector
     {
         return {
             .type = JsonType::Array,
-            .items = getJsonSchema<ValueType>(),
+            .items = {getJsonSchema<ValueType>()},
             .minItems = itemCount,
             .maxItems = itemCount,
         };
@@ -67,7 +67,7 @@ struct JsonMathReflector
         auto array = createJsonArray();
         for (auto i = std::size_t(0); i < itemCount; ++i)
         {
-            const auto &item = StaticJsonArray::getItem(value, i);
+            const auto &item = StaticJsonArray<T>::getItem(value, i);
             auto jsonItem = serializeToJson(item);
             array->add(jsonItem);
         }
@@ -85,7 +85,7 @@ struct JsonMathReflector
         auto i = std::size_t(0);
         for (const auto &jsonItem : array)
         {
-            auto &item = StaticJsonArray::getItem(value, i);
+            auto &item = StaticJsonArray<T>::getItem(value, i);
             item = deserializeJson<ValueType>(jsonItem);
             ++i;
         }
@@ -94,10 +94,11 @@ struct JsonMathReflector
 };
 
 template<typename T, int S>
-struct JsonReflector<math::vec_t<T, S>> : JsonMathReflector<math::vec_t<T, S>>
+struct JsonReflector<rkcommon::math::vec_t<T, S>> : JsonMathReflector<rkcommon::math::vec_t<T, S>>
 {
 };
 
+template<>
 struct JsonReflector<Quaternion> : JsonMathReflector<Quaternion>
 {
 };

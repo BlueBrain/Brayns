@@ -38,7 +38,7 @@ struct JsonArrayReflector
     {
         return {
             .type = JsonType::Array,
-            .items = getJsonSchema<ValueType>(),
+            .items = {getJsonSchema<ValueType>()},
         };
     }
 

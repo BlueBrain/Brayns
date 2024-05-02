@@ -73,13 +73,13 @@ template<typename T>
 std::string stringifyToJson(const T &value)
 {
     auto json = serializeToJson(value);
-    return stringify(json);
+    return stringifyToJson(json);
 }
 
 template<typename T>
 T parseJson(const std::string &data)
 {
     auto json = parseJson(data);
-    return deserialize<T>(json);
+    return deserializeJson<T>(json);
 }
 }

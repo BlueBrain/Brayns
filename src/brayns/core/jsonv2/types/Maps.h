@@ -38,7 +38,7 @@ struct JsonMapReflector
     {
         return {
             .type = JsonType::Object,
-            .items = getJsonSchema<ValueType>(),
+            .items = {getJsonSchema<ValueType>()},
         };
     }
 

@@ -34,12 +34,12 @@ struct JsonReflector<std::optional<T>>
     static JsonSchema getSchema()
     {
         return {
-            .oneOf = {getJsonSchema<T>(), getJsonSchema<NullJson>()},
             .required = false,
+            .oneOf = {getJsonSchema<T>(), getJsonSchema<NullJson>()},
         };
     }
 
-    static JsonValue serialize(const T &value)
+    static JsonValue serialize(const std::optional<T> &value)
     {
         if (!value)
         {
@@ -48,13 +48,13 @@ struct JsonReflector<std::optional<T>>
         return serializeToJson<T>(*value);
     }
 
-    static T deserialize(const JsonValue &json)
+    static std::optional<T> deserialize(const JsonValue &json)
     {
         if (json.isEmpty())
         {
             return std::nullopt;
         }
-        return deserialize<T>(json);
+        return deserializeJson<T>(json);
     }
 };
 
@@ -88,20 +88,14 @@ private:
         }
         catch (...)
         {
-            return tryDeserialize<Us...>();
-        }
-    }
-
-    template<typename U>
-    static std::variant<Ts...> tryDeserialize(const JsonValue &json)
-    {
-        try
-        {
-            return deserializeJson<U>(json);
-        }
-        catch (...)
-        {
-            throw JsonException("Invalid oneOf");
+            if constexpr (sizeof...(Us) == 0)
+            {
+                throw JsonException("Invalid oneOf");
+            }
+            else
+            {
+                return tryDeserialize<Us...>(json);
+            }
         }
     }
 };
