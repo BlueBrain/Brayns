@@ -21,65 +21,57 @@
 
 #pragma once
 
-#include "JsonSchema.h"
-#include "JsonValue.h"
+#include <map>
+#include <string>
+#include <unordered_map>
+
+#include "Primitives.h"
 
 namespace brayns::experimental
 {
 template<typename T>
-struct JsonReflector
+struct JsonMapReflector
 {
-    template<typename U>
-    static constexpr auto alwaysFalse = false;
-
-    static_assert(alwaysFalse<T>, "Please specialize JsonReflector<T>");
+    using ValueType = typename T::mapped_type;
 
     static JsonSchema getSchema()
     {
-        return {};
+        return {
+            .type = JsonType::Object,
+            .items = getJsonSchema<ValueType>(),
+        };
     }
 
     static JsonValue serialize(const T &value)
     {
-        return {};
+        auto object = createJsonObject();
+        for (const auto &[key, item] : value)
+        {
+            auto jsonItem = serializeToJson(item);
+            object->set(key, jsonItem);
+        }
+        return object;
     }
 
     static T deserialize(const JsonValue &json)
     {
-        return {};
+        const auto &object = getObject(json);
+        auto value = T();
+        for (const auto &[key, jsonItem] : object)
+        {
+            value[key] = deserializeJson<ValueType>(jsonItem);
+        }
+        return value;
     }
 };
 
 template<typename T>
-const JsonSchema &getJsonSchema()
+struct JsonReflector<std::map<std::string, T>> : JsonMapReflector<std::map<std::string, T>>
 {
-    static const JsonSchema schema = JsonReflector<T>::getSchema();
-    return schema;
-}
+};
 
 template<typename T>
-JsonValue serializeToJson(const T &value)
+struct JsonReflector<std::unordered_map<std::string, T>> : JsonMapReflector<std::unordered_map<std::string, T>>
 {
-    return JsonReflector<T>::serialize(value);
-}
-
-template<typename T>
-T deserializeJson(const JsonValue &json)
-{
-    return JsonReflector<T>::deserialize(json);
-}
-
-template<typename T>
-std::string stringifyToJson(const T &value)
-{
-    auto json = serializeToJson(value);
-    return stringify(json);
-}
-
-template<typename T>
-T parseJson(const std::string &data)
-{
-    auto json = parseJson(data);
-    return deserialize<T>(json);
-}
+};
 }

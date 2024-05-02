@@ -31,7 +31,7 @@
 namespace brayns::experimental
 {
 template<typename T>
-using EnumMap = std::vector<std::pair<std::string, T>>;
+using EnumInfo = std::vector<std::pair<std::string, T>>;
 
 template<typename T>
 struct EnumReflector
@@ -41,31 +41,26 @@ struct EnumReflector
 
     static_assert(alwaysFalse<T>, "Please specialize EnumReflector<T>");
 
-    static EnumMap<T> reflect()
+    static EnumInfo<T> reflect()
     {
         return {};
     }
 };
 
 template<typename T>
-struct EnumStorage
+const EnumInfo<T> &reflectEnum()
 {
-    static inline const EnumMap<T> mapping = EnumReflector<T>::reflect();
-};
-
-template<typename T>
-const EnumMap<T> &getEnumMapping()
-{
-    return EnumStorage<T>::mapping;
+    static const EnumInfo<T> info = EnumReflector<T>::reflect();
+    return info;
 }
 
 template<typename T>
 std::vector<std::string> getEnumNames()
 {
-    const auto &mapping = getEnumMapping<T>();
+    const auto &info = reflectEnum<T>();
     std::vector<std::string> names;
-    names.reserve(mapping.size());
-    for (const auto &[name, value] : mapping)
+    names.reserve(info.size());
+    for (const auto &[name, value] : info)
     {
         names.push_back(name);
     }
@@ -75,10 +70,10 @@ std::vector<std::string> getEnumNames()
 template<typename T>
 static std::vector<T> getEnumValues()
 {
-    const auto &mapping = getEnumMapping<T>();
+    const auto &info = reflectEnum<T>();
     std::vector<T> values;
     values.reserve(values.size());
-    for (const auto &[name, value] : mapping)
+    for (const auto &[name, value] : info)
     {
         values.push_back(value);
     }
@@ -88,8 +83,8 @@ static std::vector<T> getEnumValues()
 template<typename T>
 static const std::string *findEnumName(const T &value)
 {
-    const auto &mapping = getEnumMapping<T>();
-    for (const auto &[key, item] : mapping)
+    const auto &info = reflectEnum<T>();
+    for (const auto &[key, item] : info)
     {
         if (item == value)
         {
@@ -102,8 +97,8 @@ static const std::string *findEnumName(const T &value)
 template<typename T>
 static const T *findEnumValue(const std::string &name)
 {
-    const auto &mapping = getEnumMapping<T>();
-    for (const auto &[key, item] : mapping)
+    const auto &info = reflectEnum<T>();
+    for (const auto &[key, item] : info)
     {
         if (key == name)
         {
@@ -127,7 +122,7 @@ const std::string &getEnumName(const T &value)
 template<typename T>
 const T &getEnumValue(const std::string &name)
 {
-    const auto *value = findValue<T>(name);
+    const auto *value = findEnumValue<T>(name);
     if (value)
     {
         return *value;

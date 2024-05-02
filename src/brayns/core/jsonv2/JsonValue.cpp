@@ -28,18 +28,14 @@
 
 namespace brayns::experimental
 {
-JsonArray &createArray(JsonValue &json)
+JsonArray::Ptr createJsonArray()
 {
-    auto ptr = Poco::makeShared<JsonArray>();
-    json = ptr;
-    return *ptr;
+    return Poco::makeShared<JsonArray>();
 }
 
-JsonObject &createObject(JsonValue &json)
+JsonObject::Ptr createJsonObject()
 {
-    auto ptr = Poco::makeShared<JsonObject>();
-    json = ptr;
-    return *ptr;
+    return Poco::makeShared<JsonObject>();
 }
 
 bool isArray(const JsonValue &json)
@@ -85,7 +81,14 @@ std::string stringify(const JsonValue &json)
 
 JsonValue parseJson(const std::string &data)
 {
-    auto parser = Poco::JSON::Parser();
-    return parser.parse(data);
+    try
+    {
+        auto parser = Poco::JSON::Parser();
+        return parser.parse(data);
+    }
+    catch (const Poco::Exception &e)
+    {
+        throw JsonException(e.displayText());
+    }
 }
 }

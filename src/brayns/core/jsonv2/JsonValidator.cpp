@@ -61,61 +61,6 @@ private:
 
 void check(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors);
 
-struct RequiredType
-{
-    JsonType value;
-
-    bool accepts(JsonType type)
-    {
-        if (value == JsonType::Undefined)
-        {
-            return true;
-        }
-        if (type == value)
-        {
-            return true;
-        }
-        if (value == JsonType::Number && type == JsonType::Integer)
-        {
-            return true;
-        }
-        return false;
-    }
-};
-
-JsonType getJsonType(const JsonValue &json)
-{
-    if (json.isEmpty())
-    {
-        return JsonType::Null;
-    }
-    if (json.isBoolean())
-    {
-        return JsonType::Boolean;
-    }
-    if (json.isInteger())
-    {
-        return JsonType::Integer;
-    }
-    if (json.isNumeric())
-    {
-        return JsonType::Number;
-    }
-    if (json.isString())
-    {
-        return JsonType::String;
-    }
-    if (isArray(json))
-    {
-        return JsonType::Array;
-    }
-    if (isObject(json))
-    {
-        return JsonType::Object;
-    }
-    throw std::invalid_argument("Value is not JSON");
-}
-
 void checkOneOf(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors)
 {
     for (const auto &oneof : schema.oneOf)
@@ -131,9 +76,9 @@ void checkOneOf(const JsonValue &json, const JsonSchema &schema, ErrorContext &e
 
 bool checkType(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors)
 {
-    auto required = RequiredType{schema.type};
+    auto required = RequiredJsonType{schema.type};
     auto type = getJsonType(json);
-    if (required.accepts(type))
+    if (required.isCompatible(type))
     {
         return true;
     }

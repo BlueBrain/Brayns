@@ -21,37 +21,44 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include <concepts>
 
-#include <Poco/Dynamic/Var.h>
-#include <Poco/JSON/Array.h>
-#include <Poco/JSON/JSONException.h>
-#include <Poco/JSON/Object.h>
-#include <Poco/SharedPtr.h>
+#include <brayns/core/utils/EnumReflector.h>
+
+#include "Primitives.h"
 
 namespace brayns::experimental
 {
-using JsonValue = Poco::Dynamic::Var;
-using JsonArray = Poco::JSON::Array;
-using JsonObject = Poco::JSON::Object;
+template<typename T>
+concept Enum = std::is_enum_v<T>;
 
-struct NullJson
+template<Enum T>
+struct JsonReflector<T>
 {
-};
+    static JsonSchema getSchema()
+    {
+        return {
+            .type = JsonType::String,
+            .enums = getEnumNames<T>(),
+        };
+    }
 
-class JsonException : public std::runtime_error
-{
-public:
-    using std::runtime_error::runtime_error;
-};
+    static JsonValue serialize(const T &value)
+    {
+        return getEnumName(value);
+    }
 
-JsonArray::Ptr createJsonArray();
-JsonObject::Ptr createJsonObject();
-bool isArray(const JsonValue &json);
-bool isObject(const JsonValue &json);
-const JsonArray &getArray(const JsonValue &json);
-const JsonObject &getObject(const JsonValue &json);
-std::string stringify(const JsonValue &json);
-JsonValue parseJson(const std::string &data);
+    static T deserialize(const JsonValue &json)
+    {
+        auto name = deserializeJson<std::string>(json);
+        try
+        {
+            return getEnumValue<T>(name);
+        }
+        catch (const std::exception &e)
+        {
+            throw JsonException(e.what());
+        }
+    }
+};
 }

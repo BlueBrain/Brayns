@@ -21,37 +21,13 @@
 
 #pragma once
 
-#include <stdexcept>
-#include <string>
+#include "JsonReflector.h"
+#include "JsonSchema.h"
+#include "JsonValidator.h"
+#include "JsonValue.h"
 
-#include <Poco/Dynamic/Var.h>
-#include <Poco/JSON/Array.h>
-#include <Poco/JSON/JSONException.h>
-#include <Poco/JSON/Object.h>
-#include <Poco/SharedPtr.h>
-
-namespace brayns::experimental
-{
-using JsonValue = Poco::Dynamic::Var;
-using JsonArray = Poco::JSON::Array;
-using JsonObject = Poco::JSON::Object;
-
-struct NullJson
-{
-};
-
-class JsonException : public std::runtime_error
-{
-public:
-    using std::runtime_error::runtime_error;
-};
-
-JsonArray::Ptr createJsonArray();
-JsonObject::Ptr createJsonObject();
-bool isArray(const JsonValue &json);
-bool isObject(const JsonValue &json);
-const JsonArray &getArray(const JsonValue &json);
-const JsonObject &getObject(const JsonValue &json);
-std::string stringify(const JsonValue &json);
-JsonValue parseJson(const std::string &data);
-}
+#include "types/Arrays.h"
+#include "types/Enums.h"
+#include "types/Maps.h"
+#include "types/Primitives.h"
+#include "types/Variants.h"
