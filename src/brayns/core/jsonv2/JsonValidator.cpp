@@ -65,8 +65,8 @@ void checkOneOf(const JsonValue &json, const JsonSchema &schema, ErrorContext &e
 {
     for (const auto &oneof : schema.oneOf)
     {
-        auto suberrors = validate(json, oneof);
-        if (!suberrors.empty())
+        auto suberrors = validateJsonSchema(json, oneof);
+        if (suberrors.empty())
         {
             return;
         }
@@ -177,10 +177,14 @@ void checkUnknownProperties(const JsonObject &object, const JsonSchema &schema, 
 
 void checkProperties(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
 {
-    for (const auto &[key, value] : object)
+    for (const auto &[key, itemSchema] : schema.properties)
     {
+        if (!object.has(key))
+        {
+            continue;
+        }
         errors.push(key);
-        check(value, schema.properties.at(key), errors);
+        check(object.get(key), itemSchema, errors);
         errors.pop();
     }
 }
@@ -271,7 +275,7 @@ std::string toString(const InvalidType &error)
 {
     const auto &type = getEnumName(error.type);
     const auto &expected = getEnumName(error.expected);
-    return fmt::format("Invalid type: expected {}, got {}", expected, type);
+    return fmt::format("Invalid type: expected {} got {}", expected, type);
 }
 
 std::string toString(const BelowMinimum &error)
@@ -286,7 +290,7 @@ std::string toString(const AboveMaximum &error)
 
 std::string toString(const NotEnoughItems &error)
 {
-    return fmt::format("Too many items: {} < {}", error.count, error.minItems);
+    return fmt::format("Not enough items: {} < {}", error.count, error.minItems);
 }
 
 std::string toString(const TooManyItems &error)
@@ -319,7 +323,7 @@ std::string toString(const JsonError &error)
     return std::visit([](const auto &value) { return toString(value); }, error);
 }
 
-std::vector<JsonSchemaError> validate(const JsonValue &json, const JsonSchema &schema)
+std::vector<JsonSchemaError> validateJsonSchema(const JsonValue &json, const JsonSchema &schema)
 {
     auto errors = ErrorContext();
     check(json, schema, errors);

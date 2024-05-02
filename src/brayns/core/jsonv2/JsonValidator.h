@@ -121,5 +121,5 @@ struct JsonSchemaError
     JsonError error;
 };
 
-std::vector<JsonSchemaError> validate(const JsonValue &json, const JsonSchema &schema);
+std::vector<JsonSchemaError> validateJsonSchema(const JsonValue &json, const JsonSchema &schema);
 }
