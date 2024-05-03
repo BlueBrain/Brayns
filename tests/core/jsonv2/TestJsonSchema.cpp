@@ -256,4 +256,26 @@ TEST_CASE("JsonSchema")
         CHECK_EQ(toString(errors[1].path), "test2.test3[0]");
         CHECK_EQ(toString(errors[1].error), "Invalid type: expected integer got number");
     }
+    SUBCASE("Serialize")
+    {
+        auto schema = getJsonSchema<std::string>();
+        auto json = stringifyToJson(schema);
+        auto ref = R"({"type":"string"})";
+        CHECK_EQ(json, ref);
+
+        schema = getJsonSchema<std::vector<std::string>>();
+        json = stringifyToJson(schema);
+        ref = R"({"items":{"type":"string"},"type":"array"})";
+        CHECK_EQ(json, ref);
+
+        schema = getJsonSchema<std::map<std::string, bool>>();
+        json = stringifyToJson(schema);
+        ref = R"({"additionalProperties":{"type":"boolean"},"type":"object"})";
+        CHECK_EQ(json, ref);
+
+        schema = getJsonSchema<std::variant<std::string, bool>>();
+        json = stringifyToJson(schema);
+        ref = R"({"oneOf":[{"type":"string"},{"type":"boolean"}]})";
+        CHECK_EQ(json, ref);
+    }
 }

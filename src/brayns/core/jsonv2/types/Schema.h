@@ -21,15 +21,14 @@
 
 #pragma once
 
-#include "JsonReflector.h"
-#include "JsonSchema.h"
-#include "JsonValidator.h"
-#include "JsonValue.h"
+#include <brayns/core/jsonv2/JsonReflector.h>
 
-#include "types/Arrays.h"
-#include "types/Enums.h"
-#include "types/Maps.h"
-#include "types/Math.h"
-#include "types/Primitives.h"
-#include "types/Schema.h"
-#include "types/Variants.h"
+namespace brayns::experimental
+{
+template<>
+struct JsonReflector<JsonSchema>
+{
+    static JsonSchema getSchema();
+    static JsonValue serialize(const JsonSchema &schema);
+};
+}
