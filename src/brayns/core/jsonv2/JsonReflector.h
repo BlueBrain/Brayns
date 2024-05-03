@@ -51,10 +51,9 @@ struct JsonReflector
 };
 
 template<typename T>
-const JsonSchema &getJsonSchema()
+JsonSchema getJsonSchema()
 {
-    static const JsonSchema schema = JsonReflector<T>::getSchema();
-    return schema;
+    return JsonReflector<T>::getSchema();
 }
 
 template<typename T>

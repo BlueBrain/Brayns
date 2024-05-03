@@ -38,14 +38,15 @@ struct JsonReflector<T>
     static JsonSchema getSchema()
     {
         return {
+            .title = _info.getName(),
             .type = JsonType::String,
-            .enums = getEnumNames<T>(),
+            .enums = _info.getNames(),
         };
     }
 
     static JsonValue serialize(const T &value)
     {
-        return getEnumName(value);
+        return _info.getName(value);
     }
 
     static T deserialize(const JsonValue &json)
@@ -53,12 +54,15 @@ struct JsonReflector<T>
         auto name = deserializeJson<std::string>(json);
         try
         {
-            return getEnumValue<T>(name);
+            return _info.getValue(name);
         }
         catch (const std::exception &e)
         {
             throw JsonException(e.what());
         }
     }
+
+private:
+    static inline const EnumInfo<T> _info = reflectEnum<T>();
 };
 }

@@ -23,7 +23,6 @@
 
 #include <stdexcept>
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include <fmt/format.h>
@@ -31,7 +30,90 @@
 namespace brayns::experimental
 {
 template<typename T>
-using EnumInfo = std::vector<std::pair<std::string, T>>;
+class EnumInfo
+{
+public:
+    explicit EnumInfo(std::string name, std::vector<std::pair<std::string, T>> mapping):
+        _name(std::move(name)),
+        _mapping(std::move(mapping))
+    {
+    }
+
+    const std::string &getName() const
+    {
+        return _name;
+    }
+
+    std::vector<std::string> getNames() const
+    {
+        auto names = std::vector<std::string>();
+        names.reserve(_mapping.size());
+        for (const auto &[name, value] : _mapping)
+        {
+            names.push_back(name);
+        }
+        return names;
+    }
+
+    std::vector<T> getValues() const
+    {
+        auto values = std::vector<T>();
+        values.reserve(values.size());
+        for (const auto &[name, value] : _mapping)
+        {
+            values.push_back(value);
+        }
+        return values;
+    }
+
+    const std::string *findName(const T &value) const
+    {
+        for (const auto &[key, item] : _mapping)
+        {
+            if (item == value)
+            {
+                return &key;
+            }
+        }
+        return nullptr;
+    }
+
+    const T *findValue(const std::string &name) const
+    {
+        for (const auto &[key, item] : _mapping)
+        {
+            if (key == name)
+            {
+                return &item;
+            }
+        }
+        return nullptr;
+    }
+
+    const std::string &getName(const T &value) const
+    {
+        const auto *name = findName(value);
+        if (name)
+        {
+            return *name;
+        }
+        throw std::invalid_argument(fmt::format("Invalid enum value: {}", int(value)));
+    }
+
+    const T &getValue(const std::string &name) const
+    {
+        const auto *value = findValue(name);
+        if (value)
+        {
+            return *value;
+        }
+        throw std::invalid_argument(fmt::format("Invalid enum name '{}'", name));
+    }
+
+private:
+    std::string _name;
+    std::vector<std::pair<std::string, T>> _mapping;
+};
 
 template<typename T>
 struct EnumReflector
@@ -43,90 +125,13 @@ struct EnumReflector
 
     static EnumInfo<T> reflect()
     {
-        return {};
+        throw std::runtime_error("Not implemented");
     }
 };
 
 template<typename T>
-const EnumInfo<T> &reflectEnum()
+EnumInfo<T> reflectEnum()
 {
-    static const EnumInfo<T> info = EnumReflector<T>::reflect();
-    return info;
-}
-
-template<typename T>
-std::vector<std::string> getEnumNames()
-{
-    const auto &info = reflectEnum<T>();
-    std::vector<std::string> names;
-    names.reserve(info.size());
-    for (const auto &[name, value] : info)
-    {
-        names.push_back(name);
-    }
-    return names;
-}
-
-template<typename T>
-static std::vector<T> getEnumValues()
-{
-    const auto &info = reflectEnum<T>();
-    std::vector<T> values;
-    values.reserve(values.size());
-    for (const auto &[name, value] : info)
-    {
-        values.push_back(value);
-    }
-    return values;
-}
-
-template<typename T>
-static const std::string *findEnumName(const T &value)
-{
-    const auto &info = reflectEnum<T>();
-    for (const auto &[key, item] : info)
-    {
-        if (item == value)
-        {
-            return &key;
-        }
-    }
-    return nullptr;
-}
-
-template<typename T>
-static const T *findEnumValue(const std::string &name)
-{
-    const auto &info = reflectEnum<T>();
-    for (const auto &[key, item] : info)
-    {
-        if (key == name)
-        {
-            return &item;
-        }
-    }
-    return nullptr;
-}
-
-template<typename T>
-const std::string &getEnumName(const T &value)
-{
-    const auto *name = findEnumName(value);
-    if (name)
-    {
-        return *name;
-    }
-    throw std::invalid_argument(fmt::format("Invalid enum value: {}", int(value)));
-}
-
-template<typename T>
-const T &getEnumValue(const std::string &name)
-{
-    const auto *value = findEnumValue<T>(name);
-    if (value)
-    {
-        return *value;
-    }
-    throw std::invalid_argument(fmt::format("Invalid enum name '{}'", name));
+    return EnumReflector<T>::reflect();
 }
 }

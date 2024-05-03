@@ -38,10 +38,12 @@ struct EnumReflector<SomeEnum>
 {
     static EnumInfo<SomeEnum> reflect()
     {
-        return {
-            {"value1", SomeEnum::Value1},
-            {"value2", SomeEnum::Value2},
-        };
+        return EnumInfo<SomeEnum>(
+            "SomeEnum",
+            {
+                {"value1", SomeEnum::Value1},
+                {"value2", SomeEnum::Value2},
+            });
     }
 };
 }
@@ -99,7 +101,13 @@ TEST_CASE("JsonReflection")
     }
     SUBCASE("Enum")
     {
-        CHECK_EQ(getJsonSchema<SomeEnum>(), JsonSchema{.type = JsonType::String, .enums = {"value1", "value2"}});
+        CHECK_EQ(
+            getJsonSchema<SomeEnum>(),
+            JsonSchema{
+                .title = "SomeEnum",
+                .type = JsonType::String,
+                .enums = {"value1", "value2"},
+            });
         CHECK_EQ(deserializeJson<SomeEnum>("value1"), SomeEnum::Value1);
         CHECK_EQ(serializeToJson(SomeEnum::Value2), JsonValue("value2"));
         CHECK_THROWS_AS(deserializeJson<SomeEnum>(1), JsonException);

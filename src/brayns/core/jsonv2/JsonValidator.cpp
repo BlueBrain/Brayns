@@ -31,6 +31,8 @@ namespace
 {
 using namespace brayns::experimental;
 
+const EnumInfo<JsonType> jsonTypeInfo = reflectEnum<JsonType>();
+
 class ErrorContext
 {
 public:
@@ -273,8 +275,8 @@ std::string toString(const JsonPath &path)
 
 std::string toString(const InvalidType &error)
 {
-    const auto &type = getEnumName(error.type);
-    const auto &expected = getEnumName(error.expected);
+    const auto &type = jsonTypeInfo.getName(error.type);
+    const auto &expected = jsonTypeInfo.getName(error.expected);
     return fmt::format("Invalid type: expected {} got {}", expected, type);
 }
 
