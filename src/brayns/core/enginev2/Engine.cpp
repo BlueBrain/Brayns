@@ -19,23 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "GraphicsApi.h"
+#include "Engine.h"
 
 #include <fmt/format.h>
 
 namespace brayns::experimental
 {
-GraphicsApi::Loader::~Loader()
+Engine::Loader::~Loader()
 {
     ospShutdown();
 }
 
-GraphicsApi::GraphicsApi(std::unique_ptr<Loader> loader):
+Engine::Engine(std::unique_ptr<Loader> loader):
     _loader(std::move(loader))
 {
 }
 
-Device GraphicsApi::createDevice(Logger &logger)
+Device Engine::createDevice(Logger &logger)
 {
     auto currentDevice = ospGetCurrentDevice();
     if (currentDevice != nullptr)
@@ -71,7 +71,7 @@ Device GraphicsApi::createDevice(Logger &logger)
     return Device(device);
 }
 
-GraphicsApi loadGraphicsApi()
+Engine loadEngine()
 {
     auto error = ospLoadModule("cpu");
 
@@ -81,8 +81,8 @@ GraphicsApi loadGraphicsApi()
         throw std::runtime_error(message);
     }
 
-    auto loader = std::make_unique<GraphicsApi::Loader>();
+    auto loader = std::make_unique<Engine::Loader>();
 
-    return GraphicsApi(std::move(loader));
+    return Engine(std::move(loader));
 }
 }

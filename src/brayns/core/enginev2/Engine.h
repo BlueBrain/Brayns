@@ -29,7 +29,7 @@
 
 namespace brayns::experimental
 {
-class GraphicsApi
+class Engine
 {
 public:
     class Loader
@@ -44,7 +44,7 @@ public:
         Loader &operator=(Loader &&other) = delete;
     };
 
-    explicit GraphicsApi(std::unique_ptr<Loader> loader);
+    explicit Engine(std::unique_ptr<Loader> loader);
 
     Device createDevice(Logger &logger);
 
@@ -52,5 +52,5 @@ private:
     std::unique_ptr<Loader> _loader;
 };
 
-GraphicsApi loadGraphicsApi();
+Engine loadEngine();
 }

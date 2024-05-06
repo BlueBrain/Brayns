@@ -25,7 +25,7 @@
 
 #include <rkcommon/utility/SaveImage.h>
 
-#include <brayns/core/rendering/GraphicsApi.h>
+#include <brayns/core/enginev2/Engine.h>
 
 using namespace brayns;
 using namespace brayns::experimental;
@@ -38,9 +38,9 @@ TEST_CASE("Render")
     auto handler = [&](const auto &record) { error = record.message; };
     auto logger = Logger("Test", level, handler);
 
-    auto api = loadGraphicsApi();
+    auto engine = loadEngine();
 
-    auto device = api.createDevice(logger);
+    auto device = engine.createDevice(logger);
 
     auto width = 480;
     auto height = 360;
