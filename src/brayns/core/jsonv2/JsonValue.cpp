@@ -75,7 +75,7 @@ const JsonObject &getObject(const JsonValue &json)
 std::string stringify(const JsonValue &json)
 {
     auto stream = std::ostringstream();
-    Poco::JSON::Stringifier::condense(json, stream);
+    Poco::JSON::Stringifier::condense(json, stream, 0);
     return stream.str();
 }
 

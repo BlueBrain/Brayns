@@ -97,6 +97,8 @@ public:
 
             field.deserialize(field.schema.defaultValue, value);
         }
+
+        return value;
     }
 
 private:
@@ -153,12 +155,6 @@ public:
         return *this;
     }
 
-    JsonFieldBuilder required(bool value)
-    {
-        _field->schema.required = value;
-        return *this;
-    }
-
     JsonFieldBuilder minimum(std::optional<double> value)
     {
         _field->schema.minimum = value;
@@ -204,16 +200,20 @@ template<typename T>
 class JsonObjectInfoBuilder
 {
 public:
-    JsonFieldBuilder<T> field(std::string name, auto &&getter)
+    JsonFieldBuilder<T> field(std::string name, auto &&getPtr)
     {
-        using FieldType = std::decay_t<decltype(getter(std::declval<T>()))>;
+        using FieldPtr = decltype(getPtr(std::declval<T &>()));
+
+        static_assert(std::is_pointer_v<FieldPtr>, "getPtr must return a pointer to the object field");
+
+        using FieldType = std::decay_t<std::remove_pointer_t<FieldPtr>>;
 
         auto &field = _fields.emplace_back();
 
         field.name = std::move(name);
         field.schema = getJsonSchema<FieldType>();
-        field.serialize = [=](const auto &object) { return serializeToJson(getter(object)); };
-        field.deserialize = [=](const auto &json, auto &object) { getter(object) = deserializeAs<FieldType>(json); };
+        field.serialize = [=](const auto &object) { return serializeToJson(*getPtr(object)); };
+        field.deserialize = [=](const auto &json, auto &object) { *getPtr(object) = deserializeAs<FieldType>(json); };
 
         return JsonFieldBuilder<T>(field);
     }

@@ -25,14 +25,14 @@
 using namespace brayns;
 using namespace brayns::experimental;
 
+namespace brayns::experimental
+{
 enum class SomeEnum
 {
     Value1,
     Value2,
 };
 
-namespace brayns::experimental
-{
 template<>
 struct EnumReflector<SomeEnum>
 {
@@ -41,6 +41,52 @@ struct EnumReflector<SomeEnum>
         auto builder = EnumInfoBuilder<SomeEnum>();
         builder.field("value1", SomeEnum::Value1).description("Value 1");
         builder.field("value2", SomeEnum::Value2).description("Value 2");
+        return builder.build();
+    }
+};
+
+struct Internal
+{
+    int value;
+};
+
+template<>
+struct JsonObjectReflector<Internal>
+{
+    static JsonObjectInfo<Internal> reflect()
+    {
+        auto builder = JsonObjectInfoBuilder<Internal>();
+        builder.field("value", [](auto &object) { return &object.value; });
+        return builder.build();
+    }
+};
+
+struct SomeObject
+{
+    bool required;
+    int bounded;
+    bool description;
+    std::string withDefault;
+    std::optional<bool> optional;
+    SomeEnum someEnum = SomeEnum::Value1;
+    std::vector<int> array;
+    Internal internal;
+};
+
+template<>
+struct JsonObjectReflector<SomeObject>
+{
+    static JsonObjectInfo<SomeObject> reflect()
+    {
+        auto builder = JsonObjectInfoBuilder<SomeObject>();
+        builder.field("required", [](auto &object) { return &object.required; });
+        builder.field("bounded", [](auto &object) { return &object.bounded; }).minimum(1).maximum(3);
+        builder.field("description", [](auto &object) { return &object.description; }).description("Test");
+        builder.field("default", [](auto &object) { return &object.withDefault; }).defaultValue("test");
+        builder.field("optional", [](auto &object) { return &object.optional; });
+        builder.field("enum", [](auto &object) { return &object.someEnum; });
+        builder.field("array", [](auto &object) { return &object.array; }).minItems(1).maxItems(3);
+        builder.field("internal", [](auto &object) { return &object.internal; });
         return builder.build();
     }
 };
@@ -206,5 +252,66 @@ TEST_CASE("JsonReflection")
         CHECK_EQ(deserializeAs<std::optional<std::string>>({}), std::nullopt);
         CHECK_EQ(deserializeAs<std::optional<std::string>>("test"), std::string("test"));
         CHECK_THROWS_AS(deserializeAs<std::optional<std::string>>(1.5), JsonException);
+    }
+    SUBCASE("Object")
+    {
+        auto schema = getJsonSchema<SomeObject>();
+
+        CHECK_EQ(schema.type, JsonType::Object);
+
+        const auto &properties = schema.properties;
+
+        CHECK_EQ(properties.at("required"), getJsonSchema<bool>());
+        CHECK_EQ(properties.at("bounded"), JsonSchema{.type = JsonType::Integer, .minimum = 1, .maximum = 3});
+        CHECK_EQ(properties.at("description"), JsonSchema{.description = "Test", .type = JsonType::Boolean});
+        CHECK_EQ(
+            properties.at("default"),
+            JsonSchema{.required = false, .defaultValue = "test", .type = JsonType::String});
+        CHECK_EQ(properties.at("optional"), getJsonSchema<std::optional<bool>>());
+        CHECK_EQ(properties.at("enum"), getJsonSchema<SomeEnum>());
+        CHECK_EQ(
+            properties.at("array"),
+            JsonSchema{
+                .type = JsonType::Array,
+                .items = {getJsonSchema<int>()},
+                .minItems = 1,
+                .maxItems = 3,
+            });
+        CHECK_EQ(
+            properties.at("internal"),
+            JsonSchema{
+                .type = JsonType::Object,
+                .properties = {{"value", getJsonSchema<int>()}},
+            });
+
+        auto internal = createJsonObject();
+        internal->set("value", 2);
+
+        auto object = createJsonObject();
+        object->set("required", true);
+        object->set("bounded", 2);
+        object->set("description", true);
+        object->set("enum", "value2");
+        object->set("array", serializeToJson(std::vector<int>{1, 2, 3}));
+        object->set("internal", internal);
+
+        auto json = JsonValue(object);
+
+        auto test = deserializeAs<SomeObject>(json);
+
+        CHECK(test.required);
+        CHECK_EQ(test.bounded, 2);
+        CHECK(test.description);
+        CHECK_EQ(test.withDefault, "test");
+        CHECK_FALSE(test.optional);
+        CHECK_EQ(test.someEnum, SomeEnum::Value2);
+        CHECK_EQ(test.array, std::vector<int>{1, 2, 3});
+        CHECK_EQ(test.internal.value, 2);
+
+        object->set("default", "test");
+
+        auto backToJson = serializeToJson(test);
+
+        CHECK_EQ(backToJson, json);
     }
 }

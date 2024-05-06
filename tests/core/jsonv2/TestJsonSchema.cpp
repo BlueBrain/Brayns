@@ -150,8 +150,8 @@ TEST_CASE("JsonSchema")
             .type = JsonType::Object,
             .properties =
                 {
-                    {"integer", JsonSchema{.required = true, .type = JsonType::Integer}},
-                    {"string", JsonSchema{.type = JsonType::String}},
+                    {"integer", JsonSchema{.type = JsonType::Integer}},
+                    {"string", JsonSchema{.required = false, .type = JsonType::String}},
                 },
         };
 
