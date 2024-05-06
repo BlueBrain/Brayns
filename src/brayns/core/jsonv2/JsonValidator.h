@@ -43,6 +43,14 @@ struct InvalidType
 
 std::string toString(const InvalidType &error);
 
+struct InvalidConst
+{
+    std::string value;
+    std::string expected;
+};
+
+std::string toString(const InvalidConst &error);
+
 struct BelowMinimum
 {
     double value;
@@ -89,13 +97,6 @@ struct UnknownProperty
 
 std::string toString(const UnknownProperty &error);
 
-struct InvalidEnum
-{
-    std::string name;
-};
-
-std::string toString(const InvalidEnum &error);
-
 struct InvalidOneOf
 {
 };
@@ -104,13 +105,13 @@ std::string toString(const InvalidOneOf &error);
 
 using JsonError = std::variant<
     InvalidType,
+    InvalidConst,
     AboveMaximum,
     BelowMinimum,
     TooManyItems,
     NotEnoughItems,
     MissingRequiredProperty,
     UnknownProperty,
-    InvalidEnum,
     InvalidOneOf>;
 
 std::string toString(const JsonError &error);
@@ -121,5 +122,5 @@ struct JsonSchemaError
     JsonError error;
 };
 
-std::vector<JsonSchemaError> validateJsonSchema(const JsonValue &json, const JsonSchema &schema);
+std::vector<JsonSchemaError> validate(const JsonValue &json, const JsonSchema &schema);
 }

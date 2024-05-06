@@ -27,18 +27,16 @@ namespace brayns::experimental
 {
 EnumInfo<JsonType> EnumReflector<JsonType>::reflect()
 {
-    return EnumInfo<JsonType>(
-        "JsonType",
-        {
-            {"undefined", JsonType::Undefined},
-            {"null", JsonType::Null},
-            {"boolean", JsonType::Boolean},
-            {"integer", JsonType::Integer},
-            {"number", JsonType::Number},
-            {"string", JsonType::String},
-            {"array", JsonType::Array},
-            {"object", JsonType::Object},
-        });
+    auto builder = EnumInfoBuilder<JsonType>();
+    builder.field("undefined", JsonType::Undefined);
+    builder.field("null", JsonType::Null);
+    builder.field("boolean", JsonType::Boolean);
+    builder.field("integer", JsonType::Integer);
+    builder.field("number", JsonType::Number);
+    builder.field("string", JsonType::String);
+    builder.field("array", JsonType::Array);
+    builder.field("object", JsonType::Object);
+    return builder.build();
 }
 
 JsonType getJsonType(const JsonValue &json)

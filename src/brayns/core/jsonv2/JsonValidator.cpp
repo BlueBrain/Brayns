@@ -31,8 +31,6 @@ namespace
 {
 using namespace brayns::experimental;
 
-const EnumInfo<JsonType> jsonTypeInfo = reflectEnum<JsonType>();
-
 class ErrorContext
 {
 public:
@@ -67,7 +65,7 @@ void checkOneOf(const JsonValue &json, const JsonSchema &schema, ErrorContext &e
 {
     for (const auto &oneof : schema.oneOf)
     {
-        auto suberrors = validateJsonSchema(json, oneof);
+        auto suberrors = validate(json, oneof);
         if (suberrors.empty())
         {
             return;
@@ -88,14 +86,12 @@ bool checkType(const JsonValue &json, const JsonSchema &schema, ErrorContext &er
     return false;
 }
 
-void checkEnum(const std::string &value, const JsonSchema &schema, ErrorContext &errors)
+void checkConst(const std::string &value, const JsonSchema &schema, ErrorContext &errors)
 {
-    auto i = std::ranges::find(schema.enums, value);
-    if (i != schema.enums.end())
+    if (value != schema.constant)
     {
-        return;
+        errors.add(InvalidConst{value, schema.constant});
     }
-    errors.add(InvalidEnum{value});
 }
 
 void checkRange(double value, const JsonSchema &schema, ErrorContext &errors)
@@ -214,10 +210,10 @@ void check(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors
     {
         return;
     }
-    if (!schema.enums.empty())
+    if (!schema.constant.empty())
     {
         const auto &value = json.extract<std::string>();
-        checkEnum(value, schema, errors);
+        checkConst(value, schema, errors);
         return;
     }
     if (isNumeric(schema.type))
@@ -275,9 +271,14 @@ std::string toString(const JsonPath &path)
 
 std::string toString(const InvalidType &error)
 {
-    const auto &type = jsonTypeInfo.getName(error.type);
-    const auto &expected = jsonTypeInfo.getName(error.expected);
+    auto type = getEnumName(error.type);
+    auto expected = getEnumName(error.expected);
     return fmt::format("Invalid type: expected {} got {}", expected, type);
+}
+
+std::string toString(const InvalidConst &error)
+{
+    return fmt::format("Invalid const: expected '{}' got '{}'", error.expected, error.value);
 }
 
 std::string toString(const BelowMinimum &error)
@@ -310,11 +311,6 @@ std::string toString(const UnknownProperty &error)
     return fmt::format("Unknown property: '{}'", error.name);
 }
 
-std::string toString(const InvalidEnum &error)
-{
-    return fmt::format("Invalid enum: '{}'", error.name);
-}
-
 std::string toString(const InvalidOneOf &)
 {
     return "Invalid oneOf";
@@ -325,7 +321,7 @@ std::string toString(const JsonError &error)
     return std::visit([](const auto &value) { return toString(value); }, error);
 }
 
-std::vector<JsonSchemaError> validateJsonSchema(const JsonValue &json, const JsonSchema &schema)
+std::vector<JsonSchemaError> validate(const JsonValue &json, const JsonSchema &schema)
 {
     auto errors = ErrorContext();
     check(json, schema, errors);

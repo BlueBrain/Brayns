@@ -38,12 +38,10 @@ struct EnumReflector<SomeEnum>
 {
     static EnumInfo<SomeEnum> reflect()
     {
-        return EnumInfo<SomeEnum>(
-            "SomeEnum",
-            {
-                {"value1", SomeEnum::Value1},
-                {"value2", SomeEnum::Value2},
-            });
+        auto builder = EnumInfoBuilder<SomeEnum>();
+        builder.field("value1", SomeEnum::Value1).description("Value 1");
+        builder.field("value2", SomeEnum::Value2).description("Value 2");
+        return builder.build();
     }
 };
 }
@@ -58,60 +56,68 @@ TEST_CASE("JsonReflection")
     SUBCASE("Undefined")
     {
         CHECK_EQ(getJsonSchema<JsonValue>(), JsonSchema{.type = JsonType::Undefined});
-        CHECK_EQ(deserializeJson<JsonValue>(1), JsonValue(1));
+        CHECK_EQ(deserializeAs<JsonValue>(1), JsonValue(1));
         CHECK_EQ(serializeToJson(JsonValue("2")), JsonValue("2"));
     }
     SUBCASE("Null")
     {
         CHECK_EQ(getJsonSchema<NullJson>(), JsonSchema{.type = JsonType::Null});
-        deserializeJson<NullJson>({});
+        deserializeAs<NullJson>({});
         CHECK_EQ(serializeToJson(NullJson()), JsonValue());
-        CHECK_THROWS_AS(deserializeJson<NullJson>("xyz"), JsonException);
+        CHECK_THROWS_AS(deserializeAs<NullJson>("xyz"), JsonException);
     }
     SUBCASE("Boolean")
     {
         CHECK_EQ(getJsonSchema<bool>(), JsonSchema{.type = JsonType::Boolean});
-        CHECK_EQ(deserializeJson<bool>(true), true);
+        CHECK_EQ(deserializeAs<bool>(true), true);
         CHECK_EQ(serializeToJson(true), JsonValue(true));
-        CHECK_THROWS_AS(deserializeJson<bool>("xyz"), JsonException);
+        CHECK_THROWS_AS(deserializeAs<bool>("xyz"), JsonException);
     }
     SUBCASE("Integer")
     {
         CHECK_EQ(getJsonSchema<std::uint8_t>(), JsonSchema{.type = JsonType::Integer, .minimum = 0, .maximum = 255});
         CHECK_EQ(getJsonSchema<std::int16_t>().type, JsonType::Integer);
         CHECK_EQ(getJsonSchema<int>().type, JsonType::Integer);
-        CHECK_EQ(deserializeJson<int>(1), 1);
+        CHECK_EQ(deserializeAs<int>(1), 1);
         CHECK_EQ(serializeToJson(1), JsonValue(1));
-        CHECK_THROWS_AS(deserializeJson<int>(1.5), JsonException);
+        CHECK_THROWS_AS(deserializeAs<int>(1.5), JsonException);
     }
     SUBCASE("Number")
     {
         CHECK_EQ(getJsonSchema<float>(), JsonSchema{.type = JsonType::Number, .minimum = fmin, .maximum = fmax});
         CHECK_EQ(getJsonSchema<double>().type, JsonType::Number);
-        CHECK_EQ(deserializeJson<float>(1), 1.0f);
+        CHECK_EQ(deserializeAs<float>(1), 1.0f);
         CHECK_EQ(serializeToJson(1.5f), JsonValue(1.5f));
-        CHECK_THROWS_AS(deserializeJson<float>("1.5"), JsonException);
+        CHECK_THROWS_AS(deserializeAs<float>("1.5"), JsonException);
     }
     SUBCASE("String")
     {
         CHECK_EQ(getJsonSchema<std::string>(), JsonSchema{.type = JsonType::String});
-        CHECK_EQ(deserializeJson<std::string>("test"), JsonValue("test"));
+        CHECK_EQ(deserializeAs<std::string>("test"), JsonValue("test"));
         CHECK_EQ(serializeToJson(std::string("test")), JsonValue("test"));
-        CHECK_THROWS_AS(deserializeJson<std::string>(1), JsonException);
+        CHECK_THROWS_AS(deserializeAs<std::string>(1), JsonException);
     }
     SUBCASE("Enum")
     {
         CHECK_EQ(
             getJsonSchema<SomeEnum>(),
             JsonSchema{
-                .title = "SomeEnum",
-                .type = JsonType::String,
-                .enums = {"value1", "value2"},
-            });
-        CHECK_EQ(deserializeJson<SomeEnum>("value1"), SomeEnum::Value1);
+                .oneOf = {
+                    JsonSchema{
+                        .description = "Value 1",
+                        .type = JsonType::String,
+                        .constant = "value1",
+                    },
+                    JsonSchema{
+                        .description = "Value 2",
+                        .type = JsonType::String,
+                        .constant = "value2",
+                    },
+                }});
+        CHECK_EQ(deserializeAs<SomeEnum>("value1"), SomeEnum::Value1);
         CHECK_EQ(serializeToJson(SomeEnum::Value2), JsonValue("value2"));
-        CHECK_THROWS_AS(deserializeJson<SomeEnum>(1), JsonException);
-        CHECK_THROWS_AS(deserializeJson<SomeEnum>("value3"), JsonException);
+        CHECK_THROWS_AS(deserializeAs<SomeEnum>(1), JsonException);
+        CHECK_THROWS_AS(deserializeAs<SomeEnum>("value3"), JsonException);
     }
     SUBCASE("Array")
     {
@@ -185,9 +191,9 @@ TEST_CASE("JsonReflection")
                 }});
         CHECK_EQ(serializeToJson(Variant("test")), JsonValue("test"));
         CHECK_EQ(serializeToJson(Variant(1)), JsonValue(1));
-        CHECK_EQ(deserializeJson<Variant>(1), Variant(1));
-        CHECK_EQ(deserializeJson<Variant>("test"), Variant("test"));
-        CHECK_THROWS_AS(deserializeJson<Variant>(1.5), JsonException);
+        CHECK_EQ(deserializeAs<Variant>(1), Variant(1));
+        CHECK_EQ(deserializeAs<Variant>("test"), Variant("test"));
+        CHECK_THROWS_AS(deserializeAs<Variant>(1.5), JsonException);
 
         CHECK_EQ(
             getJsonSchema<std::optional<std::string>>(),
@@ -197,8 +203,8 @@ TEST_CASE("JsonReflection")
             });
         CHECK_EQ(serializeToJson(std::optional<std::string>("test")), JsonValue("test"));
         CHECK_EQ(serializeToJson(std::optional<std::string>()), JsonValue());
-        CHECK_EQ(deserializeJson<std::optional<std::string>>({}), std::nullopt);
-        CHECK_EQ(deserializeJson<std::optional<std::string>>("test"), std::string("test"));
-        CHECK_THROWS_AS(deserializeJson<std::optional<std::string>>(1.5), JsonException);
+        CHECK_EQ(deserializeAs<std::optional<std::string>>({}), std::nullopt);
+        CHECK_EQ(deserializeAs<std::optional<std::string>>("test"), std::string("test"));
+        CHECK_THROWS_AS(deserializeAs<std::optional<std::string>>(1.5), JsonException);
     }
 }

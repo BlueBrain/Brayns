@@ -63,7 +63,7 @@ JsonValue serializeToJson(const T &value)
 }
 
 template<typename T>
-T deserializeJson(const JsonValue &json)
+T deserializeAs(const JsonValue &json)
 {
     return JsonReflector<T>::deserialize(json);
 }
@@ -72,13 +72,13 @@ template<typename T>
 std::string stringifyToJson(const T &value)
 {
     auto json = serializeToJson(value);
-    return stringifyToJson(json);
+    return stringify(json);
 }
 
 template<typename T>
 T parseJson(const std::string &data)
 {
     auto json = parseJson(data);
-    return deserializeJson<T>(json);
+    return deserializeAs<T>(json);
 }
 }

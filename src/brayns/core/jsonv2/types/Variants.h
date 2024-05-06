@@ -54,7 +54,7 @@ struct JsonReflector<std::optional<T>>
         {
             return std::nullopt;
         }
-        return deserializeJson<T>(json);
+        return deserializeAs<T>(json);
     }
 };
 
@@ -84,7 +84,7 @@ private:
     {
         try
         {
-            return deserializeJson<U>(json);
+            return deserializeAs<U>(json);
         }
         catch (...)
         {

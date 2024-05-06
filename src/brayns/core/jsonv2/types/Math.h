@@ -28,24 +28,6 @@
 namespace brayns::experimental
 {
 template<typename T>
-struct StaticJsonArray
-{
-    static auto &getItem(auto &value, std::size_t index)
-    {
-        return value[index];
-    }
-};
-
-template<>
-struct StaticJsonArray<Quaternion>
-{
-    static auto &getItem(auto &value, std::size_t index)
-    {
-        return (&value.i)[index];
-    }
-};
-
-template<typename T>
 struct JsonMathReflector
 {
     using ValueType = typename T::Scalar;
@@ -67,7 +49,7 @@ struct JsonMathReflector
         auto array = createJsonArray();
         for (auto i = std::size_t(0); i < itemCount; ++i)
         {
-            const auto &item = StaticJsonArray<T>::getItem(value, i);
+            const auto &item = getItem(value, i);
             auto jsonItem = serializeToJson(item);
             array->add(jsonItem);
         }
@@ -85,11 +67,27 @@ struct JsonMathReflector
         auto i = std::size_t(0);
         for (const auto &jsonItem : array)
         {
-            auto &item = StaticJsonArray<T>::getItem(value, i);
-            item = deserializeJson<ValueType>(jsonItem);
+            auto &item = getItem(value, i);
+            item = deserializeAs<ValueType>(jsonItem);
             ++i;
         }
         return value;
+    }
+
+private:
+    static auto &getItem(auto &value, std::size_t index)
+    {
+        return value[index];
+    }
+
+    static auto &getItem(const Quaternion &value, std::size_t index)
+    {
+        return (&value.i)[index];
+    }
+
+    static auto &getItem(Quaternion &value, std::size_t index)
+    {
+        return (&value.i)[index];
     }
 };
 

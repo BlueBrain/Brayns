@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <concepts>
+#include <type_traits>
 
 #include <brayns/core/utils/EnumReflector.h>
 
@@ -29,40 +29,45 @@
 
 namespace brayns::experimental
 {
-template<typename T>
-concept Enum = std::is_enum_v<T>;
-
-template<Enum T>
+template<ReflectedEnum T>
 struct JsonReflector<T>
 {
     static JsonSchema getSchema()
     {
-        return {
-            .title = _info.getName(),
-            .type = JsonType::String,
-            .enums = _info.getNames(),
-        };
+        const auto &fields = getEnumFields<T>();
+
+        auto oneOf = std::vector<JsonSchema>();
+        oneOf.reserve(fields.size());
+
+        for (const auto &field : fields)
+        {
+            oneOf.push_back({
+                .description = field.description,
+                .type = JsonType::String,
+                .constant = field.name,
+            });
+        }
+
+        return {.oneOf = std::move(oneOf)};
     }
 
     static JsonValue serialize(const T &value)
     {
-        return _info.getName(value);
+        return getEnumName(value);
     }
 
     static T deserialize(const JsonValue &json)
     {
-        auto name = deserializeJson<std::string>(json);
+        auto name = deserializeAs<std::string>(json);
+
         try
         {
-            return _info.getValue(name);
+            return getEnumValue<T>(name);
         }
         catch (const std::exception &e)
         {
             throw JsonException(e.what());
         }
     }
-
-private:
-    static inline const EnumInfo<T> _info = reflectEnum<T>();
 };
 }

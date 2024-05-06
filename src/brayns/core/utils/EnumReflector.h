@@ -21,8 +21,13 @@
 
 #pragma once
 
+#include <concepts>
+#include <ranges>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <fmt/format.h>
@@ -30,108 +35,138 @@
 namespace brayns::experimental
 {
 template<typename T>
+struct EnumField
+{
+    std::string name;
+    T value;
+    std::string description;
+};
+
+template<typename T>
 class EnumInfo
 {
 public:
-    explicit EnumInfo(std::string name, std::vector<std::pair<std::string, T>> mapping):
-        _name(std::move(name)),
-        _mapping(std::move(mapping))
+    explicit EnumInfo(std::vector<EnumField<T>> fields):
+        _fields(std::move(fields))
     {
     }
 
-    const std::string &getName() const
+    const std::vector<EnumField<T>> &getFields() const
     {
-        return _name;
+        return _fields;
     }
 
-    std::vector<std::string> getNames() const
+    const EnumField<T> *findByName(std::string_view name) const
     {
-        auto names = std::vector<std::string>();
-        names.reserve(_mapping.size());
-        for (const auto &[name, value] : _mapping)
+        auto sameName = [&](const auto &field) { return field.name == name; };
+        auto i = std::ranges::find_if(_fields, sameName);
+        return i == _fields.end() ? nullptr : &*i;
+    }
+
+    const EnumField<T> *findByValue(T value) const
+    {
+        auto sameValue = [&](const auto &field) { return field.value == value; };
+        auto i = std::ranges::find_if(_fields, sameValue);
+        return i == _fields.end() ? nullptr : &*i;
+    }
+
+    const EnumField<T> &getByName(std::string_view name) const
+    {
+        const auto *field = findByName(name);
+        if (field)
         {
-            names.push_back(name);
+            return *field;
         }
-        return names;
+        throw std::invalid_argument(fmt::format("Invalid enum name: '{}'", name));
     }
 
-    std::vector<T> getValues() const
+    const EnumField<T> &getByValue(T value) const
     {
-        auto values = std::vector<T>();
-        values.reserve(values.size());
-        for (const auto &[name, value] : _mapping)
+        const auto *field = findByValue(value);
+        if (field)
         {
-            values.push_back(value);
+            return *field;
         }
-        return values;
-    }
-
-    const std::string *findName(const T &value) const
-    {
-        for (const auto &[key, item] : _mapping)
-        {
-            if (item == value)
-            {
-                return &key;
-            }
-        }
-        return nullptr;
-    }
-
-    const T *findValue(const std::string &name) const
-    {
-        for (const auto &[key, item] : _mapping)
-        {
-            if (key == name)
-            {
-                return &item;
-            }
-        }
-        return nullptr;
-    }
-
-    const std::string &getName(const T &value) const
-    {
-        const auto *name = findName(value);
-        if (name)
-        {
-            return *name;
-        }
-        throw std::invalid_argument(fmt::format("Invalid enum value: {}", int(value)));
-    }
-
-    const T &getValue(const std::string &name) const
-    {
-        const auto *value = findValue(name);
-        if (value)
-        {
-            return *value;
-        }
-        throw std::invalid_argument(fmt::format("Invalid enum name '{}'", name));
+        throw std::invalid_argument(fmt::format("Invalid enum value: {}", std::underlying_type_t<T>(value)));
     }
 
 private:
-    std::string _name;
-    std::vector<std::pair<std::string, T>> _mapping;
+    std::vector<EnumField<T>> _fields;
 };
 
 template<typename T>
-struct EnumReflector
-{
-    template<typename U>
-    static constexpr auto alwaysFalse = false;
-
-    static_assert(alwaysFalse<T>, "Please specialize EnumReflector<T>");
-
-    static EnumInfo<T> reflect()
-    {
-        throw std::runtime_error("Not implemented");
-    }
-};
+struct EnumReflector;
 
 template<typename T>
-EnumInfo<T> reflectEnum()
+concept ReflectedEnum = std::same_as<decltype(EnumReflector<T>::reflect()), EnumInfo<T>>;
+
+template<ReflectedEnum T>
+const EnumInfo<T> &reflectEnum()
 {
-    return EnumReflector<T>::reflect();
+    static const auto info = EnumReflector<T>::reflect();
+    return info;
 }
+
+template<ReflectedEnum T>
+const std::vector<EnumField<T>> &getEnumFields()
+{
+    const auto &info = reflectEnum<T>();
+    return info.getFields();
+}
+
+template<ReflectedEnum T>
+const std::string &getEnumName(T value)
+{
+    const auto &info = reflectEnum<T>();
+    const auto &field = info.getByValue(value);
+    return field.name;
+}
+
+template<ReflectedEnum T>
+T getEnumValue(std::string_view name)
+{
+    const auto &info = reflectEnum<T>();
+    const auto &field = info.getByName(name);
+    return field.value;
+}
+
+template<typename T>
+class EnumFieldBuilder
+{
+public:
+    explicit EnumFieldBuilder(EnumField<T> &field):
+        _field(&field)
+    {
+    }
+
+    EnumFieldBuilder description(std::string description)
+    {
+        _field->description = std::move(description);
+        return *this;
+    }
+
+private:
+    EnumField<T> *_field;
+};
+
+template<typename T>
+class EnumInfoBuilder
+{
+public:
+    EnumFieldBuilder<T> field(std::string name, T value)
+    {
+        auto &emplaced = _fields.emplace_back();
+        emplaced.name = std::move(name);
+        emplaced.value = value;
+        return EnumFieldBuilder<T>(emplaced);
+    }
+
+    EnumInfo<T> build()
+    {
+        return EnumInfo<T>(std::exchange(_fields, {}));
+    }
+
+private:
+    std::vector<EnumField<T>> _fields;
+};
 }

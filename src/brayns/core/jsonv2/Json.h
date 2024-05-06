@@ -30,6 +30,7 @@
 #include "types/Enums.h"
 #include "types/Maps.h"
 #include "types/Math.h"
+#include "types/Objects.h"
 #include "types/Primitives.h"
 #include "types/Schema.h"
 #include "types/Variants.h"

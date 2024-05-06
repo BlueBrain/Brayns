@@ -59,7 +59,7 @@ struct JsonMapReflector
         auto value = T();
         for (const auto &[key, jsonItem] : object)
         {
-            value[key] = deserializeJson<ValueType>(jsonItem);
+            value[key] = deserializeAs<ValueType>(jsonItem);
         }
         return value;
     }

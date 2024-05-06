@@ -23,6 +23,7 @@
 
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 #include <Poco/Dynamic/Var.h>
 #include <Poco/JSON/Array.h>
@@ -52,6 +53,6 @@ bool isArray(const JsonValue &json);
 bool isObject(const JsonValue &json);
 const JsonArray &getArray(const JsonValue &json);
 const JsonObject &getObject(const JsonValue &json);
-std::string stringifyToJson(const JsonValue &json);
+std::string stringify(const JsonValue &json);
 JsonValue parseJson(const std::string &data);
 }

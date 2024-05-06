@@ -124,7 +124,6 @@ namespace brayns::experimental
 JsonSchema JsonReflector<JsonSchema>::getSchema()
 {
     return JsonSchema{
-        .title = "JsonSchema",
         .type = JsonType::Object,
         .items = {JsonSchema()},
     };
@@ -134,17 +133,12 @@ JsonValue JsonReflector<JsonSchema>::serialize(const JsonSchema &schema)
 {
     auto object = createJsonObject();
 
-    if (!schema.title.empty())
-    {
-        set(*object, "title", schema.title);
-    }
-
     if (!schema.description.empty())
     {
         set(*object, "description", schema.description);
     }
 
-    if (schema.required)
+    if (!schema.required)
     {
         set(*object, "default", schema.defaultValue);
     }
@@ -160,9 +154,9 @@ JsonValue JsonReflector<JsonSchema>::serialize(const JsonSchema &schema)
         set(*object, "type", schema.type);
     }
 
-    if (!schema.enums.empty())
+    if (!schema.constant.empty())
     {
-        set(*object, "enum", schema.enums);
+        set(*object, "const", schema.constant);
         return object;
     }
 

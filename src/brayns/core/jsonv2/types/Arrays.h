@@ -59,7 +59,7 @@ struct JsonArrayReflector
         auto value = T();
         for (const auto &jsonItem : array)
         {
-            auto item = deserializeJson<ValueType>(jsonItem);
+            auto item = deserializeAs<ValueType>(jsonItem);
             value.push_back(std::move(item));
         }
         return value;

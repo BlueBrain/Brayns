@@ -148,19 +148,18 @@ void throwIfNotCompatible(const JsonValue &json)
 
 struct JsonSchema
 {
-    std::string title = {};
     std::string description = {};
-    bool required = false;
+    bool required = true;
     JsonValue defaultValue = {};
+    std::vector<JsonSchema> oneOf = {};
     JsonType type = JsonType::Undefined;
+    std::string constant = {};
     std::optional<double> minimum = {};
     std::optional<double> maximum = {};
     std::vector<JsonSchema> items = {};
     std::optional<std::size_t> minItems = {};
     std::optional<std::size_t> maxItems = {};
     std::map<std::string, JsonSchema> properties = {};
-    std::vector<std::string> enums = {};
-    std::vector<JsonSchema> oneOf = {};
 
     auto operator<=>(const JsonSchema &) const = default;
 };
