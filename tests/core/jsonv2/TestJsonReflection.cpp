@@ -22,8 +22,9 @@
 
 #include <brayns/core/jsonv2/Json.h>
 
-using namespace brayns;
 using namespace brayns::experimental;
+using brayns::Quaternion;
+using brayns::Vector3;
 
 namespace brayns::experimental
 {
@@ -53,7 +54,7 @@ struct Internal
 template<>
 struct JsonObjectReflector<Internal>
 {
-    static JsonObjectInfo<Internal> reflect()
+    static auto reflect()
     {
         auto builder = JsonObjectInfoBuilder<Internal>();
         builder.field("value", [](auto &object) { return &object.value; });
@@ -76,9 +77,10 @@ struct SomeObject
 template<>
 struct JsonObjectReflector<SomeObject>
 {
-    static JsonObjectInfo<SomeObject> reflect()
+    static auto reflect()
     {
         auto builder = JsonObjectInfoBuilder<SomeObject>();
+        builder.constant("constant", "test");
         builder.field("required", [](auto &object) { return &object.required; });
         builder.field("bounded", [](auto &object) { return &object.bounded; }).minimum(1).maximum(3);
         builder.field("description", [](auto &object) { return &object.description; }).description("Test");
@@ -170,7 +172,7 @@ TEST_CASE("JsonReflection")
         CHECK_EQ(
             getJsonSchema<std::vector<std::string>>(),
             JsonSchema{.type = JsonType::Array, .items = {JsonSchema{.type = JsonType::String}}});
-        CHECK_EQ(parseJson<std::vector<int>>("[1,2,3]"), std::vector<int>{1, 2, 3});
+        CHECK_EQ(parseJsonAs<std::vector<int>>("[1,2,3]"), std::vector<int>{1, 2, 3});
         CHECK_EQ(stringifyToJson(std::vector<int>{1, 2, 3}), "[1,2,3]");
     }
     SUBCASE("Math")
@@ -193,17 +195,17 @@ TEST_CASE("JsonReflection")
                 .maxItems = 4,
             });
 
-        CHECK_EQ(parseJson<Vector3>("[1,2,3]"), Vector3(1, 2, 3));
-        CHECK_EQ(parseJson<Quaternion>("[1,2,3,4]"), Quaternion(4, 1, 2, 3));
+        CHECK_EQ(parseJsonAs<Vector3>("[1,2,3]"), Vector3(1, 2, 3));
+        CHECK_EQ(parseJsonAs<Quaternion>("[1,2,3,4]"), Quaternion(4, 1, 2, 3));
 
         CHECK_EQ(stringifyToJson(Vector3(1, 2, 3)), "[1,2,3]");
         CHECK_EQ(stringifyToJson(Quaternion(4, 1, 2, 3)), "[1,2,3,4]");
 
-        CHECK_THROWS_AS(parseJson<Vector3>("[1,2,3,4]"), JsonException);
-        CHECK_THROWS_AS(parseJson<Quaternion>("[1,2,3,4,5]"), JsonException);
+        CHECK_THROWS_AS(parseJsonAs<Vector3>("[1,2,3,4]"), JsonException);
+        CHECK_THROWS_AS(parseJsonAs<Quaternion>("[1,2,3,4,5]"), JsonException);
 
-        CHECK_THROWS_AS(parseJson<Vector3>("[1,2]"), JsonException);
-        CHECK_THROWS_AS(parseJson<Quaternion>("[1,2]"), JsonException);
+        CHECK_THROWS_AS(parseJsonAs<Vector3>("[1,2]"), JsonException);
+        CHECK_THROWS_AS(parseJsonAs<Quaternion>("[1,2]"), JsonException);
     }
     SUBCASE("Map")
     {
@@ -219,10 +221,10 @@ TEST_CASE("JsonReflection")
         auto map = Map{{"test1", 1}, {"test2", 2}};
         auto json = R"({"test1":1,"test2":2})";
 
-        CHECK_EQ(parseJson<Map>(json), map);
+        CHECK_EQ(parseJsonAs<Map>(json), map);
         CHECK_EQ(stringifyToJson(map), json);
 
-        CHECK_THROWS_AS(parseJson<Map>(R"({"invalid":2.5})"), JsonException);
+        CHECK_THROWS_AS(parseJsonAs<Map>(R"({"invalid":2.5})"), JsonException);
     }
     SUBCASE("Variant")
     {
@@ -255,12 +257,13 @@ TEST_CASE("JsonReflection")
     }
     SUBCASE("Object")
     {
-        auto schema = getJsonSchema<SomeObject>();
+        const auto &schema = getJsonSchema<SomeObject>();
 
         CHECK_EQ(schema.type, JsonType::Object);
 
         const auto &properties = schema.properties;
 
+        CHECK_EQ(properties.at("constant"), JsonSchema{.type = JsonType::String, .constant = "test"});
         CHECK_EQ(properties.at("required"), getJsonSchema<bool>());
         CHECK_EQ(properties.at("bounded"), JsonSchema{.type = JsonType::Integer, .minimum = 1, .maximum = 3});
         CHECK_EQ(properties.at("description"), JsonSchema{.description = "Test", .type = JsonType::Boolean});
@@ -288,6 +291,7 @@ TEST_CASE("JsonReflection")
         internal->set("value", 2);
 
         auto object = createJsonObject();
+        object->set("constant", "test");
         object->set("required", true);
         object->set("bounded", 2);
         object->set("description", true);
@@ -310,8 +314,6 @@ TEST_CASE("JsonReflection")
 
         object->set("default", "test");
 
-        auto backToJson = serializeToJson(test);
-
-        CHECK_EQ(backToJson, json);
+        CHECK_EQ(stringifyToJson(test), stringifyToJson(json));
     }
 }

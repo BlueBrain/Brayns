@@ -25,7 +25,6 @@
 #include <map>
 #include <optional>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 #include <brayns/core/utils/EnumReflector.h>
