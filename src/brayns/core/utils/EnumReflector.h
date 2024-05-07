@@ -56,23 +56,23 @@ public:
         return _fields;
     }
 
-    const EnumField<T> *findByName(std::string_view name) const
+    const EnumField<T> *findFieldByName(std::string_view name) const
     {
         auto sameName = [&](const auto &field) { return field.name == name; };
         auto i = std::ranges::find_if(_fields, sameName);
         return i == _fields.end() ? nullptr : &*i;
     }
 
-    const EnumField<T> *findByValue(T value) const
+    const EnumField<T> *findFieldByValue(T value) const
     {
         auto sameValue = [&](const auto &field) { return field.value == value; };
         auto i = std::ranges::find_if(_fields, sameValue);
         return i == _fields.end() ? nullptr : &*i;
     }
 
-    const EnumField<T> &getByName(std::string_view name) const
+    const EnumField<T> &getFieldByName(std::string_view name) const
     {
-        const auto *field = findByName(name);
+        const auto *field = findFieldByName(name);
         if (field)
         {
             return *field;
@@ -80,9 +80,9 @@ public:
         throw std::invalid_argument(fmt::format("Invalid enum name: '{}'", name));
     }
 
-    const EnumField<T> &getByValue(T value) const
+    const EnumField<T> &getFieldByValue(T value) const
     {
-        const auto *field = findByValue(value);
+        const auto *field = findFieldByValue(value);
         if (field)
         {
             return *field;
@@ -118,7 +118,7 @@ template<ReflectedEnum T>
 const std::string &getEnumName(T value)
 {
     const auto &info = reflectEnum<T>();
-    const auto &field = info.getByValue(value);
+    const auto &field = info.getFieldByValue(value);
     return field.name;
 }
 
@@ -126,7 +126,7 @@ template<ReflectedEnum T>
 T getEnumValue(std::string_view name)
 {
     const auto &info = reflectEnum<T>();
-    const auto &field = info.getByName(name);
+    const auto &field = info.getFieldByName(name);
     return field.value;
 }
 

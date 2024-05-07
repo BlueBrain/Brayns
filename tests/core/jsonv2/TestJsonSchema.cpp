@@ -22,7 +22,6 @@
 
 #include <brayns/core/jsonv2/Json.h>
 
-using namespace brayns;
 using namespace brayns::experimental;
 
 TEST_CASE("JsonSchema")

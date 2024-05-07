@@ -51,9 +51,10 @@ struct JsonReflector
 };
 
 template<typename T>
-JsonSchema getJsonSchema()
+const JsonSchema &getJsonSchema()
 {
-    return JsonReflector<T>::getSchema();
+    static const auto schema = JsonReflector<T>::getSchema();
+    return schema;
 }
 
 template<typename T>
@@ -76,7 +77,7 @@ std::string stringifyToJson(const T &value)
 }
 
 template<typename T>
-T parseJson(const std::string &data)
+T parseJsonAs(const std::string &data)
 {
     auto json = parseJson(data);
     return deserializeAs<T>(json);

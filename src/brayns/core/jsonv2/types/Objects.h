@@ -82,10 +82,9 @@ public:
 
         for (const auto &field : _fields)
         {
-            auto jsonItem = object.get(field.name);
-
-            if (!jsonItem.isEmpty())
+            if (object.has(field.name))
             {
+                auto jsonItem = object.get(field.name);
                 field.deserialize(jsonItem, value);
                 continue;
             }
@@ -155,6 +154,12 @@ public:
         return *this;
     }
 
+    JsonFieldBuilder required(bool value)
+    {
+        _field->schema.required = value;
+        return *this;
+    }
+
     JsonFieldBuilder minimum(std::optional<double> value)
     {
         _field->schema.minimum = value;
@@ -214,6 +219,26 @@ public:
         field.schema = getJsonSchema<FieldType>();
         field.serialize = [=](const auto &object) { return serializeToJson(*getPtr(object)); };
         field.deserialize = [=](const auto &json, auto &object) { *getPtr(object) = deserializeAs<FieldType>(json); };
+
+        return JsonFieldBuilder<T>(field);
+    }
+
+    JsonFieldBuilder<T> constant(std::string name, const std::string &value)
+    {
+        auto &field = _fields.emplace_back();
+
+        field.name = std::move(name);
+        field.schema = getJsonSchema<std::string>();
+        field.schema.constant = value;
+        field.serialize = [=](const auto &) { return value; };
+        field.deserialize = [=](const auto &json, auto &)
+        {
+            auto item = deserializeAs<std::string>(json);
+            if (item != value)
+            {
+                throw JsonException("Invalid const");
+            }
+        };
 
         return JsonFieldBuilder<T>(field);
     }
