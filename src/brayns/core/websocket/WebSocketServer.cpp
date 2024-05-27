@@ -83,20 +83,15 @@ public:
             return;
         }
 
-        _logger->info("Upgrade complete, host {} is now connected", request.getHost());
+        _logger->info("Upgrade complete, {} is now connected", request.getHost());
 
         try
         {
-            _handler(*websocket);
-        }
-        catch (const WebSocketException &e)
-        {
-            _logger->warn("Error while processing websocket: '{}'", e.what());
-            websocket->close(e);
+            _handler.handle(*websocket);
         }
         catch (...)
         {
-            _logger->error("Internal error while processing websocket");
+            _logger->error("Unexpected error in websocket request handler");
             websocket->close(WebSocketStatus::UnexpectedCondition, "Internal error");
         }
     }
@@ -120,7 +115,7 @@ private:
         }
         catch (const Poco::Net::WebSocketException &e)
         {
-            auto message = e.displayText();
+            const auto &message = e.message();
 
             _logger->warn("Upgrade failed: '{}'", message);
 
@@ -161,7 +156,7 @@ public:
             return new HealthcheckRequestHandler(*_logger);
         }
 
-        if (uri == "")
+        if (uri == "/")
         {
             return new WebSocketRequestHandler(_handler, _maxFrameSize, *_logger);
         }
@@ -240,7 +235,7 @@ WebSocketServer::~WebSocketServer()
 
 WebSocketServer startWebSocketServer(const WebSocketServerSettings &settings, WebSocketHandler handler, Logger &logger)
 {
-    if (settings.maxFrameSize > std::numeric_limits<int>::max())
+    if (settings.maxFrameSize > static_cast<std::size_t>(std::numeric_limits<int>::max()))
     {
         throw std::runtime_error("Max frame size cannot be above 2 ** 31");
     }
@@ -261,7 +256,7 @@ WebSocketServer startWebSocketServer(const WebSocketServerSettings &settings, We
     }
     catch (const Poco::Exception &e)
     {
-        throw std::runtime_error(fmt::format("Failed to start websocket server: {}", e.displayText()));
+        throw std::runtime_error(fmt::format("Failed to start websocket server: {}", e.message()));
     }
 }
 }

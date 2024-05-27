@@ -22,6 +22,7 @@
 #pragma once
 
 #include <functional>
+#include <limits>
 #include <memory>
 #include <optional>
 
@@ -30,28 +31,27 @@
 #include <brayns/core/utils/Logger.h>
 
 #include "WebSocket.h"
+#include "WebSocketHandler.h"
 
 namespace brayns::experimental
 {
 struct SslSettings
 {
     std::string privateKeyFile;
-    std::string privateKeyPassphrase;
     std::string certificateFile;
-    std::string caLocation;
+    std::string caLocation = {};
+    std::string privateKeyPassphrase = {};
 };
 
 struct WebSocketServerSettings
 {
-    std::string host;
-    std::uint16_t port;
-    std::size_t maxThreadCount;
-    std::size_t queueSize;
-    std::size_t maxFrameSize;
-    std::optional<SslSettings> ssl;
+    std::string host = "localhost";
+    std::uint16_t port = 5000;
+    std::size_t maxThreadCount = 2;
+    std::size_t queueSize = 2;
+    std::size_t maxFrameSize = std::numeric_limits<int>::max();
+    std::optional<SslSettings> ssl = std::nullopt;
 };
-
-using WebSocketHandler = std::function<void(const WebSocket &)>;
 
 class WebSocketServer
 {

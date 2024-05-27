@@ -48,6 +48,12 @@ private:
     WebSocketStatus _status;
 };
 
+class WebSocketClosed : public std::runtime_error
+{
+public:
+    using runtime_error::runtime_error;
+};
+
 enum class WebSocketOpcode
 {
     Continuation = Poco::Net::WebSocket::FRAME_OP_CONT,
@@ -77,10 +83,10 @@ class WebSocket
 public:
     explicit WebSocket(const Poco::Net::WebSocket &websocket);
 
+    std::size_t getMaxFrameSize() const;
     WebSocketFrame receive();
     void send(const WebSocketFrameView &frame);
     void close(WebSocketStatus status, std::string_view message = {});
-    void close(const WebSocketException &e);
 
 private:
     Poco::Net::WebSocket _websocket;

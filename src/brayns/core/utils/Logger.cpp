@@ -21,6 +21,7 @@
 
 #include "Logger.h"
 
+#include <iostream>
 #include <stdexcept>
 
 namespace brayns
@@ -70,5 +71,11 @@ void Logger::setLevel(LogLevel level)
 bool Logger::isEnabled(LogLevel level) const
 {
     return level >= _level;
+}
+
+Logger createConsoleLogger(std::string name)
+{
+    auto handler = [](const auto &record) { std::cout << toString(record) << '\n'; };
+    return Logger(std::move(name), LogLevel::Info, handler);
 }
 }

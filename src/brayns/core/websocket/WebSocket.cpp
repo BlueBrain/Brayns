@@ -40,6 +40,11 @@ WebSocketFrame receiveFrame(Poco::Net::WebSocket &websocket)
 
     websocket.receiveFrame(buffer, flags);
 
+    if (flags == 0 && buffer.size() == 0)
+    {
+        throw WebSocketClosed("Empty frame received");
+    }
+
     auto finalFrame = flags & Poco::Net::WebSocket::FRAME_FLAG_FIN;
 
     auto opcode = flags & Poco::Net::WebSocket::FRAME_OP_BITMASK;
@@ -79,7 +84,7 @@ WebSocketStatus getStatus(int errorCode)
 WebSocketException websocketException(const Poco::Exception &e)
 {
     auto status = getStatus(e.code());
-    auto message = e.displayText();
+    const auto &message = e.message();
     return WebSocketException(status, message);
 }
 }
@@ -100,6 +105,12 @@ WebSocketStatus WebSocketException::getStatus() const
 WebSocket::WebSocket(const Poco::Net::WebSocket &websocket):
     _websocket(websocket)
 {
+}
+
+std::size_t WebSocket::getMaxFrameSize() const
+{
+    auto size = _websocket.getMaxPayloadSize();
+    return static_cast<std::size_t>(size);
 }
 
 WebSocketFrame WebSocket::receive()
@@ -146,10 +157,5 @@ void WebSocket::close(WebSocketStatus status, std::string_view message)
     catch (...)
     {
     }
-}
-
-void WebSocket::close(const WebSocketException &e)
-{
-    close(e.getStatus(), e.what());
 }
 }

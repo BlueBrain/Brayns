@@ -21,19 +21,6 @@
 
 #include "Log.h"
 
-#include <iostream>
-
-namespace
-{
-using namespace brayns;
-
-Logger consoleLogger()
-{
-    auto handler = [](const auto &record) { std::cout << toString(record) << '\n'; };
-    return Logger("Brayns", LogLevel::Info, handler);
-}
-}
-
 namespace brayns
 {
 void Log::setLevel(LogLevel level)
@@ -46,5 +33,5 @@ void Log::disable()
     setLevel(LogLevel::Off);
 }
 
-Logger Log::_logger = consoleLogger();
+Logger Log::_logger = createConsoleLogger("Brayns");
 } // namespace brayns

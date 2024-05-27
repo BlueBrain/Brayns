@@ -19,15 +19,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "WebSocketManager.h"
+#include "WebSocketHandler.h"
 
 #include <string>
 #include <utility>
 
+#include <brayns/core/utils/Binary.h>
+
 namespace
 {
 using namespace brayns::experimental;
-using namespace brayns;
+using brayns::Logger;
 
 struct WebSocketBuffer
 {
@@ -73,18 +75,18 @@ void onBinary(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger &logg
     buffer.binary = true;
 }
 
-void onClose(const WebSocketConnection &websocket, Logger &logger)
+void onClose(WebSocket &websocket, Logger &logger)
 {
     logger.info("Close frame received, sending normal close frame");
 
-    websocket.closeOk();
+    websocket.close(WebSocketStatus::NormalClose);
 }
 
-void onPing(const WebSocketConnection &websocket, Logger &logger)
+void onPing(const WebSocketFrame &frame, WebSocket &websocket, Logger &logger)
 {
     logger.info("Ping frame received, sending pong frame");
 
-    websocket.send({.opcode = WebSocketOpcode::Pong});
+    websocket.send({.opcode = WebSocketOpcode::Pong, .data = frame.data});
 }
 
 void onPong(Logger &logger)
@@ -92,19 +94,52 @@ void onPong(Logger &logger)
     logger.info("Pong frame received, ignoring");
 }
 
-void respond(const WebSocketConnection &websocket, const RawResponse &response)
+void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const RawResponse &response)
 {
-    websocket.send({
-        .opcode = response.binary ? WebSocketOpcode::Binary : WebSocketOpcode::Text,
-        .data = response.data,
-    });
+    auto data = response.data;
+
+    logger.info("Sending response of {} bytes to client {}", data.size(), clientId);
+
+    if (!response.binary)
+    {
+        logger.debug("Text response data: {}", data);
+    }
+
+    auto opcode = response.binary ? WebSocketOpcode::Binary : WebSocketOpcode::Text;
+
+    auto maxFrameSize = websocket.getMaxFrameSize();
+
+    while (true)
+    {
+        auto chunk = extractBytes(data, maxFrameSize);
+
+        logger.info("Sending websocket frame of {} bytes", data.size());
+
+        try
+        {
+            websocket.send({opcode, chunk});
+        }
+        catch (const WebSocketException &e)
+        {
+            logger.warn("Failed to send websocket frame: {}", e.what());
+            websocket.close(e.getStatus(), e.what());
+            return;
+        }
+        catch (...)
+        {
+            logger.error("Unexpected error while sending websocket frame");
+            websocket.close(WebSocketStatus::UnexpectedCondition, "Internal error");
+            return;
+        }
+
+        if (data.empty())
+        {
+            return;
+        }
+    }
 }
 
-void runClientLoop(
-    ClientId clientId,
-    const WebSocketConnection &websocket,
-    const WebSocketListener &listener,
-    Logger &logger)
+void runClientLoop(ClientId clientId, WebSocket &websocket, const WebSocketListener &listener, Logger &logger)
 {
     auto buffer = WebSocketBuffer();
 
@@ -127,12 +162,13 @@ void runClientLoop(
             onClose(websocket, logger);
             return;
         case WebSocketOpcode::Ping:
-            onPing(websocket, logger);
+            onPing(frame, websocket, logger);
             continue;
         case WebSocketOpcode::Pong:
             onPong(logger);
             continue;
         default:
+            logger.error("Unexpected invalid opcode: {}", static_cast<int>(frame.opcode));
             throw WebSocketException(WebSocketStatus::UnexpectedCondition, "Unexpected invalid opcode");
         }
 
@@ -141,36 +177,54 @@ void runClientLoop(
             continue;
         }
 
-        listener.onRequest({
+        auto request = RawRequest{
             .clientId = clientId,
             .data = std::exchange(buffer.data, {}),
             .binary = buffer.binary,
-            .respond = [=](const auto &response) { respond(websocket, response); },
-        });
+            .respond = [=, &logger](const auto &response) mutable { respond(clientId, websocket, logger, response); },
+        };
+
+        logger.info("Received request of {} bytes from client {}", request.data.size(), clientId);
+
+        if (!request.binary)
+        {
+            logger.debug("Text request data: {}", request.data);
+        }
+
+        listener.onRequest(request);
     }
 }
 }
 
 namespace brayns::experimental
 {
-WebSocketManager::WebSocketManager(WebSocketListener listener, Logger &logger):
+WebSocketHandler::WebSocketHandler(WebSocketListener listener, Logger &logger):
     _listener(std::move(listener)),
     _logger(&logger)
 {
 }
 
-void WebSocketManager::handle(const WebSocketConnection &websocket)
+void WebSocketHandler::handle(WebSocket &websocket)
 {
     auto clientId = _clientIds.next();
+
+    _listener.onConnect(clientId);
 
     try
     {
         runClientLoop(clientId, websocket, _listener, *_logger);
     }
-    catch (...)
+    catch (const WebSocketClosed &e)
     {
-        _logger->error("Unexpected error in websocket client loop");
+        _logger->warn("WebSocket closed by peer: {}", e.what());
     }
+    catch (const WebSocketException &e)
+    {
+        _logger->warn("Error while processing websocket: '{}'", e.what());
+        websocket.close(e.getStatus(), e.what());
+    }
+
+    _listener.onDisconnect(clientId);
 
     _clientIds.recycle(clientId);
 }

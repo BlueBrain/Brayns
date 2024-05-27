@@ -122,4 +122,6 @@ private:
     LogLevel _level;
     LogHandler _handler;
 };
+
+Logger createConsoleLogger(std::string name);
 }

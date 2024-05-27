@@ -32,13 +32,6 @@
 
 namespace brayns::experimental
 {
-struct WebSocketConnection
-{
-    std::function<WebSocketFrame()> receive;
-    std::function<void(const WebSocketFrameView &)> send;
-    std::function<void()> closeOk;
-};
-
 using ClientId = std::uint32_t;
 
 struct RawResponse
@@ -62,12 +55,12 @@ struct WebSocketListener
     std::function<void(RawRequest)> onRequest;
 };
 
-class WebSocketManager
+class WebSocketHandler
 {
 public:
-    explicit WebSocketManager(WebSocketListener listener, Logger &logger);
+    explicit WebSocketHandler(WebSocketListener listener, Logger &logger);
 
-    void handle(const WebSocketConnection &websocket);
+    void handle(WebSocket &websocket);
 
 private:
     WebSocketListener _listener;
