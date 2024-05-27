@@ -127,21 +127,4 @@ struct JsonObjectReflector<JsonRpcProgress>
         return builder.build();
     }
 };
-
-struct JsonRpcNotification
-{
-    JsonRpcProgress params;
-};
-
-template<>
-struct JsonObjectReflector<JsonRpcNotification>
-{
-    static auto reflect()
-    {
-        auto builder = JsonObjectInfoBuilder<JsonRpcNotification>();
-        builder.constant("jsonrpc", "2.0");
-        builder.field("params", [](auto &object) { return &object.params; });
-        return builder.build();
-    }
-};
 }
