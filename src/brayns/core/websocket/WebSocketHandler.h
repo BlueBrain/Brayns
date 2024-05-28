@@ -19,19 +19,52 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Log.h"
+#pragma once
 
-namespace brayns
+#include <functional>
+#include <string>
+#include <string_view>
+
+#include "WebSocket.h"
+
+#include <brayns/core/utils/IdGenerator.h>
+#include <brayns/core/utils/Logger.h>
+
+namespace brayns::experimental
 {
-void Log::setLevel(LogLevel level)
+using ClientId = std::uint32_t;
+
+struct RawResponse
 {
-    _logger.setLevel(level);
+    std::string_view data;
+    bool binary;
+};
+
+struct RawRequest
+{
+    ClientId clientId;
+    std::string data;
+    bool binary;
+    std::function<void(const RawResponse &)> respond;
+};
+
+struct WebSocketListener
+{
+    std::function<void(ClientId)> onConnect;
+    std::function<void(ClientId)> onDisconnect;
+    std::function<void(RawRequest)> onRequest;
+};
+
+class WebSocketHandler
+{
+public:
+    explicit WebSocketHandler(WebSocketListener listener, Logger &logger);
+
+    void handle(WebSocket &websocket);
+
+private:
+    WebSocketListener _listener;
+    Logger *_logger;
+    IdGenerator<ClientId> _clientIds;
+};
 }
-
-void Log::disable()
-{
-    setLevel(LogLevel::Off);
-}
-
-Logger Log::_logger = createConsoleLogger("Brayns");
-} // namespace brayns

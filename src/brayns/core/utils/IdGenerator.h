@@ -19,19 +19,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Log.h"
+#pragma once
 
-namespace brayns
+#include <vector>
+
+namespace brayns::experimental
 {
-void Log::setLevel(LogLevel level)
+template<typename T>
+class IdGenerator
 {
-    _logger.setLevel(level);
+public:
+    T next()
+    {
+        if (_recycled.empty())
+        {
+            return _counter++;
+        }
+
+        auto id = _recycled.back();
+
+        _recycled.pop_back();
+
+        return id;
+    }
+
+    void recycle(T id)
+    {
+        _recycled.push_back(id);
+    }
+
+private:
+    T _counter = 0;
+    std::vector<T> _recycled;
+};
 }
-
-void Log::disable()
-{
-    setLevel(LogLevel::Off);
-}
-
-Logger Log::_logger = createConsoleLogger("Brayns");
-} // namespace brayns

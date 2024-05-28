@@ -58,7 +58,7 @@ T swapBytes(T value)
 inline std::string_view extractBytes(std::string_view &bytes, std::size_t count)
 {
     auto extracted = bytes.substr(0, count);
-    bytes.remove_prefix(count);
+    bytes.remove_prefix(extracted.size());
     return extracted;
 }
 

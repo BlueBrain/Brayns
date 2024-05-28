@@ -56,7 +56,7 @@ const JsonArray &getArray(const JsonValue &json)
     }
     catch (const Poco::Exception &e)
     {
-        throw JsonException(e.displayText());
+        throw JsonException(e.message());
     }
 }
 
@@ -68,7 +68,7 @@ const JsonObject &getObject(const JsonValue &json)
     }
     catch (const Poco::Exception &e)
     {
-        throw JsonException(e.displayText());
+        throw JsonException(e.message());
     }
 }
 
@@ -88,7 +88,7 @@ JsonValue parseJson(const std::string &data)
     }
     catch (const Poco::Exception &e)
     {
-        throw JsonException(e.displayText());
+        throw JsonException(e.message());
     }
 }
 }
