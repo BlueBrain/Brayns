@@ -21,6 +21,8 @@
 
 #include "Schema.h"
 
+#include <stdexcept>
+
 #include "Arrays.h"
 #include "Enums.h"
 #include "Maps.h"
@@ -186,5 +188,10 @@ JsonValue JsonReflector<JsonSchema>::serialize(const JsonSchema &schema)
     serializeObject(*object, schema);
 
     return object;
+}
+
+JsonSchema JsonReflector<JsonSchema>::deserialize(const JsonValue &)
+{
+    throw std::runtime_error("Not implemented");
 }
 }
