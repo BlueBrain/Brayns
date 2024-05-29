@@ -25,8 +25,6 @@
 
 #include <fmt/format.h>
 
-#include <brayns/core/jsonrpc/Errors.h>
-
 namespace brayns::experimental
 {
 Api::Api(std::map<std::string, Endpoint> endpoints):

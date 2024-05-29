@@ -62,5 +62,52 @@ TEST_CASE("Api")
         CHECK_EQ(std::get<int>(response.id), 0);
         CHECK_EQ(response.result.extract<float>(), 3.0f);
         CHECK_EQ(response.binary, "");
+
+        request.method = "invalid";
+        CHECK_THROWS_AS(api.execute(request), MethodNotFound);
+        request.method = "test";
+
+        request.params = "invalidString";
+        CHECK_THROWS_AS(api.execute(request), InvalidParams);
+        request.params = 2;
+
+        request.binary = "123";
+        CHECK_THROWS_AS(api.execute(request), InvalidParams);
+        request.binary = "";
+
+        CHECK_THROWS_AS(api.getSchema("invalidParams"), InvalidParams);
+    }
+    SUBCASE("No params or no results")
+    {
+        auto called = false;
+        auto buffer = 0;
+
+        auto builder = ApiBuilder();
+
+        builder.endpoint("test1", [] { return 0; });
+        builder.endpoint("test2", [&] { called = true; });
+        builder.endpoint("test3", [&](int value) { buffer = value; });
+
+        auto api = builder.build();
+
+        auto request = JsonRpcRequest{
+            .id = 0,
+            .method = "test1",
+            .params = {},
+        };
+
+        auto response = api.execute(request);
+        CHECK_EQ(response.result.extract<int>(), 0);
+
+        request.method = "test2";
+        response = api.execute(request);
+        CHECK(called);
+        CHECK(response.result.isEmpty());
+
+        request.method = "test3";
+        request.params = 3;
+        response = api.execute(request);
+        CHECK(response.result.isEmpty());
+        CHECK_EQ(buffer, 3);
     }
 }

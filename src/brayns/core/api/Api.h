@@ -27,6 +27,7 @@
 #include <string_view>
 #include <type_traits>
 
+#include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/jsonrpc/Messages.h>
 #include <brayns/core/jsonv2/Json.h>
 #include <brayns/core/utils/FunctorReflector.h>
