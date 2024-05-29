@@ -30,5 +30,6 @@ struct JsonReflector<JsonSchema>
 {
     static JsonSchema getSchema();
     static JsonValue serialize(const JsonSchema &schema);
+    static JsonSchema deserialize(const JsonValue &json);
 };
 }
