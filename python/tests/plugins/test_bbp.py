@@ -123,6 +123,7 @@ class TestBbpLoader(unittest.TestCase):
                     "geometry_type": "original",
                     "resampling": 2.0,
                     "subsampling": 1,
+                    "growth": 1,
                 },
             },
         )

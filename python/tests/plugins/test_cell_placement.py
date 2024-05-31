@@ -55,6 +55,7 @@ class TestCellPlacementLoader(unittest.TestCase):
                     "radius_multiplier": 1.0,
                     "resampling": 2,
                     "subsampling": 1,
+                    "growth": 1,
                 },
             },
         )
