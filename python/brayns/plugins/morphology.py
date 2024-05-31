@@ -62,6 +62,8 @@ class Morphology:
     :type resampling: float, optional
     :param subsampling: Step factor to skip morphology samples.
     :type subsampling: int, optional
+    :param growth: Morphology growth [0-1], remove all segments at 0, leave unchanged at 1.
+    :type growth: int, optional
     """
 
     @staticmethod
@@ -80,6 +82,7 @@ class Morphology:
     geometry_type: GeometryType = GeometryType.SMOOTH
     resampling: float = 2
     subsampling: int = 1
+    growth: float = 1.0
 
 
 def serialize_morphology(morphology: Morphology) -> dict[str, Any]:
@@ -91,6 +94,7 @@ def serialize_morphology(morphology: Morphology) -> dict[str, Any]:
         "geometry_type": morphology.geometry_type.value,
         "resampling": morphology.resampling,
         "subsampling": morphology.subsampling,
+        "growth": morphology.growth,
     }
 
 

@@ -33,6 +33,7 @@ class TestMorphology(unittest.TestCase):
             geometry_type=brayns.GeometryType.CONSTANT_RADII,
             resampling=0.5,
             subsampling=5,
+            growth=0.5,
         )
         self.assertEqual(
             serialize_morphology(test),
@@ -44,6 +45,7 @@ class TestMorphology(unittest.TestCase):
                 "geometry_type": brayns.GeometryType.CONSTANT_RADII.value,
                 "resampling": 0.5,
                 "subsampling": 5,
+                "growth": 0.5,
             },
         )
 
@@ -72,5 +74,6 @@ class TestMorphologyLoader(unittest.TestCase):
             "geometry_type": "original",
             "resampling": 2.0,
             "subsampling": 1,
+            "growth": 1,
         }
         self.assertEqual(loader.get_properties(), properties)

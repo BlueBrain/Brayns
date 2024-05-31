@@ -172,6 +172,7 @@ class TestSonataLoader(unittest.TestCase):
                         "geometry_type": "smooth",
                         "resampling": 2.0,
                         "subsampling": 1,
+                        "growth": 1,
                     },
                     "vasculature_geometry_parameters": {
                         "radius_multiplier": 2.0,
@@ -188,6 +189,7 @@ class TestSonataLoader(unittest.TestCase):
                         "geometry_type": "smooth",
                         "resampling": 2,
                         "subsampling": 1,
+                        "growth": 1,
                     },
                     "vasculature_geometry_parameters": {
                         "radius_multiplier": 1.0,
