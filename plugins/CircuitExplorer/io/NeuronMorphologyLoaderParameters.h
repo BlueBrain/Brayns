@@ -33,6 +33,7 @@ struct NeuronMorphologyLoaderParameters
     NeuronGeometryType geometry_type = NeuronGeometryType::Original;
     float resampling = 0;
     uint32_t subsampling = 1;
+    float growth = 1.0f;
 };
 
 namespace brayns
@@ -113,6 +114,13 @@ struct JsonAdapter<NeuronMorphologyLoaderParameters> : ObjectAdapter<NeuronMorph
                 [](auto &object, auto value) { object.subsampling = value; })
             .description("Skip factor when converting samples into geometry (disabled if <= 1)")
             .defaultValue(1);
+        builder
+            .getset(
+                "growth",
+                [](auto &object) { return object.growth; },
+                [](auto &object, auto value) { object.growth = value; })
+            .description("Neuron growth [0-1], includes all segments at 1 and none at 0")
+            .defaultValue(1.0f);
         return builder.build();
     }
 };

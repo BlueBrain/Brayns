@@ -19,6 +19,7 @@
 #include "NeuronMorphologyPipeline.h"
 
 #include "processors/ConstantRadius.h"
+#include "processors/Growth.h"
 #include "processors/RadiusMultiplier.h"
 #include "processors/Resampler.h"
 #include "processors/SectionSmoother.h"
@@ -75,6 +76,15 @@ public:
         stages.push_back(std::make_unique<Subsampler>(samplingFactor));
     }
 
+    void addGrowthStage(float growth)
+    {
+        if (growth == 1.0f)
+        {
+            return;
+        }
+        stages.push_back(std::make_unique<Growth>(growth));
+    }
+
     NeuronMorphologyPipeline::Stages stages;
 };
 }
@@ -86,6 +96,7 @@ NeuronMorphologyPipeline NeuronMorphologyPipeline::fromParameters(const NeuronMo
     stageBuilder.addSubsamplingStage(parameters.subsampling);
     stageBuilder.addResamplingStage(parameters.resampling);
     stageBuilder.addRadiusStage(parameters.radius_multiplier);
+    stageBuilder.addGrowthStage(parameters.growth);
     return NeuronMorphologyPipeline(std::move(stageBuilder.stages));
 }
 
