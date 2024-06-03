@@ -71,14 +71,16 @@ class TestConnector(ApiTestCase):
         service = brayns.Service(
             uri=self.uri,
             max_clients=3,
-            ssl_context=brayns.SslServerContext(
-                private_key_file=str(self.key),
-                private_key_passphrase="test",
-                certificate_file=str(self.certificate),
-                ca_location=str(self.certificate),
-            )
-            if secure
-            else None,
+            ssl_context=(
+                brayns.SslServerContext(
+                    private_key_file=str(self.key),
+                    private_key_passphrase="test",
+                    certificate_file=str(self.certificate),
+                    ca_location=str(self.certificate),
+                )
+                if secure
+                else None
+            ),
             executable=self.executable,
             env=self.env,
         )
