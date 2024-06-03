@@ -21,14 +21,16 @@
 
 #include "SimulationParameters.h"
 
+#include <stdexcept>
+
 namespace brayns
 {
 void SimulationParameters::reset()
 {
-    setFrame(0);
-    setDt(0.);
     setStartFrame(0);
     setEndFrame(0);
+    setDt(0.);
+    setFrame(0);
 }
 
 void SimulationParameters::setStartFrame(const uint32_t startFrame) noexcept
@@ -51,8 +53,12 @@ uint32_t SimulationParameters::getEndFrame() const noexcept
     return _endFrame;
 }
 
-void SimulationParameters::setFrame(const uint32_t value) noexcept
+void SimulationParameters::setFrame(const uint32_t value)
 {
+    if (value < _startFrame || value > _endFrame)
+    {
+        throw std::out_of_range("Simulation frame out of range");
+    }
     _flag.update(_current, value);
 }
 
