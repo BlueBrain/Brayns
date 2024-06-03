@@ -56,6 +56,11 @@ This loader does not support loading binary data using 'upload-model'.
                             "spheres"
                         ]
                     },
+                    "growth": {
+                        "description": "Neuron growth [0-1], includes all segments at 1 and none at 0",
+                        "type": "number",
+                        "default": 1
+                    },
                     "load_axon": {
                         "description": "Load the axon section of the neuron",
                         "type": "boolean",
@@ -177,6 +182,11 @@ This loader does not support loading binary data using 'upload-model'.
                             "spheres"
                         ]
                     },
+                    "growth": {
+                        "description": "Neuron growth [0-1], includes all segments at 1 and none at 0",
+                        "type": "number",
+                        "default": 1
+                    },
                     "load_axon": {
                         "description": "Load the axon section of the neuron",
                         "type": "boolean",
@@ -248,6 +258,11 @@ This loader does not support loading binary data using 'upload-model'.
                     "constant_radii",
                     "spheres"
                 ]
+            },
+            "growth": {
+                "description": "Neuron growth [0-1], includes all segments at 1 and none at 0",
+                "type": "number",
+                "default": 1
             },
             "load_axon": {
                 "description": "Load the axon section of the neuron",
@@ -363,6 +378,11 @@ This loader does not support loading binary data using 'upload-model'.
                                         "constant_radii",
                                         "spheres"
                                     ]
+                                },
+                                "growth": {
+                                    "description": "Neuron growth [0-1], includes all segments at 1 and none at 0",
+                                    "type": "number",
+                                    "default": 1
                                 },
                                 "load_axon": {
                                     "description": "Load the axon section of the neuron",
