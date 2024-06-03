@@ -77,7 +77,7 @@ public:
      *
      * @param value uint32_t Current frame index.
      */
-    void setFrame(const uint32_t value) noexcept;
+    void setFrame(const uint32_t value);
 
     /**
      * @brief Returns the current frame.

@@ -149,6 +149,7 @@ TEST_CASE("Systems")
 
         auto parameters = brayns::ParametersManager(0, nullptr);
         auto &simulation = parameters.getSimulationParameters();
+        simulation.setEndFrame(102);
         simulation.setFrame(101);
 
         CHECK(!components.has<uint32_t>());

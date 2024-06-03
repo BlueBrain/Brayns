@@ -18,6 +18,9 @@
 
 #include "SonataSpikeData.h"
 
+#include <ranges>
+#include <unordered_set>
+
 #include <brayns/utils/MathTypes.h>
 
 namespace sonataloader
@@ -61,12 +64,17 @@ std::string SonataSpikeData::getTimeUnit() const noexcept
 
 std::vector<float> SonataSpikeData::getFrame(double timestamp) const
 {
-    auto limit = static_cast<float>(getEndTime()) - 0.01f;
-    auto frame = brayns::math::clamp(static_cast<float>(timestamp), 0.f, limit);
-    auto frameStart = frame - _interval;
-    auto frameEnd = frame + _interval;
+    auto frameStart = brayns::math::clamp(timestamp - _interval, _start, _end);
+    auto frameEnd = brayns::math::clamp(timestamp + _interval, _start, _end);
 
-    auto spikes = _population.get(_selection, frameStart, frameEnd);
+    auto spikes = _population.get({}, frameStart, frameEnd);
+
+    auto values = _selection.flatten();
+    auto selection = std::unordered_set<bbp::sonata::Selection::Value>(values.begin(), values.end());
+
+    auto notSelected = [&](const auto &spike) { return !selection.contains(spike.first); };
+    auto [first, last] = std::ranges::remove_if(spikes, notSelected);
+    spikes.erase(first, last);
 
     auto data = std::vector<float>(_mapping.size(), 0.f);
 
@@ -83,7 +91,7 @@ std::vector<float> SonataSpikeData::getFrame(double timestamp) const
         }
 
         auto index = it->second;
-        data[index] = _calculator.compute(spikeTime, frame);
+        data[index] = _calculator.compute(spikeTime, static_cast<float>(timestamp));
     }
 
     return data;
