@@ -21,145 +21,211 @@
 
 #include "Geometry.h"
 
+#include <stdexcept>
+
+namespace
+{
+using namespace brayns::experimental;
+
+void setMeshParams(OSPGeometry handle, const MeshSettings &settings)
+{
+    setObjectParam(handle, "vertex.position", settings.positions);
+
+    if (settings.normals)
+    {
+        setObjectParam(handle, "vertex.normal", *settings.normals);
+    }
+
+    if (settings.colors)
+    {
+        setObjectParam(handle, "vertex.color", *settings.colors);
+    }
+
+    if (settings.uvs)
+    {
+        setObjectParam(handle, "vertex.texcoord", *settings.uvs);
+    }
+}
+
+void setSphereParams(OSPGeometry handle, const SphereSettings &settings)
+{
+    setObjectParam(handle, "sphere.position", settings.positions);
+
+    std::visit([=](const auto &radius) { setObjectParam(handle, "sphere.radius", radius); }, settings.radii);
+
+    if (settings.uvs)
+    {
+        setObjectParam(handle, "sphere.texcoord", *settings.uvs);
+    }
+}
+
+void setCurveParams(OSPGeometry handle, const CylinderSettings &settings)
+{
+    setObjectParam(handle, "vertex.position_radius", settings.samples);
+    setObjectParam(handle, "index", settings.indices);
+
+    if (settings.uvs)
+    {
+        setObjectParam(handle, "vertex.texcoord", *settings.uvs);
+    }
+
+    if (settings.colors)
+    {
+        setObjectParam(handle, "vertex.color", *settings.colors);
+    }
+}
+}
+
 namespace brayns::experimental
 {
-void GeometricModel::setGeometry(const Geometry &geometry)
+void Mesh::setColors(const Data1D<Color4> &colors)
 {
-    setParam("geometry", geometry.getHandle());
+    auto handle = getHandle();
+    setObjectParam(handle, "vertex.color", colors);
+    commitObject(handle);
 }
 
-void GeometricModel::setMaterial(std::uint32_t rendererIndex)
+void loadMeshParams(OSPGeometry handle, const TriangleMeshSettings &settings)
 {
-    setParam("material", rendererIndex);
+    setMeshParams(handle, settings);
+
+    if (settings.indices)
+    {
+        setObjectParam(handle, "index", *settings.indices);
+    }
+
+    commitObject(handle);
 }
 
-void GeometricModel::setPrimitiveMaterials(SharedArray<std::uint32_t> rendererIndices)
+void loadMeshParams(OSPGeometry handle, const QuadMeshSettings &settings)
 {
-    setParam("material", toSharedData(rendererIndices));
+    setMeshParams(handle, settings);
+
+    if (settings.indices)
+    {
+        setObjectParam(handle, "index", *settings.indices);
+    }
+    else
+    {
+        setObjectParam(handle, "quadSoup", true);
+    }
+
+    commitObject(handle);
 }
 
-void GeometricModel::setPrimitiveColors(SharedArray<Color4> colors)
+void loadSphereParams(OSPGeometry handle, const SphereSettings &settings)
 {
-    setParam("color", toSharedData(colors));
+    setSphereParams(handle, settings);
+    commitObject(handle);
 }
 
-void GeometricModel::setColor(const Color4 &color)
+void loadSphereParams(OSPGeometry handle, const DiscSettings &settings)
 {
-    setParam("color", color);
+    setSphereParams(handle, settings);
+
+    auto type = settings.normals ? OSP_ORIENTED_DISC : OSP_DISC;
+
+    setObjectParam(handle, "type", type);
+
+    if (settings.normals)
+    {
+        setObjectParam(handle, "sphere.normal", *settings.normals);
+    }
+
+    commitObject(handle);
 }
 
-void GeometricModel::removeColors()
+void Spheres::setRadii(const Data1D<float> &radii)
 {
-    removeParam("color");
-}
-
-void GeometricModel::invertNormals(bool inverted)
-{
-    setParam("invertNormals", inverted);
-}
-
-void GeometricModel::setId(std::uint32_t id)
-{
-    setParam("id", id);
-}
-
-void Mesh::setVertexPositions(SharedArray<Vector3> positions)
-{
-    setParam("vertex.position", toSharedData(positions));
-}
-
-void Mesh::setVertexNormals(SharedArray<Vector3> normals)
-{
-    setParam("vertex.normal", toSharedData(normals));
-}
-
-void Mesh::setVertexColors(SharedArray<Color4> colors)
-{
-    setParam("vertex.color", toSharedData(colors));
-}
-
-void Mesh::setTriangleIndices(SharedArray<Index3> indices)
-{
-    setParam("index", toSharedData(indices));
-}
-
-void Mesh::setQuadIndices(SharedArray<Index4> indices)
-{
-    setParam("index", toSharedData(indices));
-}
-
-void Mesh::setQuadSoup(bool quadSoup)
-{
-    setParam("quadSoup", quadSoup);
-}
-
-void Spheres::setPositions(SharedArray<Vector3> positions)
-{
-    setParam("sphere.position", toSharedData(positions));
-}
-
-void Spheres::setRadii(SharedArray<float> radii)
-{
-    setParam("sphere.radius", toSharedData(radii));
+    auto handle = getHandle();
+    setObjectParam(handle, "sphere.radius", radii);
+    commitObject(handle);
 }
 
 void Spheres::setRadius(float radius)
 {
-    setParam("radius", radius);
+    auto handle = getHandle();
+    setObjectParam(handle, "sphere.radius", radius);
+    commitObject(handle);
 }
 
-void Curve::setVertexPositionsAndRadii(SharedArray<PositionRadius> positionsRadii)
+void loadCurveParams(OSPGeometry handle, const CylinderSettings &settings)
 {
-    setParam("vertex.position_radius", toSharedData(positionsRadii));
+    setCurveParams(handle, settings);
+    commitObject(handle);
 }
 
-void Curve::setVertexColors(SharedArray<Color4> colors)
+void loadCurveParams(OSPGeometry handle, const CurveSettings &settings)
 {
-    setParam("vertex.color", toSharedData(colors));
+    setCurveParams(handle, settings);
+    setObjectParam(handle, "type", static_cast<OSPCurveType>(settings.type));
+    setObjectParam(handle, "basis", static_cast<OSPCurveBasis>(settings.basis));
+    commitObject(handle);
 }
 
-void Curve::setIndices(SharedArray<std::uint32_t> indices)
+void loadCurveParams(OSPGeometry handle, const RibbonCurveSettings &settings)
 {
-    setParam("index", toSharedData(indices));
+    if (settings.basis == CurveBasis::Linear)
+    {
+        throw std::invalid_argument("Ribbon curve with linear basis not supported");
+    }
+
+    setCurveParams(handle, settings);
+
+    setObjectParam(handle, "vertex.normal", settings.normals);
+    setObjectParam(handle, "type", OSP_RIBBON);
+    setObjectParam(handle, "basis", static_cast<OSPCurveBasis>(settings.basis));
+
+    commitObject(handle);
 }
 
-void Curve::setType(CurveType type)
+void loadCurveParams(OSPGeometry handle, const HermiteCurveSettings &settings)
 {
-    setParam("type", static_cast<OSPCurveType>(type));
+    setCurveParams(handle, settings);
+    setObjectParam(handle, "vertex.tangent", settings.tangents);
+    setObjectParam(handle, "type", static_cast<OSPCurveType>(settings.type));
+    setObjectParam(handle, "basis", OSP_HERMITE);
+    commitObject(handle);
 }
 
-void Curve::setBasis(CurveBasis basis)
+void Curve::setSamples(const Data1D<PositionRadius> &samples)
 {
-    setParam("basis", static_cast<OSPCurveBasis>(basis));
+    auto handle = getHandle();
+    setObjectParam(handle, "vertex.position_radius", samples);
+    commitObject(handle);
 }
 
-void Boxes::setBoxes(SharedArray<Box3> boxes)
+void Curve::setColors(const Data1D<Color4> &colors)
 {
-    setParam("box", toSharedData(boxes));
+    auto handle = getHandle();
+    setObjectParam(handle, "vertex.color", colors);
+    commitObject(handle);
 }
 
-void Planes::setCoefficients(SharedArray<Vector4> coefficients)
+void loadBoxParams(OSPGeometry handle, const BoxSettings &settings)
 {
-    setParam("plane.coefficients", toSharedData(coefficients));
+    setObjectParam(handle, "box", settings.boxes);
+    commitObject(handle);
 }
 
-void Planes::setBounds(SharedArray<Box3> bounds)
+void loadPlaneParams(OSPGeometry handle, const PlaneSettings &settings)
 {
-    setParam("plane.bounds", toSharedData(bounds));
+    setObjectParam(handle, "plane.coefficients", settings.coefficients);
+
+    if (settings.bounds)
+    {
+        setObjectParam(handle, "plane.bounds", *settings.bounds);
+    }
+
+    commitObject(handle);
 }
 
-void Isosurfaces::setVolume(const Volume &volume)
+void loadIsosurfaceParams(OSPGeometry handle, const IsosurfaceSettings &settings)
 {
-    setParam("volume", volume.getHandle());
-}
+    setObjectParam(handle, "volume", settings.volume);
 
-void Isosurfaces::setIsovalues(SharedArray<float> values)
-{
-    setParam("isovalue", toSharedData(values));
-}
+    std::visit([=](const auto &isovalues) { setObjectParam(handle, "isovalue", isovalues); }, settings.isovalues);
 
-void Isosurfaces::setIsovalue(float value)
-{
-    setParam("isovalue", value);
+    commitObject(handle);
 }
 }

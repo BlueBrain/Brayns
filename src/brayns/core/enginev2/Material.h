@@ -21,14 +21,14 @@
 
 #pragma once
 
-#include "Managed.h"
+#include "Object.h"
 
 namespace brayns::experimental
 {
-class Material : public Managed<OSPMaterial>
+class Material : public Object<OSPMaterial>
 {
 public:
-    using Managed::Managed;
+    using Object::Object;
 };
 
 class ObjMaterial : public Material

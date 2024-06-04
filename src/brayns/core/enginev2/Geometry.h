@@ -21,8 +21,11 @@
 
 #pragma once
 
+#include <optional>
+#include <variant>
+
 #include "Data.h"
-#include "Managed.h"
+#include "Object.h"
 #include "Volume.h"
 
 namespace brayns::experimental
@@ -33,55 +36,64 @@ public:
     using Managed::Managed;
 };
 
-class GeometricModel : public Managed<OSPGeometricModel>
+struct MeshSettings
 {
-public:
-    using Managed::Managed;
-
-    void setGeometry(const Geometry &geometry);
-    void setMaterial(std::uint32_t rendererIndex);
-    void setPrimitiveMaterials(SharedArray<std::uint32_t> rendererIndices);
-    void setPrimitiveColors(SharedArray<Color4> colors);
-    void setColor(const Color4 &color);
-    void removeColors();
-    void invertNormals(bool inverted);
-    void setId(std::uint32_t id);
+    Data1D<Vector3> positions;
+    std::optional<Data1D<Vector3>> normals = std::nullopt;
+    std::optional<Data1D<Color4>> colors = std::nullopt;
+    std::optional<Data1D<Vector2>> uvs = std::nullopt;
+    std::optional<Data1D<Index3>> indices = std::nullopt;
 };
+
+struct TriangleMeshSettings : MeshSettings
+{
+    std::optional<Data1D<Index3>> indices = std::nullopt;
+};
+
+struct QuadMeshSettings : MeshSettings
+{
+    std::optional<Data1D<Index4>> indices = std::nullopt;
+};
+
+void loadMeshParams(OSPGeometry handle, const TriangleMeshSettings &settings);
+void loadMeshParams(OSPGeometry handle, const QuadMeshSettings &settings);
 
 class Mesh : public Geometry
 {
 public:
-    static inline const std::string name = "mesh";
-
     using Geometry::Geometry;
 
-    void setVertexPositions(SharedArray<Vector3> positions);
-    void setVertexNormals(SharedArray<Vector3> normals);
-    void setVertexColors(SharedArray<Color4> colors);
-    void setTriangleIndices(SharedArray<Index3> indices);
-    void setQuadIndices(SharedArray<Index4> indices);
-    void setQuadSoup(bool quadSoup);
+    void setColors(const Data1D<Color4> &colors);
 };
+
+struct SphereSettings
+{
+    Data1D<Vector3> positions;
+    std::variant<float, Data1D<float>> radii;
+    std::optional<Data1D<Vector2>> uvs = std::nullopt;
+};
+
+struct DiscSettings : SphereSettings
+{
+    std::optional<Data1D<Vector3>> normals;
+};
+
+void loadSphereParams(OSPGeometry handle, const SphereSettings &settings);
+void loadSphereParams(OSPGeometry handle, const DiscSettings &settings);
 
 class Spheres : public Geometry
 {
 public:
-    static inline const std::string name = "sphere";
-
     using Geometry::Geometry;
 
-    void setPositions(SharedArray<Vector3> positions);
-    void setRadii(SharedArray<float> radii);
+    void setRadii(const Data1D<float> &radii);
     void setRadius(float radius);
 };
-
-using PositionRadius = Vector4;
 
 enum class CurveType
 {
     Flat = OSP_FLAT,
     Round = OSP_ROUND,
-    Disjoint = OSP_DISJOINT,
 };
 
 enum class CurveBasis
@@ -89,64 +101,89 @@ enum class CurveBasis
     Linear = OSP_LINEAR,
     Bezier = OSP_BEZIER,
     Bspline = OSP_BSPLINE,
+    CatmullRom = OSP_CATMULL_ROM,
 };
+
+using PositionRadius = Vector4;
+
+struct CylinderSettings
+{
+    Data1D<PositionRadius> samples;
+    Data1D<std::uint32_t> indices;
+    std::optional<Data1D<Color4>> colors = std::nullopt;
+    std::optional<Data1D<Vector2>> uvs = std::nullopt;
+};
+
+struct CurveSettings : CylinderSettings
+{
+    CurveType type = CurveType::Round;
+    CurveBasis basis = CurveBasis::Linear;
+};
+
+struct RibbonCurveSettings : CylinderSettings
+{
+    CurveBasis basis = CurveBasis::Bezier;
+    Data1D<Vector3> normals;
+};
+
+struct HermiteCurveSettings : CylinderSettings
+{
+    CurveType type = CurveType::Round;
+    Data1D<Vector4> tangents;
+};
+
+void loadCurveParams(OSPGeometry handle, const CylinderSettings &settings);
+void loadCurveParams(OSPGeometry handle, const CurveSettings &settings);
+void loadCurveParams(OSPGeometry handle, const RibbonCurveSettings &settings);
+void loadCurveParams(OSPGeometry handle, const HermiteCurveSettings &settings);
 
 class Curve : public Geometry
 {
 public:
-    static inline const std::string name = "curve";
-
     using Geometry::Geometry;
 
-    void setVertexPositionsAndRadii(SharedArray<PositionRadius> positionsRadii);
-    void setVertexColors(SharedArray<Color4> colors);
-    void setIndices(SharedArray<std::uint32_t> indices);
-    void setType(CurveType type);
-    void setBasis(CurveBasis basis);
+    void setSamples(const Data1D<PositionRadius> &samples);
+    void setColors(const Data1D<Color4> &colors);
 };
+
+struct BoxSettings
+{
+    Data1D<Box3> boxes;
+};
+
+void loadBoxParams(OSPGeometry handle, const BoxSettings &settings);
 
 class Boxes : public Geometry
 {
 public:
-    static inline const std::string name = "box";
-
     using Geometry::Geometry;
-
-    void setBoxes(SharedArray<Box3> boxes);
 };
+
+struct PlaneSettings
+{
+    Data1D<Vector4> coefficients;
+    std::optional<Data1D<Box3>> bounds;
+};
+
+void loadPlaneParams(OSPGeometry handle, const PlaneSettings &settings);
 
 class Planes : public Geometry
 {
 public:
-    static inline const std::string name = "plane";
-
     using Geometry::Geometry;
-
-    void setCoefficients(SharedArray<Vector4> coefficients);
-    void setBounds(SharedArray<Box3> bounds);
 };
+
+struct IsosurfaceSettings
+{
+    Volume volume;
+    std::variant<float, Data1D<float>> isovalues;
+};
+
+void loadIsosurfaceParams(OSPGeometry handle, const IsosurfaceSettings &settings);
 
 class Isosurfaces : public Geometry
 {
 public:
-    static inline const std::string name = "isosurface";
-
     using Geometry::Geometry;
-
-    void setVolume(const Volume &volume);
-    void setIsovalues(SharedArray<float> values);
-    void setIsovalue(float value);
 };
-}
-
-namespace ospray
-{
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Geometry, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::GeometricModel, OSP_GEOMETRIC_MODEL)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Mesh, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Spheres, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Curve, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Boxes, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Planes, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Isosurfaces, OSP_GEOMETRY)
 }

@@ -28,25 +28,39 @@
 
 namespace brayns
 {
-using Index3 = rkcommon::math::vec3ui;
-using Index4 = rkcommon::math::vec4ui;
+template<typename T, int S>
+using Vector = rkcommon::math::vec_t<T, S>;
 
-using Size3 = rkcommon::math::vec3ul;
+using Index3 = Vector<std::uint32_t, 3>;
+using Index4 = Vector<std::uint32_t, 4>;
 
-using Vector2 = rkcommon::math::vec2f;
-using Vector3 = rkcommon::math::vec3f;
-using Vector4 = rkcommon::math::vec4f;
+using Size2 = Vector<std::size_t, 2>;
+using Size3 = Vector<std::size_t, 3>;
 
-using Box1 = rkcommon::math::box1f;
-using Box2 = rkcommon::math::box2f;
-using Box3 = rkcommon::math::box3f;
+using Vector2 = Vector<float, 2>;
+using Vector3 = Vector<float, 3>;
+using Vector4 = Vector<float, 4>;
 
 using Color3 = Vector3;
 using Color4 = Vector4;
 
 using Quaternion = rkcommon::math::quaternionf;
 
+template<typename T, int S>
+using Box = rkcommon::math::box_t<T, S>;
+
+using Box1 = Box<float, 1>;
+using Box2 = Box<float, 2>;
+using Box3 = Box<float, 3>;
+
+using Affine2 = rkcommon::math::AffineSpace2f;
 using Affine3 = rkcommon::math::AffineSpace3f;
+
+template<typename T, int S>
+T reduceMultiply(const Vector<T, S> &value)
+{
+    return rkcommon::math::reduce_mul(value);
+}
 
 struct Transform
 {

@@ -22,8 +22,8 @@
 #pragma once
 
 #include "Data.h"
-#include "Managed.h"
 #include "Material.h"
+#include "Object.h"
 
 namespace brayns::experimental
 {
@@ -36,10 +36,10 @@ enum class PixelFilter
     BlackmanHarris = OSP_PIXELFILTER_BLACKMAN_HARRIS,
 };
 
-class Renderer : public Managed<OSPRenderer>
+class Renderer : public Object<OSPRenderer>
 {
 public:
-    using Managed::Managed;
+    using Object::Object;
 
     void setPixelSamples(std::size_t count);
     void setMaxRayRecursion(std::size_t depth);

@@ -24,16 +24,16 @@
 #include "Data.h"
 #include "Geometry.h"
 #include "Light.h"
-#include "Managed.h"
+#include "Object.h"
 #include "Volume.h"
 
 namespace brayns::experimental
 {
-class Group : public Managed<OSPGroup>
+class Group : public Object<OSPGroup>
 {
 public:
-    using Managed::getBounds;
-    using Managed::Managed;
+    using Object::getBounds;
+    using Object::Object;
 
     void setVolumes(SharedArray<VolumetricModel> models);
     void setGeometries(SharedArray<GeometricModel> models);
@@ -41,22 +41,22 @@ public:
     void setLights(SharedArray<Light> lights);
 };
 
-class Instance : public Managed<OSPInstance>
+class Instance : public Object<OSPInstance>
 {
 public:
-    using Managed::getBounds;
-    using Managed::Managed;
+    using Object::getBounds;
+    using Object::Object;
 
     void setGroup(const Group &group);
     void setTransform(const Affine3 &transform);
     void setId(std::uint32_t id);
 };
 
-class World : public Managed<OSPWorld>
+class World : public Object<OSPWorld>
 {
 public:
-    using Managed::getBounds;
-    using Managed::Managed;
+    using Object::getBounds;
+    using Object::Object;
 
     void setInstances(SharedArray<Instance> instances);
 };

@@ -43,6 +43,10 @@ class Device
 public:
     explicit Device(OSPDevice handle);
 
+    OSPDevice getHandle() const;
+
+    Spheres createSpheres(const SphereSettings &settings);
+
     GeometricModel createGeometricModel();
     VolumetricModel createVolumetricModel();
     Group createGroup();
@@ -123,4 +127,6 @@ private:
 
     std::unique_ptr<osp::Device, Deleter> _handle;
 };
+
+Device createDevice(Logger &logger);
 }

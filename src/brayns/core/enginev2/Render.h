@@ -23,7 +23,7 @@
 
 #include "Camera.h"
 #include "Framebuffer.h"
-#include "Managed.h"
+#include "Object.h"
 #include "Renderer.h"
 #include "World.h"
 
@@ -37,10 +37,10 @@ struct RenderSettings
     World world;
 };
 
-class RenderTask : public Managed<OSPFuture>
+class RenderTask : public Object<OSPFuture>
 {
 public:
-    using Managed::Managed;
+    using Object::Object;
 
     bool isReady() const;
     float getProgress() const;

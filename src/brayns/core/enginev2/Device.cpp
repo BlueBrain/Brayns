@@ -85,5 +85,50 @@ RenderTask Device::render(const RenderSettings &settings)
 void Device::Deleter::operator()(OSPDevice device) const
 {
     ospDeviceRelease(device);
+    ospShutdown();
+}
+
+Device createDevice(Logger &logger)
+{
+    auto error = ospLoadModule("cpu");
+
+    if (error != OSP_NO_ERROR)
+    {
+        auto message = fmt::format("Failed to load OSPRay CPU module (code = {})", static_cast<int>(error));
+        throw std::runtime_error(message);
+    }
+
+    auto currentDevice = ospGetCurrentDevice();
+    if (currentDevice != nullptr)
+    {
+        throw std::invalid_argument("OSPRay only accepts one device created at a time");
+    }
+
+    auto device = ospNewDevice();
+
+    auto logLevel = OSP_LOG_DEBUG;
+    ospDeviceSetParam(device, "logLevel", OSP_UINT, &logLevel);
+
+    auto warnAsError = true;
+    ospDeviceSetParam(device, "warnAsError", OSP_BOOL, &warnAsError);
+
+    auto errorCallback = [](auto *userData, auto code, const auto *message)
+    {
+        auto &logger = *static_cast<Logger *>(userData);
+        logger.error("Device error (code = {}): {}", static_cast<int>(code), message);
+    };
+    ospDeviceSetErrorCallback(device, errorCallback, &logger);
+
+    auto statusCallback = [](auto *userData, const auto *message)
+    {
+        auto &logger = *static_cast<Logger *>(userData);
+        logger.debug("Device status: {}", message);
+    };
+    ospDeviceSetStatusCallback(device, statusCallback, &logger);
+
+    ospDeviceCommit(device);
+    ospSetCurrentDevice(device);
+
+    return Device(device);
 }
 }

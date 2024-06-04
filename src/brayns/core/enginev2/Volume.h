@@ -22,14 +22,14 @@
 #pragma once
 
 #include "Data.h"
-#include "Managed.h"
+#include "Object.h"
 
 namespace brayns::experimental
 {
-class TransferFunction : public Managed<OSPTransferFunction>
+class TransferFunction : public Object<OSPTransferFunction>
 {
 public:
-    using Managed::Managed;
+    using Object::Object;
 };
 
 class LinearTransferFunction : public TransferFunction
@@ -44,16 +44,16 @@ public:
     void setScalarRange(Box1 range);
 };
 
-class Volume : public Managed<OSPVolume>
+class Volume : public Object<OSPVolume>
 {
 public:
-    using Managed::Managed;
+    using Object::Object;
 };
 
-class VolumetricModel : public Managed<OSPVolumetricModel>
+class VolumetricModel : public Object<OSPVolumetricModel>
 {
 public:
-    using Managed::Managed;
+    using Object::Object;
 
     void setVolume(const Volume &volume);
     void setTransferFunction(const TransferFunction &function);

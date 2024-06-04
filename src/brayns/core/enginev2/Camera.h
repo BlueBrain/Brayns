@@ -21,45 +21,49 @@
 
 #pragma once
 
-#include "Managed.h"
+#include "Object.h"
 
 namespace brayns::experimental
 {
+struct CameraSettings
+{
+    Vector3 position = {0.0f, 0.0f, 0.0f};
+    Vector3 direction = {0.0f, 0.0f, 1.0f};
+    Vector3 up = {0.0f, 1.0f, 0.0f};
+    float nearClippingDistance = 1.0e-6F;
+};
+
 class Camera : public Managed<OSPCamera>
 {
 public:
     using Managed::Managed;
+};
 
-    void setTransform(const Affine3 &transform);
-    void setNearClip(float distance);
+struct PerspectiveCameraSettings : CameraSettings
+{
+    float fovy = 60.0f;
+    float aspectRatio = 1.0f;
 };
 
 class PerspectiveCamera : public Camera
 {
 public:
-    static inline const std::string name = "perspective";
-
     using Camera::Camera;
-
-    void setFovy(float degrees);
-    void setAspectRatio(float aspect);
 };
+
+void loadPerspectiveCameraParams(OSPCamera handle, const PerspectiveCameraSettings &settings);
+
+struct OrthographicCameraSettings : CameraSettings
+{
+    float height = 1.0f;
+    float aspectRatio = 1.0f;
+};
+
+void loadOrthographicCameraParams(OSPCamera handle, const OrthographicCameraSettings &settings);
 
 class OrthographicCamera : public Camera
 {
 public:
-    static inline const std::string name = "orthographic";
-
     using Camera::Camera;
-
-    void setHeight(float height);
-    void setAspectRatio(float aspect);
 };
-}
-
-namespace ospray
-{
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Camera, OSP_CAMERA)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::PerspectiveCamera, OSP_CAMERA)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::OrthographicCamera, OSP_CAMERA)
 }

@@ -21,14 +21,14 @@
 
 #pragma once
 
-#include "Managed.h"
+#include "Object.h"
 
 namespace brayns::experimental
 {
-class Light : public Managed<OSPLight>
+class Light : public Object<OSPLight>
 {
 public:
-    using Managed::Managed;
+    using Object::Object;
 
     void setColor(const Color3 &color);
     void setIntensity(float intensity);

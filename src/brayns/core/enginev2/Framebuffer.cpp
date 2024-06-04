@@ -23,6 +23,25 @@
 
 namespace brayns::experimental
 {
+void loadToneMapperParams(OSPImageOperation handle, const ToneMapperSettings &settings)
+{
+    setObjectParam(handle, "exposure", settings.exposure);
+    setObjectParam(handle, "contrast", settings.contrast);
+    setObjectParam(handle, "shoulder", settings.hightlightCompression);
+    setObjectParam(handle, "midIn", settings.midLevelAnchorInput);
+    setObjectParam(handle, "midOut", settings.midLevelAnchorOutput);
+    setObjectParam(handle, "acesColor", settings.aces);
+}
+
+void loadFramebufferParams(OSPFrameBuffer handle, const FramebufferSettings &settings)
+{
+    if (settings.operations)
+    {
+        setObjectParam(handle, "imageOperation", *settings.operations);
+    }
+    commitObject(handle);
+}
+
 const void *Framebuffer::map(FramebufferChannel channel)
 {
     auto handle = getHandle();
@@ -45,10 +64,5 @@ float Framebuffer::getVariance()
 {
     auto handle = getHandle();
     return ospGetVariance(handle);
-}
-
-void Framebuffer::setImageOperations(SharedArray<ImageOperation> operations)
-{
-    setParam("imageOperation", toSharedData(operations));
 }
 }
