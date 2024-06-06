@@ -21,75 +21,65 @@
 
 #include "Renderer.h"
 
+namespace
+{
+using brayns::Color4;
+using namespace brayns::experimental;
+
+void setBackgroundParam(OSPRenderer handle, const Color4 &color)
+{
+    setObjectParam(handle, "backgroundColor", color);
+}
+
+void setBackgroundParam(OSPRenderer handle, const Texture2D &texture)
+{
+    setObjectParam(handle, "map_backplate", texture);
+}
+
+void setBackground(OSPRenderer handle, const Background &background)
+{
+    std::visit([=](const auto &value) { setBackgroundParam(handle, value); }, background);
+}
+
+void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
+{
+    setObjectParam(handle, "pixelSamples", settings.pixelSamples);
+    setObjectParam(handle, "maxPathLength", settings.maxRayRecursionDepth);
+    setObjectParam(handle, "minContribution", settings.minSampleContribution);
+    setObjectParam(handle, "varianceThreshold", settings.varianceThreshold);
+    setBackground(handle, settings.background);
+    setObjectData(handle, "material", settings.materials);
+    setObjectParam(handle, "pixelFilter", static_cast<OSPPixelFilterType>(settings.pixelFilter));
+    commitObject(handle);
+}
+}
+
 namespace brayns::experimental
 {
-void Renderer::setPixelSamples(std::size_t count)
+void loadRendererParams(OSPRenderer handle, const AmbientOcclusionRendererSettings &settings)
 {
-    setParam("pixelSamples", static_cast<int>(count));
+    setRendererParams(handle, settings);
+    setObjectParam(handle, "aoSamples", settings.aoSamples);
+    setObjectParam(handle, "aoDistance", settings.aoDistance);
+    setObjectParam(handle, "aoIntensity", settings.aoIntensity);
+    setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
+    commitObject(handle);
 }
 
-void Renderer::setMaxRayRecursion(std::size_t depth)
+void loadRendererParams(OSPRenderer handle, const ScivisRendererSettings &settings)
 {
-    setParam("maxPathLength", static_cast<int>(depth));
+    setRendererParams(handle, settings);
+    setObjectParam(handle, "shadows", settings.shadows);
+    setObjectParam(handle, "aoSamples", settings.aoSamples);
+    setObjectParam(handle, "aoDistance", settings.aoDistance);
+    setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
+    setObjectParam(handle, "visibleLights", settings.showVisibleLights);
+    commitObject(handle);
 }
 
-void Renderer::setMinSampleContribution(float intensity)
+void loadRendererParams(OSPRenderer handle, const PathTracerSettings &settings)
 {
-    setParam("minContribution", intensity);
-}
-
-void Renderer::setVarianceThreshold(float threshold)
-{
-    setParam("varianceThreshold", threshold);
-}
-
-void Renderer::setBackgroundColor(const Color4 &color)
-{
-    setParam("backgroundColor", color);
-}
-
-void Renderer::setMaterials(SharedArray<Material> materials)
-{
-    setParam("material", toSharedData(materials));
-}
-
-void Renderer::setPixelFilter(PixelFilter filter)
-{
-    setParam("pixelFilter", static_cast<OSPPixelFilterType>(filter));
-}
-
-void AmbientOcclusionRenderer::setAoSamples(std::size_t count)
-{
-    setParam("aoSamples", static_cast<int>(count));
-}
-
-void AmbientOcclusionRenderer::setAoDistance(float distance)
-{
-    setParam("aoDistance", distance);
-}
-
-void AmbientOcclusionRenderer::setAoIntensity(float intensity)
-{
-    setParam("aoIntensity", intensity);
-}
-
-void ScivisRenderer::enableShadows(bool enable)
-{
-    setParam("shadows", enable);
-}
-
-void ScivisRenderer::setAoSamples(std::size_t count)
-{
-    setParam("aoSamples", static_cast<int>(count));
-}
-
-void ScivisRenderer::setAoDistance(float distance)
-{
-    setParam("aoDistance", distance);
-}
-
-void ScivisRenderer::showLights(bool show)
-{
-    setParam("visibleLights", show);
+    setRendererParams(handle, settings);
+    commitObject(handle);
 }
 }

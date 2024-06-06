@@ -61,7 +61,7 @@ OSPDataType getDataType(TextureFormat format)
     }
 }
 
-Data toSharedData2D(const void *data, const Size2 &size, TextureFormat format)
+Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
 {
     auto type = getDataType(format);
     auto handle = ospNewSharedData(data, type, size[0], 0, size[1]);
@@ -73,10 +73,13 @@ namespace brayns::experimental
 {
 void loadTextureParams(OSPTexture handle, const Texture2DSettings &settings)
 {
+    auto data = toSharedData2D(settings.data, settings.format, settings.size);
+
     setObjectParam(handle, "format", static_cast<OSPTextureFormat>(settings.format));
     setObjectParam(handle, "filter", static_cast<OSPTextureFilter>(settings.filter));
-    setObjectParam(handle, "data", toSharedData2D(settings.data, settings.size, settings.format));
+    setObjectParam(handle, "data", data);
     setObjectParam(handle, "wrapMode", static_cast<OSPTextureWrapMode>(settings.wrap));
+
     commitObject(handle);
 }
 

@@ -23,6 +23,7 @@
 
 #include "Data.h"
 #include "Object.h"
+#include "TransferFunction.h"
 #include "Volume.h"
 
 namespace brayns::experimental
@@ -68,8 +69,8 @@ public:
 struct Texture2DSettings
 {
     const void *data;
-    Size2 size;
     TextureFormat format;
+    Size2 size;
     TextureFilter filter = TextureFilter::Linear;
     TextureWrap wrap = TextureWrap::Repeat;
 };

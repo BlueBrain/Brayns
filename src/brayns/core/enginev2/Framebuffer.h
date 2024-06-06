@@ -76,6 +76,11 @@ FramebufferChannel operator|(FramebufferChannel left, FramebufferChannel right)
     return static_cast<FramebufferChannel>(static_cast<int>(left) | static_cast<int>(right));
 }
 
+FramebufferChannel &operator|=(FramebufferChannel &left, FramebufferChannel right)
+{
+    return left = left | right;
+}
+
 bool operator&(FramebufferChannel channels, FramebufferChannel channel)
 {
     return static_cast<int>(channels) & static_cast<int>(channel) != 0;

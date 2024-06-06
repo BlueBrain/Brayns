@@ -33,7 +33,7 @@ public:
     using Managed::Managed;
 };
 
-template<typename T>
+template<OsprayDataType T>
 Data toSharedData(std::span<T> items)
 {
     auto data = items.data();
@@ -43,13 +43,13 @@ Data toSharedData(std::span<T> items)
     return Data(handle);
 }
 
-template<typename T>
+template<OsprayDataType T>
 void setObjectData(OSPObject handle, const char *id, std::span<T> items)
 {
     setObjectParam(handle, id, toSharedData(items));
 }
 
-template<typename T>
+template<OsprayDataType T>
 void setObjectDataIfNotEmpty(OSPObject handle, const char *id, std::span<T> items)
 {
     if (items.empty())

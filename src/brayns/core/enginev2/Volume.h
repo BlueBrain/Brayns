@@ -21,43 +21,17 @@
 
 #pragma once
 
+#include <limits>
+
 #include "Data.h"
 #include "Object.h"
 
 namespace brayns::experimental
 {
-class TransferFunction : public Object<OSPTransferFunction>
+class Volume : public Managed<OSPVolume>
 {
 public:
-    using Object::Object;
-};
-
-class LinearTransferFunction : public TransferFunction
-{
-public:
-    static inline const std::string name = "piecewiseLinear";
-
-    using TransferFunction::TransferFunction;
-
-    void setColors(SharedArray<Color3> colors);
-    void setOpacities(SharedArray<float> opacities);
-    void setScalarRange(Box1 range);
-};
-
-class Volume : public Object<OSPVolume>
-{
-public:
-    using Object::Object;
-};
-
-class VolumetricModel : public Object<OSPVolumetricModel>
-{
-public:
-    using Object::Object;
-
-    void setVolume(const Volume &volume);
-    void setTransferFunction(const TransferFunction &function);
-    void setId(std::uint32_t id);
+    using Managed::Managed;
 };
 
 enum class VoxelDataType
@@ -70,19 +44,6 @@ enum class VoxelDataType
     Double = OSP_DOUBLE,
 };
 
-struct VolumeData
-{
-    const void *data;
-    VoxelDataType type;
-    Size3 size;
-};
-
-enum class VolumeStructure
-{
-    VertexCentered,
-    CellCentered,
-};
-
 enum class VolumeFilter
 {
     Nearest = OSP_VOLUME_FILTER_NEAREST,
@@ -90,26 +51,21 @@ enum class VolumeFilter
     Cubic = OSP_VOLUME_FILTER_CUBIC,
 };
 
-class StructuredRegularVolume : public Volume
+struct RegularVolumeSettings
+{
+    const void *data;
+    VoxelDataType voxelDataType;
+    Size3 size;
+    bool cellCentered = false;
+    VolumeFilter filter = VolumeFilter::Linear;
+    float background = std::numeric_limits<float>::quiet_NaN();
+};
+
+void loadVolumeParams(OSPVolume handle, const RegularVolumeSettings &settings);
+
+class RegularVolume : public Volume
 {
 public:
-    static inline const std::string name = "structuredRegular";
-
     using Volume::Volume;
-
-    void setData(const VolumeData &data);
-    void setStructure(VolumeStructure structure);
-    void setOrigin(const Vector3 &origin);
-    void setSpacing(const Vector3 &spacing);
-    void setFilter(VolumeFilter filter);
 };
-}
-
-namespace ospray
-{
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::TransferFunction, OSP_TRANSFER_FUNCTION)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::LinearTransferFunction, OSP_TRANSFER_FUNCTION)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Volume, OSP_VOLUME)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::VolumetricModel, OSP_VOLUMETRIC_MODEL)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::StructuredRegularVolume, OSP_VOLUME)
 }

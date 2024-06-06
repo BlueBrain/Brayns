@@ -19,32 +19,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#pragma once
+
+#include "Object.h"
+#include "TransferFunction.h"
 #include "Volume.h"
-
-namespace
-{
-using brayns::Size3;
-using namespace brayns::experimental;
-
-Data toSharedData3D(const void *data, VoxelDataType voxelDataType, const Size3 &size)
-{
-    auto type = static_cast<OSPDataType>(voxelDataType);
-    auto handle = ospNewSharedData(data, type, size[0], 0, size[1], 0, size[2]);
-    return Data(handle);
-}
-}
 
 namespace brayns::experimental
 {
-void loadVolumeParams(OSPVolume handle, const RegularVolumeSettings &settings)
+struct VolumetricModelSettings
 {
-    auto data = toSharedData3D(settings.data, settings.voxelDataType, settings.size);
+    Volume volume;
+    TransferFunction transferFunction;
+    float densityScale = 1.0F;
+    float anisotropy = 0.0F;
+    std::uint32_t id = std::uint32_t(-1);
+};
 
-    setObjectParam(handle, "data", data);
-    setObjectParam(handle, "cellCentered", settings.cellCentered);
-    setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
-    setObjectParam(handle, "background", settings.background);
+void loadVolumetricModelParams(OSPVolumetricModel handle, const VolumetricModelSettings &settings);
 
-    commitObject(handle);
-}
+class VolumetricModel : public Managed<OSPVolumetricModel>
+{
+public:
+    using Managed::Managed;
+};
 }

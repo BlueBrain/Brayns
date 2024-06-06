@@ -22,49 +22,60 @@
 #pragma once
 
 #include "Data.h"
-#include "Geometry.h"
+#include "GeometricModel.h"
 #include "Light.h"
 #include "Object.h"
-#include "Volume.h"
+#include "VolumetricModel.h"
 
 namespace brayns::experimental
 {
-class Group : public Object<OSPGroup>
+struct GroupSettings
 {
-public:
-    using Object::getBounds;
-    using Object::Object;
-
-    void setVolumes(SharedArray<VolumetricModel> models);
-    void setGeometries(SharedArray<GeometricModel> models);
-    void setClippingGeometries(SharedArray<GeometricModel> models);
-    void setLights(SharedArray<Light> lights);
+    std::span<GeometricModel> geometries = {};
+    std::span<VolumetricModel> volumes = {};
+    std::span<ClippingModel> clippingGeometries = {};
+    std::span<Light> lights = {};
 };
 
-class Instance : public Object<OSPInstance>
+void loadGroupParams(OSPGroup handle, const GroupSettings &settings);
+
+class Group : public Managed<OSPGroup>
 {
 public:
-    using Object::getBounds;
-    using Object::Object;
+    using Managed::Managed;
 
-    void setGroup(const Group &group);
-    void setTransform(const Affine3 &transform);
-    void setId(std::uint32_t id);
+    Box3 getBounds() const;
 };
 
-class World : public Object<OSPWorld>
+struct InstanceSettings
+{
+    Group group;
+    Transform transform;
+    std::uint32_t id = std::uint32_t(-1);
+};
+
+void loadInstanceParams(OSPInstance handle, const InstanceSettings &settings);
+
+class Instance : public Managed<OSPInstance>
 {
 public:
-    using Object::getBounds;
-    using Object::Object;
+    using Managed::Managed;
 
-    void setInstances(SharedArray<Instance> instances);
+    Box3 getBounds() const;
 };
-}
 
-namespace ospray
+struct WorldSettings
 {
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Group, OSP_GROUP)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Instance, OSP_INSTANCE)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::World, OSP_WORLD)
+    std::span<Instance> instances;
+};
+
+void loadWorldParams(OSPWorld handle, const WorldSettings &settings);
+
+class World : public Managed<OSPWorld>
+{
+public:
+    using Managed::Managed;
+
+    Box3 getBounds() const;
+};
 }

@@ -23,43 +23,44 @@
 
 namespace brayns::experimental
 {
-void Group::setVolumes(SharedArray<VolumetricModel> models)
+void loadGroupParams(OSPGroup handle, const GroupSettings &settings)
 {
-    setParam("volume", toSharedData(models));
+    setObjectDataIfNotEmpty(handle, "geometry", settings.geometries);
+    setObjectDataIfNotEmpty(handle, "volume", settings.volumes);
+    setObjectDataIfNotEmpty(handle, "clippingGeometry", settings.clippingGeometries);
+    setObjectDataIfNotEmpty(handle, "light", settings.lights);
+    commitObject(handle);
 }
 
-void Group::setGeometries(SharedArray<GeometricModel> models)
+Box3 Group::getBounds() const
 {
-    setParam("geometry", toSharedData(models));
+    auto handle = getHandle();
+    return getObjectBounds(handle);
 }
 
-void Group::setClippingGeometries(SharedArray<GeometricModel> models)
+void loadInstanceParams(OSPInstance handle, const InstanceSettings &settings)
 {
-    setParam("clippingGeometry", toSharedData(models));
+    setObjectParam(handle, "group", settings.group);
+    setObjectParam(handle, "transform", toAffine(settings.transform));
+    setObjectParam(handle, "id", settings.id);
+    commitObject(handle);
 }
 
-void Group::setLights(SharedArray<Light> lights)
+Box3 Instance::getBounds() const
 {
-    setParam("light", toSharedData(lights));
+    auto handle = getHandle();
+    return getObjectBounds(handle);
 }
 
-void Instance::setGroup(const Group &group)
+void loadWorldParams(OSPWorld handle, const WorldSettings &settings)
 {
-    setParam("group", group.getHandle());
+    setObjectData(handle, "instance", settings.instances);
+    commitObject(handle);
 }
 
-void Instance::setTransform(const Affine3 &transform)
+Box3 World::getBounds() const
 {
-    setParam("transform", transform);
-}
-
-void Instance::setId(std::uint32_t id)
-{
-    setParam("id", id);
-}
-
-void World::setInstances(SharedArray<Instance> instances)
-{
-    setParam("instance", toSharedData(instances));
+    auto handle = getHandle();
+    return getObjectBounds(handle);
 }
 }

@@ -49,7 +49,7 @@ using Quaternion = rkcommon::math::quaternionf;
 template<typename T, int S>
 using Box = rkcommon::math::box_t<T, S>;
 
-using Box1 = Box<float, 1>;
+using Box1 = rkcommon::math::box1f;
 using Box2 = Box<float, 2>;
 using Box3 = Box<float, 3>;
 
@@ -77,17 +77,5 @@ inline Affine3 toAffine(const Transform &transform)
     auto rotation = rkcommon::math::LinearSpace3f(transform.rotation);
     auto scale = rkcommon::math::LinearSpace3f::scale(transform.scale);
     return Affine3(rotation * scale, translation);
-}
-
-template<typename T>
-T identity()
-{
-    return T(rkcommon::math::OneTy());
-}
-
-template<typename T>
-T zeros()
-{
-    return T(rkcommon::math::ZeroTy());
 }
 }

@@ -37,14 +37,27 @@ struct RenderSettings
     World world;
 };
 
-class RenderTask : public Object<OSPFuture>
+class RenderTask : public Managed<OSPFuture>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 
     bool isReady() const;
     float getProgress() const;
     void cancel();
     float waitAndGetDuration();
+};
+
+struct PickSettings : RenderSettings
+{
+    Vector2 normalizedScreenPosition;
+};
+
+struct PickResult
+{
+    Vector3 worldPosition;
+    Instance instance;
+    GeometricModel model;
+    std::uint32_t primitiveIndex;
 };
 }
