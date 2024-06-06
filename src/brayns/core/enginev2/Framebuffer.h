@@ -21,8 +21,6 @@
 
 #pragma once
 
-#include <optional>
-
 #include "Data.h"
 #include "Object.h"
 
@@ -36,12 +34,12 @@ public:
 
 struct ToneMapperSettings
 {
-    float exposure = 1.0;
-    float contrast = 1.6773;
-    float hightlightCompression = 0.9714;
-    float midLevelAnchorInput = 0.18;
-    float midLevelAnchorOutput = 0.18;
-    float maxHdr = 11.0785;
+    float exposure = 1.0F;
+    float contrast = 1.6773F;
+    float hightlightCompression = 0.9714F;
+    float midLevelAnchorInput = 0.18F;
+    float midLevelAnchorOutput = 0.18F;
+    float maxHdr = 11.0785F;
     bool aces = true;
 };
 
@@ -57,7 +55,7 @@ enum class FramebufferFormat
 {
     Rgba8 = OSP_FB_RGBA8,
     Srgba8 = OSP_FB_SRGBA,
-    Rgba32f = OSP_FB_RGBA32F,
+    Rgba32F = OSP_FB_RGBA32F,
 };
 
 enum class FramebufferChannel
@@ -73,13 +71,23 @@ enum class FramebufferChannel
     InstanceId = OSP_FB_ID_INSTANCE,
 };
 
+FramebufferChannel operator|(FramebufferChannel left, FramebufferChannel right)
+{
+    return static_cast<FramebufferChannel>(static_cast<int>(left) | static_cast<int>(right));
+}
+
+bool operator&(FramebufferChannel channels, FramebufferChannel channel)
+{
+    return static_cast<int>(channels) & static_cast<int>(channel) != 0;
+}
+
 struct FramebufferSettings
 {
     std::size_t width;
     std::size_t height;
     FramebufferFormat format = FramebufferFormat::Srgba8;
-    std::vector<FramebufferChannel> channels = {FramebufferChannel::Color};
-    std::optional<Data1D<ImageOperation>> operations = std::nullopt;
+    FramebufferChannel channels = FramebufferChannel::Color;
+    std::span<ImageOperation> operations = {};
 };
 
 void loadFramebufferParams(OSPFrameBuffer handle, const FramebufferSettings &settings);

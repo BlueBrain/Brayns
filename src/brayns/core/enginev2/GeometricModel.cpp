@@ -28,37 +28,9 @@ using namespace brayns::experimental;
 
 void setMaterialParam(OSPGeometricModel handle, const PrimitiveMaterials &materials)
 {
-    std::visit([=](const auto &value) { setObjectParam(handle, "material", value); }, materials);
-}
-
-void setColorParam(OSPGeometricModel handle, std::monostate)
-{
-    removeObjectParam(handle, "color");
-}
-
-void setColorParam(OSPGeometricModel handle, const Data1D<Color4> &colors)
-{
-    setObjectParam(handle, "color", colors);
-}
-
-void setColorParam(OSPGeometricModel handle, const Color4 &color)
-{
-    setObjectParam(handle, "color", color);
-}
-
-void setColorParams(OSPGeometricModel handle, const PrimitiveColors &colors)
-{
-    std::visit([&](const auto &value) { setColorParam(handle, value); }, colors);
-}
-
-void setIndicesParam(OSPGeometricModel handle, const MaterialAndColorIndices &indices)
-{
-    if (!indices)
-    {
-        removeObjectParam(handle, "index");
-        return;
-    }
-    setObjectParam(handle, "index", *indices);
+    setObjectData(handle, "material", materials.rendererIndices);
+    setObjectDataIfNotEmpty(handle, "color", materials.colors);
+    setObjectDataIfNotEmpty(handle, "index", materials.materialAndColorIndices);
 }
 }
 
@@ -68,8 +40,6 @@ void loadGeometricModelParams(OSPGeometricModel handle, const GeometricModelSett
 {
     setObjectParam(handle, "geometry", settings.geometry);
     setMaterialParam(handle, settings.materials);
-    setColorParams(handle, settings.colors);
-    setIndicesParam(handle, settings.indices);
     setObjectParam(handle, "invertNormals", settings.invertedNormals);
     setObjectParam(handle, "id", settings.id);
     commitObject(handle);
@@ -79,20 +49,6 @@ void GeometricModel::setMaterials(const PrimitiveMaterials &materials)
 {
     auto handle = getHandle();
     setMaterialParam(handle, materials);
-    commitObject(handle);
-}
-
-void GeometricModel::setColors(const PrimitiveColors &colors)
-{
-    auto handle = getHandle();
-    setColorParams(handle, colors);
-    commitObject(handle);
-}
-
-void GeometricModel::setIndices(const MaterialAndColorIndices &indices)
-{
-    auto handle = getHandle();
-    setIndicesParam(handle, indices);
     commitObject(handle);
 }
 

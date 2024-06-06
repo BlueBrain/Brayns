@@ -78,4 +78,16 @@ inline Affine3 toAffine(const Transform &transform)
     auto scale = rkcommon::math::LinearSpace3f::scale(transform.scale);
     return Affine3(rotation * scale, translation);
 }
+
+template<typename T>
+T identity()
+{
+    return T(rkcommon::math::OneTy());
+}
+
+template<typename T>
+T zeros()
+{
+    return T(rkcommon::math::ZeroTy());
+}
 }

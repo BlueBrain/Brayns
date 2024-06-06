@@ -31,14 +31,12 @@ void loadToneMapperParams(OSPImageOperation handle, const ToneMapperSettings &se
     setObjectParam(handle, "midIn", settings.midLevelAnchorInput);
     setObjectParam(handle, "midOut", settings.midLevelAnchorOutput);
     setObjectParam(handle, "acesColor", settings.aces);
+    commitObject(handle);
 }
 
 void loadFramebufferParams(OSPFrameBuffer handle, const FramebufferSettings &settings)
 {
-    if (settings.operations)
-    {
-        setObjectParam(handle, "imageOperation", *settings.operations);
-    }
+    setObjectData(handle, "imageOperation", settings.operations);
     commitObject(handle);
 }
 

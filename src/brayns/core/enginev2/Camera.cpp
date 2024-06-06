@@ -25,7 +25,7 @@ namespace
 {
 using namespace brayns::experimental;
 
-void loadCameraParams(OSPCamera handle, const CameraSettings &settings)
+void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 {
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "direction", settings.direction);
@@ -38,7 +38,7 @@ namespace brayns::experimental
 {
 void loadPerspectiveCameraParams(OSPCamera handle, const PerspectiveCameraSettings &settings)
 {
-    loadCameraParams(handle, settings);
+    setCameraParams(handle, settings);
     setObjectParam(handle, "fovy", settings.fovy);
     setObjectParam(handle, "aspect", settings.aspectRatio);
     commitObject(handle);
@@ -46,7 +46,7 @@ void loadPerspectiveCameraParams(OSPCamera handle, const PerspectiveCameraSettin
 
 void loadOrthographicCameraParams(OSPCamera handle, const OrthographicCameraSettings &settings)
 {
-    loadCameraParams(handle, settings);
+    setCameraParams(handle, settings);
     setObjectParam(handle, "height", settings.height);
     setObjectParam(handle, "aspect", settings.aspectRatio);
     commitObject(handle);

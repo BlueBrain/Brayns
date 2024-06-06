@@ -21,85 +21,60 @@
 
 #include "Light.h"
 
+namespace
+{
+using namespace brayns::experimental;
+
+void setLightParams(OSPLight handle, const LightSettings &settings)
+{
+    setObjectParam(handle, "color", settings.color);
+    setObjectParam(handle, "intensity", settings.intensity);
+    setObjectParam(handle, "visible", settings.visible);
+}
+}
+
 namespace brayns::experimental
 {
-void Light::setColor(const Color3 &color)
+void loadLightParams(OSPLight handle, const DistanceLightSettings &settings)
 {
-    setParam("color", color);
+    setLightParams(handle, settings);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "angularDiameter", settings.angularDiameter);
+    commitObject(handle);
 }
 
-void Light::setIntensity(float intensity)
+void loadLightParams(OSPLight handle, const SphereLightSettings &settings)
 {
-    setParam("intensity", intensity);
+    setLightParams(handle, settings);
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "radius", settings.radius);
+    commitObject(handle);
 }
 
-void Light::setVisible(bool visible)
+void loadLightParams(OSPLight handle, const SpotLightSettings &settings)
 {
-    setParam("visible", visible);
+    setLightParams(handle, settings);
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "openingAngle", settings.openingAngle);
+    setObjectParam(handle, "penumbraAngle", settings.penumbraAngle);
+    setObjectParam(handle, "radius", settings.outerRadius);
+    setObjectParam(handle, "innerRadius", settings.innerRadius);
+    commitObject(handle);
 }
 
-void DistantLight::setDirection(const Vector3 &direction)
+void loadLightParams(OSPLight handle, const QuadLightSettings &settings)
 {
-    setParam("direction", direction);
+    setLightParams(handle, settings);
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "edge1", settings.edge1);
+    setObjectParam(handle, "edge2", settings.edge2);
+    commitObject(handle);
 }
 
-void DistantLight::setAngularDiameter(float degrees)
+void loadLightParams(OSPLight handle, const AmbientLightSettings &settings)
 {
-    setParam("angularDiameter", degrees);
-}
-
-void SphereLight::setPosition(const Vector3 &position)
-{
-    setParam("position", position);
-}
-
-void SphereLight::setRadius(float radius)
-{
-    setParam("radius", radius);
-}
-
-void SpotLight::setPosition(const Vector3 &position)
-{
-    setParam("position", position);
-}
-
-void SpotLight::setDirection(const Vector3 &direction)
-{
-    setParam("direction", direction);
-}
-
-void SpotLight::setOpeningAngle(float degrees)
-{
-    setParam("openingAngle", degrees);
-}
-
-void SpotLight::setPenumbraAngle(float degrees)
-{
-    setParam("penumbraAngle", degrees);
-}
-
-void SpotLight::setOuterRadius(float radius)
-{
-    setParam("radius", radius);
-}
-
-void SpotLight::setInnerRadius(float radius)
-{
-    setParam("innerRadius", radius);
-}
-
-void QuadLight::setPosition(const Vector3 &position)
-{
-    setParam("position", position);
-}
-
-void QuadLight::setEdge1(const Vector3 &edge)
-{
-    setParam("edge1", edge);
-}
-
-void QuadLight::setEdge2(const Vector3 &edge)
-{
-    setParam("edge2", edge);
+    setLightParams(handle, settings);
+    commitObject(handle);
 }
 }

@@ -21,27 +21,23 @@
 
 #pragma once
 
-#include <optional>
-#include <variant>
-
 #include "Data.h"
 #include "Geometry.h"
 #include "Object.h"
 
 namespace brayns::experimental
 {
-using RendererIndex = std::uint32_t;
-using PrimitiveMaterials = std::variant<RendererIndex, Data1D<RendererIndex>>;
-using PrimitiveColors = std::variant<std::monostate, Color4, Data1D<Color4>>;
-using UseGeometryColors = std::monostate;
-using MaterialAndColorIndices = std::optional<Data1D<std::uint8_t>>;
+struct PrimitiveMaterials
+{
+    std::span<std::uint32_t> rendererIndices;
+    std::span<Color4> colors = {};
+    std::span<std::uint8_t> materialAndColorIndices = {};
+};
 
 struct GeometricModelSettings
 {
     Geometry geometry;
-    PrimitiveMaterials materials = RendererIndex(0);
-    PrimitiveColors colors = UseGeometryColors();
-    MaterialAndColorIndices indices = std::nullopt;
+    PrimitiveMaterials materials;
     bool invertedNormals = false;
     std::uint32_t id = std::uint32_t(-1);
 };
@@ -54,8 +50,6 @@ public:
     using Managed::Managed;
 
     void setMaterials(const PrimitiveMaterials &materials);
-    void setColors(const PrimitiveColors &colors);
-    void setIndices(const MaterialAndColorIndices &indices);
     void invertNormals(bool inverted);
 };
 

@@ -27,9 +27,9 @@ namespace brayns::experimental
 {
 struct CameraSettings
 {
-    Vector3 position = {0.0f, 0.0f, 0.0f};
-    Vector3 direction = {0.0f, 0.0f, 1.0f};
-    Vector3 up = {0.0f, 1.0f, 0.0f};
+    Vector3 position = {0.0F, 0.0F, 0.0F};
+    Vector3 direction = {0.0F, 0.0F, 1.0F};
+    Vector3 up = {0.0F, 1.0F, 0.0F};
     float nearClippingDistance = 1.0e-6F;
 };
 
@@ -41,8 +41,8 @@ public:
 
 struct PerspectiveCameraSettings : CameraSettings
 {
-    float fovy = 60.0f;
-    float aspectRatio = 1.0f;
+    float fovy = 60.0F;
+    float aspectRatio = 1.0F;
 };
 
 class PerspectiveCamera : public Camera
@@ -55,8 +55,8 @@ void loadPerspectiveCameraParams(OSPCamera handle, const PerspectiveCameraSettin
 
 struct OrthographicCameraSettings : CameraSettings
 {
-    float height = 1.0f;
-    float aspectRatio = 1.0f;
+    float height = 1.0F;
+    float aspectRatio = 1.0F;
 };
 
 void loadOrthographicCameraParams(OSPCamera handle, const OrthographicCameraSettings &settings);

@@ -21,9 +21,6 @@
 
 #pragma once
 
-#include <optional>
-#include <variant>
-
 #include "Data.h"
 #include "Object.h"
 #include "Volume.h"
@@ -38,24 +35,25 @@ public:
 
 struct MeshSettings
 {
-    Data1D<Vector3> positions;
-    std::optional<Data1D<Vector3>> normals = std::nullopt;
-    std::optional<Data1D<Color4>> colors = std::nullopt;
-    std::optional<Data1D<Vector2>> uvs = std::nullopt;
-    std::optional<Data1D<Index3>> indices = std::nullopt;
+    std::span<Vector3> positions;
+    std::span<Vector3> normals = {};
+    std::span<Color4> colors = {};
+    std::span<Vector2> uvs = {};
+    std::span<Index3> indices = {};
 };
 
 struct TriangleMeshSettings : MeshSettings
 {
-    std::optional<Data1D<Index3>> indices = std::nullopt;
-};
-
-struct QuadMeshSettings : MeshSettings
-{
-    std::optional<Data1D<Index4>> indices = std::nullopt;
+    std::span<Index3> indices = {};
 };
 
 void loadMeshParams(OSPGeometry handle, const TriangleMeshSettings &settings);
+
+struct QuadMeshSettings : MeshSettings
+{
+    std::span<Index4> indices = {};
+};
+
 void loadMeshParams(OSPGeometry handle, const QuadMeshSettings &settings);
 
 class Mesh : public Geometry
@@ -63,31 +61,55 @@ class Mesh : public Geometry
 public:
     using Geometry::Geometry;
 
-    void setColors(const Data1D<Color4> &colors);
+    void setColors(std::span<Color4> colors);
 };
 
 struct SphereSettings
 {
-    Data1D<Vector3> positions;
-    std::variant<float, Data1D<float>> radii;
-    std::optional<Data1D<Vector2>> uvs = std::nullopt;
-};
-
-struct DiscSettings : SphereSettings
-{
-    std::optional<Data1D<Vector3>> normals;
+    std::span<Vector3> positions;
+    std::span<float> radii;
+    std::span<Vector2> uvs = {};
 };
 
 void loadSphereParams(OSPGeometry handle, const SphereSettings &settings);
-void loadSphereParams(OSPGeometry handle, const DiscSettings &settings);
 
 class Spheres : public Geometry
 {
 public:
     using Geometry::Geometry;
+};
 
-    void setRadii(const Data1D<float> &radii);
-    void setRadius(float radius);
+struct DiscSettings : SphereSettings
+{
+    std::span<Vector3> normals;
+};
+
+void loadDiscParams(OSPGeometry handle, const DiscSettings &settings);
+
+class Discs : public Geometry
+{
+public:
+    using Geometry::Geometry;
+};
+
+using PositionRadius = Vector4;
+
+struct CylinderSettings
+{
+    std::span<PositionRadius> samples;
+    std::span<std::uint32_t> indices;
+    std::span<Color4> colors = {};
+    std::span<Vector2> uvs = {};
+};
+
+void loadCylinderParams(OSPGeometry handle, const CylinderSettings &settings);
+
+class Cylinders : public Geometry
+{
+public:
+    using Geometry::Geometry;
+
+    void setColors(std::span<Color4> colors);
 };
 
 enum class CurveType
@@ -104,51 +126,44 @@ enum class CurveBasis
     CatmullRom = OSP_CATMULL_ROM,
 };
 
-using PositionRadius = Vector4;
-
-struct CylinderSettings
-{
-    Data1D<PositionRadius> samples;
-    Data1D<std::uint32_t> indices;
-    std::optional<Data1D<Color4>> colors = std::nullopt;
-    std::optional<Data1D<Vector2>> uvs = std::nullopt;
-};
-
 struct CurveSettings : CylinderSettings
 {
     CurveType type = CurveType::Round;
     CurveBasis basis = CurveBasis::Linear;
 };
 
-struct RibbonCurveSettings : CylinderSettings
-{
-    CurveBasis basis = CurveBasis::Bezier;
-    Data1D<Vector3> normals;
-};
-
-struct HermiteCurveSettings : CylinderSettings
-{
-    CurveType type = CurveType::Round;
-    Data1D<Vector4> tangents;
-};
-
-void loadCurveParams(OSPGeometry handle, const CylinderSettings &settings);
 void loadCurveParams(OSPGeometry handle, const CurveSettings &settings);
-void loadCurveParams(OSPGeometry handle, const RibbonCurveSettings &settings);
-void loadCurveParams(OSPGeometry handle, const HermiteCurveSettings &settings);
 
-class Curve : public Geometry
+class Curve : public Cylinders
 {
 public:
-    using Geometry::Geometry;
+    using Cylinders::Cylinders;
+};
 
-    void setSamples(const Data1D<PositionRadius> &samples);
-    void setColors(const Data1D<Color4> &colors);
+enum class RibbonBasis
+{
+    Bezier = OSP_BEZIER,
+    Bspline = OSP_BSPLINE,
+    CatmullRom = OSP_CATMULL_ROM,
+};
+
+struct RibbonSettings : CylinderSettings
+{
+    RibbonBasis basis = RibbonBasis::Bezier;
+    std::span<Vector3> normals;
+};
+
+void loadRibbonParams(OSPGeometry handle, const RibbonSettings &settings);
+
+class Ribbon : public Cylinders
+{
+public:
+    using Cylinders::Cylinders;
 };
 
 struct BoxSettings
 {
-    Data1D<Box3> boxes;
+    std::span<Box3> boxes;
 };
 
 void loadBoxParams(OSPGeometry handle, const BoxSettings &settings);
@@ -161,8 +176,8 @@ public:
 
 struct PlaneSettings
 {
-    Data1D<Vector4> coefficients;
-    std::optional<Data1D<Box3>> bounds;
+    std::span<Vector4> coefficients;
+    std::span<Box3> bounds;
 };
 
 void loadPlaneParams(OSPGeometry handle, const PlaneSettings &settings);
@@ -176,7 +191,7 @@ public:
 struct IsosurfaceSettings
 {
     Volume volume;
-    std::variant<float, Data1D<float>> isovalues;
+    std::span<float> isovalues;
 };
 
 void loadIsosurfaceParams(OSPGeometry handle, const IsosurfaceSettings &settings);

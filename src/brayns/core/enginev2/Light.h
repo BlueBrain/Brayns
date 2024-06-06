@@ -25,80 +25,89 @@
 
 namespace brayns::experimental
 {
-class Light : public Object<OSPLight>
+struct LightSettings
+{
+    Color3 color = {1.0F, 1.0F, 1.0F};
+    float intensity = 1.0F;
+    bool visible = true;
+};
+
+class Light : public Managed<OSPLight>
 {
 public:
-    using Object::Object;
-
-    void setColor(const Color3 &color);
-    void setIntensity(float intensity);
-    void setVisible(bool visible);
+    using Managed::Managed;
 };
+
+struct DistanceLightSettings : LightSettings
+{
+    Vector3 direction = {0.0F, 0.0F, 1.0F};
+    float angularDiameter = 0.0F;
+};
+
+void loadLightParams(OSPLight handle, const DistanceLightSettings &settings);
 
 class DistantLight : public Light
 {
 public:
-    static inline const std::string name = "distant";
-
     using Light::Light;
-
-    void setDirection(const Vector3 &direction);
-    void setAngularDiameter(float degrees);
 };
+
+struct SphereLightSettings : LightSettings
+{
+    Vector3 position = {0.0F, 0.0F, 0.0F};
+    float radius = 0.0F;
+};
+
+void loadLightParams(OSPLight handle, const SphereLightSettings &settings);
 
 class SphereLight : public Light
 {
 public:
-    static inline const std::string name = "sphere";
-
     using Light::Light;
-
-    void setPosition(const Vector3 &position);
-    void setRadius(float radius);
 };
+
+struct SpotLightSettings : LightSettings
+{
+    Vector3 position = {0.0F, 0.0F, 0.0F};
+    Vector3 direction = {0.0F, 0.0F, 1.0F};
+    float openingAngle = 180.0F;
+    float penumbraAngle = 5.0F;
+    float outerRadius = 0.0F;
+    float innerRadius = 0.0F;
+};
+
+void loadLightParams(OSPLight handle, const SpotLightSettings &settings);
 
 class SpotLight : public Light
 {
 public:
-    static inline const std::string name = "spot";
-
     using Light::Light;
-
-    void setPosition(const Vector3 &position);
-    void setDirection(const Vector3 &direction);
-    void setOpeningAngle(float degrees);
-    void setPenumbraAngle(float degrees);
-    void setOuterRadius(float radius);
-    void setInnerRadius(float radius);
 };
+
+struct QuadLightSettings : LightSettings
+{
+    Vector3 position = {0.0F, 0.0F, 0.0F};
+    Vector3 edge1 = {1.0F, 0.0F, 0.0F};
+    Vector3 edge2 = {0.0F, 1.0F, 0.0F};
+};
+
+void loadLightParams(OSPLight handle, const QuadLightSettings &settings);
 
 class QuadLight : public Light
 {
 public:
-    static inline const std::string name = "quad";
-
     using Light::Light;
-
-    void setPosition(const Vector3 &position);
-    void setEdge1(const Vector3 &edge);
-    void setEdge2(const Vector3 &edge);
 };
+
+struct AmbientLightSettings : LightSettings
+{
+};
+
+void loadLightParams(OSPLight handle, const AmbientLightSettings &settings);
 
 class AmbientLight : public Light
 {
 public:
-    static inline const std::string name = "ambient";
-
     using Light::Light;
 };
-}
-
-namespace ospray
-{
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Light, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::DistantLight, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::SphereLight, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::SpotLight, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::QuadLight, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::AmbientLight, OSP_LIGHT)
 }

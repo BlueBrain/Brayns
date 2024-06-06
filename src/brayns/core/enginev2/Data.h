@@ -27,35 +27,36 @@
 
 namespace brayns::experimental
 {
-using DataType = OSPDataType;
-
-struct DataSettings
-{
-    DataType type;
-    Size3 itemCount;
-    const void *data;
-    void (*deleter)(const void *, const void *) = nullptr;
-};
-
 class Data : public Managed<OSPData>
 {
 public:
     using Managed::Managed;
 };
 
-template<typename ItemType, std::size_t DimensionCount>
-class DataND : public Data
+template<typename T>
+Data toSharedData(std::span<T> items)
 {
-public:
-    using Data::Data;
-};
+    auto data = items.data();
+    auto type = ospray::OSPTypeFor<T>::value;
+    auto size = items.size();
+    auto handle = ospNewSharedData(data, type, size);
+    return Data(handle);
+}
 
-template<typename ItemType>
-using Data1D = DataND<ItemType, 1>;
+template<typename T>
+void setObjectData(OSPObject handle, const char *id, std::span<T> items)
+{
+    setObjectParam(handle, id, toSharedData(items));
+}
 
-template<typename ItemType>
-using Data2D = DataND<ItemType, 2>;
-
-template<typename ItemType>
-using Data3D = DataND<ItemType, 3>;
+template<typename T>
+void setObjectDataIfNotEmpty(OSPObject handle, const char *id, std::span<T> items)
+{
+    if (items.empty())
+    {
+        removeObjectParam(handle, id);
+        return;
+    }
+    setObjectData(handle, id, items);
+}
 }

@@ -21,33 +21,103 @@
 
 #pragma once
 
+#include <variant>
+
 #include "Object.h"
+#include "Texture.h"
 
 namespace brayns::experimental
 {
-class Material : public Object<OSPMaterial>
+class Material : public Managed<OSPMaterial>
 {
 public:
-    using Object::Object;
+    using Managed::Managed;
 };
 
-class ObjMaterial : public Material
+struct MaterialTexture2D
+{
+    Texture2D value;
+    TextureTransform transform = {};
+};
+
+struct MaterialVolumeTexture
+{
+    VolumeTexture value;
+    Transform transform = {};
+};
+
+using MaterialTexture = std::variant<std::monostate, MaterialTexture2D, MaterialVolumeTexture>;
+
+struct AmbientOcclusionMaterialSettings
+{
+    Color3 diffuse = {0.8F, 0.8F, 0.8F};
+    MaterialTexture diffuseMap = {};
+    float opacity = 1.0F;
+};
+
+void loadMaterialParams(OSPMaterial handle, const AmbientOcclusionMaterialSettings &settings);
+
+class AmbientOcclusionMaterial : public Material
 {
 public:
-    static inline const std::string name = "obj";
-
     using Material::Material;
-
-    void setDiffuseColor(const Color3 &color);
-    void setSpecularColor(const Color3 &color);
-    void setShininess(float exponent);
-    void setOpacity(float opacity);
-    void setTransparencyFilter(const Color3 &color);
 };
-}
 
-namespace ospray
+struct ScivisMaterialSettings : AmbientOcclusionMaterialSettings
 {
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Material, OSP_MATERIAL)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ObjMaterial, OSP_MATERIAL)
+    Color3 specular = {0.0F, 0.0F, 0.0F};
+    float shininess = 10.0F;
+    Color3 transparencyFilter = {0.0F, 0.0F, 0.0F};
+};
+
+void loadMaterialParams(OSPMaterial handle, const ScivisMaterialSettings &settings);
+
+class ScivisMaterial : public Material
+{
+public:
+    using Material::Material;
+};
+
+struct PrincipledMaterialSettings
+{
+    Color3 baseColor = {0.8F, 0.8F, 0.8F};
+    MaterialTexture baseColorMap = {};
+    Color3 edgeColor = {1.0F, 1.0F, 1.0F};
+    float metallic = 0.0F;
+    float diffuse = 1.0F;
+    float specular = 1.0F;
+    float ior = 1.0F;
+    float transmission = 0.0F;
+    Color3 transmissionColor = {1.0F, 1.0F, 1.0F};
+    float transmissionDepth = 1.0F;
+    float roughness = 0.0F;
+    float anisotropy = 0.0F;
+    float rotation = 0.0F;
+    float normal = 1.0F;
+    MaterialTexture normalMap = {};
+    float baseNormal = 1.0F;
+    bool thin = false;
+    float thickness = 1.0F;
+    float backlight = 0.0F;
+    float coat = 0.0F;
+    float coatIor = 1.5F;
+    Color3 coatColor = {1.0F, 1.0F, 1.0F};
+    float coatThickness = 1.0F;
+    float coatRoughness = 0.0F;
+    float coatNormal = 1.0F;
+    float sheen = 0.0F;
+    Color3 sheenColor = {1.0F, 1.0F, 1.0F};
+    float sheenTint = 0.0F;
+    float sheenRoughness = 0.2F;
+    float opacity = 1.0F;
+    Color3 emissiveColor = {0.0F, 0.0F, 0.0F};
+};
+
+void loadMaterialParams(OSPMaterial handle, const PrincipledMaterialSettings &settings);
+
+class PrincipledMaterial : public Material
+{
+public:
+    using Material::Material;
+};
 }
