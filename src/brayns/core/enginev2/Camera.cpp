@@ -36,7 +36,7 @@ void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 
 namespace brayns::experimental
 {
-void loadPerspectiveCameraParams(OSPCamera handle, const PerspectiveCameraSettings &settings)
+void ObjectReflector<PerspectiveCamera>::loadParams(OSPCamera handle, const Settings &settings)
 {
     setCameraParams(handle, settings);
     setObjectParam(handle, "fovy", settings.fovy);
@@ -44,7 +44,7 @@ void loadPerspectiveCameraParams(OSPCamera handle, const PerspectiveCameraSettin
     commitObject(handle);
 }
 
-void loadOrthographicCameraParams(OSPCamera handle, const OrthographicCameraSettings &settings)
+void ObjectReflector<OrthographicCamera>::loadParams(OSPCamera handle, const Settings &settings)
 {
     setCameraParams(handle, settings);
     setObjectParam(handle, "height", settings.height);

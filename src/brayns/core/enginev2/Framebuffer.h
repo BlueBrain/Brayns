@@ -21,36 +21,14 @@
 
 #pragma once
 
+#include <vector>
+
 #include "Data.h"
+#include "ImageOperation.h"
 #include "Object.h"
 
 namespace brayns::experimental
 {
-class ImageOperation : public Managed<OSPImageOperation>
-{
-public:
-    using Managed::Managed;
-};
-
-struct ToneMapperSettings
-{
-    float exposure = 1.0F;
-    float contrast = 1.6773F;
-    float hightlightCompression = 0.9714F;
-    float midLevelAnchorInput = 0.18F;
-    float midLevelAnchorOutput = 0.18F;
-    float maxHdr = 11.0785F;
-    bool aces = true;
-};
-
-class ToneMapper : public ImageOperation
-{
-public:
-    using ImageOperation::ImageOperation;
-};
-
-void loadToneMapperParams(OSPImageOperation handle, const ToneMapperSettings &settings);
-
 enum class FramebufferFormat
 {
     Rgba8 = OSP_FB_RGBA8,
@@ -71,31 +49,14 @@ enum class FramebufferChannel
     InstanceId = OSP_FB_ID_INSTANCE,
 };
 
-FramebufferChannel operator|(FramebufferChannel left, FramebufferChannel right)
-{
-    return static_cast<FramebufferChannel>(static_cast<int>(left) | static_cast<int>(right));
-}
-
-FramebufferChannel &operator|=(FramebufferChannel &left, FramebufferChannel right)
-{
-    return left = left | right;
-}
-
-bool operator&(FramebufferChannel channels, FramebufferChannel channel)
-{
-    return static_cast<int>(channels) & static_cast<int>(channel) != 0;
-}
-
 struct FramebufferSettings
 {
     std::size_t width;
     std::size_t height;
     FramebufferFormat format = FramebufferFormat::Srgba8;
-    FramebufferChannel channels = FramebufferChannel::Color;
+    std::vector<FramebufferChannel> channels = {FramebufferChannel::Color};
     std::span<ImageOperation> operations = {};
 };
-
-void loadFramebufferParams(OSPFrameBuffer handle, const FramebufferSettings &settings);
 
 class Framebuffer : public Managed<OSPFrameBuffer>
 {
@@ -107,4 +68,7 @@ public:
     void resetAccumulation();
     float getVariance();
 };
+
+int getFramebufferChannels(std::span<FramebufferChannel> channels);
+void loadFramebufferParams(OSPFrameBuffer handle, const FramebufferSettings &settings);
 }

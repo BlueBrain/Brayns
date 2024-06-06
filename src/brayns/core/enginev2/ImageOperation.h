@@ -19,32 +19,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Volume.h"
+#pragma once
 
-namespace
-{
-using brayns::Size3;
-using namespace brayns::experimental;
-
-Data toSharedData3D(const void *data, VoxelDataType voxelDataType, const Size3 &size)
-{
-    auto type = static_cast<OSPDataType>(voxelDataType);
-    auto handle = ospNewSharedData(data, type, size[0], 0, size[1], 0, size[2]);
-    return Data(handle);
-}
-}
+#include "Data.h"
+#include "Object.h"
 
 namespace brayns::experimental
 {
-void ObjectReflector<RegularVolume>::loadParams(OSPVolume handle, const Settings &settings)
+class ImageOperation : public Managed<OSPImageOperation>
 {
-    auto data = toSharedData3D(settings.data, settings.voxelDataType, settings.size);
+public:
+    using Managed::Managed;
+};
 
-    setObjectParam(handle, "data", data);
-    setObjectParam(handle, "cellCentered", settings.cellCentered);
-    setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
-    setObjectParam(handle, "background", settings.background);
+struct ToneMapperSettings
+{
+    float exposure = 1.0F;
+    float contrast = 1.6773F;
+    float hightlightCompression = 0.9714F;
+    float midLevelAnchorInput = 0.18F;
+    float midLevelAnchorOutput = 0.18F;
+    float maxHdr = 11.0785F;
+    bool aces = true;
+};
 
-    commitObject(handle);
-}
+class ToneMapper : public ImageOperation
+{
+public:
+    using ImageOperation::ImageOperation;
+};
+
+template<>
+struct ObjectReflector<ToneMapper>
+{
+    using Settings = ToneMapperSettings;
+
+    static inline const std::string name = "tonemapper";
+
+    static void loadParams(OSPImageOperation handle, const Settings &settings);
+};
+
 }

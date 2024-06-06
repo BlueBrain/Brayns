@@ -61,11 +61,19 @@ struct RegularVolumeSettings
     float background = std::numeric_limits<float>::quiet_NaN();
 };
 
-void loadVolumeParams(OSPVolume handle, const RegularVolumeSettings &settings);
-
 class RegularVolume : public Volume
 {
 public:
     using Volume::Volume;
+};
+
+template<>
+struct ObjectReflector<RegularVolume>
+{
+    using Settings = RegularVolumeSettings;
+
+    static inline const std::string name = "structuredRegular";
+
+    static void loadParams(OSPVolume handle, const Settings &settings);
 };
 }

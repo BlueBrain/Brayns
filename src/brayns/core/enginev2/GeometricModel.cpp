@@ -36,15 +36,6 @@ void setMaterialParam(OSPGeometricModel handle, const PrimitiveMaterials &materi
 
 namespace brayns::experimental
 {
-void loadGeometricModelParams(OSPGeometricModel handle, const GeometricModelSettings &settings)
-{
-    setObjectParam(handle, "geometry", settings.geometry);
-    setMaterialParam(handle, settings.materials);
-    setObjectParam(handle, "invertNormals", settings.invertedNormals);
-    setObjectParam(handle, "id", settings.id);
-    commitObject(handle);
-}
-
 void GeometricModel::setMaterials(const PrimitiveMaterials &materials)
 {
     auto handle = getHandle();
@@ -59,18 +50,27 @@ void GeometricModel::invertNormals(bool invert)
     commitObject(handle);
 }
 
-void loadClippingModelParams(OSPGeometricModel handle, const ClippingModelSettings &settings)
+void ClippingModel::invertNormals(bool invert)
+{
+    auto handle = getHandle();
+    setObjectParam(handle, "invertNormals", invert);
+    commitObject(handle);
+}
+
+void loadGeometricModelParams(OSPGeometricModel handle, const GeometricModelSettings &settings)
 {
     setObjectParam(handle, "geometry", settings.geometry);
+    setMaterialParam(handle, settings.materials);
     setObjectParam(handle, "invertNormals", settings.invertedNormals);
     setObjectParam(handle, "id", settings.id);
     commitObject(handle);
 }
 
-void ClippingModel::invertNormals(bool invert)
+void loadClippingModelParams(OSPGeometricModel handle, const ClippingModelSettings &settings)
 {
-    auto handle = getHandle();
-    setObjectParam(handle, "invertNormals", invert);
+    setObjectParam(handle, "geometry", settings.geometry);
+    setObjectParam(handle, "invertNormals", settings.invertedNormals);
+    setObjectParam(handle, "id", settings.id);
     commitObject(handle);
 }
 }

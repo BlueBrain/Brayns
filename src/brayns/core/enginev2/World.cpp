@@ -23,6 +23,24 @@
 
 namespace brayns::experimental
 {
+Box3 Group::getBounds() const
+{
+    auto handle = getHandle();
+    return getObjectBounds(handle);
+}
+
+Box3 Instance::getBounds() const
+{
+    auto handle = getHandle();
+    return getObjectBounds(handle);
+}
+
+Box3 World::getBounds() const
+{
+    auto handle = getHandle();
+    return getObjectBounds(handle);
+}
+
 void loadGroupParams(OSPGroup handle, const GroupSettings &settings)
 {
     setObjectDataIfNotEmpty(handle, "geometry", settings.geometries);
@@ -30,12 +48,6 @@ void loadGroupParams(OSPGroup handle, const GroupSettings &settings)
     setObjectDataIfNotEmpty(handle, "clippingGeometry", settings.clippingGeometries);
     setObjectDataIfNotEmpty(handle, "light", settings.lights);
     commitObject(handle);
-}
-
-Box3 Group::getBounds() const
-{
-    auto handle = getHandle();
-    return getObjectBounds(handle);
 }
 
 void loadInstanceParams(OSPInstance handle, const InstanceSettings &settings)
@@ -46,21 +58,9 @@ void loadInstanceParams(OSPInstance handle, const InstanceSettings &settings)
     commitObject(handle);
 }
 
-Box3 Instance::getBounds() const
-{
-    auto handle = getHandle();
-    return getObjectBounds(handle);
-}
-
 void loadWorldParams(OSPWorld handle, const WorldSettings &settings)
 {
     setObjectData(handle, "instance", settings.instances);
     commitObject(handle);
-}
-
-Box3 World::getBounds() const
-{
-    auto handle = getHandle();
-    return getObjectBounds(handle);
 }
 }

@@ -23,7 +23,7 @@
 
 namespace brayns::experimental
 {
-void loadTransferFunctionParams(OSPTransferFunction handle, const LinearTransferFunctionSettings &settings)
+void ObjectReflector<LinearTransferFunction>::loadParams(OSPTransferFunction handle, const Settings &settings)
 {
     setObjectData(handle, "color", settings.colors);
     setObjectData(handle, "opacity", settings.opacities);

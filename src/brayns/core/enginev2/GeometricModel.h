@@ -42,8 +42,6 @@ struct GeometricModelSettings
     std::uint32_t id = std::uint32_t(-1);
 };
 
-void loadGeometricModelParams(OSPGeometricModel handle, const GeometricModelSettings &settings);
-
 class GeometricModel : public Managed<OSPGeometricModel>
 {
 public:
@@ -60,8 +58,6 @@ struct ClippingModelSettings
     std::uint32_t id = std::uint32_t(-1);
 };
 
-void loadClippingModelParams(OSPGeometricModel handle, const ClippingModelSettings &settings);
-
 class ClippingModel : public Managed<OSPGeometricModel>
 {
 public:
@@ -69,4 +65,7 @@ public:
 
     void invertNormals(bool inverted);
 };
+
+void loadGeometricModelParams(OSPGeometricModel handle, const GeometricModelSettings &settings);
+void loadClippingModelParams(OSPGeometricModel handle, const ClippingModelSettings &settings);
 }

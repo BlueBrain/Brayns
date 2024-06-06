@@ -35,7 +35,7 @@ void setLightParams(OSPLight handle, const LightSettings &settings)
 
 namespace brayns::experimental
 {
-void loadLightParams(OSPLight handle, const DistanceLightSettings &settings)
+void ObjectReflector<DistantLight>::loadParams(OSPLight handle, const Settings &settings)
 {
     setLightParams(handle, settings);
     setObjectParam(handle, "direction", settings.direction);
@@ -43,7 +43,7 @@ void loadLightParams(OSPLight handle, const DistanceLightSettings &settings)
     commitObject(handle);
 }
 
-void loadLightParams(OSPLight handle, const SphereLightSettings &settings)
+void ObjectReflector<SphereLight>::loadParams(OSPLight handle, const Settings &settings)
 {
     setLightParams(handle, settings);
     setObjectParam(handle, "position", settings.position);
@@ -51,7 +51,7 @@ void loadLightParams(OSPLight handle, const SphereLightSettings &settings)
     commitObject(handle);
 }
 
-void loadLightParams(OSPLight handle, const SpotLightSettings &settings)
+void ObjectReflector<SpotLight>::loadParams(OSPLight handle, const Settings &settings)
 {
     setLightParams(handle, settings);
     setObjectParam(handle, "position", settings.position);
@@ -63,7 +63,7 @@ void loadLightParams(OSPLight handle, const SpotLightSettings &settings)
     commitObject(handle);
 }
 
-void loadLightParams(OSPLight handle, const QuadLightSettings &settings)
+void ObjectReflector<QuadLight>::loadParams(OSPLight handle, const Settings &settings)
 {
     setLightParams(handle, settings);
     setObjectParam(handle, "position", settings.position);
@@ -72,7 +72,7 @@ void loadLightParams(OSPLight handle, const QuadLightSettings &settings)
     commitObject(handle);
 }
 
-void loadLightParams(OSPLight handle, const AmbientLightSettings &settings)
+void ObjectReflector<AmbientLight>::loadParams(OSPLight handle, const Settings &settings)
 {
     setLightParams(handle, settings);
     commitObject(handle);

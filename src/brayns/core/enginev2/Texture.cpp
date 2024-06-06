@@ -71,7 +71,7 @@ Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
 
 namespace brayns::experimental
 {
-void loadTextureParams(OSPTexture handle, const Texture2DSettings &settings)
+void ObjectReflector<Texture2D>::loadParams(OSPTexture handle, const Settings &settings)
 {
     auto data = toSharedData2D(settings.data, settings.format, settings.size);
 
@@ -83,7 +83,7 @@ void loadTextureParams(OSPTexture handle, const Texture2DSettings &settings)
     commitObject(handle);
 }
 
-void loadTextureParams(OSPTexture handle, const VolumeTextureSettings &settings)
+void ObjectReflector<VolumeTexture>::loadParams(OSPTexture handle, const Settings &settings)
 {
     setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "transferFunction", settings.transferFunction);

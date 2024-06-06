@@ -51,7 +51,15 @@ public:
     using Camera::Camera;
 };
 
-void loadPerspectiveCameraParams(OSPCamera handle, const PerspectiveCameraSettings &settings);
+template<>
+struct ObjectReflector<PerspectiveCamera>
+{
+    using Settings = PerspectiveCameraSettings;
+
+    static inline const std::string name = "perspective";
+
+    static void loadParams(OSPCamera handle, const Settings &settings);
+};
 
 struct OrthographicCameraSettings : CameraSettings
 {
@@ -59,11 +67,19 @@ struct OrthographicCameraSettings : CameraSettings
     float aspectRatio = 1.0F;
 };
 
-void loadOrthographicCameraParams(OSPCamera handle, const OrthographicCameraSettings &settings);
-
 class OrthographicCamera : public Camera
 {
 public:
     using Camera::Camera;
+};
+
+template<>
+struct ObjectReflector<OrthographicCamera>
+{
+    using Settings = OrthographicCameraSettings;
+
+    static inline const std::string name = "orthographic";
+
+    static void loadParams(OSPCamera handle, const Settings &settings);
 };
 }

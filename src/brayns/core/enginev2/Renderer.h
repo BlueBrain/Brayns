@@ -66,12 +66,20 @@ struct AmbientOcclusionRendererSettings : RendererSettings
     float volumeSamplingRate = 1.0F;
 };
 
-void loadRendererParams(OSPRenderer handle, const AmbientOcclusionRendererSettings &settings);
-
 class AmbientOcclusionRenderer : public Renderer
 {
 public:
     using Renderer::Renderer;
+};
+
+template<>
+struct ObjectReflector<AmbientOcclusionRenderer>
+{
+    using Settings = AmbientOcclusionRendererSettings;
+
+    static inline const std::string name = "ao";
+
+    static void loadParams(OSPRenderer handle, const Settings &settings);
 };
 
 struct ScivisRendererSettings : RendererSettings
@@ -83,12 +91,20 @@ struct ScivisRendererSettings : RendererSettings
     bool showVisibleLights = false;
 };
 
-void loadRendererParams(OSPRenderer handle, const ScivisRendererSettings &settings);
-
 class ScivisRenderer : public Renderer
 {
 public:
     using Renderer::Renderer;
+};
+
+template<>
+struct ObjectReflector<ScivisRenderer>
+{
+    using Settings = ScivisRendererSettings;
+
+    static inline const std::string name = "scivis";
+
+    static void loadParams(OSPRenderer handle, const Settings &settings);
 };
 
 struct PathTracerSettings : RendererSettings
@@ -101,5 +117,13 @@ public:
     using Renderer::Renderer;
 };
 
-void loadRendererParams(OSPRenderer handle, const PathTracerSettings &settings);
+template<>
+struct ObjectReflector<PathTracer>
+{
+    using Settings = PathTracerSettings;
+
+    static inline const std::string name = "pathtracer";
+
+    static void loadParams(OSPRenderer handle, const Settings &settings);
+};
 }

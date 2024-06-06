@@ -37,8 +37,6 @@ struct GroupSettings
     std::span<Light> lights = {};
 };
 
-void loadGroupParams(OSPGroup handle, const GroupSettings &settings);
-
 class Group : public Managed<OSPGroup>
 {
 public:
@@ -54,8 +52,6 @@ struct InstanceSettings
     std::uint32_t id = std::uint32_t(-1);
 };
 
-void loadInstanceParams(OSPInstance handle, const InstanceSettings &settings);
-
 class Instance : public Managed<OSPInstance>
 {
 public:
@@ -69,8 +65,6 @@ struct WorldSettings
     std::span<Instance> instances;
 };
 
-void loadWorldParams(OSPWorld handle, const WorldSettings &settings);
-
 class World : public Managed<OSPWorld>
 {
 public:
@@ -78,4 +72,8 @@ public:
 
     Box3 getBounds() const;
 };
+
+void loadGroupParams(OSPGroup handle, const GroupSettings &settings);
+void loadInstanceParams(OSPInstance handle, const InstanceSettings &settings);
+void loadWorldParams(OSPWorld handle, const WorldSettings &settings);
 }

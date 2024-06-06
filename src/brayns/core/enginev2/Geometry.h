@@ -42,26 +42,54 @@ struct MeshSettings
     std::span<Index3> indices = {};
 };
 
-struct TriangleMeshSettings : MeshSettings
-{
-    std::span<Index3> indices = {};
-};
-
-void loadMeshParams(OSPGeometry handle, const TriangleMeshSettings &settings);
-
-struct QuadMeshSettings : MeshSettings
-{
-    std::span<Index4> indices = {};
-};
-
-void loadMeshParams(OSPGeometry handle, const QuadMeshSettings &settings);
-
 class Mesh : public Geometry
 {
 public:
     using Geometry::Geometry;
 
     void setColors(std::span<Color4> colors);
+};
+
+struct TriangleMeshSettings : MeshSettings
+{
+    std::span<Index3> indices = {};
+};
+
+class TriangleMesh : public Mesh
+{
+public:
+    using Mesh::Mesh;
+};
+
+template<>
+struct ObjectReflector<TriangleMesh>
+{
+    using Settings = TriangleMeshSettings;
+
+    static inline const std::string name = "mesh";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
+};
+
+struct QuadMeshSettings : MeshSettings
+{
+    std::span<Index4> indices = {};
+};
+
+class QuadMesh : public Mesh
+{
+public:
+    using Mesh::Mesh;
+};
+
+template<>
+struct ObjectReflector<QuadMesh>
+{
+    using Settings = QuadMeshSettings;
+
+    static inline const std::string name = "mesh";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 
 struct SphereSettings
@@ -71,12 +99,20 @@ struct SphereSettings
     std::span<Vector2> uvs = {};
 };
 
-void loadSphereParams(OSPGeometry handle, const SphereSettings &settings);
-
 class Spheres : public Geometry
 {
 public:
     using Geometry::Geometry;
+};
+
+template<>
+struct ObjectReflector<Spheres>
+{
+    using Settings = SphereSettings;
+
+    static inline const std::string name = "sphere";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 
 struct DiscSettings : SphereSettings
@@ -84,12 +120,20 @@ struct DiscSettings : SphereSettings
     std::span<Vector3> normals;
 };
 
-void loadDiscParams(OSPGeometry handle, const DiscSettings &settings);
-
 class Discs : public Geometry
 {
 public:
     using Geometry::Geometry;
+};
+
+template<>
+struct ObjectReflector<Discs>
+{
+    using Settings = DiscSettings;
+
+    static inline const std::string name = "sphere";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 
 using PositionRadius = Vector4;
@@ -102,14 +146,22 @@ struct CylinderSettings
     std::span<Vector2> uvs = {};
 };
 
-void loadCylinderParams(OSPGeometry handle, const CylinderSettings &settings);
-
 class Cylinders : public Geometry
 {
 public:
     using Geometry::Geometry;
 
     void setColors(std::span<Color4> colors);
+};
+
+template<>
+struct ObjectReflector<Cylinders>
+{
+    using Settings = CylinderSettings;
+
+    static inline const std::string name = "curve";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 
 enum class CurveType
@@ -132,12 +184,20 @@ struct CurveSettings : CylinderSettings
     CurveBasis basis = CurveBasis::Linear;
 };
 
-void loadCurveParams(OSPGeometry handle, const CurveSettings &settings);
-
 class Curve : public Cylinders
 {
 public:
     using Cylinders::Cylinders;
+};
+
+template<>
+struct ObjectReflector<Curve>
+{
+    using Settings = CurveSettings;
+
+    static inline const std::string name = "curve";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 
 enum class RibbonBasis
@@ -153,12 +213,20 @@ struct RibbonSettings : CylinderSettings
     std::span<Vector3> normals;
 };
 
-void loadRibbonParams(OSPGeometry handle, const RibbonSettings &settings);
-
 class Ribbon : public Cylinders
 {
 public:
     using Cylinders::Cylinders;
+};
+
+template<>
+struct ObjectReflector<Ribbon>
+{
+    using Settings = RibbonSettings;
+
+    static inline const std::string name = "curve";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 
 struct BoxSettings
@@ -166,12 +234,20 @@ struct BoxSettings
     std::span<Box3> boxes;
 };
 
-void loadBoxParams(OSPGeometry handle, const BoxSettings &settings);
-
 class Boxes : public Geometry
 {
 public:
     using Geometry::Geometry;
+};
+
+template<>
+struct ObjectReflector<Boxes>
+{
+    using Settings = BoxSettings;
+
+    static inline const std::string name = "box";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 
 struct PlaneSettings
@@ -180,12 +256,20 @@ struct PlaneSettings
     std::span<Box3> bounds;
 };
 
-void loadPlaneParams(OSPGeometry handle, const PlaneSettings &settings);
-
 class Planes : public Geometry
 {
 public:
     using Geometry::Geometry;
+};
+
+template<>
+struct ObjectReflector<Planes>
+{
+    using Settings = PlaneSettings;
+
+    static inline const std::string name = "plane";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 
 struct IsosurfaceSettings
@@ -194,11 +278,19 @@ struct IsosurfaceSettings
     std::span<float> isovalues;
 };
 
-void loadIsosurfaceParams(OSPGeometry handle, const IsosurfaceSettings &settings);
-
 class Isosurfaces : public Geometry
 {
 public:
     using Geometry::Geometry;
+};
+
+template<>
+struct ObjectReflector<Isosurfaces>
+{
+    using Settings = IsosurfaceSettings;
+
+    static inline const std::string name = "isosurface";
+
+    static void loadParams(OSPGeometry handle, const Settings &settings);
 };
 }

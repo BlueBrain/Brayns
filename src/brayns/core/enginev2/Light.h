@@ -38,18 +38,26 @@ public:
     using Managed::Managed;
 };
 
-struct DistanceLightSettings : LightSettings
+struct DistantLightSettings : LightSettings
 {
     Vector3 direction = {0.0F, 0.0F, 1.0F};
     float angularDiameter = 0.0F;
 };
 
-void loadLightParams(OSPLight handle, const DistanceLightSettings &settings);
-
 class DistantLight : public Light
 {
 public:
     using Light::Light;
+};
+
+template<>
+struct ObjectReflector<DistantLight>
+{
+    using Settings = DistantLightSettings;
+
+    static inline const std::string name = "distant";
+
+    static void loadParams(OSPLight handle, const Settings &settings);
 };
 
 struct SphereLightSettings : LightSettings
@@ -58,12 +66,20 @@ struct SphereLightSettings : LightSettings
     float radius = 0.0F;
 };
 
-void loadLightParams(OSPLight handle, const SphereLightSettings &settings);
-
 class SphereLight : public Light
 {
 public:
     using Light::Light;
+};
+
+template<>
+struct ObjectReflector<SphereLight>
+{
+    using Settings = SphereLightSettings;
+
+    static inline const std::string name = "sphere";
+
+    static void loadParams(OSPLight handle, const Settings &settings);
 };
 
 struct SpotLightSettings : LightSettings
@@ -76,12 +92,20 @@ struct SpotLightSettings : LightSettings
     float innerRadius = 0.0F;
 };
 
-void loadLightParams(OSPLight handle, const SpotLightSettings &settings);
-
 class SpotLight : public Light
 {
 public:
     using Light::Light;
+};
+
+template<>
+struct ObjectReflector<SpotLight>
+{
+    using Settings = SpotLightSettings;
+
+    static inline const std::string name = "spot";
+
+    static void loadParams(OSPLight handle, const Settings &settings);
 };
 
 struct QuadLightSettings : LightSettings
@@ -91,23 +115,39 @@ struct QuadLightSettings : LightSettings
     Vector3 edge2 = {0.0F, 1.0F, 0.0F};
 };
 
-void loadLightParams(OSPLight handle, const QuadLightSettings &settings);
-
 class QuadLight : public Light
 {
 public:
     using Light::Light;
 };
 
+template<>
+struct ObjectReflector<QuadLight>
+{
+    using Settings = QuadLightSettings;
+
+    static inline const std::string name = "quad";
+
+    static void loadParams(OSPLight handle, const Settings &settings);
+};
+
 struct AmbientLightSettings : LightSettings
 {
 };
-
-void loadLightParams(OSPLight handle, const AmbientLightSettings &settings);
 
 class AmbientLight : public Light
 {
 public:
     using Light::Light;
+};
+
+template<>
+struct ObjectReflector<AmbientLight>
+{
+    using Settings = AmbientLightSettings;
+
+    static inline const std::string name = "ambient";
+
+    static void loadParams(OSPLight handle, const Settings &settings);
 };
 }

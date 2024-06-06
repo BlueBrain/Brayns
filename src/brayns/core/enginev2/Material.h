@@ -28,12 +28,6 @@
 
 namespace brayns::experimental
 {
-class Material : public Managed<OSPMaterial>
-{
-public:
-    using Managed::Managed;
-};
-
 struct MaterialTexture2D
 {
     Texture2D value;
@@ -48,6 +42,12 @@ struct MaterialVolumeTexture
 
 using MaterialTexture = std::variant<std::monostate, MaterialTexture2D, MaterialVolumeTexture>;
 
+class Material : public Managed<OSPMaterial>
+{
+public:
+    using Managed::Managed;
+};
+
 struct AmbientOcclusionMaterialSettings
 {
     Color3 diffuse = {0.8F, 0.8F, 0.8F};
@@ -55,12 +55,20 @@ struct AmbientOcclusionMaterialSettings
     float opacity = 1.0F;
 };
 
-void loadMaterialParams(OSPMaterial handle, const AmbientOcclusionMaterialSettings &settings);
-
 class AmbientOcclusionMaterial : public Material
 {
 public:
     using Material::Material;
+};
+
+template<>
+struct ObjectReflector<AmbientOcclusionMaterial>
+{
+    using Settings = AmbientOcclusionMaterialSettings;
+
+    static inline const std::string name = "obj";
+
+    static void loadParams(OSPMaterial handle, const Settings &settings);
 };
 
 struct ScivisMaterialSettings : AmbientOcclusionMaterialSettings
@@ -70,12 +78,20 @@ struct ScivisMaterialSettings : AmbientOcclusionMaterialSettings
     Color3 transparencyFilter = {0.0F, 0.0F, 0.0F};
 };
 
-void loadMaterialParams(OSPMaterial handle, const ScivisMaterialSettings &settings);
-
 class ScivisMaterial : public Material
 {
 public:
     using Material::Material;
+};
+
+template<>
+struct ObjectReflector<ScivisMaterial>
+{
+    using Settings = ScivisMaterialSettings;
+
+    static inline const std::string name = "obj";
+
+    static void loadParams(OSPMaterial handle, const Settings &settings);
 };
 
 struct PrincipledMaterialSettings
@@ -113,11 +129,19 @@ struct PrincipledMaterialSettings
     Color3 emissiveColor = {0.0F, 0.0F, 0.0F};
 };
 
-void loadMaterialParams(OSPMaterial handle, const PrincipledMaterialSettings &settings);
-
 class PrincipledMaterial : public Material
 {
 public:
     using Material::Material;
+};
+
+template<>
+struct ObjectReflector<PrincipledMaterial>
+{
+    using Settings = PrincipledMaterialSettings;
+
+    static inline const std::string name = "principled";
+
+    static void loadParams(OSPMaterial handle, const Settings &settings);
 };
 }

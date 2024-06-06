@@ -73,13 +73,13 @@ void setMaterialParams(OSPMaterial handle, const AmbientOcclusionMaterialSetting
 
 namespace brayns::experimental
 {
-void loadMaterialParams(OSPMaterial handle, const AmbientOcclusionMaterialSettings &settings)
+void ObjectReflector<AmbientOcclusionMaterial>::loadParams(OSPMaterial handle, const Settings &settings)
 {
     setMaterialParams(handle, settings);
     commitObject(handle);
 }
 
-void loadMaterialParams(OSPMaterial handle, const ScivisMaterialSettings &settings)
+void ObjectReflector<ScivisMaterial>::loadParams(OSPMaterial handle, const Settings &settings)
 {
     setMaterialParams(handle, settings);
     setObjectParam(handle, "ks", settings.specular);
@@ -88,7 +88,7 @@ void loadMaterialParams(OSPMaterial handle, const ScivisMaterialSettings &settin
     commitObject(handle);
 }
 
-void loadMaterialParams(OSPMaterial handle, const PrincipledMaterialSettings &settings)
+void ObjectReflector<PrincipledMaterial>::loadParams(OSPMaterial handle, const Settings &settings)
 {
     setObjectParam(handle, "baseColor", settings.baseColor);
     setTextureParam(handle, "map_baseColor", settings.baseColorMap);

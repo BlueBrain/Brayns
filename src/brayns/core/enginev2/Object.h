@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <concepts>
+#include <string>
 
 #include <ospray/ospray_cpp.h>
 #include <ospray/ospray_cpp/ext/rkcommon.h>
@@ -148,6 +149,27 @@ void setObjectParam(OSPObject handle, const char *id, const T &value)
     constexpr auto type = ospray::OSPTypeFor<T>::value;
     ospSetParam(handle, id, type, &value);
 }
+
+template<typename T>
+struct ObjectReflector
+{
+    using Settings = void;
+    using Handle = typename T::Handle;
+
+    static inline const std::string name = "";
+
+    static void loadParams(Handle handle, const Settings &settings)
+    {
+        (void)handle;
+        (void)settings;
+    }
+
+private:
+    template<typename U>
+    constexpr auto alwaysFalse = false;
+
+    static_assert(alwaysFalse<T>, "Unsupported device object");
+};
 }
 
 namespace ospray

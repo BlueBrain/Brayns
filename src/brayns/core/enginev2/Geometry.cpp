@@ -58,14 +58,14 @@ void Mesh::setColors(std::span<Color4> colors)
     commitObject(handle);
 }
 
-void loadMeshParams(OSPGeometry handle, const TriangleMeshSettings &settings)
+void ObjectReflector<TriangleMesh>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setMeshParams(handle, settings);
     setObjectDataIfNotEmpty(handle, "index", settings.indices);
     commitObject(handle);
 }
 
-void loadMeshParams(OSPGeometry handle, const QuadMeshSettings &settings)
+void ObjectReflector<QuadMesh>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setMeshParams(handle, settings);
 
@@ -81,13 +81,13 @@ void loadMeshParams(OSPGeometry handle, const QuadMeshSettings &settings)
     commitObject(handle);
 }
 
-void loadSphereParams(OSPGeometry handle, const SphereSettings &settings)
+void ObjectReflector<Spheres>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setSphereParams(handle, settings);
     commitObject(handle);
 }
 
-void loadDiscParams(OSPGeometry handle, const DiscSettings &settings)
+void ObjectReflector<Discs>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setSphereParams(handle, settings);
 
@@ -104,7 +104,7 @@ void loadDiscParams(OSPGeometry handle, const DiscSettings &settings)
     commitObject(handle);
 }
 
-void loadCylinderParams(OSPGeometry handle, const CylinderSettings &settings)
+void ObjectReflector<Cylinders>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setCurveParams(handle, settings);
     commitObject(handle);
@@ -117,7 +117,7 @@ void Cylinders::setColors(std::span<Color4> colors)
     commitObject(handle);
 }
 
-void loadCurveParams(OSPGeometry handle, const CurveSettings &settings)
+void ObjectReflector<Curve>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setCurveParams(handle, settings);
     setObjectParam(handle, "type", static_cast<OSPCurveType>(settings.type));
@@ -125,7 +125,7 @@ void loadCurveParams(OSPGeometry handle, const CurveSettings &settings)
     commitObject(handle);
 }
 
-void loadRibbonParams(OSPGeometry handle, const RibbonSettings &settings)
+void ObjectReflector<Ribbon>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setCurveParams(handle, settings);
     setObjectData(handle, "vertex.normal", settings.normals);
@@ -134,20 +134,20 @@ void loadRibbonParams(OSPGeometry handle, const RibbonSettings &settings)
     commitObject(handle);
 }
 
-void loadBoxParams(OSPGeometry handle, const BoxSettings &settings)
+void ObjectReflector<Boxes>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setObjectData(handle, "box", settings.boxes);
     commitObject(handle);
 }
 
-void loadPlaneParams(OSPGeometry handle, const PlaneSettings &settings)
+void ObjectReflector<Planes>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setObjectData(handle, "plane.coefficients", settings.coefficients);
     setObjectDataIfNotEmpty(handle, "plane.bounds", settings.bounds);
     commitObject(handle);
 }
 
-void loadIsosurfaceParams(OSPGeometry handle, const IsosurfaceSettings &settings)
+void ObjectReflector<Isosurfaces>::loadParams(OSPGeometry handle, const Settings &settings)
 {
     setObjectParam(handle, "volume", settings.volume);
     setObjectData(handle, "isovalue", settings.isovalues);

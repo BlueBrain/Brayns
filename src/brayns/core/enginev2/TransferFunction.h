@@ -39,11 +39,19 @@ struct LinearTransferFunctionSettings
     Box1 scalarRange;
 };
 
-void loadTransferFunctionParams(OSPTransferFunction handle, const LinearTransferFunctionSettings &settings);
-
 class LinearTransferFunction : public TransferFunction
 {
 public:
     using TransferFunction::TransferFunction;
+};
+
+template<>
+struct ObjectReflector<LinearTransferFunction>
+{
+    using Settings = LinearTransferFunctionSettings;
+
+    static inline const std::string name = "piecewiseLinear";
+
+    static void loadParams(OSPTransferFunction handle, const Settings &settings);
 };
 }

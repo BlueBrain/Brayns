@@ -28,33 +28,48 @@ Device::Device(OSPDevice handle):
 {
 }
 
-GeometricModel Device::createGeometricModel()
+OSPDevice Device::getHandle() const
+{
+    return _handle.get();
+}
+
+GeometricModel Device::createGeometricModel(const GeometricModelSettings &settings)
 {
     auto handle = ospNewGeometricModel();
+    throwIfNull(handle);
+    loadGeometricModelParams(handle, settings);
     return GeometricModel(handle);
 }
 
-VolumetricModel Device::createVolumetricModel()
+VolumetricModel Device::createVolumetricModel(const VolumetricModelSettings &settings)
 {
     auto handle = ospNewVolumetricModel();
+    throwIfNull(handle);
+    loadVolumetricModelParams(handle, settings);
     return VolumetricModel(handle);
 }
 
-Group Device::createGroup()
+Group Device::createGroup(const GroupSettings &settings)
 {
     auto handle = ospNewGroup();
+    throwIfNull(handle);
+    loadGroupParams(handle, settings);
     return Group(handle);
 }
 
-Instance Device::createInstance()
+Instance Device::createInstance(const InstanceSettings &settings)
 {
     auto handle = ospNewInstance();
+    throwIfNull(handle);
+    loadInstanceParams(handle, settings);
     return Instance(handle);
 }
 
-World Device::createWorld()
+World Device::createWorld(const WorldSettings &settings)
 {
     auto handle = ospNewWorld();
+    throwIfNull(handle);
+    loadWorldParams(handle, settings);
     return World(handle);
 }
 
@@ -64,11 +79,17 @@ Framebuffer Device::createFramebuffer(const FramebufferSettings &settings)
     auto height = static_cast<int>(settings.height);
     auto format = static_cast<OSPFrameBufferFormat>(settings.format);
     auto channels = static_cast<std::uint32_t>(OSP_FB_NONE);
+
     for (auto channel : settings.channels)
     {
         channels |= static_cast<OSPFrameBufferChannel>(channel);
     }
+
     auto handle = ospNewFrameBuffer(width, height, format, channels);
+
+    throwIfNull(handle);
+    loadFramebufferParams(handle, settings);
+
     return Framebuffer(handle);
 }
 
@@ -78,14 +99,56 @@ RenderTask Device::render(const RenderSettings &settings)
     auto renderer = settings.renderer.getHandle();
     auto camera = settings.camera.getHandle();
     auto world = settings.world.getHandle();
+
     auto future = ospRenderFrame(framebuffer, renderer, camera, world);
+    throwIfNull(future);
+
     return RenderTask(future);
+}
+
+std::optional<PickResult> Device::pick(const PickSettings &settings)
+{
+    auto framebuffer = settings.framebuffer.getHandle();
+    auto renderer = settings.renderer.getHandle();
+    auto camera = settings.camera.getHandle();
+    auto world = settings.world.getHandle();
+
+    const auto &position = settings.normalizedScreenPosition;
+
+    auto result = OSPPickResult();
+    ospPick(&result, framebuffer, renderer, camera, world, position.x, position.y);
+
+    if (!result.hasHit)
+    {
+        return std::nullopt;
+    }
+
+    auto [x, y, z] = result.worldPosition;
+
+    return PickResult{
+        .worldPosition = {x, y, z},
+        .instance = Instance(result.instance),
+        .model = GeometricModel(result.model),
+        .primitiveIndex = result.primID,
+    };
 }
 
 void Device::Deleter::operator()(OSPDevice device) const
 {
     ospDeviceRelease(device);
     ospShutdown();
+}
+
+void Device::throwIfNull(OSPObject object) const
+{
+    if (object != nullptr)
+    {
+        return;
+    }
+
+    const auto *lastError = ospDeviceGetLastErrorMsg(_handle.get());
+
+    throw std::runtime_error(fmt::format("OSPRay internal error: '{}'", lastError));
 }
 
 Device createDevice(Logger &logger)
@@ -105,6 +168,11 @@ Device createDevice(Logger &logger)
     }
 
     auto device = ospNewDevice();
+
+    if (device == nullptr)
+    {
+        throw std::runtime_error("Failed to create device");
+    }
 
     auto logLevel = OSP_LOG_DEBUG;
     ospDeviceSetParam(device, "logLevel", OSP_UINT, &logLevel);

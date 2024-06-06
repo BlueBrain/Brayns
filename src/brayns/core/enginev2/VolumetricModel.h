@@ -36,11 +36,11 @@ struct VolumetricModelSettings
     std::uint32_t id = std::uint32_t(-1);
 };
 
-void loadVolumetricModelParams(OSPVolumetricModel handle, const VolumetricModelSettings &settings);
-
 class VolumetricModel : public Managed<OSPVolumetricModel>
 {
 public:
     using Managed::Managed;
 };
+
+void loadVolumetricModelParams(OSPVolumetricModel handle, const VolumetricModelSettings &settings);
 }

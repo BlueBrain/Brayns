@@ -28,6 +28,12 @@
 
 namespace brayns::experimental
 {
+class Texture : public Managed<OSPTexture>
+{
+public:
+    using Managed::Managed;
+};
+
 enum class TextureFormat
 {
     Rgba8 = OSP_TEXTURE_RGBA8,
@@ -60,10 +66,11 @@ enum class TextureWrap
     ClampToEdge = OSP_TEXTURE_WRAP_CLAMP_TO_EDGE,
 };
 
-class Texture : public Managed<OSPTexture>
+struct TextureTransform
 {
-public:
-    using Managed::Managed;
+    float rotation = 0.0F;
+    Vector2 scale = {1.0F, 1.0F};
+    Vector2 translation = {0.0F, 0.0F};
 };
 
 struct Texture2DSettings
@@ -75,19 +82,20 @@ struct Texture2DSettings
     TextureWrap wrap = TextureWrap::Repeat;
 };
 
-void loadTextureParams(OSPTexture handle, const Texture2DSettings &settings);
-
 class Texture2D : public Texture
 {
 public:
     using Texture::Texture;
 };
 
-struct TextureTransform
+template<>
+struct ObjectReflector<Texture2D>
 {
-    float rotation = 0.0F;
-    Vector2 scale = {1.0F, 1.0F};
-    Vector2 translation = {0.0F, 0.0F};
+    using Settings = Texture2DSettings;
+
+    static inline const std::string name = "texture2D";
+
+    static void loadParams(OSPTexture handle, const Settings &settings);
 };
 
 struct VolumeTextureSettings
@@ -96,11 +104,19 @@ struct VolumeTextureSettings
     TransferFunction transferFunction;
 };
 
-void loadTextureParams(OSPTexture handle, const VolumeTextureSettings &settings);
-
 class VolumeTexture : public Texture
 {
 public:
     using Texture::Texture;
+};
+
+template<>
+struct ObjectReflector<VolumeTexture>
+{
+    using Settings = VolumeTextureSettings;
+
+    static inline const std::string name = "volume";
+
+    static void loadParams(OSPTexture handle, const Settings &settings);
 };
 }

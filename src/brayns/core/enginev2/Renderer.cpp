@@ -50,13 +50,12 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
     setBackground(handle, settings.background);
     setObjectData(handle, "material", settings.materials);
     setObjectParam(handle, "pixelFilter", static_cast<OSPPixelFilterType>(settings.pixelFilter));
-    commitObject(handle);
 }
 }
 
 namespace brayns::experimental
 {
-void loadRendererParams(OSPRenderer handle, const AmbientOcclusionRendererSettings &settings)
+void ObjectReflector<AmbientOcclusionRenderer>::loadParams(OSPRenderer handle, const Settings &settings)
 {
     setRendererParams(handle, settings);
     setObjectParam(handle, "aoSamples", settings.aoSamples);
@@ -66,7 +65,7 @@ void loadRendererParams(OSPRenderer handle, const AmbientOcclusionRendererSettin
     commitObject(handle);
 }
 
-void loadRendererParams(OSPRenderer handle, const ScivisRendererSettings &settings)
+void ObjectReflector<ScivisRenderer>::loadParams(OSPRenderer handle, const Settings &settings)
 {
     setRendererParams(handle, settings);
     setObjectParam(handle, "shadows", settings.shadows);
@@ -77,7 +76,7 @@ void loadRendererParams(OSPRenderer handle, const ScivisRendererSettings &settin
     commitObject(handle);
 }
 
-void loadRendererParams(OSPRenderer handle, const PathTracerSettings &settings)
+void ObjectReflector<PathTracer>::loadParams(OSPRenderer handle, const Settings &settings)
 {
     setRendererParams(handle, settings);
     commitObject(handle);

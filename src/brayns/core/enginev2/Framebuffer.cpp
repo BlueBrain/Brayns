@@ -23,15 +23,14 @@
 
 namespace brayns::experimental
 {
-void loadToneMapperParams(OSPImageOperation handle, const ToneMapperSettings &settings)
+int getFramebufferChannels(std::span<FramebufferChannel> channels)
 {
-    setObjectParam(handle, "exposure", settings.exposure);
-    setObjectParam(handle, "contrast", settings.contrast);
-    setObjectParam(handle, "shoulder", settings.hightlightCompression);
-    setObjectParam(handle, "midIn", settings.midLevelAnchorInput);
-    setObjectParam(handle, "midOut", settings.midLevelAnchorOutput);
-    setObjectParam(handle, "acesColor", settings.aces);
-    commitObject(handle);
+    auto flags = 0;
+    for (auto channel : channels)
+    {
+        flags |= static_cast<int>(channel);
+    }
+    return flags;
 }
 
 void loadFramebufferParams(OSPFrameBuffer handle, const FramebufferSettings &settings)

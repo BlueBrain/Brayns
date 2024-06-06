@@ -19,32 +19,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Volume.h"
-
-namespace
-{
-using brayns::Size3;
-using namespace brayns::experimental;
-
-Data toSharedData3D(const void *data, VoxelDataType voxelDataType, const Size3 &size)
-{
-    auto type = static_cast<OSPDataType>(voxelDataType);
-    auto handle = ospNewSharedData(data, type, size[0], 0, size[1], 0, size[2]);
-    return Data(handle);
-}
-}
+#include "ImageOperation.h"
 
 namespace brayns::experimental
 {
-void ObjectReflector<RegularVolume>::loadParams(OSPVolume handle, const Settings &settings)
+void ObjectReflector<ToneMapper>::loadParams(OSPImageOperation handle, const Settings &settings)
 {
-    auto data = toSharedData3D(settings.data, settings.voxelDataType, settings.size);
-
-    setObjectParam(handle, "data", data);
-    setObjectParam(handle, "cellCentered", settings.cellCentered);
-    setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
-    setObjectParam(handle, "background", settings.background);
-
+    setObjectParam(handle, "exposure", settings.exposure);
+    setObjectParam(handle, "contrast", settings.contrast);
+    setObjectParam(handle, "shoulder", settings.hightlightCompression);
+    setObjectParam(handle, "midIn", settings.midLevelAnchorInput);
+    setObjectParam(handle, "midOut", settings.midLevelAnchorOutput);
+    setObjectParam(handle, "acesColor", settings.aces);
     commitObject(handle);
 }
 }
