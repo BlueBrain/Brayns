@@ -54,9 +54,7 @@ struct ObjectReflector<ToneMapper>
 {
     using Settings = ToneMapperSettings;
 
-    static inline const std::string name = "tonemapper";
-
-    static void loadParams(OSPImageOperation handle, const Settings &settings);
+    static OSPImageOperation createHandle(OSPDevice device, const Settings &settings);
 };
 
 }

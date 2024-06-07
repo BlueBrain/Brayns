@@ -50,8 +50,6 @@ struct ObjectReflector<LinearTransferFunction>
 {
     using Settings = LinearTransferFunctionSettings;
 
-    static inline const std::string name = "piecewiseLinear";
-
-    static void loadParams(OSPTransferFunction handle, const Settings &settings);
+    static OSPTransferFunction createHandle(OSPDevice device, const Settings &settings);
 };
 }

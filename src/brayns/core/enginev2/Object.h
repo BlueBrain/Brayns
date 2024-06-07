@@ -150,26 +150,33 @@ void setObjectParam(OSPObject handle, const char *id, const T &value)
     ospSetParam(handle, id, type, &value);
 }
 
-template<typename T>
-struct ObjectReflector
+inline void throwLastDeviceErrorIfNull(OSPDevice device, OSPObject object)
 {
-    using Settings = void;
-    using Handle = typename T::Handle;
-
-    static inline const std::string name = "";
-
-    static void loadParams(Handle handle, const Settings &settings)
+    if (object != nullptr)
     {
-        (void)handle;
-        (void)settings;
+        return;
     }
 
-private:
-    template<typename U>
-    constexpr auto alwaysFalse = false;
+    const auto *message = ospDeviceGetLastErrorMsg(device);
 
-    static_assert(alwaysFalse<T>, "Unsupported device object");
-};
+    throw std::runtime_error(message);
+}
+
+template<typename T>
+struct ObjectReflector;
+
+template<typename T>
+concept ReflectedObjectSettings = requires { typename ObjectReflector<T>::Settings; };
+
+template<ReflectedObjectSettings T>
+using SettingsOf = typename ObjectReflector<T>::Settings;
+
+template<typename T>
+concept ReflectorObjectHandle =
+    requires(OSPDevice device, SettingsOf<T> settings) { T(ObjectReflector<T>::createHandle(device, settings)); };
+
+template<typename T>
+concept ReflectedObject = ReflectedObjectSettings<T> && ReflectorObjectHandle<T>;
 }
 
 namespace ospray

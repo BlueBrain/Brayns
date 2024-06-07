@@ -72,8 +72,6 @@ struct ObjectReflector<RegularVolume>
 {
     using Settings = RegularVolumeSettings;
 
-    static inline const std::string name = "structuredRegular";
-
-    static void loadParams(OSPVolume handle, const Settings &settings);
+    static OSPVolume createHandle(OSPDevice device, const Settings &settings);
 };
 }

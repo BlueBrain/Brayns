@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <concepts>
 #include <memory>
 #include <optional>
 
@@ -47,103 +46,18 @@ namespace brayns::experimental
 {
 class Device
 {
-private:
-    template<typename T>
-    using SettingsOf = typename ObjectReflector<T>::Settings;
-
-    template<typename T>
-    static constexpr auto nameOf = ObjectReflector<T>::name.c_str();
-
-    template<typename T>
-    static void loadParams(auto handle, const auto &settings)
-    {
-        throwIfNull(handle);
-        ObjectReflector<T>::loadParams(handle, settings);
-    }
-
 public:
     explicit Device(OSPDevice handle);
 
     OSPDevice getHandle() const;
-    GeometricModel createGeometricModel(const GeometricModelSettings &settings);
-    VolumetricModel createVolumetricModel(const VolumetricModelSettings &settings);
-    Group createGroup(const GroupSettings &settings);
-    Instance createInstance(const InstanceSettings &settings);
-    World createWorld(const WorldSettings &settings);
-    Framebuffer createFramebuffer(const FramebufferSettings &settings);
-    RenderTask render(const RenderSettings &settings);
+    Future render(const RenderSettings &settings);
     std::optional<PickResult> pick(const PickSettings &settings);
 
-    template<std::derived_from<Camera> CameraType>
-    CameraType createCamera(const SettingsOf<CameraType> &settings)
+    template<ReflectedObjectSettings T>
+    T create(const SettingsOf<T> &settings)
     {
-        auto handle = ospNewCamera(nameOf<CameraType>);
-        loadParams(handle, settings);
-        return CameraType(handle);
-    }
-
-    template<std::derived_from<Geometry> GeometryType>
-    GeometryType createGeometry(const SettingsOf<GeometryType> &settings)
-    {
-        auto handle = ospNewGeometry(nameOf<GeometryType>);
-        loadParams(handle, settings);
-        return GeometryType(handle);
-    }
-
-    template<std::derived_from<ImageOperation> ImageOperationType>
-    ImageOperationType createImageOperation(const SettingsOf<ImageOperationType> &settings)
-    {
-        auto handle = ospNewImageOperation(nameOf<ImageOperationType>);
-        loadParams(handle, settings);
-        return ImageOperationType(handle);
-    }
-
-    template<std::derived_from<Light> LightType>
-    LightType createLight(const SettingsOf<LightType> &settings)
-    {
-        auto handle = ospNewLight(nameOf<LightType>);
-        loadParams(handle, settings);
-        return LightType(handle);
-    }
-
-    template<std::derived_from<Material> MaterialType>
-    MaterialType createMaterial(const SettingsOf<MaterialType> &settings)
-    {
-        auto handle = ospNewMaterial(nameOf<MaterialType>);
-        loadParams(handle, settings);
-        return MaterialType(handle);
-    }
-
-    template<std::derived_from<Renderer> RendererType>
-    RendererType createRenderer(const SettingsOf<RendererType> &settings)
-    {
-        auto handle = ospNewRenderer(nameOf<RendererType>);
-        loadParams(handle, settings);
-        return RendererType(handle);
-    }
-
-    template<std::derived_from<Texture> TextureType>
-    TextureType createTexture(const SettingsOf<TextureType> &settings)
-    {
-        auto handle = ospNewTexture(nameOf<TextureType>);
-        loadParams(handle, settings);
-        return TextureType(handle);
-    }
-
-    template<std::derived_from<TransferFunction> TransferFunctionType>
-    TransferFunctionType createTransferFunction(const SettingsOf<TransferFunctionType> &settings)
-    {
-        auto handle = ospNewTransferFunction(nameOf<TransferFunctionType>);
-        loadParams(handle, settings);
-        return TransferFunctionType(handle);
-    }
-
-    template<std::derived_from<Volume> VolumeType>
-    VolumeType createVolume(const SettingsOf<VolumeType> &settings)
-    {
-        auto handle = ospNewVolume(nameOf<VolumeType>);
-        loadParams(handle, settings);
-        return VolumeType(handle);
+        auto handle = ObjectReflector<T>::createHandle(_handle.get(), settings);
+        return T(handle);
     }
 
 private:
@@ -153,8 +67,6 @@ private:
     };
 
     std::unique_ptr<osp::Device, Deleter> _handle;
-
-    void throwIfNull(OSPObject handle) const;
 };
 
 Device createDevice(Logger &logger);

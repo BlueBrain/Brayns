@@ -35,46 +35,80 @@ void setLightParams(OSPLight handle, const LightSettings &settings)
 
 namespace brayns::experimental
 {
-void ObjectReflector<DistantLight>::loadParams(OSPLight handle, const Settings &settings)
+OSPLight ObjectReflector<DistantLight>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewLight("distant");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setLightParams(handle, settings);
+
     setObjectParam(handle, "direction", settings.direction);
     setObjectParam(handle, "angularDiameter", settings.angularDiameter);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<SphereLight>::loadParams(OSPLight handle, const Settings &settings)
+OSPLight ObjectReflector<SphereLight>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewLight("sphere");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setLightParams(handle, settings);
+
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "radius", settings.radius);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<SpotLight>::loadParams(OSPLight handle, const Settings &settings)
+OSPLight ObjectReflector<SpotLight>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewLight("spot");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setLightParams(handle, settings);
+
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "direction", settings.direction);
     setObjectParam(handle, "openingAngle", settings.openingAngle);
     setObjectParam(handle, "penumbraAngle", settings.penumbraAngle);
     setObjectParam(handle, "radius", settings.outerRadius);
     setObjectParam(handle, "innerRadius", settings.innerRadius);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<QuadLight>::loadParams(OSPLight handle, const Settings &settings)
+OSPLight ObjectReflector<QuadLight>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewLight("quad");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setLightParams(handle, settings);
+
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "edge1", settings.edge1);
     setObjectParam(handle, "edge2", settings.edge2);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<AmbientLight>::loadParams(OSPLight handle, const Settings &settings)
+OSPLight ObjectReflector<AmbientLight>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewLight("ambient");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setLightParams(handle, settings);
+
     commitObject(handle);
+
+    return handle;
 }
 }

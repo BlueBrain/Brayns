@@ -77,9 +77,7 @@ struct ObjectReflector<AmbientOcclusionRenderer>
 {
     using Settings = AmbientOcclusionRendererSettings;
 
-    static inline const std::string name = "ao";
-
-    static void loadParams(OSPRenderer handle, const Settings &settings);
+    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct ScivisRendererSettings : RendererSettings
@@ -102,9 +100,7 @@ struct ObjectReflector<ScivisRenderer>
 {
     using Settings = ScivisRendererSettings;
 
-    static inline const std::string name = "scivis";
-
-    static void loadParams(OSPRenderer handle, const Settings &settings);
+    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct PathTracerSettings : RendererSettings
@@ -122,8 +118,6 @@ struct ObjectReflector<PathTracer>
 {
     using Settings = PathTracerSettings;
 
-    static inline const std::string name = "pathtracer";
-
-    static void loadParams(OSPRenderer handle, const Settings &settings);
+    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
 };
 }

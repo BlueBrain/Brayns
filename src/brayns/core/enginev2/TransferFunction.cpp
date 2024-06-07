@@ -23,11 +23,17 @@
 
 namespace brayns::experimental
 {
-void ObjectReflector<LinearTransferFunction>::loadParams(OSPTransferFunction handle, const Settings &settings)
+OSPTransferFunction ObjectReflector<LinearTransferFunction>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewTransferFunction("piecewiseLinear");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectData(handle, "color", settings.colors);
     setObjectData(handle, "opacity", settings.opacities);
     setObjectParam(handle, "value", settings.scalarRange);
+
     commitObject(handle);
+
+    return handle;
 }
 }

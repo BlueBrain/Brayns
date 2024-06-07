@@ -23,13 +23,19 @@
 
 namespace brayns::experimental
 {
-void loadVolumetricModelParams(OSPVolumetricModel handle, const VolumetricModelSettings &settings)
+OSPVolumetricModel ObjectReflector<VolumetricModel>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewVolumetricModel();
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "transferFunction", settings.transferFunction);
     setObjectParam(handle, "densityScale", settings.densityScale);
     setObjectParam(handle, "anisotropy", settings.anisotropy);
     setObjectParam(handle, "id", settings.id);
+
     commitObject(handle);
+
+    return handle;
 }
 }

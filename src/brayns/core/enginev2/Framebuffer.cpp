@@ -23,22 +23,6 @@
 
 namespace brayns::experimental
 {
-int getFramebufferChannels(std::span<FramebufferChannel> channels)
-{
-    auto flags = 0;
-    for (auto channel : channels)
-    {
-        flags |= static_cast<int>(channel);
-    }
-    return flags;
-}
-
-void loadFramebufferParams(OSPFrameBuffer handle, const FramebufferSettings &settings)
-{
-    setObjectData(handle, "imageOperation", settings.operations);
-    commitObject(handle);
-}
-
 const void *Framebuffer::map(FramebufferChannel channel)
 {
     auto handle = getHandle();
@@ -61,5 +45,27 @@ float Framebuffer::getVariance()
 {
     auto handle = getHandle();
     return ospGetVariance(handle);
+}
+
+OSPFrameBuffer ObjectReflector<Framebuffer>::createHandle(OSPDevice device, const FramebufferSettings &settings)
+{
+    auto width = static_cast<int>(settings.width);
+    auto height = static_cast<int>(settings.height);
+    auto format = static_cast<OSPFrameBufferFormat>(settings.format);
+    auto channels = static_cast<std::uint32_t>(OSP_FB_NONE);
+
+    for (auto channel : settings.channels)
+    {
+        channels |= static_cast<OSPFrameBufferChannel>(channel);
+    }
+
+    auto handle = ospNewFrameBuffer(width, height, format, channels);
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setObjectData(handle, "imageOperation", settings.operations);
+
+    commitObject(handle);
+
+    return handle;
 }
 }

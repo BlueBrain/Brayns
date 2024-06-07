@@ -41,26 +41,44 @@ Box3 World::getBounds() const
     return getObjectBounds(handle);
 }
 
-void loadGroupParams(OSPGroup handle, const GroupSettings &settings)
+OSPGroup ObjectReflector<Group>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGroup();
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectDataIfNotEmpty(handle, "geometry", settings.geometries);
     setObjectDataIfNotEmpty(handle, "volume", settings.volumes);
     setObjectDataIfNotEmpty(handle, "clippingGeometry", settings.clippingGeometries);
     setObjectDataIfNotEmpty(handle, "light", settings.lights);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void loadInstanceParams(OSPInstance handle, const InstanceSettings &settings)
+OSPInstance ObjectReflector<Instance>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewInstance();
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectParam(handle, "group", settings.group);
     setObjectParam(handle, "transform", toAffine(settings.transform));
     setObjectParam(handle, "id", settings.id);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void loadWorldParams(OSPWorld handle, const WorldSettings &settings)
+OSPWorld ObjectReflector<World>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewWorld();
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectData(handle, "instance", settings.instances);
+
     commitObject(handle);
+
+    return handle;
 }
 }

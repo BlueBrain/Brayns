@@ -36,8 +36,11 @@ Data toSharedData3D(const void *data, VoxelDataType voxelDataType, const Size3 &
 
 namespace brayns::experimental
 {
-void ObjectReflector<RegularVolume>::loadParams(OSPVolume handle, const Settings &settings)
+OSPVolume ObjectReflector<RegularVolume>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewVolume("structuredRegular");
+    throwLastDeviceErrorIfNull(device, handle);
+
     auto data = toSharedData3D(settings.data, settings.voxelDataType, settings.size);
 
     setObjectParam(handle, "data", data);
@@ -46,5 +49,7 @@ void ObjectReflector<RegularVolume>::loadParams(OSPVolume handle, const Settings
     setObjectParam(handle, "background", settings.background);
 
     commitObject(handle);
+
+    return handle;
 }
 }

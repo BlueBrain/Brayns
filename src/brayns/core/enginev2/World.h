@@ -45,6 +45,14 @@ public:
     Box3 getBounds() const;
 };
 
+template<>
+struct ObjectReflector<Group>
+{
+    using Settings = GroupSettings;
+
+    static OSPGroup createHandle(OSPDevice device, const Settings &settings);
+};
+
 struct InstanceSettings
 {
     Group group;
@@ -60,6 +68,14 @@ public:
     Box3 getBounds() const;
 };
 
+template<>
+struct ObjectReflector<Instance>
+{
+    using Settings = InstanceSettings;
+
+    static OSPInstance createHandle(OSPDevice device, const Settings &settings);
+};
+
 struct WorldSettings
 {
     std::span<Instance> instances;
@@ -73,7 +89,11 @@ public:
     Box3 getBounds() const;
 };
 
-void loadGroupParams(OSPGroup handle, const GroupSettings &settings);
-void loadInstanceParams(OSPInstance handle, const InstanceSettings &settings);
-void loadWorldParams(OSPWorld handle, const WorldSettings &settings);
+template<>
+struct ObjectReflector<World>
+{
+    using Settings = WorldSettings;
+
+    static OSPWorld createHandle(OSPDevice device, const Settings &settings);
+};
 }

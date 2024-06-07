@@ -23,14 +23,20 @@
 
 namespace brayns::experimental
 {
-void ObjectReflector<ToneMapper>::loadParams(OSPImageOperation handle, const Settings &settings)
+OSPImageOperation ObjectReflector<ToneMapper>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewImageOperation("tonemapper");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectParam(handle, "exposure", settings.exposure);
     setObjectParam(handle, "contrast", settings.contrast);
     setObjectParam(handle, "shoulder", settings.hightlightCompression);
     setObjectParam(handle, "midIn", settings.midLevelAnchorInput);
     setObjectParam(handle, "midOut", settings.midLevelAnchorOutput);
     setObjectParam(handle, "acesColor", settings.aces);
+
     commitObject(handle);
+
+    return handle;
 }
 }

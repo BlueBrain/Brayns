@@ -25,7 +25,7 @@
 
 #include <rkcommon/utility/SaveImage.h>
 
-#include <brayns/core/enginev2/Engine.h>
+#include <brayns/core/enginev2/Device.h>
 
 using namespace brayns;
 using namespace brayns::experimental;
@@ -38,45 +38,30 @@ TEST_CASE("Render")
     auto handler = [&](const auto &record) { error = record.message; };
     auto logger = Logger("Test", level, handler);
 
-    auto engine = loadEngine();
-
-    auto device = engine.createDevice(logger);
+    auto device = createDevice(logger);
 
     auto width = 480;
     auto height = 360;
 
-    auto toneMapper = device.createImageOperation<ToneMapper>();
-    toneMapper.commit();
+    auto toneMapper = device.create<ToneMapper>({});
 
     auto imageOperations = std::vector<ImageOperation>{toneMapper};
 
-    auto framebuffer = device.createFramebuffer({
+    auto framebuffer = device.create<Framebuffer>({
         .width = std::size_t(width),
         .height = std::size_t(height),
         .format = FramebufferFormat::Srgba8,
         .channels = {FramebufferChannel::Color},
+        .operations = imageOperations,
     });
-    framebuffer.setImageOperations(imageOperations);
-    framebuffer.commit();
 
-    auto material = device.createMaterial<ObjMaterial>();
-    material.setDiffuseColor({1, 1, 1});
-    material.setSpecularColor({0, 0, 0});
-    material.setTransparencyFilter({0, 0, 0});
-    material.setShininess(10);
-    material.commit();
+    auto material = device.create<ScivisMaterial>({});
 
     auto materials = std::vector<Material>{material};
 
-    auto renderer = device.createRenderer<ScivisRenderer>();
-    renderer.setBackgroundColor({1, 1, 1, 1});
-    renderer.enableShadows(true);
-    renderer.setPixelSamples(1);
-    renderer.setAoSamples(0);
-    renderer.setMaterials(materials);
-    renderer.commit();
+    auto renderer = device.create<ScivisRenderer>();
 
-    auto camera = device.createCamera<PerspectiveCamera>();
+    auto camera = device.create<PerspectiveCamera>();
     camera.setAspectRatio(float(width) / float(height));
     camera.setFovy(45);
     camera.setTransform(toAffine({.translation = {0, 0, -1}}));

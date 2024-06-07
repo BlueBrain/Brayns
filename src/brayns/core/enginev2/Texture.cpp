@@ -71,8 +71,11 @@ Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
 
 namespace brayns::experimental
 {
-void ObjectReflector<Texture2D>::loadParams(OSPTexture handle, const Settings &settings)
+OSPTexture ObjectReflector<Texture2D>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewTexture("texture2D");
+    throwLastDeviceErrorIfNull(device, handle);
+
     auto data = toSharedData2D(settings.data, settings.format, settings.size);
 
     setObjectParam(handle, "format", static_cast<OSPTextureFormat>(settings.format));
@@ -81,12 +84,20 @@ void ObjectReflector<Texture2D>::loadParams(OSPTexture handle, const Settings &s
     setObjectParam(handle, "wrapMode", static_cast<OSPTextureWrapMode>(settings.wrap));
 
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<VolumeTexture>::loadParams(OSPTexture handle, const Settings &settings)
+OSPTexture ObjectReflector<VolumeTexture>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewTexture("volume");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "transferFunction", settings.transferFunction);
+
     commitObject(handle);
+
+    return handle;
 }
 }

@@ -69,6 +69,11 @@ public:
     float getVariance();
 };
 
-int getFramebufferChannels(std::span<FramebufferChannel> channels);
-void loadFramebufferParams(OSPFrameBuffer handle, const FramebufferSettings &settings);
+template<>
+struct ObjectReflector<Framebuffer>
+{
+    using Settings = FramebufferSettings;
+
+    static OSPFrameBuffer createHandle(OSPDevice device, const Settings &settings);
+};
 }

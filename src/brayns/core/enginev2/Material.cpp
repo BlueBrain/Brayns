@@ -73,23 +73,39 @@ void setMaterialParams(OSPMaterial handle, const AmbientOcclusionMaterialSetting
 
 namespace brayns::experimental
 {
-void ObjectReflector<AmbientOcclusionMaterial>::loadParams(OSPMaterial handle, const Settings &settings)
+OSPMaterial ObjectReflector<AmbientOcclusionMaterial>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewMaterial("obj");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setMaterialParams(handle, settings);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<ScivisMaterial>::loadParams(OSPMaterial handle, const Settings &settings)
+OSPMaterial ObjectReflector<ScivisMaterial>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewMaterial("obj");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setMaterialParams(handle, settings);
+
     setObjectParam(handle, "ks", settings.specular);
     setObjectParam(handle, "ns", settings.shininess);
     setObjectParam(handle, "tf", settings.transparencyFilter);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<PrincipledMaterial>::loadParams(OSPMaterial handle, const Settings &settings)
+OSPMaterial ObjectReflector<PrincipledMaterial>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewMaterial("principled");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectParam(handle, "baseColor", settings.baseColor);
     setTextureParam(handle, "map_baseColor", settings.baseColorMap);
     setObjectParam(handle, "edgeColor", settings.edgeColor);
@@ -121,6 +137,9 @@ void ObjectReflector<PrincipledMaterial>::loadParams(OSPMaterial handle, const S
     setObjectParam(handle, "sheenRoughness", settings.sheenRoughness);
     setObjectParam(handle, "opacity", settings.opacity);
     setObjectParam(handle, "emissiveColor", settings.emissiveColor);
+
     commitObject(handle);
+
+    return handle;
 }
 }

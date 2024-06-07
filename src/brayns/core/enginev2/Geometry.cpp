@@ -58,15 +58,24 @@ void Mesh::setColors(std::span<Color4> colors)
     commitObject(handle);
 }
 
-void ObjectReflector<TriangleMesh>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<TriangleMesh>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("mesh");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setMeshParams(handle, settings);
     setObjectDataIfNotEmpty(handle, "index", settings.indices);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<QuadMesh>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<QuadMesh>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("mesh");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setMeshParams(handle, settings);
 
     if (!settings.indices.empty())
@@ -79,16 +88,27 @@ void ObjectReflector<QuadMesh>::loadParams(OSPGeometry handle, const Settings &s
     }
 
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<Spheres>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<Spheres>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("sphere");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setSphereParams(handle, settings);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<Discs>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<Discs>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("sphere");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setSphereParams(handle, settings);
 
     if (settings.normals.empty())
@@ -102,12 +122,8 @@ void ObjectReflector<Discs>::loadParams(OSPGeometry handle, const Settings &sett
     }
 
     commitObject(handle);
-}
 
-void ObjectReflector<Cylinders>::loadParams(OSPGeometry handle, const Settings &settings)
-{
-    setCurveParams(handle, settings);
-    commitObject(handle);
+    return handle;
 }
 
 void Cylinders::setColors(std::span<Color4> colors)
@@ -117,40 +133,84 @@ void Cylinders::setColors(std::span<Color4> colors)
     commitObject(handle);
 }
 
-void ObjectReflector<Curve>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<Cylinders>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("curve");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setCurveParams(handle, settings);
-    setObjectParam(handle, "type", static_cast<OSPCurveType>(settings.type));
-    setObjectParam(handle, "basis", static_cast<OSPCurveBasis>(settings.basis));
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<Ribbon>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<Curve>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("curve");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setCurveParams(handle, settings);
+
+    setObjectParam(handle, "type", static_cast<OSPCurveType>(settings.type));
+    setObjectParam(handle, "basis", static_cast<OSPCurveBasis>(settings.basis));
+
+    commitObject(handle);
+
+    return handle;
+}
+
+OSPGeometry ObjectReflector<Ribbon>::createHandle(OSPDevice device, const Settings &settings)
+{
+    auto handle = ospNewGeometry("curve");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setCurveParams(handle, settings);
+
     setObjectData(handle, "vertex.normal", settings.normals);
     setObjectParam(handle, "type", OSP_RIBBON);
     setObjectParam(handle, "basis", static_cast<OSPCurveBasis>(settings.basis));
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<Boxes>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<Boxes>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("box");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectData(handle, "box", settings.boxes);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<Planes>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<Planes>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("plane");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectData(handle, "plane.coefficients", settings.coefficients);
     setObjectDataIfNotEmpty(handle, "plane.bounds", settings.bounds);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<Isosurfaces>::loadParams(OSPGeometry handle, const Settings &settings)
+OSPGeometry ObjectReflector<Isosurfaces>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewGeometry("isosurface");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setObjectParam(handle, "volume", settings.volume);
     setObjectData(handle, "isovalue", settings.isovalues);
+
     commitObject(handle);
+
+    return handle;
 }
 }

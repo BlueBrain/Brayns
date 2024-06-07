@@ -56,9 +56,7 @@ struct ObjectReflector<PerspectiveCamera>
 {
     using Settings = PerspectiveCameraSettings;
 
-    static inline const std::string name = "perspective";
-
-    static void loadParams(OSPCamera handle, const Settings &settings);
+    static OSPCamera createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct OrthographicCameraSettings : CameraSettings
@@ -78,8 +76,6 @@ struct ObjectReflector<OrthographicCamera>
 {
     using Settings = OrthographicCameraSettings;
 
-    static inline const std::string name = "orthographic";
-
-    static void loadParams(OSPCamera handle, const Settings &settings);
+    static OSPCamera createHandle(OSPDevice device, const Settings &settings);
 };
 }

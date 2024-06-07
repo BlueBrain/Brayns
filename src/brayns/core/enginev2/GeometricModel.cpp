@@ -30,7 +30,7 @@ void setMaterialParam(OSPGeometricModel handle, const PrimitiveMaterials &materi
 {
     setObjectData(handle, "material", materials.rendererIndices);
     setObjectDataIfNotEmpty(handle, "color", materials.colors);
-    setObjectDataIfNotEmpty(handle, "index", materials.materialAndColorIndices);
+    setObjectDataIfNotEmpty(handle, "index", materials.indices);
 }
 }
 
@@ -50,6 +50,21 @@ void GeometricModel::invertNormals(bool invert)
     commitObject(handle);
 }
 
+OSPGeometricModel ObjectReflector<GeometricModel>::createHandle(OSPDevice device, const Settings &settings)
+{
+    auto handle = ospNewGeometricModel();
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setObjectParam(handle, "geometry", settings.geometry);
+    setMaterialParam(handle, settings.materials);
+    setObjectParam(handle, "invertNormals", settings.invertedNormals);
+    setObjectParam(handle, "id", settings.id);
+
+    commitObject(handle);
+
+    return handle;
+}
+
 void ClippingModel::invertNormals(bool invert)
 {
     auto handle = getHandle();
@@ -57,20 +72,17 @@ void ClippingModel::invertNormals(bool invert)
     commitObject(handle);
 }
 
-void loadGeometricModelParams(OSPGeometricModel handle, const GeometricModelSettings &settings)
+OSPGeometricModel ObjectReflector<ClippingModel>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setObjectParam(handle, "geometry", settings.geometry);
-    setMaterialParam(handle, settings.materials);
-    setObjectParam(handle, "invertNormals", settings.invertedNormals);
-    setObjectParam(handle, "id", settings.id);
-    commitObject(handle);
-}
+    auto handle = ospNewGeometricModel();
+    throwLastDeviceErrorIfNull(device, handle);
 
-void loadClippingModelParams(OSPGeometricModel handle, const ClippingModelSettings &settings)
-{
     setObjectParam(handle, "geometry", settings.geometry);
     setObjectParam(handle, "invertNormals", settings.invertedNormals);
     setObjectParam(handle, "id", settings.id);
+
     commitObject(handle);
+
+    return handle;
 }
 }

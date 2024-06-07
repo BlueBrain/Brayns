@@ -42,5 +42,11 @@ public:
     using Managed::Managed;
 };
 
-void loadVolumetricModelParams(OSPVolumetricModel handle, const VolumetricModelSettings &settings);
+template<>
+struct ObjectReflector<VolumetricModel>
+{
+    using Settings = VolumetricModelSettings;
+
+    static OSPVolumetricModel createHandle(OSPDevice device, const Settings &settings);
+};
 }

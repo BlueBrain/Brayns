@@ -31,7 +31,7 @@ struct PrimitiveMaterials
 {
     std::span<std::uint32_t> rendererIndices;
     std::span<Color4> colors = {};
-    std::span<std::uint8_t> materialAndColorIndices = {};
+    std::span<std::uint8_t> indices = {};
 };
 
 struct GeometricModelSettings
@@ -51,6 +51,14 @@ public:
     void invertNormals(bool inverted);
 };
 
+template<>
+struct ObjectReflector<GeometricModel>
+{
+    using Settings = GeometricModelSettings;
+
+    static OSPGeometricModel createHandle(OSPDevice device, const Settings &settings);
+};
+
 struct ClippingModelSettings
 {
     Geometry geometry;
@@ -66,6 +74,12 @@ public:
     void invertNormals(bool inverted);
 };
 
-void loadGeometricModelParams(OSPGeometricModel handle, const GeometricModelSettings &settings);
-void loadClippingModelParams(OSPGeometricModel handle, const ClippingModelSettings &settings);
+template<>
+struct ObjectReflector<ClippingModel>
+{
+    using Settings = ClippingModelSettings;
+
+    static OSPGeometricModel createHandle(OSPDevice device, const Settings &settings);
+};
+
 }

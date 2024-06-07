@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include "Camera.h"
 #include "Framebuffer.h"
 #include "Object.h"
@@ -37,7 +39,7 @@ struct RenderSettings
     World world;
 };
 
-class RenderTask : public Managed<OSPFuture>
+class Future : public Managed<OSPFuture>
 {
 public:
     using Managed::Managed;
@@ -47,6 +49,8 @@ public:
     void cancel();
     float waitAndGetDuration();
 };
+
+Future startRendering(OSPDevice device, const RenderSettings &settings);
 
 struct PickSettings : RenderSettings
 {
@@ -60,4 +64,6 @@ struct PickResult
     GeometricModel model;
     std::uint32_t primitiveIndex;
 };
+
+std::optional<PickResult> tryPick(OSPDevice device, const PickSettings &settings);
 }

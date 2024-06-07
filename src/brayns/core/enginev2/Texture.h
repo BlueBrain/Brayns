@@ -93,9 +93,7 @@ struct ObjectReflector<Texture2D>
 {
     using Settings = Texture2DSettings;
 
-    static inline const std::string name = "texture2D";
-
-    static void loadParams(OSPTexture handle, const Settings &settings);
+    static OSPTexture createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct VolumeTextureSettings
@@ -115,8 +113,6 @@ struct ObjectReflector<VolumeTexture>
 {
     using Settings = VolumeTextureSettings;
 
-    static inline const std::string name = "volume";
-
-    static void loadParams(OSPTexture handle, const Settings &settings);
+    static OSPTexture createHandle(OSPDevice device, const Settings &settings);
 };
 }

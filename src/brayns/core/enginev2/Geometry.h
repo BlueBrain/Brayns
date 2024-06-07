@@ -66,9 +66,7 @@ struct ObjectReflector<TriangleMesh>
 {
     using Settings = TriangleMeshSettings;
 
-    static inline const std::string name = "mesh";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct QuadMeshSettings : MeshSettings
@@ -87,9 +85,7 @@ struct ObjectReflector<QuadMesh>
 {
     using Settings = QuadMeshSettings;
 
-    static inline const std::string name = "mesh";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct SphereSettings
@@ -110,9 +106,7 @@ struct ObjectReflector<Spheres>
 {
     using Settings = SphereSettings;
 
-    static inline const std::string name = "sphere";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct DiscSettings : SphereSettings
@@ -131,9 +125,7 @@ struct ObjectReflector<Discs>
 {
     using Settings = DiscSettings;
 
-    static inline const std::string name = "sphere";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 using PositionRadius = Vector4;
@@ -159,9 +151,7 @@ struct ObjectReflector<Cylinders>
 {
     using Settings = CylinderSettings;
 
-    static inline const std::string name = "curve";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 enum class CurveType
@@ -195,9 +185,7 @@ struct ObjectReflector<Curve>
 {
     using Settings = CurveSettings;
 
-    static inline const std::string name = "curve";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 enum class RibbonBasis
@@ -224,9 +212,7 @@ struct ObjectReflector<Ribbon>
 {
     using Settings = RibbonSettings;
 
-    static inline const std::string name = "curve";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct BoxSettings
@@ -245,9 +231,7 @@ struct ObjectReflector<Boxes>
 {
     using Settings = BoxSettings;
 
-    static inline const std::string name = "box";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct PlaneSettings
@@ -267,9 +251,7 @@ struct ObjectReflector<Planes>
 {
     using Settings = PlaneSettings;
 
-    static inline const std::string name = "plane";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct IsosurfaceSettings
@@ -289,8 +271,6 @@ struct ObjectReflector<Isosurfaces>
 {
     using Settings = IsosurfaceSettings;
 
-    static inline const std::string name = "isosurface";
-
-    static void loadParams(OSPGeometry handle, const Settings &settings);
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 }

@@ -66,9 +66,7 @@ struct ObjectReflector<AmbientOcclusionMaterial>
 {
     using Settings = AmbientOcclusionMaterialSettings;
 
-    static inline const std::string name = "obj";
-
-    static void loadParams(OSPMaterial handle, const Settings &settings);
+    static OSPMaterial createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct ScivisMaterialSettings : AmbientOcclusionMaterialSettings
@@ -89,9 +87,7 @@ struct ObjectReflector<ScivisMaterial>
 {
     using Settings = ScivisMaterialSettings;
 
-    static inline const std::string name = "obj";
-
-    static void loadParams(OSPMaterial handle, const Settings &settings);
+    static OSPMaterial createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct PrincipledMaterialSettings
@@ -140,8 +136,6 @@ struct ObjectReflector<PrincipledMaterial>
 {
     using Settings = PrincipledMaterialSettings;
 
-    static inline const std::string name = "principled";
-
-    static void loadParams(OSPMaterial handle, const Settings &settings);
+    static OSPMaterial createHandle(OSPDevice device, const Settings &settings);
 };
 }

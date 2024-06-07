@@ -55,30 +55,50 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 
 namespace brayns::experimental
 {
-void ObjectReflector<AmbientOcclusionRenderer>::loadParams(OSPRenderer handle, const Settings &settings)
+OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewRenderer("ao");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setRendererParams(handle, settings);
+
     setObjectParam(handle, "aoSamples", settings.aoSamples);
     setObjectParam(handle, "aoDistance", settings.aoDistance);
     setObjectParam(handle, "aoIntensity", settings.aoIntensity);
     setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<ScivisRenderer>::loadParams(OSPRenderer handle, const Settings &settings)
+OSPRenderer ObjectReflector<ScivisRenderer>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewRenderer("scivis");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setRendererParams(handle, settings);
+
     setObjectParam(handle, "shadows", settings.shadows);
     setObjectParam(handle, "aoSamples", settings.aoSamples);
     setObjectParam(handle, "aoDistance", settings.aoDistance);
     setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
     setObjectParam(handle, "visibleLights", settings.showVisibleLights);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<PathTracer>::loadParams(OSPRenderer handle, const Settings &settings)
+OSPRenderer ObjectReflector<PathTracer>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewRenderer("pathtracer");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setRendererParams(handle, settings);
+
     commitObject(handle);
+
+    return handle;
 }
 }

@@ -55,9 +55,7 @@ struct ObjectReflector<DistantLight>
 {
     using Settings = DistantLightSettings;
 
-    static inline const std::string name = "distant";
-
-    static void loadParams(OSPLight handle, const Settings &settings);
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct SphereLightSettings : LightSettings
@@ -77,9 +75,7 @@ struct ObjectReflector<SphereLight>
 {
     using Settings = SphereLightSettings;
 
-    static inline const std::string name = "sphere";
-
-    static void loadParams(OSPLight handle, const Settings &settings);
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct SpotLightSettings : LightSettings
@@ -103,9 +99,7 @@ struct ObjectReflector<SpotLight>
 {
     using Settings = SpotLightSettings;
 
-    static inline const std::string name = "spot";
-
-    static void loadParams(OSPLight handle, const Settings &settings);
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct QuadLightSettings : LightSettings
@@ -126,9 +120,7 @@ struct ObjectReflector<QuadLight>
 {
     using Settings = QuadLightSettings;
 
-    static inline const std::string name = "quad";
-
-    static void loadParams(OSPLight handle, const Settings &settings);
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
 };
 
 struct AmbientLightSettings : LightSettings
@@ -146,8 +138,6 @@ struct ObjectReflector<AmbientLight>
 {
     using Settings = AmbientLightSettings;
 
-    static inline const std::string name = "ambient";
-
-    static void loadParams(OSPLight handle, const Settings &settings);
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
 };
 }

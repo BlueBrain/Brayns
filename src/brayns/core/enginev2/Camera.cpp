@@ -36,19 +36,32 @@ void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 
 namespace brayns::experimental
 {
-void ObjectReflector<PerspectiveCamera>::loadParams(OSPCamera handle, const Settings &settings)
+OSPCamera ObjectReflector<PerspectiveCamera>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewCamera("perspective");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setCameraParams(handle, settings);
+
     setObjectParam(handle, "fovy", settings.fovy);
     setObjectParam(handle, "aspect", settings.aspectRatio);
+
     commitObject(handle);
+
+    return handle;
 }
 
-void ObjectReflector<OrthographicCamera>::loadParams(OSPCamera handle, const Settings &settings)
+OSPCamera ObjectReflector<OrthographicCamera>::createHandle(OSPDevice device, const Settings &settings)
 {
+    auto handle = ospNewCamera("perspective");
+    throwLastDeviceErrorIfNull(device, handle);
+
     setCameraParams(handle, settings);
     setObjectParam(handle, "height", settings.height);
     setObjectParam(handle, "aspect", settings.aspectRatio);
+
     commitObject(handle);
+
+    return handle;
 }
 }
