@@ -62,7 +62,6 @@ TEST_CASE("Render")
     auto renderer = device.create<ScivisRenderer>({.base = {.materials = materials}});
 
     auto camera = device.create<PerspectiveCamera>({
-        .base = {.position = {0, 0, -1}, .direction = {0, 0, 1}, .nearClippingDistance = 0},
         .fovy = 45.0F,
         .aspectRatio = float(width) / float(height),
     });
@@ -109,7 +108,7 @@ TEST_CASE("Render")
 
     auto data = framebuffer.map(FramebufferChannel::Color);
 
-    rkcommon::utility::writePPM("test.ppm", width, height, static_cast<const std::uint32_t *>(data));
+    /*rkcommon::utility::writePPM("test.ppm", width, height, static_cast<const std::uint32_t *>(data));*/
 
     framebuffer.unmap(data);
 

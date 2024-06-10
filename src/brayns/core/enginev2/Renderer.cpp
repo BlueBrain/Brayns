@@ -43,8 +43,8 @@ void setBackground(OSPRenderer handle, const Background &background)
 
 void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 {
-    setObjectParam(handle, "pixelSamples", settings.pixelSamples);
-    setObjectParam(handle, "maxPathLength", settings.maxRayRecursionDepth);
+    setObjectParam(handle, "pixelSamples", static_cast<int>(settings.pixelSamples));
+    setObjectParam(handle, "maxPathLength", static_cast<int>(settings.maxRayRecursionDepth));
     setObjectParam(handle, "minContribution", settings.minSampleContribution);
     setObjectParam(handle, "varianceThreshold", settings.varianceThreshold);
     setBackground(handle, settings.background);
@@ -68,7 +68,7 @@ OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice de
 
     setRendererParams(handle, settings.base);
 
-    setObjectParam(handle, "aoSamples", settings.aoSamples);
+    setObjectParam(handle, "aoSamples", static_cast<int>(settings.aoSamples));
     setObjectParam(handle, "aoDistance", settings.aoDistance);
     setObjectParam(handle, "aoIntensity", settings.aoIntensity);
     setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
@@ -86,7 +86,7 @@ OSPRenderer ObjectReflector<ScivisRenderer>::createHandle(OSPDevice device, cons
     setRendererParams(handle, settings.base);
 
     setObjectParam(handle, "shadows", settings.shadows);
-    setObjectParam(handle, "aoSamples", settings.aoSamples);
+    setObjectParam(handle, "aoSamples", static_cast<int>(settings.aoSamples));
     setObjectParam(handle, "aoDistance", settings.aoDistance);
     setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
     setObjectParam(handle, "visibleLights", settings.showVisibleLights);

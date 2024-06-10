@@ -56,7 +56,7 @@ struct ObjectReflector<Group>
 struct InstanceSettings
 {
     Group group;
-    Transform transform;
+    Transform transform = {};
     std::uint32_t id = std::uint32_t(-1);
 };
 
