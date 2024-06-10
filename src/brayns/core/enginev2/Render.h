@@ -21,15 +21,17 @@
 
 #pragma once
 
+#include <optional>
+
 #include "Camera.h"
 #include "Framebuffer.h"
-#include "Managed.h"
+#include "Object.h"
 #include "Renderer.h"
 #include "World.h"
 
 namespace brayns::experimental
 {
-struct RenderSettings
+struct Context
 {
     Framebuffer framebuffer;
     Renderer renderer;
@@ -37,7 +39,7 @@ struct RenderSettings
     World world;
 };
 
-class RenderTask : public Managed<OSPFuture>
+class Future : public Managed<OSPFuture>
 {
 public:
     using Managed::Managed;
@@ -47,4 +49,22 @@ public:
     void cancel();
     float waitAndGetDuration();
 };
+
+Future startRendering(OSPDevice device, const Context &context);
+
+struct PickSettings
+{
+    Context context;
+    Vector2 normalizedScreenPosition;
+};
+
+struct PickResult
+{
+    Vector3 worldPosition;
+    Instance instance;
+    GeometricModel model;
+    std::uint32_t primitiveIndex;
+};
+
+std::optional<PickResult> tryPick(OSPDevice device, const PickSettings &settings);
 }

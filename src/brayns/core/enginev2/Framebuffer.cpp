@@ -47,8 +47,25 @@ float Framebuffer::getVariance()
     return ospGetVariance(handle);
 }
 
-void Framebuffer::setImageOperations(SharedArray<ImageOperation> operations)
+OSPFrameBuffer ObjectReflector<Framebuffer>::createHandle(OSPDevice device, const FramebufferSettings &settings)
 {
-    setParam("imageOperation", toSharedData(operations));
+    auto width = static_cast<int>(settings.width);
+    auto height = static_cast<int>(settings.height);
+    auto format = static_cast<OSPFrameBufferFormat>(settings.format);
+    auto channels = static_cast<std::uint32_t>(OSP_FB_NONE);
+
+    for (auto channel : settings.channels)
+    {
+        channels |= static_cast<OSPFrameBufferChannel>(channel);
+    }
+
+    auto handle = ospNewFrameBuffer(width, height, format, channels);
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setObjectDataIfNotEmpty(handle, "imageOperation", settings.operations);
+
+    commitObject(handle);
+
+    return handle;
 }
 }

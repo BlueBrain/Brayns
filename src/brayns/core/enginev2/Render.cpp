@@ -23,28 +23,69 @@
 
 namespace brayns::experimental
 {
-bool RenderTask::isReady() const
+bool Future::isReady() const
 {
     auto handle = getHandle();
     return ospIsReady(handle);
 }
 
-float RenderTask::getProgress() const
+float Future::getProgress() const
 {
     auto handle = getHandle();
     return ospGetProgress(handle);
 }
 
-void RenderTask::cancel()
+void Future::cancel()
 {
     auto handle = getHandle();
     ospCancel(handle);
 }
 
-float RenderTask::waitAndGetDuration()
+float Future::waitAndGetDuration()
 {
     auto handle = getHandle();
     ospWait(handle);
     return ospGetTaskDuration(handle);
+}
+
+Future startRendering(OSPDevice device, const Context &context)
+{
+    auto framebuffer = context.framebuffer.getHandle();
+    auto renderer = context.renderer.getHandle();
+    auto camera = context.camera.getHandle();
+    auto world = context.world.getHandle();
+
+    auto handle = ospRenderFrame(framebuffer, renderer, camera, world);
+    throwLastDeviceErrorIfNull(device, handle);
+
+    return Future(handle);
+}
+
+std::optional<PickResult> tryPick(OSPDevice device, const PickSettings &settings)
+{
+    (void)device;
+
+    auto framebuffer = settings.context.framebuffer.getHandle();
+    auto renderer = settings.context.renderer.getHandle();
+    auto camera = settings.context.camera.getHandle();
+    auto world = settings.context.world.getHandle();
+    auto [screenX, screenY] = settings.normalizedScreenPosition;
+
+    auto result = OSPPickResult();
+    ospPick(&result, framebuffer, renderer, camera, world, screenX, screenY);
+
+    if (!result.hasHit)
+    {
+        return std::nullopt;
+    }
+
+    auto [x, y, z] = result.worldPosition;
+
+    return PickResult{
+        .worldPosition = {x, y, z},
+        .instance = Instance(result.instance),
+        .model = GeometricModel(result.model),
+        .primitiveIndex = result.primID,
+    };
 }
 }

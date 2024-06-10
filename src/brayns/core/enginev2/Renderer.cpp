@@ -21,75 +21,90 @@
 
 #include "Renderer.h"
 
+namespace
+{
+using brayns::Color4;
+using namespace brayns::experimental;
+
+void setBackgroundParam(OSPRenderer handle, const Color4 &color)
+{
+    setObjectParam(handle, "backgroundColor", color);
+}
+
+void setBackgroundParam(OSPRenderer handle, const Texture2D &texture)
+{
+    setObjectParam(handle, "map_backplate", texture);
+}
+
+void setBackground(OSPRenderer handle, const Background &background)
+{
+    std::visit([=](const auto &value) { setBackgroundParam(handle, value); }, background);
+}
+
+void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
+{
+    setObjectParam(handle, "pixelSamples", static_cast<int>(settings.pixelSamples));
+    setObjectParam(handle, "maxPathLength", static_cast<int>(settings.maxRayRecursionDepth));
+    setObjectParam(handle, "minContribution", settings.minSampleContribution);
+    setObjectParam(handle, "varianceThreshold", settings.varianceThreshold);
+    setBackground(handle, settings.background);
+
+    if (settings.maxDepth)
+    {
+        setObjectParam(handle, "maxDepth", *settings.maxDepth);
+    }
+
+    setObjectData(handle, "material", settings.materials);
+    setObjectParam(handle, "pixelFilter", static_cast<OSPPixelFilterType>(settings.pixelFilter));
+}
+}
+
 namespace brayns::experimental
 {
-void Renderer::setPixelSamples(std::size_t count)
+OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("pixelSamples", static_cast<int>(count));
+    auto handle = ospNewRenderer("ao");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setRendererParams(handle, settings.base);
+
+    setObjectParam(handle, "aoSamples", static_cast<int>(settings.aoSamples));
+    setObjectParam(handle, "aoDistance", settings.aoDistance);
+    setObjectParam(handle, "aoIntensity", settings.aoIntensity);
+    setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void Renderer::setMaxRayRecursion(std::size_t depth)
+OSPRenderer ObjectReflector<ScivisRenderer>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("maxPathLength", static_cast<int>(depth));
+    auto handle = ospNewRenderer("scivis");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setRendererParams(handle, settings.base);
+
+    setObjectParam(handle, "shadows", settings.shadows);
+    setObjectParam(handle, "aoSamples", static_cast<int>(settings.aoSamples));
+    setObjectParam(handle, "aoDistance", settings.aoDistance);
+    setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
+    setObjectParam(handle, "visibleLights", settings.showVisibleLights);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void Renderer::setMinSampleContribution(float intensity)
+OSPRenderer ObjectReflector<PathTracer>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("minContribution", intensity);
-}
+    auto handle = ospNewRenderer("pathtracer");
+    throwLastDeviceErrorIfNull(device, handle);
 
-void Renderer::setVarianceThreshold(float threshold)
-{
-    setParam("varianceThreshold", threshold);
-}
+    setRendererParams(handle, settings.base);
 
-void Renderer::setBackgroundColor(const Color4 &color)
-{
-    setParam("backgroundColor", color);
-}
+    commitObject(handle);
 
-void Renderer::setMaterials(SharedArray<Material> materials)
-{
-    setParam("material", toSharedData(materials));
-}
-
-void Renderer::setPixelFilter(PixelFilter filter)
-{
-    setParam("pixelFilter", static_cast<OSPPixelFilterType>(filter));
-}
-
-void AmbientOcclusionRenderer::setAoSamples(std::size_t count)
-{
-    setParam("aoSamples", static_cast<int>(count));
-}
-
-void AmbientOcclusionRenderer::setAoDistance(float distance)
-{
-    setParam("aoDistance", distance);
-}
-
-void AmbientOcclusionRenderer::setAoIntensity(float intensity)
-{
-    setParam("aoIntensity", intensity);
-}
-
-void ScivisRenderer::enableShadows(bool enable)
-{
-    setParam("shadows", enable);
-}
-
-void ScivisRenderer::setAoSamples(std::size_t count)
-{
-    setParam("aoSamples", static_cast<int>(count));
-}
-
-void ScivisRenderer::setAoDistance(float distance)
-{
-    setParam("aoDistance", distance);
-}
-
-void ScivisRenderer::showLights(bool show)
-{
-    setParam("visibleLights", show);
+    return handle;
 }
 }

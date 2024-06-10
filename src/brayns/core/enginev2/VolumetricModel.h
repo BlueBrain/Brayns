@@ -22,62 +22,31 @@
 #pragma once
 
 #include "Object.h"
+#include "TransferFunction.h"
+#include "Volume.h"
 
 namespace brayns::experimental
 {
-struct CameraSettings
+struct VolumetricModelSettings
 {
-    Vector3 position = {0.0F, 0.0F, 0.0F};
-    Vector3 direction = {0.0F, 0.0F, 1.0F};
-    Vector3 up = {0.0F, 1.0F, 0.0F};
-    float nearClippingDistance = 1.0e-6F;
+    Volume volume;
+    TransferFunction transferFunction;
+    float densityScale = 1.0F;
+    float anisotropy = 0.0F;
+    std::uint32_t id = std::uint32_t(-1);
 };
 
-class Camera : public Managed<OSPCamera>
+class VolumetricModel : public Managed<OSPVolumetricModel>
 {
 public:
     using Managed::Managed;
 };
 
-struct PerspectiveCameraSettings
-{
-    CameraSettings base = {};
-    float fovy = 60.0F;
-    float aspectRatio = 1.0F;
-};
-
-class PerspectiveCamera : public Camera
-{
-public:
-    using Camera::Camera;
-};
-
 template<>
-struct ObjectReflector<PerspectiveCamera>
+struct ObjectReflector<VolumetricModel>
 {
-    using Settings = PerspectiveCameraSettings;
+    using Settings = VolumetricModelSettings;
 
-    static OSPCamera createHandle(OSPDevice device, const Settings &settings);
-};
-
-struct OrthographicCameraSettings
-{
-    CameraSettings base = {};
-    float height = 1.0F;
-    float aspectRatio = 1.0F;
-};
-
-class OrthographicCamera : public Camera
-{
-public:
-    using Camera::Camera;
-};
-
-template<>
-struct ObjectReflector<OrthographicCamera>
-{
-    using Settings = OrthographicCameraSettings;
-
-    static OSPCamera createHandle(OSPDevice device, const Settings &settings);
+    static OSPVolumetricModel createHandle(OSPDevice device, const Settings &settings);
 };
 }

@@ -22,78 +22,64 @@
 #pragma once
 
 #include "Data.h"
-#include "GeometricModel.h"
-#include "Light.h"
+#include "Geometry.h"
 #include "Object.h"
-#include "VolumetricModel.h"
 
 namespace brayns::experimental
 {
-struct GroupSettings
+struct PrimitiveMaterials
 {
-    std::span<GeometricModel> geometries = {};
-    std::span<VolumetricModel> volumes = {};
-    std::span<ClippingModel> clippingGeometries = {};
-    std::span<Light> lights = {};
+    std::span<std::uint32_t> rendererIndices;
+    std::span<Color4> colors = {};
+    std::span<std::uint8_t> indices = {};
 };
 
-class Group : public Managed<OSPGroup>
+struct GeometricModelSettings
 {
-public:
-    using Managed::Managed;
-
-    Box3 getBounds() const;
-};
-
-template<>
-struct ObjectReflector<Group>
-{
-    using Settings = GroupSettings;
-
-    static OSPGroup createHandle(OSPDevice device, const Settings &settings);
-};
-
-struct InstanceSettings
-{
-    Group group;
-    Transform transform = {};
+    Geometry geometry;
+    PrimitiveMaterials materials;
+    bool invertedNormals = false;
     std::uint32_t id = std::uint32_t(-1);
 };
 
-class Instance : public Managed<OSPInstance>
+class GeometricModel : public Managed<OSPGeometricModel>
 {
 public:
     using Managed::Managed;
 
-    Box3 getBounds() const;
+    void setMaterials(const PrimitiveMaterials &materials);
+    void invertNormals(bool inverted);
 };
 
 template<>
-struct ObjectReflector<Instance>
+struct ObjectReflector<GeometricModel>
 {
-    using Settings = InstanceSettings;
+    using Settings = GeometricModelSettings;
 
-    static OSPInstance createHandle(OSPDevice device, const Settings &settings);
+    static OSPGeometricModel createHandle(OSPDevice device, const Settings &settings);
 };
 
-struct WorldSettings
+struct ClippingModelSettings
 {
-    std::span<Instance> instances;
+    Geometry geometry;
+    bool invertedNormals = false;
+    std::uint32_t id = std::uint32_t(-1);
 };
 
-class World : public Managed<OSPWorld>
+class ClippingModel : public Managed<OSPGeometricModel>
 {
 public:
     using Managed::Managed;
 
-    Box3 getBounds() const;
+    void invertNormals(bool inverted);
 };
 
 template<>
-struct ObjectReflector<World>
+struct ObjectReflector<ClippingModel>
 {
-    using Settings = WorldSettings;
+    using Settings = ClippingModelSettings;
 
-    static OSPWorld createHandle(OSPDevice device, const Settings &settings);
+    static OSPGeometricModel createHandle(OSPDevice device, const Settings &settings);
 };
+
 }

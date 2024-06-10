@@ -23,16 +23,40 @@
 
 #include <span>
 
-#include <ospray/ospray_cpp.h>
+#include "Object.h"
 
 namespace brayns::experimental
 {
-template<typename T>
-using SharedArray = std::span<T>;
-
-template<typename T>
-ospray::cpp::SharedData toSharedData(SharedArray<T> data)
+class Data : public Managed<OSPData>
 {
-    return ospray::cpp::SharedData(data.data(), data.size());
+public:
+    using Managed::Managed;
+};
+
+template<OsprayDataType T>
+Data toSharedData(std::span<T> items)
+{
+    auto data = items.data();
+    auto type = ospray::OSPTypeFor<T>::value;
+    auto size = items.size();
+    auto handle = ospNewSharedData(data, type, size);
+    return Data(handle);
+}
+
+template<OsprayDataType T>
+void setObjectData(OSPObject handle, const char *id, std::span<T> items)
+{
+    setObjectParam(handle, id, toSharedData(items));
+}
+
+template<OsprayDataType T>
+void setObjectDataIfNotEmpty(OSPObject handle, const char *id, std::span<T> items)
+{
+    if (items.empty())
+    {
+        removeObjectParam(handle, id);
+        return;
+    }
+    setObjectData(handle, id, items);
 }
 }

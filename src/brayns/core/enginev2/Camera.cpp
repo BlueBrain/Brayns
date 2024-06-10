@@ -21,35 +21,48 @@
 
 #include "Camera.h"
 
+namespace
+{
+using namespace brayns::experimental;
+
+void setCameraParams(OSPCamera handle, const CameraSettings &settings)
+{
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "up", settings.up);
+    setObjectParam(handle, "nearClip", settings.nearClippingDistance);
+}
+}
+
 namespace brayns::experimental
 {
-void Camera::setTransform(const Affine3 &transform)
+OSPCamera ObjectReflector<PerspectiveCamera>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("transform", transform);
+    auto handle = ospNewCamera("perspective");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setCameraParams(handle, settings.base);
+
+    setObjectParam(handle, "fovy", settings.fovy);
+    setObjectParam(handle, "aspect", settings.aspectRatio);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void Camera::setNearClip(float distance)
+OSPCamera ObjectReflector<OrthographicCamera>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("nearClip", distance);
-}
+    auto handle = ospNewCamera("perspective");
+    throwLastDeviceErrorIfNull(device, handle);
 
-void PerspectiveCamera::setFovy(float degrees)
-{
-    setParam("fovy", degrees);
-}
+    setCameraParams(handle, settings.base);
 
-void PerspectiveCamera::setAspectRatio(float aspect)
-{
-    setParam("aspect", aspect);
-}
+    setObjectParam(handle, "height", settings.height);
+    setObjectParam(handle, "aspect", settings.aspectRatio);
 
-void OrthographicCamera::setHeight(float height)
-{
-    setParam("height", height);
-}
+    commitObject(handle);
 
-void OrthographicCamera::setAspectRatio(float aspect)
-{
-    setParam("aspect", aspect);
+    return handle;
 }
 }

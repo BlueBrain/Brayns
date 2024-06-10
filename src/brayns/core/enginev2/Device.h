@@ -21,19 +21,25 @@
 
 #pragma once
 
-#include <concepts>
 #include <memory>
+#include <optional>
 
-#include <ospray/ospray_cpp.h>
+#include <brayns/core/utils/Logger.h>
 
 #include "Camera.h"
 #include "Framebuffer.h"
+#include "GeometricModel.h"
 #include "Geometry.h"
+#include "ImageOperation.h"
 #include "Light.h"
 #include "Material.h"
+#include "Object.h"
 #include "Render.h"
 #include "Renderer.h"
+#include "Texture.h"
+#include "TransferFunction.h"
 #include "Volume.h"
+#include "VolumetricModel.h"
 #include "World.h"
 
 namespace brayns::experimental
@@ -43,76 +49,15 @@ class Device
 public:
     explicit Device(OSPDevice handle);
 
-    GeometricModel createGeometricModel();
-    VolumetricModel createVolumetricModel();
-    Group createGroup();
-    Instance createInstance();
-    World createWorld();
-    Framebuffer createFramebuffer(const FramebufferSettings &settings);
-    RenderTask render(const RenderSettings &settings);
+    OSPDevice getHandle() const;
+    Future render(const Context &context);
+    std::optional<PickResult> pick(const PickSettings &settings);
 
-    template<std::derived_from<Camera> CameraType>
-    CameraType createCamera()
+    template<ReflectedObjectSettings T>
+    T create(const SettingsOf<T> &settings)
     {
-        const auto &name = CameraType::name;
-        auto handle = ospNewCamera(name.c_str());
-        return CameraType(handle);
-    }
-
-    template<std::derived_from<ImageOperation> ImageOperationType>
-    ImageOperationType createImageOperation()
-    {
-        const auto &name = ImageOperationType::name;
-        auto handle = ospNewImageOperation(name.c_str());
-        return ImageOperationType(handle);
-    }
-
-    template<std::derived_from<Geometry> GeometryType>
-    GeometryType createGeometry()
-    {
-        const auto &name = GeometryType::name;
-        auto handle = ospNewGeometry(name.c_str());
-        return GeometryType(handle);
-    }
-
-    template<std::derived_from<Light> LightType>
-    LightType createLight()
-    {
-        const auto &name = LightType::name;
-        auto handle = ospNewLight(name.c_str());
-        return LightType(handle);
-    }
-
-    template<std::derived_from<Material> MaterialType>
-    MaterialType createMaterial()
-    {
-        const auto &name = MaterialType::name;
-        auto handle = ospNewMaterial(name.c_str());
-        return MaterialType(handle);
-    }
-
-    template<std::derived_from<Renderer> RendererType>
-    RendererType createRenderer()
-    {
-        const auto &name = RendererType::name;
-        auto handle = ospNewRenderer(name.c_str());
-        return RendererType(handle);
-    }
-
-    template<std::derived_from<TransferFunction> TransferFunctionType>
-    TransferFunctionType createTransferFunction()
-    {
-        const auto &name = TransferFunctionType::name;
-        auto handle = ospNewTransferFunction(name.c_str());
-        return TransferFunctionType(handle);
-    }
-
-    template<std::derived_from<Volume> VolumeType>
-    VolumeType createVolume()
-    {
-        const auto &name = VolumeType::name;
-        auto handle = ospNewVolume(name.c_str());
-        return VolumeType(handle);
+        auto handle = ObjectReflector<T>::createHandle(_handle.get(), settings);
+        return T(handle);
     }
 
 private:
@@ -123,4 +68,6 @@ private:
 
     std::unique_ptr<osp::Device, Deleter> _handle;
 };
+
+Device createDevice(Logger &logger);
 }

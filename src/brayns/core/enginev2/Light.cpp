@@ -21,85 +21,144 @@
 
 #include "Light.h"
 
+namespace
+{
+using namespace brayns::experimental;
+
+void setLightParams(OSPLight handle, const LightSettings &settings)
+{
+    setObjectParam(handle, "color", settings.color);
+    setObjectParam(handle, "intensity", settings.intensity);
+    setObjectParam(handle, "visible", settings.visible);
+}
+}
+
 namespace brayns::experimental
 {
-void Light::setColor(const Color3 &color)
+OSPLight ObjectReflector<DistantLight>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("color", color);
+    auto handle = ospNewLight("distant");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "angularDiameter", settings.angularDiameter);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void Light::setIntensity(float intensity)
+OSPLight ObjectReflector<SphereLight>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("intensity", intensity);
+    auto handle = ospNewLight("sphere");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "radius", settings.radius);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void Light::setVisible(bool visible)
+OSPLight ObjectReflector<SpotLight>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("visible", visible);
+    auto handle = ospNewLight("spot");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "openingAngle", settings.openingAngle);
+    setObjectParam(handle, "penumbraAngle", settings.penumbraAngle);
+    setObjectParam(handle, "radius", settings.outerRadius);
+    setObjectParam(handle, "innerRadius", settings.innerRadius);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void DistantLight::setDirection(const Vector3 &direction)
+OSPLight ObjectReflector<QuadLight>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("direction", direction);
+    auto handle = ospNewLight("quad");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "edge1", settings.edge1);
+    setObjectParam(handle, "edge2", settings.edge2);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void DistantLight::setAngularDiameter(float degrees)
+OSPLight ObjectReflector<CylinderLight>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("angularDiameter", degrees);
+    auto handle = ospNewLight("cylinder");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "position1", settings.start);
+    setObjectParam(handle, "position2", settings.end);
+    setObjectParam(handle, "radius", settings.radius);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void SphereLight::setPosition(const Vector3 &position)
+OSPLight ObjectReflector<HdriLight>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("position", position);
+    auto handle = ospNewLight("hdri");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "up", settings.up);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "map", settings.map);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void SphereLight::setRadius(float radius)
+OSPLight ObjectReflector<AmbientLight>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("radius", radius);
+    auto handle = ospNewLight("ambient");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void SpotLight::setPosition(const Vector3 &position)
+OSPLight ObjectReflector<SunSkyLight>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("position", position);
-}
+    auto handle = ospNewLight("sunSky");
+    throwLastDeviceErrorIfNull(device, handle);
 
-void SpotLight::setDirection(const Vector3 &direction)
-{
-    setParam("direction", direction);
-}
+    setLightParams(handle, settings.base);
 
-void SpotLight::setOpeningAngle(float degrees)
-{
-    setParam("openingAngle", degrees);
-}
+    setObjectParam(handle, "up", settings.up);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "turbidity", settings.turbidity);
+    setObjectParam(handle, "albedo", settings.albedo);
+    setObjectParam(handle, "horizonExtension", settings.horizonExtension);
 
-void SpotLight::setPenumbraAngle(float degrees)
-{
-    setParam("penumbraAngle", degrees);
-}
+    commitObject(handle);
 
-void SpotLight::setOuterRadius(float radius)
-{
-    setParam("radius", radius);
-}
-
-void SpotLight::setInnerRadius(float radius)
-{
-    setParam("innerRadius", radius);
-}
-
-void QuadLight::setPosition(const Vector3 &position)
-{
-    setParam("position", position);
-}
-
-void QuadLight::setEdge1(const Vector3 &edge)
-{
-    setParam("edge1", edge);
-}
-
-void QuadLight::setEdge2(const Vector3 &edge)
-{
-    setParam("edge2", edge);
+    return handle;
 }
 }

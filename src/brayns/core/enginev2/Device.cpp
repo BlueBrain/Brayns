@@ -28,62 +28,73 @@ Device::Device(OSPDevice handle):
 {
 }
 
-GeometricModel Device::createGeometricModel()
+OSPDevice Device::getHandle() const
 {
-    auto handle = ospNewGeometricModel();
-    return GeometricModel(handle);
+    return _handle.get();
 }
 
-VolumetricModel Device::createVolumetricModel()
+Future Device::render(const Context &context)
 {
-    auto handle = ospNewVolumetricModel();
-    return VolumetricModel(handle);
+    return startRendering(_handle.get(), context);
 }
 
-Group Device::createGroup()
+std::optional<PickResult> Device::pick(const PickSettings &settings)
 {
-    auto handle = ospNewGroup();
-    return Group(handle);
-}
-
-Instance Device::createInstance()
-{
-    auto handle = ospNewInstance();
-    return Instance(handle);
-}
-
-World Device::createWorld()
-{
-    auto handle = ospNewWorld();
-    return World(handle);
-}
-
-Framebuffer Device::createFramebuffer(const FramebufferSettings &settings)
-{
-    auto width = static_cast<int>(settings.width);
-    auto height = static_cast<int>(settings.height);
-    auto format = static_cast<OSPFrameBufferFormat>(settings.format);
-    auto channels = static_cast<std::uint32_t>(OSP_FB_NONE);
-    for (auto channel : settings.channels)
-    {
-        channels |= static_cast<OSPFrameBufferChannel>(channel);
-    }
-    auto handle = ospNewFrameBuffer(width, height, format, channels);
-    return Framebuffer(handle);
-}
-
-RenderTask Device::render(const RenderSettings &settings)
-{
-    auto framebuffer = settings.framebuffer.getHandle();
-    auto renderer = settings.renderer.getHandle();
-    auto camera = settings.camera.getHandle();
-    auto world = settings.world.getHandle();
-    auto future = ospRenderFrame(framebuffer, renderer, camera, world);
-    return RenderTask(future);
+    return tryPick(_handle.get(), settings);
 }
 
 void Device::Deleter::operator()(OSPDevice device) const
 {
     ospDeviceRelease(device);
+    ospShutdown();
+}
+
+Device createDevice(Logger &logger)
+{
+    auto error = ospLoadModule("cpu");
+
+    if (error != OSP_NO_ERROR)
+    {
+        auto message = fmt::format("Failed to load OSPRay CPU module (code = {})", static_cast<int>(error));
+        throw std::runtime_error(message);
+    }
+
+    auto currentDevice = ospGetCurrentDevice();
+    if (currentDevice != nullptr)
+    {
+        throw std::invalid_argument("OSPRay only accepts one device created at a time");
+    }
+
+    auto device = ospNewDevice();
+
+    if (device == nullptr)
+    {
+        throw std::runtime_error("Failed to create device");
+    }
+
+    auto logLevel = OSP_LOG_DEBUG;
+    ospDeviceSetParam(device, "logLevel", OSP_UINT, &logLevel);
+
+    auto warnAsError = true;
+    ospDeviceSetParam(device, "warnAsError", OSP_BOOL, &warnAsError);
+
+    auto errorCallback = [](auto *userData, auto code, const auto *message)
+    {
+        auto &logger = *static_cast<Logger *>(userData);
+        logger.error("Device error (code = {}): {}", static_cast<int>(code), message);
+    };
+    ospDeviceSetErrorCallback(device, errorCallback, &logger);
+
+    auto statusCallback = [](auto *userData, const auto *message)
+    {
+        auto &logger = *static_cast<Logger *>(userData);
+        logger.debug("Device status: {}", message);
+    };
+    ospDeviceSetStatusCallback(device, statusCallback, &logger);
+
+    ospDeviceCommit(device);
+    ospSetCurrentDevice(device);
+
+    return Device(device);
 }
 }

@@ -21,84 +21,197 @@
 
 #pragma once
 
-#include "Managed.h"
+#include "Object.h"
+#include "Texture.h"
 
 namespace brayns::experimental
 {
+struct LightSettings
+{
+    Color3 color = {1.0F, 1.0F, 1.0F};
+    float intensity = 1.0F;
+    bool visible = true;
+};
+
 class Light : public Managed<OSPLight>
 {
 public:
     using Managed::Managed;
+};
 
-    void setColor(const Color3 &color);
-    void setIntensity(float intensity);
-    void setVisible(bool visible);
+struct DistantLightSettings
+{
+    LightSettings base = {};
+    Vector3 direction = {0.0F, 0.0F, 1.0F};
+    float angularDiameter = 0.0F;
 };
 
 class DistantLight : public Light
 {
 public:
-    static inline const std::string name = "distant";
-
     using Light::Light;
+};
 
-    void setDirection(const Vector3 &direction);
-    void setAngularDiameter(float degrees);
+template<>
+struct ObjectReflector<DistantLight>
+{
+    using Settings = DistantLightSettings;
+
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct SphereLightSettings
+{
+    LightSettings base = {};
+    Vector3 position = {0.0F, 0.0F, 0.0F};
+    float radius = 0.0F;
 };
 
 class SphereLight : public Light
 {
 public:
-    static inline const std::string name = "sphere";
-
     using Light::Light;
+};
 
-    void setPosition(const Vector3 &position);
-    void setRadius(float radius);
+template<>
+struct ObjectReflector<SphereLight>
+{
+    using Settings = SphereLightSettings;
+
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct SpotLightSettings
+{
+    LightSettings base = {};
+    Vector3 position = {0.0F, 0.0F, 0.0F};
+    Vector3 direction = {0.0F, 0.0F, 1.0F};
+    float openingAngle = 180.0F;
+    float penumbraAngle = 5.0F;
+    float outerRadius = 0.0F;
+    float innerRadius = 0.0F;
 };
 
 class SpotLight : public Light
 {
 public:
-    static inline const std::string name = "spot";
-
     using Light::Light;
+};
 
-    void setPosition(const Vector3 &position);
-    void setDirection(const Vector3 &direction);
-    void setOpeningAngle(float degrees);
-    void setPenumbraAngle(float degrees);
-    void setOuterRadius(float radius);
-    void setInnerRadius(float radius);
+template<>
+struct ObjectReflector<SpotLight>
+{
+    using Settings = SpotLightSettings;
+
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct QuadLightSettings
+{
+    LightSettings base = {};
+    Vector3 position = {0.0F, 0.0F, 0.0F};
+    Vector3 edge1 = {1.0F, 0.0F, 0.0F};
+    Vector3 edge2 = {0.0F, 1.0F, 0.0F};
 };
 
 class QuadLight : public Light
 {
 public:
-    static inline const std::string name = "quad";
-
     using Light::Light;
+};
 
-    void setPosition(const Vector3 &position);
-    void setEdge1(const Vector3 &edge);
-    void setEdge2(const Vector3 &edge);
+template<>
+struct ObjectReflector<QuadLight>
+{
+    using Settings = QuadLightSettings;
+
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct CylinderLightSettings
+{
+    LightSettings base = {};
+    Vector3 start = {0.0F, 0.0F, 0.0F};
+    Vector3 end = {0.0F, 0.0F, 1.0F};
+    float radius = 1.0F;
+};
+
+class CylinderLight : public Light
+{
+public:
+    using Light::Light;
+};
+
+template<>
+struct ObjectReflector<CylinderLight>
+{
+    using Settings = CylinderLightSettings;
+
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct HdriLightSettings
+{
+    Texture2D map;
+    LightSettings base = {};
+    Vector3 up = {0.0F, 1.0F, 0.0F};
+    Vector3 direction = {0.0F, 0.0F, 1.0F};
+};
+
+class HdriLight : public Light
+{
+public:
+    using Light::Light;
+};
+
+template<>
+struct ObjectReflector<HdriLight>
+{
+    using Settings = HdriLightSettings;
+
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct AmbientLightSettings
+{
+    LightSettings base = {};
 };
 
 class AmbientLight : public Light
 {
 public:
-    static inline const std::string name = "ambient";
-
     using Light::Light;
 };
-}
 
-namespace ospray
+template<>
+struct ObjectReflector<AmbientLight>
 {
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Light, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::DistantLight, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::SphereLight, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::SpotLight, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::QuadLight, OSP_LIGHT)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::AmbientLight, OSP_LIGHT)
+    using Settings = AmbientLightSettings;
+
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct SunSkyLightSettings
+{
+    LightSettings base = {};
+    Vector3 up = {0.0F, 1.0F, 0.0F};
+    Vector3 direction = {0.0F, -1.0F, 0.0F};
+    float turbidity = 3.0F;
+    float albedo = 0.3F;
+    float horizonExtension = 0.01F;
+};
+
+class SunSkyLight : public Light
+{
+public:
+    using Light::Light;
+};
+
+template<>
+struct ObjectReflector<SunSkyLight>
+{
+    using Settings = SunSkyLightSettings;
+
+    static OSPLight createHandle(OSPDevice device, const Settings &settings);
+};
 }

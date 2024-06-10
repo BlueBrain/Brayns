@@ -21,63 +21,40 @@
 
 #pragma once
 
+#include "Data.h"
 #include "Object.h"
 
 namespace brayns::experimental
 {
-struct CameraSettings
-{
-    Vector3 position = {0.0F, 0.0F, 0.0F};
-    Vector3 direction = {0.0F, 0.0F, 1.0F};
-    Vector3 up = {0.0F, 1.0F, 0.0F};
-    float nearClippingDistance = 1.0e-6F;
-};
-
-class Camera : public Managed<OSPCamera>
+class ImageOperation : public Managed<OSPImageOperation>
 {
 public:
     using Managed::Managed;
 };
 
-struct PerspectiveCameraSettings
+struct ToneMapperSettings
 {
-    CameraSettings base = {};
-    float fovy = 60.0F;
-    float aspectRatio = 1.0F;
+    float exposure = 1.0F;
+    float contrast = 1.6773F;
+    float hightlightCompression = 0.9714F;
+    float midLevelAnchorInput = 0.18F;
+    float midLevelAnchorOutput = 0.18F;
+    float maxHdr = 11.0785F;
+    bool aces = true;
 };
 
-class PerspectiveCamera : public Camera
+class ToneMapper : public ImageOperation
 {
 public:
-    using Camera::Camera;
+    using ImageOperation::ImageOperation;
 };
 
 template<>
-struct ObjectReflector<PerspectiveCamera>
+struct ObjectReflector<ToneMapper>
 {
-    using Settings = PerspectiveCameraSettings;
+    using Settings = ToneMapperSettings;
 
-    static OSPCamera createHandle(OSPDevice device, const Settings &settings);
+    static OSPImageOperation createHandle(OSPDevice device, const Settings &settings);
 };
 
-struct OrthographicCameraSettings
-{
-    CameraSettings base = {};
-    float height = 1.0F;
-    float aspectRatio = 1.0F;
-};
-
-class OrthographicCamera : public Camera
-{
-public:
-    using Camera::Camera;
-};
-
-template<>
-struct ObjectReflector<OrthographicCamera>
-{
-    using Settings = OrthographicCameraSettings;
-
-    static OSPCamera createHandle(OSPDevice device, const Settings &settings);
-};
 }

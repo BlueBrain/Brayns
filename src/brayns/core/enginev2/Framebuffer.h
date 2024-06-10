@@ -21,30 +21,19 @@
 
 #pragma once
 
+#include <vector>
+
 #include "Data.h"
-#include "Managed.h"
+#include "ImageOperation.h"
+#include "Object.h"
 
 namespace brayns::experimental
 {
-class ImageOperation : public Managed<OSPImageOperation>
-{
-public:
-    using Managed::Managed;
-};
-
-class ToneMapper : public ImageOperation
-{
-public:
-    static inline const std::string name = "tonemapper";
-
-    using ImageOperation::ImageOperation;
-};
-
 enum class FramebufferFormat
 {
     Rgba8 = OSP_FB_RGBA8,
     Srgba8 = OSP_FB_SRGBA,
-    Rgba32f = OSP_FB_RGBA32F,
+    Rgba32F = OSP_FB_RGBA32F,
 };
 
 enum class FramebufferChannel
@@ -66,6 +55,7 @@ struct FramebufferSettings
     std::size_t height;
     FramebufferFormat format = FramebufferFormat::Srgba8;
     std::vector<FramebufferChannel> channels = {FramebufferChannel::Color};
+    std::span<ImageOperation> operations = {};
 };
 
 class Framebuffer : public Managed<OSPFrameBuffer>
@@ -77,13 +67,13 @@ public:
     void unmap(const void *data);
     void resetAccumulation();
     float getVariance();
-    void setImageOperations(SharedArray<ImageOperation> operations);
 };
-}
 
-namespace ospray
+template<>
+struct ObjectReflector<Framebuffer>
 {
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ImageOperation, OSP_IMAGE_OPERATION)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ToneMapper, OSP_IMAGE_OPERATION)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Framebuffer, OSP_FRAMEBUFFER)
+    using Settings = FramebufferSettings;
+
+    static OSPFrameBuffer createHandle(OSPDevice device, const Settings &settings);
+};
 }

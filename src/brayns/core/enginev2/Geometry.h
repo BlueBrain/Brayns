@@ -21,8 +21,10 @@
 
 #pragma once
 
+#include <variant>
+
 #include "Data.h"
-#include "Managed.h"
+#include "Object.h"
 #include "Volume.h"
 
 namespace brayns::experimental
@@ -33,120 +35,250 @@ public:
     using Managed::Managed;
 };
 
-class GeometricModel : public Managed<OSPGeometricModel>
+struct MeshVertices
 {
-public:
-    using Managed::Managed;
-
-    void setGeometry(const Geometry &geometry);
-    void setMaterial(std::uint32_t rendererIndex);
-    void setPrimitiveMaterials(SharedArray<std::uint32_t> rendererIndices);
-    void setPrimitiveColors(SharedArray<Color4> colors);
-    void setColor(const Color4 &color);
-    void removeColors();
-    void invertNormals(bool inverted);
-    void setId(std::uint32_t id);
+    std::span<Vector3> positions;
+    std::span<Vector3> normals = {};
+    std::span<Color4> colors = {};
+    std::span<Vector2> uvs = {};
 };
 
 class Mesh : public Geometry
 {
 public:
-    static inline const std::string name = "mesh";
-
     using Geometry::Geometry;
 
-    void setVertexPositions(SharedArray<Vector3> positions);
-    void setVertexNormals(SharedArray<Vector3> normals);
-    void setVertexColors(SharedArray<Color4> colors);
-    void setTriangleIndices(SharedArray<Index3> indices);
-    void setQuadIndices(SharedArray<Index4> indices);
-    void setQuadSoup(bool quadSoup);
+    void setColors(std::span<Color4> colors);
+};
+
+struct TriangleMeshSettings
+{
+    MeshVertices vertices;
+    std::span<Index3> indices = {};
+};
+
+class TriangleMesh : public Mesh
+{
+public:
+    using Mesh::Mesh;
+};
+
+template<>
+struct ObjectReflector<TriangleMesh>
+{
+    using Settings = TriangleMeshSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct QuadMeshSettings
+{
+    MeshVertices vertices;
+    std::span<Index4> indices = {};
+};
+
+class QuadMesh : public Mesh
+{
+public:
+    using Mesh::Mesh;
+};
+
+template<>
+struct ObjectReflector<QuadMesh>
+{
+    using Settings = QuadMeshSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
+};
+
+using PositionRadius = Vector4;
+
+struct SphereSettings
+{
+    std::span<PositionRadius> points;
+    std::span<Vector2> uvs = {};
 };
 
 class Spheres : public Geometry
 {
 public:
-    static inline const std::string name = "sphere";
+    using Geometry::Geometry;
+};
 
+template<>
+struct ObjectReflector<Spheres>
+{
+    using Settings = SphereSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct DiscSettings
+{
+    std::span<PositionRadius> points;
+    std::span<Vector3> normals = {};
+    std::span<Vector2> uvs = {};
+};
+
+class Discs : public Geometry
+{
+public:
+    using Geometry::Geometry;
+};
+
+template<>
+struct ObjectReflector<Discs>
+{
+    using Settings = DiscSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct CurveVertices
+{
+    std::span<PositionRadius> points;
+    std::span<Color4> colors = {};
+    std::span<Vector2> uvs = {};
+};
+
+struct CylinderSettings
+{
+    CurveVertices vertices;
+    std::span<std::uint32_t> indices;
+};
+
+class Cylinders : public Geometry
+{
+public:
     using Geometry::Geometry;
 
-    void setPositions(SharedArray<Vector3> positions);
-    void setRadii(SharedArray<float> radii);
-    void setRadius(float radius);
+    void setColors(std::span<Color4> colors);
 };
 
-using PositionRadius = Vector4;
-
-enum class CurveType
+template<>
+struct ObjectReflector<Cylinders>
 {
-    Flat = OSP_FLAT,
-    Round = OSP_ROUND,
-    Disjoint = OSP_DISJOINT,
+    using Settings = CylinderSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
-enum class CurveBasis
+struct FlatCurve
 {
-    Linear = OSP_LINEAR,
-    Bezier = OSP_BEZIER,
-    Bspline = OSP_BSPLINE,
+};
+
+struct RoundCurve
+{
+};
+
+struct RibbonCurve
+{
+    std::span<Vector3> normals;
+};
+
+using CurveType = std::variant<FlatCurve, RoundCurve, RibbonCurve>;
+
+struct LinearCurve
+{
+};
+
+struct BezierCurve
+{
+};
+
+struct BsplineCurve
+{
+};
+
+struct HermiteCurve
+{
+    std::span<Vector4> tangents;
+};
+
+struct CatmullRomCurve
+{
+};
+
+using CurveBasis = std::variant<LinearCurve, BezierCurve, BsplineCurve, HermiteCurve, CatmullRomCurve>;
+
+struct CurveSettings
+{
+    CurveVertices vertices;
+    std::span<std::uint32_t> indices;
+    CurveType type = RoundCurve();
+    CurveBasis basis = LinearCurve();
 };
 
 class Curve : public Geometry
 {
 public:
-    static inline const std::string name = "curve";
-
     using Geometry::Geometry;
+};
 
-    void setVertexPositionsAndRadii(SharedArray<PositionRadius> positionsRadii);
-    void setVertexColors(SharedArray<Color4> colors);
-    void setIndices(SharedArray<std::uint32_t> indices);
-    void setType(CurveType type);
-    void setBasis(CurveBasis basis);
+template<>
+struct ObjectReflector<Curve>
+{
+    using Settings = CurveSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct BoxSettings
+{
+    std::span<Box3> boxes;
 };
 
 class Boxes : public Geometry
 {
 public:
-    static inline const std::string name = "box";
-
     using Geometry::Geometry;
+};
 
-    void setBoxes(SharedArray<Box3> boxes);
+template<>
+struct ObjectReflector<Boxes>
+{
+    using Settings = BoxSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct PlaneSettings
+{
+    std::span<Vector4> coefficients;
+    std::span<Box3> bounds;
 };
 
 class Planes : public Geometry
 {
 public:
-    static inline const std::string name = "plane";
-
     using Geometry::Geometry;
+};
 
-    void setCoefficients(SharedArray<Vector4> coefficients);
-    void setBounds(SharedArray<Box3> bounds);
+template<>
+struct ObjectReflector<Planes>
+{
+    using Settings = PlaneSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct IsosurfaceSettings
+{
+    Volume volume;
+    std::span<float> isovalues;
 };
 
 class Isosurfaces : public Geometry
 {
 public:
-    static inline const std::string name = "isosurface";
-
     using Geometry::Geometry;
-
-    void setVolume(const Volume &volume);
-    void setIsovalues(SharedArray<float> values);
-    void setIsovalue(float value);
 };
-}
 
-namespace ospray
+template<>
+struct ObjectReflector<Isosurfaces>
 {
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Geometry, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::GeometricModel, OSP_GEOMETRIC_MODEL)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Mesh, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Spheres, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Curve, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Boxes, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Planes, OSP_GEOMETRY)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Isosurfaces, OSP_GEOMETRY)
+    using Settings = IsosurfaceSettings;
+
+    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
+};
 }

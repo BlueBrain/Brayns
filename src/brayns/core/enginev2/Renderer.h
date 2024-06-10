@@ -21,9 +21,13 @@
 
 #pragma once
 
+#include <optional>
+#include <variant>
+
 #include "Data.h"
-#include "Managed.h"
 #include "Material.h"
+#include "Object.h"
+#include "Texture.h"
 
 namespace brayns::experimental
 {
@@ -36,58 +40,89 @@ enum class PixelFilter
     BlackmanHarris = OSP_PIXELFILTER_BLACKMAN_HARRIS,
 };
 
+using Background = std::variant<Color4, Texture2D>;
+
+struct RendererSettings
+{
+    std::size_t pixelSamples = 1;
+    std::size_t maxRayRecursionDepth = 20;
+    float minSampleContribution = 0.001F;
+    float varianceThreshold = 0.0F;
+    Background background = Color4(0.0F, 0.0F, 0.0F, 0.0F);
+    std::optional<Texture2D> maxDepth = std::nullopt;
+    std::span<Material> materials = {};
+    PixelFilter pixelFilter = PixelFilter::Gauss;
+};
+
 class Renderer : public Managed<OSPRenderer>
 {
 public:
     using Managed::Managed;
+};
 
-    void setPixelSamples(std::size_t count);
-    void setMaxRayRecursion(std::size_t depth);
-    void setMinSampleContribution(float intensity);
-    void setVarianceThreshold(float threshold);
-    void setBackgroundColor(const Color4 &color);
-    void setMaterials(SharedArray<Material> materials);
-    void setPixelFilter(PixelFilter filter);
+struct AmbientOcclusionRendererSettings
+{
+    RendererSettings base = {};
+    std::size_t aoSamples = 1;
+    float aoDistance = 1e20F;
+    float aoIntensity = 1.0F;
+    float volumeSamplingRate = 1.0F;
 };
 
 class AmbientOcclusionRenderer : public Renderer
 {
 public:
-    static inline const std::string name = "ao";
-
     using Renderer::Renderer;
+};
 
-    void setAoSamples(std::size_t count);
-    void setAoDistance(float distance);
-    void setAoIntensity(float intensity);
+template<>
+struct ObjectReflector<AmbientOcclusionRenderer>
+{
+    using Settings = AmbientOcclusionRendererSettings;
+
+    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct ScivisRendererSettings
+{
+    RendererSettings base = {};
+    bool shadows = false;
+    std::size_t aoSamples = 0;
+    float aoDistance = 1e20F;
+    float volumeSamplingRate = 1.0F;
+    bool showVisibleLights = false;
 };
 
 class ScivisRenderer : public Renderer
 {
 public:
-    static inline const std::string name = "scivis";
-
     using Renderer::Renderer;
+};
 
-    void enableShadows(bool enable);
-    void setAoSamples(std::size_t count);
-    void setAoDistance(float distance);
-    void showLights(bool show);
+template<>
+struct ObjectReflector<ScivisRenderer>
+{
+    using Settings = ScivisRendererSettings;
+
+    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
+};
+
+struct PathTracerSettings
+{
+    RendererSettings base = {};
 };
 
 class PathTracer : public Renderer
 {
 public:
-    static inline const std::string name = "pathtracer";
-
     using Renderer::Renderer;
 };
-}
 
-namespace ospray
+template<>
+struct ObjectReflector<PathTracer>
 {
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::Renderer, OSP_RENDERER)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::AmbientOcclusionRenderer, OSP_RENDERER)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::ScivisRenderer, OSP_RENDERER)
-OSPTYPEFOR_SPECIALIZATION(brayns::experimental::PathTracer, OSP_RENDERER)
+    using Settings = PathTracerSettings;
+
+    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
+};
 }

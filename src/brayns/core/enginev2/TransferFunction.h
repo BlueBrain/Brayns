@@ -21,36 +21,35 @@
 
 #pragma once
 
-#include <memory>
-
-#include <brayns/core/utils/Logger.h>
-
-#include "Device.h"
+#include "Data.h"
+#include "Object.h"
 
 namespace brayns::experimental
 {
-class Engine
+class TransferFunction : public Managed<OSPTransferFunction>
 {
 public:
-    class Loader
-    {
-    public:
-        Loader() = default;
-        ~Loader();
-
-        Loader(const Loader &other) = delete;
-        Loader(Loader &&other) = delete;
-        Loader &operator=(const Loader &other) = delete;
-        Loader &operator=(Loader &&other) = delete;
-    };
-
-    explicit Engine(std::unique_ptr<Loader> loader);
-
-    Device createDevice(Logger &logger);
-
-private:
-    std::unique_ptr<Loader> _loader;
+    using Managed::Managed;
 };
 
-Engine loadEngine();
+struct LinearTransferFunctionSettings
+{
+    std::span<Color3> colors;
+    std::span<float> opacities;
+    Box1 scalarRange;
+};
+
+class LinearTransferFunction : public TransferFunction
+{
+public:
+    using TransferFunction::TransferFunction;
+};
+
+template<>
+struct ObjectReflector<LinearTransferFunction>
+{
+    using Settings = LinearTransferFunctionSettings;
+
+    static OSPTransferFunction createHandle(OSPDevice device, const Settings &settings);
+};
 }

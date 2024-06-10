@@ -23,43 +23,62 @@
 
 namespace brayns::experimental
 {
-void Group::setVolumes(SharedArray<VolumetricModel> models)
+Box3 Group::getBounds() const
 {
-    setParam("volume", toSharedData(models));
+    auto handle = getHandle();
+    return getObjectBounds(handle);
 }
 
-void Group::setGeometries(SharedArray<GeometricModel> models)
+Box3 Instance::getBounds() const
 {
-    setParam("geometry", toSharedData(models));
+    auto handle = getHandle();
+    return getObjectBounds(handle);
 }
 
-void Group::setClippingGeometries(SharedArray<GeometricModel> models)
+Box3 World::getBounds() const
 {
-    setParam("clippingGeometry", toSharedData(models));
+    auto handle = getHandle();
+    return getObjectBounds(handle);
 }
 
-void Group::setLights(SharedArray<Light> lights)
+OSPGroup ObjectReflector<Group>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("light", toSharedData(lights));
+    auto handle = ospNewGroup();
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setObjectDataIfNotEmpty(handle, "geometry", settings.geometries);
+    setObjectDataIfNotEmpty(handle, "volume", settings.volumes);
+    setObjectDataIfNotEmpty(handle, "clippingGeometry", settings.clippingGeometries);
+    setObjectDataIfNotEmpty(handle, "light", settings.lights);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void Instance::setGroup(const Group &group)
+OSPInstance ObjectReflector<Instance>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("group", group.getHandle());
+    auto handle = ospNewInstance();
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setObjectParam(handle, "group", settings.group);
+    setObjectParam(handle, "transform", toAffine(settings.transform));
+    setObjectParam(handle, "id", settings.id);
+
+    commitObject(handle);
+
+    return handle;
 }
 
-void Instance::setTransform(const Affine3 &transform)
+OSPWorld ObjectReflector<World>::createHandle(OSPDevice device, const Settings &settings)
 {
-    setParam("transform", transform);
-}
+    auto handle = ospNewWorld();
+    throwLastDeviceErrorIfNull(device, handle);
 
-void Instance::setId(std::uint32_t id)
-{
-    setParam("id", id);
-}
+    setObjectData(handle, "instance", settings.instances);
 
-void World::setInstances(SharedArray<Instance> instances)
-{
-    setParam("instance", toSharedData(instances));
+    commitObject(handle);
+
+    return handle;
 }
 }
