@@ -21,31 +21,84 @@
 
 #include "Geometry.h"
 
+#include <stdexcept>
+
 namespace
 {
+using brayns::Vector3;
 using namespace brayns::experimental;
 
-void setMeshParams(OSPGeometry handle, const MeshSettings &settings)
+void setMeshVerticesParams(OSPGeometry handle, const MeshVertices &vertices)
 {
-    setObjectData(handle, "vertex.position", settings.positions);
-    setObjectDataIfNotEmpty(handle, "vertex.normal", settings.normals);
-    setObjectDataIfNotEmpty(handle, "vertex.color", settings.colors);
-    setObjectDataIfNotEmpty(handle, "vertex.texcoord", settings.uvs);
+    setObjectData(handle, "vertex.position", vertices.positions);
+    setObjectDataIfNotEmpty(handle, "vertex.normal", vertices.normals);
+    setObjectDataIfNotEmpty(handle, "vertex.color", vertices.colors);
+    setObjectDataIfNotEmpty(handle, "vertex.texcoord", vertices.uvs);
 }
 
-void setSphereParams(OSPGeometry handle, const SphereSettings &settings)
+// TODO remove when OSPRay exposes sphere.position_radius to match embree internal layout
+void setInterleavedSpheresParams(OSPGeometry handle, std::span<PositionRadius> points)
 {
-    setObjectData(handle, "sphere.position", settings.positions);
-    setObjectData(handle, "sphere.radius", settings.radii);
-    setObjectDataIfNotEmpty(handle, "sphere.texcoord", settings.uvs);
+    auto data = points.data();
+    auto size = points.size();
+
+    constexpr auto stride = sizeof(PositionRadius);
+    constexpr auto radiusOffset = sizeof(PositionRadius) - sizeof(float);
+
+    auto positions = Data(ospNewSharedData(data, OSP_VEC3F, size, stride));
+    setObjectParam(handle, "sphere.position", positions);
+
+    auto radii = Data(ospNewSharedData(data + radiusOffset, OSP_FLOAT, size, stride));
+    setObjectParam(handle, "sphere.radius", radii);
 }
 
-void setCurveParams(OSPGeometry handle, const CylinderSettings &settings)
+void setCurveVerticesParams(OSPGeometry handle, const CurveVertices &vertices)
 {
-    setObjectData(handle, "vertex.position_radius", settings.samples);
-    setObjectData(handle, "index", settings.indices);
-    setObjectDataIfNotEmpty(handle, "vertex.texcoord", settings.uvs);
-    setObjectDataIfNotEmpty(handle, "vertex.color", settings.colors);
+    setObjectData(handle, "vertex.position_radius", vertices.points);
+    setObjectDataIfNotEmpty(handle, "vertex.texcoord", vertices.uvs);
+    setObjectDataIfNotEmpty(handle, "vertex.color", vertices.colors);
+}
+
+void setCurveType(OSPGeometry handle, FlatCurve)
+{
+    setObjectParam(handle, "type", OSP_FLAT);
+}
+
+void setCurveType(OSPGeometry handle, RoundCurve)
+{
+    setObjectParam(handle, "type", OSP_ROUND);
+}
+
+void setCurveType(OSPGeometry handle, const RibbonCurve &curve)
+{
+    setObjectParam(handle, "type", OSP_RIBBON);
+    setObjectData(handle, "vertex.normal", curve.normals);
+}
+
+void setCurveBasis(OSPGeometry handle, LinearCurve)
+{
+    setObjectParam(handle, "basis", OSP_LINEAR);
+}
+
+void setCurveBasis(OSPGeometry handle, BezierCurve)
+{
+    setObjectParam(handle, "basis", OSP_BEZIER);
+}
+
+void setCurveBasis(OSPGeometry handle, BsplineCurve)
+{
+    setObjectParam(handle, "basis", OSP_BSPLINE);
+}
+
+void setCurveBasis(OSPGeometry handle, const HermiteCurve &curve)
+{
+    setObjectParam(handle, "basis", OSP_HERMITE);
+    setObjectData(handle, "vertex.tangent", curve.tangents);
+}
+
+void setCurveBasis(OSPGeometry handle, CatmullRomCurve)
+{
+    setObjectParam(handle, "basis", OSP_CATMULL_ROM);
 }
 }
 
@@ -63,7 +116,7 @@ OSPGeometry ObjectReflector<TriangleMesh>::createHandle(OSPDevice device, const 
     auto handle = ospNewGeometry("mesh");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setMeshParams(handle, settings);
+    setMeshVerticesParams(handle, settings.vertices);
     setObjectDataIfNotEmpty(handle, "index", settings.indices);
 
     commitObject(handle);
@@ -76,15 +129,15 @@ OSPGeometry ObjectReflector<QuadMesh>::createHandle(OSPDevice device, const Sett
     auto handle = ospNewGeometry("mesh");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setMeshParams(handle, settings);
+    setMeshVerticesParams(handle, settings.vertices);
 
-    if (!settings.indices.empty())
+    if (settings.indices.empty())
     {
-        setObjectData(handle, "index", settings.indices);
+        setObjectParam(handle, "quadSoup", true);
     }
     else
     {
-        setObjectParam(handle, "quadSoup", true);
+        setObjectData(handle, "index", settings.indices);
     }
 
     commitObject(handle);
@@ -97,7 +150,9 @@ OSPGeometry ObjectReflector<Spheres>::createHandle(OSPDevice device, const Setti
     auto handle = ospNewGeometry("sphere");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setSphereParams(handle, settings);
+    setInterleavedSpheresParams(handle, settings.points);
+    setObjectDataIfNotEmpty(handle, "sphere.texcoord", settings.uvs);
+    setObjectParam(handle, "type", OSP_SPHERE);
 
     commitObject(handle);
 
@@ -109,7 +164,8 @@ OSPGeometry ObjectReflector<Discs>::createHandle(OSPDevice device, const Setting
     auto handle = ospNewGeometry("sphere");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setSphereParams(handle, settings);
+    setInterleavedSpheresParams(handle, settings.points);
+    setObjectDataIfNotEmpty(handle, "sphere.texcoord", settings.uvs);
 
     if (settings.normals.empty())
     {
@@ -138,7 +194,11 @@ OSPGeometry ObjectReflector<Cylinders>::createHandle(OSPDevice device, const Set
     auto handle = ospNewGeometry("curve");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setCurveParams(handle, settings);
+    setCurveVerticesParams(handle, settings.vertices);
+    setObjectData(handle, "indices", settings.indices);
+
+    setObjectParam(handle, "type", OSP_DISJOINT);
+    setObjectParam(handle, "basis", OSP_LINEAR);
 
     commitObject(handle);
 
@@ -147,29 +207,19 @@ OSPGeometry ObjectReflector<Cylinders>::createHandle(OSPDevice device, const Set
 
 OSPGeometry ObjectReflector<Curve>::createHandle(OSPDevice device, const Settings &settings)
 {
+    if (std::holds_alternative<RibbonCurve>(settings.type) && std::holds_alternative<LinearCurve>(settings.basis))
+    {
+        throw std::invalid_argument("OSPRay does not support ribbon curve with linear basis");
+    }
+
     auto handle = ospNewGeometry("curve");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setCurveParams(handle, settings);
+    setCurveVerticesParams(handle, settings.vertices);
+    setObjectData(handle, "indices", settings.indices);
 
-    setObjectParam(handle, "type", static_cast<OSPCurveType>(settings.type));
-    setObjectParam(handle, "basis", static_cast<OSPCurveBasis>(settings.basis));
-
-    commitObject(handle);
-
-    return handle;
-}
-
-OSPGeometry ObjectReflector<Ribbon>::createHandle(OSPDevice device, const Settings &settings)
-{
-    auto handle = ospNewGeometry("curve");
-    throwLastDeviceErrorIfNull(device, handle);
-
-    setCurveParams(handle, settings);
-
-    setObjectData(handle, "vertex.normal", settings.normals);
-    setObjectParam(handle, "type", OSP_RIBBON);
-    setObjectParam(handle, "basis", static_cast<OSPCurveBasis>(settings.basis));
+    std::visit([=](const auto &value) { setCurveType(handle, value); }, settings.type);
+    std::visit([=](const auto &value) { setCurveBasis(handle, value); }, settings.basis);
 
     commitObject(handle);
 

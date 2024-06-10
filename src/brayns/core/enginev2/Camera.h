@@ -39,8 +39,9 @@ public:
     using Managed::Managed;
 };
 
-struct PerspectiveCameraSettings : CameraSettings
+struct PerspectiveCameraSettings
 {
+    CameraSettings base = {};
     float fovy = 60.0F;
     float aspectRatio = 1.0F;
 };
@@ -59,8 +60,9 @@ struct ObjectReflector<PerspectiveCamera>
     static OSPCamera createHandle(OSPDevice device, const Settings &settings);
 };
 
-struct OrthographicCameraSettings : CameraSettings
+struct OrthographicCameraSettings
 {
+    CameraSettings base = {};
     float height = 1.0F;
     float aspectRatio = 1.0F;
 };

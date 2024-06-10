@@ -40,7 +40,7 @@ OSPLight ObjectReflector<DistantLight>::createHandle(OSPDevice device, const Set
     auto handle = ospNewLight("distant");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setLightParams(handle, settings);
+    setLightParams(handle, settings.base);
 
     setObjectParam(handle, "direction", settings.direction);
     setObjectParam(handle, "angularDiameter", settings.angularDiameter);
@@ -55,7 +55,7 @@ OSPLight ObjectReflector<SphereLight>::createHandle(OSPDevice device, const Sett
     auto handle = ospNewLight("sphere");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setLightParams(handle, settings);
+    setLightParams(handle, settings.base);
 
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "radius", settings.radius);
@@ -70,7 +70,7 @@ OSPLight ObjectReflector<SpotLight>::createHandle(OSPDevice device, const Settin
     auto handle = ospNewLight("spot");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setLightParams(handle, settings);
+    setLightParams(handle, settings.base);
 
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "direction", settings.direction);
@@ -89,11 +89,43 @@ OSPLight ObjectReflector<QuadLight>::createHandle(OSPDevice device, const Settin
     auto handle = ospNewLight("quad");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setLightParams(handle, settings);
+    setLightParams(handle, settings.base);
 
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "edge1", settings.edge1);
     setObjectParam(handle, "edge2", settings.edge2);
+
+    commitObject(handle);
+
+    return handle;
+}
+
+OSPLight ObjectReflector<CylinderLight>::createHandle(OSPDevice device, const Settings &settings)
+{
+    auto handle = ospNewLight("cylinder");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "position1", settings.start);
+    setObjectParam(handle, "position2", settings.end);
+    setObjectParam(handle, "radius", settings.radius);
+
+    commitObject(handle);
+
+    return handle;
+}
+
+OSPLight ObjectReflector<HdriLight>::createHandle(OSPDevice device, const Settings &settings)
+{
+    auto handle = ospNewLight("hdri");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "up", settings.up);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "map", settings.map);
 
     commitObject(handle);
 
@@ -105,7 +137,25 @@ OSPLight ObjectReflector<AmbientLight>::createHandle(OSPDevice device, const Set
     auto handle = ospNewLight("ambient");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setLightParams(handle, settings);
+    setLightParams(handle, settings.base);
+
+    commitObject(handle);
+
+    return handle;
+}
+
+OSPLight ObjectReflector<SunSkyLight>::createHandle(OSPDevice device, const Settings &settings)
+{
+    auto handle = ospNewLight("sunSky");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    setLightParams(handle, settings.base);
+
+    setObjectParam(handle, "up", settings.up);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "turbidity", settings.turbidity);
+    setObjectParam(handle, "albedo", settings.albedo);
+    setObjectParam(handle, "horizonExtension", settings.horizonExtension);
 
     commitObject(handle);
 

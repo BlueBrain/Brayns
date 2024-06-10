@@ -53,6 +53,8 @@ enum class TextureFormat
     R16 = OSP_TEXTURE_R16,
 };
 
+DataType getTextureDataType(TextureFormat format);
+
 enum class TextureFilter
 {
     Linear = OSP_TEXTURE_FILTER_LINEAR,

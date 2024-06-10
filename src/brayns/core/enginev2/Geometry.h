@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <variant>
+
 #include "Data.h"
 #include "Object.h"
 #include "Volume.h"
@@ -33,13 +35,12 @@ public:
     using Managed::Managed;
 };
 
-struct MeshSettings
+struct MeshVertices
 {
     std::span<Vector3> positions;
     std::span<Vector3> normals = {};
     std::span<Color4> colors = {};
     std::span<Vector2> uvs = {};
-    std::span<Index3> indices = {};
 };
 
 class Mesh : public Geometry
@@ -50,8 +51,9 @@ public:
     void setColors(std::span<Color4> colors);
 };
 
-struct TriangleMeshSettings : MeshSettings
+struct TriangleMeshSettings
 {
+    MeshVertices vertices;
     std::span<Index3> indices = {};
 };
 
@@ -69,8 +71,9 @@ struct ObjectReflector<TriangleMesh>
     static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
-struct QuadMeshSettings : MeshSettings
+struct QuadMeshSettings
 {
+    MeshVertices vertices;
     std::span<Index4> indices = {};
 };
 
@@ -88,10 +91,11 @@ struct ObjectReflector<QuadMesh>
     static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
+using PositionRadius = Vector4;
+
 struct SphereSettings
 {
-    std::span<Vector3> positions;
-    std::span<float> radii;
+    std::span<PositionRadius> points;
     std::span<Vector2> uvs = {};
 };
 
@@ -109,9 +113,11 @@ struct ObjectReflector<Spheres>
     static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
-struct DiscSettings : SphereSettings
+struct DiscSettings
 {
-    std::span<Vector3> normals;
+    std::span<PositionRadius> points;
+    std::span<Vector3> normals = {};
+    std::span<Vector2> uvs = {};
 };
 
 class Discs : public Geometry
@@ -128,14 +134,17 @@ struct ObjectReflector<Discs>
     static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
-using PositionRadius = Vector4;
+struct CurveVertices
+{
+    std::span<PositionRadius> points;
+    std::span<Color4> colors = {};
+    std::span<Vector2> uvs = {};
+};
 
 struct CylinderSettings
 {
-    std::span<PositionRadius> samples;
+    CurveVertices vertices;
     std::span<std::uint32_t> indices;
-    std::span<Color4> colors = {};
-    std::span<Vector2> uvs = {};
 };
 
 class Cylinders : public Geometry
@@ -154,63 +163,62 @@ struct ObjectReflector<Cylinders>
     static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };
 
-enum class CurveType
+struct FlatCurve
 {
-    Flat = OSP_FLAT,
-    Round = OSP_ROUND,
 };
 
-enum class CurveBasis
+struct RoundCurve
 {
-    Linear = OSP_LINEAR,
-    Bezier = OSP_BEZIER,
-    Bspline = OSP_BSPLINE,
-    CatmullRom = OSP_CATMULL_ROM,
 };
 
-struct CurveSettings : CylinderSettings
+struct RibbonCurve
 {
-    CurveType type = CurveType::Round;
-    CurveBasis basis = CurveBasis::Linear;
+    std::span<Vector3> normals;
 };
 
-class Curve : public Cylinders
+using CurveType = std::variant<FlatCurve, RoundCurve, RibbonCurve>;
+
+struct LinearCurve
+{
+};
+
+struct BezierCurve
+{
+};
+
+struct BsplineCurve
+{
+};
+
+struct HermiteCurve
+{
+    std::span<Vector4> tangents;
+};
+
+struct CatmullRomCurve
+{
+};
+
+using CurveBasis = std::variant<LinearCurve, BezierCurve, BsplineCurve, HermiteCurve, CatmullRomCurve>;
+
+struct CurveSettings
+{
+    CurveVertices vertices;
+    std::span<std::uint32_t> indices;
+    CurveType type = RoundCurve();
+    CurveBasis basis = LinearCurve();
+};
+
+class Curve : public Geometry
 {
 public:
-    using Cylinders::Cylinders;
+    using Geometry::Geometry;
 };
 
 template<>
 struct ObjectReflector<Curve>
 {
     using Settings = CurveSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
-
-enum class RibbonBasis
-{
-    Bezier = OSP_BEZIER,
-    Bspline = OSP_BSPLINE,
-    CatmullRom = OSP_CATMULL_ROM,
-};
-
-struct RibbonSettings : CylinderSettings
-{
-    RibbonBasis basis = RibbonBasis::Bezier;
-    std::span<Vector3> normals;
-};
-
-class Ribbon : public Cylinders
-{
-public:
-    using Cylinders::Cylinders;
-};
-
-template<>
-struct ObjectReflector<Ribbon>
-{
-    using Settings = RibbonSettings;
 
     static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
 };

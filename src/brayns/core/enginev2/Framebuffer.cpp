@@ -62,7 +62,7 @@ OSPFrameBuffer ObjectReflector<Framebuffer>::createHandle(OSPDevice device, cons
     auto handle = ospNewFrameBuffer(width, height, format, channels);
     throwLastDeviceErrorIfNull(device, handle);
 
-    setObjectData(handle, "imageOperation", settings.operations);
+    setObjectDataIfNotEmpty(handle, "imageOperation", settings.operations);
 
     commitObject(handle);
 

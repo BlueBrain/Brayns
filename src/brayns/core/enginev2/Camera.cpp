@@ -41,7 +41,7 @@ OSPCamera ObjectReflector<PerspectiveCamera>::createHandle(OSPDevice device, con
     auto handle = ospNewCamera("perspective");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setCameraParams(handle, settings);
+    setCameraParams(handle, settings.base);
 
     setObjectParam(handle, "fovy", settings.fovy);
     setObjectParam(handle, "aspect", settings.aspectRatio);
@@ -56,7 +56,8 @@ OSPCamera ObjectReflector<OrthographicCamera>::createHandle(OSPDevice device, co
     auto handle = ospNewCamera("perspective");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setCameraParams(handle, settings);
+    setCameraParams(handle, settings.base);
+
     setObjectParam(handle, "height", settings.height);
     setObjectParam(handle, "aspect", settings.aspectRatio);
 

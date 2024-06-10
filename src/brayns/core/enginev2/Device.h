@@ -50,7 +50,7 @@ public:
     explicit Device(OSPDevice handle);
 
     OSPDevice getHandle() const;
-    Future render(const RenderSettings &settings);
+    Future render(const Context &context);
     std::optional<PickResult> pick(const PickSettings &settings);
 
     template<ReflectedObjectSettings T>

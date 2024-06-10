@@ -48,6 +48,12 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
     setObjectParam(handle, "minContribution", settings.minSampleContribution);
     setObjectParam(handle, "varianceThreshold", settings.varianceThreshold);
     setBackground(handle, settings.background);
+
+    if (settings.maxDepth)
+    {
+        setObjectParam(handle, "maxDepth", *settings.maxDepth);
+    }
+
     setObjectData(handle, "material", settings.materials);
     setObjectParam(handle, "pixelFilter", static_cast<OSPPixelFilterType>(settings.pixelFilter));
 }
@@ -60,7 +66,7 @@ OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice de
     auto handle = ospNewRenderer("ao");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setRendererParams(handle, settings);
+    setRendererParams(handle, settings.base);
 
     setObjectParam(handle, "aoSamples", settings.aoSamples);
     setObjectParam(handle, "aoDistance", settings.aoDistance);
@@ -77,7 +83,7 @@ OSPRenderer ObjectReflector<ScivisRenderer>::createHandle(OSPDevice device, cons
     auto handle = ospNewRenderer("scivis");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setRendererParams(handle, settings);
+    setRendererParams(handle, settings.base);
 
     setObjectParam(handle, "shadows", settings.shadows);
     setObjectParam(handle, "aoSamples", settings.aoSamples);
@@ -95,7 +101,7 @@ OSPRenderer ObjectReflector<PathTracer>::createHandle(OSPDevice device, const Se
     auto handle = ospNewRenderer("pathtracer");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setRendererParams(handle, settings);
+    setRendererParams(handle, settings.base);
 
     commitObject(handle);
 

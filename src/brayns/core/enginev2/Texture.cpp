@@ -26,7 +26,17 @@ namespace
 using brayns::Size2;
 using namespace brayns::experimental;
 
-OSPDataType getDataType(TextureFormat format)
+Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
+{
+    auto type = getTextureDataType(format);
+    auto handle = ospNewSharedData(data, type, size[0], 0, size[1]);
+    return Data(handle);
+}
+}
+
+namespace brayns::experimental
+{
+DataType getTextureDataType(TextureFormat format)
 {
     switch (format)
     {
@@ -61,16 +71,6 @@ OSPDataType getDataType(TextureFormat format)
     }
 }
 
-Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
-{
-    auto type = getDataType(format);
-    auto handle = ospNewSharedData(data, type, size[0], 0, size[1]);
-    return Data(handle);
-}
-}
-
-namespace brayns::experimental
-{
 OSPTexture ObjectReflector<Texture2D>::createHandle(OSPDevice device, const Settings &settings)
 {
     auto handle = ospNewTexture("texture2D");

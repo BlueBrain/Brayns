@@ -33,9 +33,9 @@ OSPDevice Device::getHandle() const
     return _handle.get();
 }
 
-Future Device::render(const RenderSettings &settings)
+Future Device::render(const Context &context)
 {
-    return startRendering(_handle.get(), settings);
+    return startRendering(_handle.get(), context);
 }
 
 std::optional<PickResult> Device::pick(const PickSettings &settings)

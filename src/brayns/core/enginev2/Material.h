@@ -42,6 +42,13 @@ struct MaterialVolumeTexture
 
 using MaterialTexture = std::variant<std::monostate, MaterialTexture2D, MaterialVolumeTexture>;
 
+template<typename T>
+struct MaterialParam
+{
+    T value;
+    MaterialTexture texture = {};
+};
+
 class Material : public Managed<OSPMaterial>
 {
 public:
@@ -50,9 +57,8 @@ public:
 
 struct AmbientOcclusionMaterialSettings
 {
-    Color3 diffuse = {0.8F, 0.8F, 0.8F};
-    MaterialTexture diffuseMap = {};
-    float opacity = 1.0F;
+    MaterialParam<Color3> diffuse = {{0.8F, 0.8F, 0.8F}};
+    MaterialParam<float> opacity = {1.0F};
 };
 
 class AmbientOcclusionMaterial : public Material
@@ -69,10 +75,12 @@ struct ObjectReflector<AmbientOcclusionMaterial>
     static OSPMaterial createHandle(OSPDevice device, const Settings &settings);
 };
 
-struct ScivisMaterialSettings : AmbientOcclusionMaterialSettings
+struct ScivisMaterialSettings
 {
-    Color3 specular = {0.0F, 0.0F, 0.0F};
-    float shininess = 10.0F;
+    MaterialParam<Color3> diffuse = {{0.8F, 0.8F, 0.8F}};
+    MaterialParam<float> opacity = {1.0F};
+    MaterialParam<Color3> specular = {{0.0F, 0.0F, 0.0F}};
+    MaterialParam<float> shininess = {10.0F};
     Color3 transparencyFilter = {0.0F, 0.0F, 0.0F};
 };
 
@@ -92,37 +100,37 @@ struct ObjectReflector<ScivisMaterial>
 
 struct PrincipledMaterialSettings
 {
-    Color3 baseColor = {0.8F, 0.8F, 0.8F};
-    MaterialTexture baseColorMap = {};
-    Color3 edgeColor = {1.0F, 1.0F, 1.0F};
-    float metallic = 0.0F;
-    float diffuse = 1.0F;
-    float specular = 1.0F;
-    float ior = 1.0F;
-    float transmission = 0.0F;
-    Color3 transmissionColor = {1.0F, 1.0F, 1.0F};
-    float transmissionDepth = 1.0F;
-    float roughness = 0.0F;
-    float anisotropy = 0.0F;
-    float rotation = 0.0F;
-    float normal = 1.0F;
-    MaterialTexture normalMap = {};
-    float baseNormal = 1.0F;
-    bool thin = false;
-    float thickness = 1.0F;
-    float backlight = 0.0F;
-    float coat = 0.0F;
-    float coatIor = 1.5F;
-    Color3 coatColor = {1.0F, 1.0F, 1.0F};
-    float coatThickness = 1.0F;
-    float coatRoughness = 0.0F;
-    float coatNormal = 1.0F;
-    float sheen = 0.0F;
-    Color3 sheenColor = {1.0F, 1.0F, 1.0F};
-    float sheenTint = 0.0F;
-    float sheenRoughness = 0.2F;
-    float opacity = 1.0F;
-    Color3 emissiveColor = {0.0F, 0.0F, 0.0F};
+    MaterialParam<Color3> baseColor = {{0.8F, 0.8F, 0.8F}};
+    MaterialParam<MaterialTexture> baseColorMap = {{}};
+    MaterialParam<Color3> edgeColor = {{1.0F, 1.0F, 1.0F}};
+    MaterialParam<float> metallic = {0.0F};
+    MaterialParam<float> diffuse = {1.0F};
+    MaterialParam<float> specular = {1.0F};
+    MaterialParam<float> ior = {1.0F};
+    MaterialParam<float> transmission = {0.0F};
+    MaterialParam<Color3> transmissionColor = {{1.0F, 1.0F, 1.0F}};
+    MaterialParam<float> transmissionDepth = {1.0F};
+    MaterialParam<float> roughness = {0.0F};
+    MaterialParam<float> anisotropy = {0.0F};
+    MaterialParam<float> rotation = {0.0F};
+    MaterialParam<float> normal = {1.0F};
+    MaterialParam<MaterialTexture> normalMap = {{}};
+    MaterialParam<float> baseNormal = {1.0F};
+    MaterialParam<bool> thin = {false};
+    MaterialParam<float> thickness = {1.0F};
+    MaterialParam<float> backlight = {0.0F};
+    MaterialParam<float> coat = {0.0F};
+    MaterialParam<float> coatIor = {1.5F};
+    MaterialParam<Color3> coatColor = {{1.0F, 1.0F, 1.0F}};
+    MaterialParam<float> coatThickness = {1.0F};
+    MaterialParam<float> coatRoughness = {0.0F};
+    MaterialParam<float> coatNormal = {1.0F};
+    MaterialParam<float> sheen = {0.0F};
+    MaterialParam<Color3> sheenColor = {{1.0F, 1.0F, 1.0F}};
+    MaterialParam<float> sheenTint = {0.0F};
+    MaterialParam<float> sheenRoughness = {0.2F};
+    MaterialParam<float> opacity = {1.0F};
+    MaterialParam<Color3> emissiveColor = {{0.0F, 0.0F, 0.0F}};
 };
 
 class PrincipledMaterial : public Material

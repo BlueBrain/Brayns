@@ -47,11 +47,11 @@ using Color4 = Vector4;
 using Quaternion = rkcommon::math::quaternionf;
 
 template<typename T, int S>
-using Box = rkcommon::math::box_t<T, S>;
+using BoxT = rkcommon::math::box_t<T, S>;
 
 using Box1 = rkcommon::math::box1f;
-using Box2 = Box<float, 2>;
-using Box3 = Box<float, 3>;
+using Box2 = BoxT<float, 2>;
+using Box3 = BoxT<float, 3>;
 
 using Affine2 = rkcommon::math::AffineSpace2f;
 using Affine3 = rkcommon::math::AffineSpace3f;

@@ -26,7 +26,7 @@ namespace
 using brayns::Color4;
 using namespace brayns::experimental;
 
-void setMaterialParam(OSPGeometricModel handle, const PrimitiveMaterials &materials)
+void setMaterialParams(OSPGeometricModel handle, const PrimitiveMaterials &materials)
 {
     setObjectData(handle, "material", materials.rendererIndices);
     setObjectDataIfNotEmpty(handle, "color", materials.colors);
@@ -39,7 +39,7 @@ namespace brayns::experimental
 void GeometricModel::setMaterials(const PrimitiveMaterials &materials)
 {
     auto handle = getHandle();
-    setMaterialParam(handle, materials);
+    setMaterialParams(handle, materials);
     commitObject(handle);
 }
 
@@ -56,7 +56,7 @@ OSPGeometricModel ObjectReflector<GeometricModel>::createHandle(OSPDevice device
     throwLastDeviceErrorIfNull(device, handle);
 
     setObjectParam(handle, "geometry", settings.geometry);
-    setMaterialParam(handle, settings.materials);
+    setMaterialParams(handle, settings.materials);
     setObjectParam(handle, "invertNormals", settings.invertedNormals);
     setObjectParam(handle, "id", settings.id);
 

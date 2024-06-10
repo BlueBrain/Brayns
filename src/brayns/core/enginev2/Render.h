@@ -31,7 +31,7 @@
 
 namespace brayns::experimental
 {
-struct RenderSettings
+struct Context
 {
     Framebuffer framebuffer;
     Renderer renderer;
@@ -50,10 +50,11 @@ public:
     float waitAndGetDuration();
 };
 
-Future startRendering(OSPDevice device, const RenderSettings &settings);
+Future startRendering(OSPDevice device, const Context &context);
 
-struct PickSettings : RenderSettings
+struct PickSettings
 {
+    Context context;
     Vector2 normalizedScreenPosition;
 };
 

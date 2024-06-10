@@ -124,24 +124,29 @@ public:
     }
 };
 
-Box3 getObjectBounds(OSPObject handle)
+inline Box3 getObjectBounds(OSPObject handle)
 {
     auto [lower, upper] = ospGetBounds(handle);
     return {{lower[0], lower[1], lower[2]}, {upper[0], upper[1], upper[2]}};
 }
 
-void commitObject(OSPObject handle)
+inline void commitObject(OSPObject handle)
 {
     ospCommit(handle);
 }
 
-void removeObjectParam(OSPObject handle, const char *id)
+inline void removeObjectParam(OSPObject handle, const char *id)
 {
     ospRemoveParam(handle, id);
 }
 
+using DataType = OSPDataType;
+
 template<typename T>
-concept OsprayDataType = (ospray::OSPTypeFor<T>::value != OSP_UNKNOWN);
+constexpr auto dataTypeOf = ospray::OSPTypeFor<T>::value;
+
+template<typename T>
+concept OsprayDataType = (dataTypeOf<T> != OSP_UNKNOWN);
 
 template<OsprayDataType T>
 void setObjectParam(OSPObject handle, const char *id, const T &value)

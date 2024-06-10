@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <optional>
 #include <variant>
 
 #include "Data.h"
@@ -48,6 +49,7 @@ struct RendererSettings
     float minSampleContribution = 0.001F;
     float varianceThreshold = 0.0F;
     Background background = Color4(0.0F, 0.0F, 0.0F, 0.0F);
+    std::optional<Texture2D> maxDepth = std::nullopt;
     std::span<Material> materials = {};
     PixelFilter pixelFilter = PixelFilter::Gauss;
 };
@@ -58,8 +60,9 @@ public:
     using Managed::Managed;
 };
 
-struct AmbientOcclusionRendererSettings : RendererSettings
+struct AmbientOcclusionRendererSettings
 {
+    RendererSettings base = {};
     std::size_t aoSamples = 1;
     float aoDistance = 1e20F;
     float aoIntensity = 1.0F;
@@ -80,8 +83,9 @@ struct ObjectReflector<AmbientOcclusionRenderer>
     static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
 };
 
-struct ScivisRendererSettings : RendererSettings
+struct ScivisRendererSettings
 {
+    RendererSettings base = {};
     bool shadows = false;
     std::size_t aoSamples = 0;
     float aoDistance = 1e20F;
@@ -103,8 +107,9 @@ struct ObjectReflector<ScivisRenderer>
     static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
 };
 
-struct PathTracerSettings : RendererSettings
+struct PathTracerSettings
 {
+    RendererSettings base = {};
 };
 
 class PathTracer : public Renderer

@@ -27,47 +27,45 @@ namespace
 {
 using namespace brayns::experimental;
 
-void setTextureParam(OSPMaterial handle, const char *id, std::monostate)
+void setTextureParam(OSPMaterial handle, const std::string &id, std::monostate)
 {
-    removeObjectParam(handle, id);
+    removeObjectParam(handle, id.c_str());
 }
 
-void setTextureParam(OSPMaterial handle, const char *id, const MaterialTexture2D &texture)
+void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTexture2D &texture)
 {
-    setObjectParam(handle, id, texture.value);
+    setObjectParam(handle, id.c_str(), texture.value);
 
-    auto name = std::string(id);
-
-    auto rotation = name + ".rotation";
-    auto scale = name + ".scale";
-    auto translation = name + ".translation";
-
+    auto rotation = id + ".rotation";
     setObjectParam(handle, rotation.c_str(), texture.transform.rotation);
+
+    auto scale = id + ".scale";
     setObjectParam(handle, scale.c_str(), texture.transform.scale);
+
+    auto translation = id + ".translation";
     setObjectParam(handle, translation.c_str(), texture.transform.translation);
 }
 
-void setTextureParam(OSPMaterial handle, const char *id, const MaterialVolumeTexture &texture)
+void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialVolumeTexture &texture)
 {
-    setObjectParam(handle, id, texture.value);
+    setObjectParam(handle, id.c_str(), texture.value);
 
-    auto name = std::string(id);
-
-    auto transform = name + ".transform";
-
+    auto transform = id + ".transform";
     setObjectParam(handle, transform.c_str(), toAffine(texture.transform));
 }
 
-void setTextureParam(OSPMaterial handle, const char *id, const MaterialTexture &texture)
+void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTexture &texture)
 {
-    std::visit([=](const auto &value) { setTextureParam(handle, id, value); }, texture);
+    std::visit([&](const auto &value) { setTextureParam(handle, id, value); }, texture);
 }
 
-void setMaterialParams(OSPMaterial handle, const AmbientOcclusionMaterialSettings &settings)
+template<typename T>
+void setMaterialParam(OSPMaterial handle, const char *id, const MaterialParam<T> &param)
 {
-    setObjectParam(handle, "kd", settings.diffuse);
-    setTextureParam(handle, "map_kd", settings.diffuseMap);
-    setObjectParam(handle, "d", settings.opacity);
+    setObjectParam(handle, id, param.value);
+
+    auto textureId = std::string("map_") + id;
+    setTextureParam(handle, textureId, param.texture);
 }
 }
 
@@ -78,7 +76,8 @@ OSPMaterial ObjectReflector<AmbientOcclusionMaterial>::createHandle(OSPDevice de
     auto handle = ospNewMaterial("obj");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setMaterialParams(handle, settings);
+    setMaterialParam(handle, "kd", settings.diffuse);
+    setMaterialParam(handle, "d", settings.opacity);
 
     commitObject(handle);
 
@@ -90,10 +89,10 @@ OSPMaterial ObjectReflector<ScivisMaterial>::createHandle(OSPDevice device, cons
     auto handle = ospNewMaterial("obj");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setMaterialParams(handle, settings);
-
-    setObjectParam(handle, "ks", settings.specular);
-    setObjectParam(handle, "ns", settings.shininess);
+    setMaterialParam(handle, "kd", settings.diffuse);
+    setMaterialParam(handle, "d", settings.opacity);
+    setMaterialParam(handle, "ks", settings.specular);
+    setMaterialParam(handle, "ns", settings.shininess);
     setObjectParam(handle, "tf", settings.transparencyFilter);
 
     commitObject(handle);
@@ -106,37 +105,35 @@ OSPMaterial ObjectReflector<PrincipledMaterial>::createHandle(OSPDevice device, 
     auto handle = ospNewMaterial("principled");
     throwLastDeviceErrorIfNull(device, handle);
 
-    setObjectParam(handle, "baseColor", settings.baseColor);
-    setTextureParam(handle, "map_baseColor", settings.baseColorMap);
-    setObjectParam(handle, "edgeColor", settings.edgeColor);
-    setObjectParam(handle, "metallic", settings.metallic);
-    setObjectParam(handle, "diffuse", settings.diffuse);
-    setObjectParam(handle, "specular", settings.specular);
-    setObjectParam(handle, "ior", settings.ior);
-    setObjectParam(handle, "transmission", settings.transmission);
-    setObjectParam(handle, "transmissionColor", settings.transmissionColor);
-    setObjectParam(handle, "transmissionDepth", settings.transmissionDepth);
-    setObjectParam(handle, "roughness", settings.roughness);
-    setObjectParam(handle, "anisotropy", settings.anisotropy);
-    setObjectParam(handle, "rotation", settings.rotation);
-    setObjectParam(handle, "normal", settings.normal);
-    setTextureParam(handle, "map_normal", settings.normalMap);
-    setObjectParam(handle, "baseNormal", settings.baseNormal);
-    setObjectParam(handle, "thin", settings.thin);
-    setObjectParam(handle, "thickness", settings.thickness);
-    setObjectParam(handle, "backlight", settings.backlight);
-    setObjectParam(handle, "coat", settings.coat);
-    setObjectParam(handle, "coatIor", settings.coatIor);
-    setObjectParam(handle, "coatColor", settings.coatColor);
-    setObjectParam(handle, "coatThickness", settings.coatThickness);
-    setObjectParam(handle, "coatRoughness", settings.coatRoughness);
-    setObjectParam(handle, "coatNormal", settings.coatNormal);
-    setObjectParam(handle, "sheen", settings.sheen);
-    setObjectParam(handle, "sheenColor", settings.sheenColor);
-    setObjectParam(handle, "sheenTint", settings.sheenTint);
-    setObjectParam(handle, "sheenRoughness", settings.sheenRoughness);
-    setObjectParam(handle, "opacity", settings.opacity);
-    setObjectParam(handle, "emissiveColor", settings.emissiveColor);
+    setMaterialParam(handle, "baseColor", settings.baseColor);
+    setMaterialParam(handle, "edgeColor", settings.edgeColor);
+    setMaterialParam(handle, "metallic", settings.metallic);
+    setMaterialParam(handle, "diffuse", settings.diffuse);
+    setMaterialParam(handle, "specular", settings.specular);
+    setMaterialParam(handle, "ior", settings.ior);
+    setMaterialParam(handle, "transmission", settings.transmission);
+    setMaterialParam(handle, "transmissionColor", settings.transmissionColor);
+    setMaterialParam(handle, "transmissionDepth", settings.transmissionDepth);
+    setMaterialParam(handle, "roughness", settings.roughness);
+    setMaterialParam(handle, "anisotropy", settings.anisotropy);
+    setMaterialParam(handle, "rotation", settings.rotation);
+    setMaterialParam(handle, "normal", settings.normal);
+    setMaterialParam(handle, "baseNormal", settings.baseNormal);
+    setMaterialParam(handle, "thin", settings.thin);
+    setMaterialParam(handle, "thickness", settings.thickness);
+    setMaterialParam(handle, "backlight", settings.backlight);
+    setMaterialParam(handle, "coat", settings.coat);
+    setMaterialParam(handle, "coatIor", settings.coatIor);
+    setMaterialParam(handle, "coatColor", settings.coatColor);
+    setMaterialParam(handle, "coatThickness", settings.coatThickness);
+    setMaterialParam(handle, "coatRoughness", settings.coatRoughness);
+    setMaterialParam(handle, "coatNormal", settings.coatNormal);
+    setMaterialParam(handle, "sheen", settings.sheen);
+    setMaterialParam(handle, "sheenColor", settings.sheenColor);
+    setMaterialParam(handle, "sheenTint", settings.sheenTint);
+    setMaterialParam(handle, "sheenRoughness", settings.sheenRoughness);
+    setMaterialParam(handle, "opacity", settings.opacity);
+    setMaterialParam(handle, "emissiveColor", settings.emissiveColor);
 
     commitObject(handle);
 
