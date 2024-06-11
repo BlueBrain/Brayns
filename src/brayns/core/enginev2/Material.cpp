@@ -62,7 +62,7 @@ void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTe
 template<typename T>
 void setMaterialParam(OSPMaterial handle, const char *id, const MaterialParam<T> &param)
 {
-    setObjectParam(handle, id, param.value);
+    setObjectParam(handle, id, param.factor);
 
     auto textureId = std::string("map_") + id;
     setTextureParam(handle, textureId, param.texture);

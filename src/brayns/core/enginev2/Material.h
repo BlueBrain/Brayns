@@ -45,7 +45,7 @@ using MaterialTexture = std::variant<std::monostate, MaterialTexture2D, Material
 template<typename T>
 struct MaterialParam
 {
-    T value;
+    T factor;
     MaterialTexture texture = {};
 };
 

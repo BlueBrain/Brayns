@@ -10,7 +10,6 @@ project(BraynsSuperbuild)
 
 option(CMAKE_BUILD_TYPE "CMake build type" Release)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(BRAYNS_ENABLE_INSTALL "Install Brayns with dependencies" OFF)
 
 include(ExternalProject)
 
@@ -99,24 +98,3 @@ ExternalProject_Add(
     -DENABLE_ACTIVERECORD=OFF
     -DENABLE_ACTIVERECORD_COMPILER=OFF
 )
-
-if(BRAYNS_ENABLE_INSTALL)
-    ExternalProject_Add(
-        Brayns
-        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../..
-        CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-        -DBRAYNS_ENABLE_TESTS=OFF
-    )
-    ExternalProject_Add_StepDependencies(
-        Brayns
-        configure
-        fmt
-        libsonata
-        morphio
-        ospray
-        poco
-    )
-endif()
