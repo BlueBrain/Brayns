@@ -114,22 +114,6 @@ public:
         }
     }
 };
-
-class NeuronSectionsChecker
-{
-public:
-    static void check(const BBPLoaderParameters &input)
-    {
-        const auto &morphSettings = input.neuron_morphology_parameters;
-        const auto loadSoma = morphSettings.load_soma;
-        const auto loadAxon = morphSettings.load_axon;
-        const auto loadDend = morphSettings.load_dendrites;
-        if (!loadSoma && !loadAxon && !loadDend)
-        {
-            throw std::invalid_argument("All neuron sections cannot be disabled");
-        }
-    }
-};
 } // namespace
 
 void ParameterCheck::checkInput(const brion::BlueConfig &config, const BBPLoaderParameters &input)
@@ -137,6 +121,5 @@ void ParameterCheck::checkInput(const brion::BlueConfig &config, const BBPLoader
     InputGidSettingsChecker::check(input);
     TargetChecker::check(config, input);
     ReportChecker::check(config, input);
-    NeuronSectionsChecker::check(input);
 }
 } // namespace bbploader
