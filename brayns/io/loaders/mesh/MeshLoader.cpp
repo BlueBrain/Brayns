@@ -42,6 +42,7 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
+#include "MeshLoader.h"
 
 namespace
 {
@@ -189,6 +190,11 @@ std::string MeshLoader::getName() const
 std::vector<std::string> MeshLoader::getExtensions() const
 {
     return _parsers.getAllSupportedExtensions();
+}
+
+bool MeshLoader::canLoadBinary() const
+{
+    return true;
 }
 
 std::vector<std::shared_ptr<Model>> MeshLoader::loadBinary(const BinaryRequest &request)

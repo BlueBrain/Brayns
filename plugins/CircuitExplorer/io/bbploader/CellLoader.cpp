@@ -175,7 +175,7 @@ std::vector<CellCompartments> CellLoader::load(
 
     auto colorData = ColorDataFactory::create(context);
 
-    if (loadSoma && !loadAxon && !loadDend)
+    if (!loadSoma && !loadAxon && !loadDend)
     {
         return SomaImporter::import(context, model, std::move(colorData));
     }

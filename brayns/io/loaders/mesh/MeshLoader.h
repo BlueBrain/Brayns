@@ -125,6 +125,13 @@ public:
     std::vector<std::string> getExtensions() const override;
 
     /**
+     * @brief Supports binary
+     *
+     * @return true
+     */
+    bool canLoadBinary() const override;
+
+    /**
      * @brief Import the mesh in the given scene from the given binary data.
      *
      * @param request Loading request.
