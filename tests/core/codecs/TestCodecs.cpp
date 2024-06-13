@@ -23,6 +23,7 @@
 #include <fstream>
 
 #include <brayns/core/codecs/JpegCodec.h>
+#include <brayns/core/codecs/PngCodec.h>
 #include <brayns/core/utils/Filesystem.h>
 
 using namespace brayns::experimental;
@@ -33,6 +34,7 @@ struct TestImage
     std::string data;
     Size2 size;
     ImageFormat format;
+    RowOrder rowOrder;
 };
 
 TestImage createTestImage(ImageFormat format)
@@ -42,12 +44,13 @@ TestImage createTestImage(ImageFormat format)
     auto pixelSize = getPixelSize(format);
     auto rowSize = width * pixelSize;
     auto size = rowSize * height;
+    auto rowOrder = RowOrder::BottomUp;
 
     auto data = std::string(size, '\0');
 
-    for (auto i = std::size_t(20); i < 40; ++i)
+    for (auto i = std::size_t(0); i < 20; ++i)
     {
-        for (auto j = std::size_t(10); j < 30; ++j)
+        for (auto j = std::size_t(0); j < 30; ++j)
         {
             auto redIndex = i * rowSize + j * pixelSize;
 
@@ -60,18 +63,36 @@ TestImage createTestImage(ImageFormat format)
         }
     }
 
-    return {std::move(data), {width, height}, format};
+    return {std::move(data), {width, height}, format, rowOrder};
+}
+
+ImageView view(const TestImage &image)
+{
+    return {image.data.data(), image.size, image.format, image.rowOrder};
 }
 
 TEST_CASE("JpegCodec")
 {
     auto image = createTestImage(ImageFormat::Rgb);
 
-    auto data = encodeJpeg({image.data.data(), image.size, image.format});
+    auto data = encodeJpeg(view(image));
     writeFile(data, "test1.jpg");
 
     image = createTestImage(ImageFormat::Rgba);
 
-    data = encodeJpeg({image.data.data(), image.size, image.format});
+    data = encodeJpeg(view(image));
     writeFile(data, "test2.jpg");
+}
+
+TEST_CASE("PngCodec")
+{
+    auto image = createTestImage(ImageFormat::Rgb);
+
+    auto data = encodePng(view(image));
+    writeFile(data, "test1.png");
+
+    image = createTestImage(ImageFormat::Rgba);
+
+    data = encodePng(view(image));
+    writeFile(data, "test2.png");
 }

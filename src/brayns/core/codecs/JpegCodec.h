@@ -27,5 +27,10 @@
 
 namespace brayns::experimental
 {
-std::string encodeJpeg(const ImageView &image, int quality = 100);
+struct JpegSettings
+{
+    int quality = 100;
+};
+
+std::string encodeJpeg(const ImageView &image, const JpegSettings &settings = {});
 }

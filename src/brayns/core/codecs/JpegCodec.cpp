@@ -51,7 +51,7 @@ TJPF getPixelFormat(ImageFormat format)
     case ImageFormat::Rgba:
         return TJPF_RGBA;
     default:
-        throw std::runtime_error(fmt::format("Invalid pixel format for JPEG encoder: {}", static_cast<int>(format)));
+        throw std::invalid_argument("Image format not supported by JPEG encoder");
     }
 }
 
@@ -64,7 +64,6 @@ std::runtime_error lastError(tjhandle handle, const char *message)
 void setParam(tjhandle handle, TJPARAM param, int value)
 {
     auto result = tj3Set(handle, param, value);
-
     if (result != 0)
     {
         throw lastError(handle, "Failed to set JPEG param");
@@ -74,7 +73,7 @@ void setParam(tjhandle handle, TJPARAM param, int value)
 
 namespace brayns::experimental
 {
-std::string encodeJpeg(const ImageView &image, int quality)
+std::string encodeJpeg(const ImageView &image, const JpegSettings &settings)
 {
     auto *compressor = tjInitCompress();
 
@@ -85,19 +84,20 @@ std::string encodeJpeg(const ImageView &image, int quality)
 
     auto holder = Holder(compressor);
 
-    auto &[data, size, format] = image;
+    auto [data, size, format, rowOrder] = image;
 
     const auto *source = static_cast<const unsigned char *>(data);
     auto width = static_cast<int>(size[0]);
     auto height = static_cast<int>(size[1]);
     auto pitch = 0;
     auto pixelFormat = static_cast<int>(getPixelFormat(format));
+    auto bottomUp = rowOrder == RowOrder::BottomUp;
     auto subsampling = TJSAMP_444;
 
     setParam(compressor, TJPARAM_STOPONWARNING, 1);
-    setParam(compressor, TJPARAM_BOTTOMUP, 1);
+    setParam(compressor, TJPARAM_BOTTOMUP, bottomUp ? 1 : 0);
     setParam(compressor, TJPARAM_NOREALLOC, 1);
-    setParam(compressor, TJPARAM_QUALITY, quality);
+    setParam(compressor, TJPARAM_QUALITY, settings.quality);
     setParam(compressor, TJPARAM_SUBSAMP, subsampling);
 
     auto bufferSize = tj3JPEGBufSize(width, height, subsampling);
@@ -107,9 +107,9 @@ std::string encodeJpeg(const ImageView &image, int quality)
 
     auto **output = &bufferPtr;
 
-    auto result = tj3Compress8(compressor, source, width, pitch, height, pixelFormat, output, &bufferSize);
+    auto code = tj3Compress8(compressor, source, width, pitch, height, pixelFormat, output, &bufferSize);
 
-    if (result == 0)
+    if (code == 0)
     {
         buffer.resize(bufferSize);
         return buffer;

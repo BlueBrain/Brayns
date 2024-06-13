@@ -21,42 +21,11 @@
 
 #pragma once
 
-#include <stdexcept>
+#include <string>
 
-#include <brayns/core/utils/Math.h>
+#include "ImageView.h"
 
 namespace brayns::experimental
 {
-enum class ImageFormat
-{
-    Rgb,
-    Rgba,
-};
-
-inline std::size_t getPixelSize(ImageFormat format)
-{
-    switch (format)
-    {
-    case ImageFormat::Rgb:
-        return 3;
-    case ImageFormat::Rgba:
-        return 4;
-    default:
-        throw std::invalid_argument("Invalid pixel format");
-    }
-}
-
-enum class RowOrder
-{
-    TopDown,
-    BottomUp,
-};
-
-struct ImageView
-{
-    const void *data;
-    Size2 size;
-    ImageFormat format;
-    RowOrder rowOrder;
-};
+std::string encodePng(const ImageView &image);
 }
