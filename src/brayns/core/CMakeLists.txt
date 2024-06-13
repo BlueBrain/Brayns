@@ -23,4 +23,5 @@ target_link_libraries(
     ${ZLIB_LIBRARIES}
     stb
     tinyexr
+    libjpeg-turbo::turbojpeg
 )

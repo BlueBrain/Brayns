@@ -60,7 +60,7 @@ void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTe
 }
 
 template<typename T>
-void setMaterialParam(OSPMaterial handle, const char *id, const MaterialParam<T> &param)
+void setMaterialParam(OSPMaterial handle, const char *id, const MaterialField<T> &param)
 {
     setObjectParam(handle, id, param.factor);
 

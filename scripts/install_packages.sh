@@ -15,5 +15,6 @@ apt-get update && apt-get -y --no-install-recommends install \
    libssl-dev \
    zlib1g-dev \
    libbz2-dev \
+   nasm \
    && apt-get clean \
    && rm -rf /var/lib/apt/lists

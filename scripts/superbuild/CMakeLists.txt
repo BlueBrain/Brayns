@@ -25,6 +25,17 @@ ExternalProject_Add(
 )
 
 ExternalProject_Add(
+    libjpeg-turbo
+    GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
+    GIT_TAG 3.0.3
+    GIT_SHALLOW ON
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+)
+
+ExternalProject_Add(
     libsonata
     GIT_REPOSITORY https://github.com/BlueBrain/libsonata.git
     GIT_TAG v0.1.25

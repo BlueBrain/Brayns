@@ -28,6 +28,7 @@ find_package(ospray REQUIRED)
 find_package(Poco REQUIRED COMPONENTS Foundation JSON Net NetSSL)
 find_package(rkcommon REQUIRED)
 find_package(ZLIB REQUIRED)
+find_package(libjpeg-turbo REQUIRED)
 
 if(BRAYNS_ENABLE_CIRCUITS)
     find_package(HDF5 REQUIRED)
