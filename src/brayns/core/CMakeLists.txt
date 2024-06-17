@@ -25,4 +25,5 @@ target_link_libraries(
     tinyexr
     PNG::PNG
     libjpeg-turbo::turbojpeg
+    OpenEXR::OpenEXR
 )

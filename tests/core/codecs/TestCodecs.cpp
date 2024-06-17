@@ -20,13 +20,13 @@
 
 #include <doctest.h>
 
-#include <fstream>
-
+#include <brayns/core/codecs/ExrCodec.h>
 #include <brayns/core/codecs/JpegCodec.h>
 #include <brayns/core/codecs/PngCodec.h>
 #include <brayns/core/utils/Filesystem.h>
 
 using namespace brayns::experimental;
+using brayns::Color4;
 using brayns::Size2;
 
 struct TestImage
@@ -41,7 +41,7 @@ TestImage createTestImage(ImageFormat format)
 {
     auto width = std::size_t(50);
     auto height = std::size_t(50);
-    auto pixelSize = getPixelSize(format);
+    auto pixelSize = format == ImageFormat::Rgb8 ? 3 : 4;
     auto rowSize = width * pixelSize;
     auto size = rowSize * height;
     auto rowOrder = RowOrder::BottomUp;
@@ -56,7 +56,7 @@ TestImage createTestImage(ImageFormat format)
 
             data[redIndex] = -1;
 
-            if (format == ImageFormat::Rgba)
+            if (format == ImageFormat::Rgba8)
             {
                 data[redIndex + 3] = -1;
             }
@@ -73,12 +73,12 @@ ImageView view(const TestImage &image)
 
 TEST_CASE("JpegCodec")
 {
-    auto image = createTestImage(ImageFormat::Rgb);
+    auto image = createTestImage(ImageFormat::Rgb8);
 
     auto data = encodeJpeg(view(image));
     writeFile(data, "test1.jpg");
 
-    image = createTestImage(ImageFormat::Rgba);
+    image = createTestImage(ImageFormat::Rgba8);
 
     data = encodeJpeg(view(image));
     writeFile(data, "test2.jpg");
@@ -86,13 +86,92 @@ TEST_CASE("JpegCodec")
 
 TEST_CASE("PngCodec")
 {
-    auto image = createTestImage(ImageFormat::Rgb);
+    auto image = createTestImage(ImageFormat::Rgb8);
 
     auto data = encodePng(view(image));
     writeFile(data, "test1.png");
 
-    image = createTestImage(ImageFormat::Rgba);
+    image = createTestImage(ImageFormat::Rgba8);
 
     data = encodePng(view(image));
     writeFile(data, "test2.png");
+}
+
+TEST_CASE("ExrCodec")
+{
+    auto width = std::size_t(50);
+    auto height = std::size_t(50);
+    auto size = width * height;
+
+    auto colors = std::vector<Color4>(size);
+    auto depths = std::vector<float>(size);
+    auto ids = std::vector<std::uint32_t>(size);
+
+    for (auto i = std::size_t(0); i < 20; ++i)
+    {
+        for (auto j = std::size_t(0); j < 30; ++j)
+        {
+            auto index = i * width + j;
+            colors[index] = {1, 0, 0, 1};
+            depths[index] = 1.0F;
+            ids[index] = 1;
+        }
+    }
+
+    auto image = ExrImage{
+        .size = {width, height},
+        .layers = {
+            ExrLayer{
+                .channels =
+                    {
+                        ExrChannel{
+                            .name = "R",
+                            .data = &colors[0],
+                            .dataType = ExrDataType::F32,
+                            .stride = sizeof(Color4),
+                        },
+                        ExrChannel{
+                            .name = "G",
+                            .data = &colors[1],
+                            .dataType = ExrDataType::F32,
+                            .stride = sizeof(Color4),
+                        },
+                        ExrChannel{
+                            .name = "B",
+                            .data = &colors[2],
+                            .dataType = ExrDataType::F32,
+                            .stride = sizeof(Color4),
+                        },
+                        ExrChannel{
+                            .name = "A",
+                            .data = &colors[3],
+                            .dataType = ExrDataType::F32,
+                            .stride = sizeof(Color4),
+                        },
+                    },
+            },
+            ExrLayer{
+                .channels =
+                    {
+                        ExrChannel{
+                            .name = "Z",
+                            .data = &depths[0],
+                            .dataType = ExrDataType::F32,
+                        },
+                    },
+            },
+            ExrLayer{
+                .channels =
+                    {
+                        ExrChannel{
+                            .name = "ID",
+                            .data = &ids[0],
+                            .dataType = ExrDataType::U32,
+                        },
+                    },
+            },
+        }};
+
+    auto data = encodeExr(image);
+    writeFile(data, "test.exr");
 }

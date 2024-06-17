@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include <vector>
+#include <optional>
+#include <set>
 
 #include "Data.h"
 #include "ImageOperation.h"
@@ -40,8 +41,6 @@ enum class FramebufferChannel
 {
     Color = OSP_FB_COLOR,
     Depth = OSP_FB_DEPTH,
-    Accumulation = OSP_FB_ACCUM,
-    Variance = OSP_FB_VARIANCE,
     Normal = OSP_FB_NORMAL,
     Albedo = OSP_FB_ALBEDO,
     PrimitiveId = OSP_FB_ID_PRIMITIVE,
@@ -49,12 +48,18 @@ enum class FramebufferChannel
     InstanceId = OSP_FB_ID_INSTANCE,
 };
 
+struct Accumulation
+{
+    bool variance = true;
+};
+
 struct FramebufferSettings
 {
     std::size_t width;
     std::size_t height;
     FramebufferFormat format = FramebufferFormat::Srgba8;
-    std::vector<FramebufferChannel> channels = {FramebufferChannel::Color};
+    std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
+    std::optional<Accumulation> accumulation = std::nullopt;
     std::span<ImageOperation> operations = {};
 };
 

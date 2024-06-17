@@ -46,9 +46,9 @@ TJPF getPixelFormat(ImageFormat format)
 {
     switch (format)
     {
-    case ImageFormat::Rgb:
+    case ImageFormat::Rgb8:
         return TJPF_RGB;
-    case ImageFormat::Rgba:
+    case ImageFormat::Rgba8:
         return TJPF_RGBA;
     default:
         throw std::invalid_argument("Image format not supported by JPEG encoder");
@@ -91,11 +91,11 @@ std::string encodeJpeg(const ImageView &image, const JpegSettings &settings)
     auto height = static_cast<int>(size[1]);
     auto pitch = 0;
     auto pixelFormat = static_cast<int>(getPixelFormat(format));
-    auto bottomUp = rowOrder == RowOrder::BottomUp;
+    auto bottomUp = rowOrder == RowOrder::BottomUp ? 1 : 0;
     auto subsampling = TJSAMP_444;
 
     setParam(compressor, TJPARAM_STOPONWARNING, 1);
-    setParam(compressor, TJPARAM_BOTTOMUP, bottomUp ? 1 : 0);
+    setParam(compressor, TJPARAM_BOTTOMUP, bottomUp);
     setParam(compressor, TJPARAM_NOREALLOC, 1);
     setParam(compressor, TJPARAM_QUALITY, settings.quality);
     setParam(compressor, TJPARAM_SUBSAMP, subsampling);
@@ -109,13 +109,13 @@ std::string encodeJpeg(const ImageView &image, const JpegSettings &settings)
 
     auto code = tj3Compress8(compressor, source, width, pitch, height, pixelFormat, output, &bufferSize);
 
-    if (code == 0)
+    if (code != 0)
     {
-        buffer.resize(bufferSize);
-        return buffer;
+        throw lastError(compressor, "JPEG encoding failed");
     }
 
-    const auto *lastError = tj3GetErrorStr(compressor);
-    throw std::runtime_error(fmt::format("JPEG encoding failed: {}", lastError));
+    buffer.resize(bufferSize);
+
+    return buffer;
 }
 }

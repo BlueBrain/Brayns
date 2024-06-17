@@ -53,10 +53,22 @@ OSPFrameBuffer ObjectReflector<Framebuffer>::createHandle(OSPDevice device, cons
     auto height = static_cast<int>(settings.height);
     auto format = static_cast<OSPFrameBufferFormat>(settings.format);
     auto channels = static_cast<std::uint32_t>(OSP_FB_NONE);
+    auto accumulation = settings.accumulation.has_value();
+    auto variance = settings.accumulation && settings.accumulation->variance;
 
     for (auto channel : settings.channels)
     {
         channels |= static_cast<OSPFrameBufferChannel>(channel);
+    }
+
+    if (accumulation)
+    {
+        channels |= OSP_FB_ACCUM;
+    }
+
+    if (variance)
+    {
+        channels |= OSP_FB_VARIANCE;
     }
 
     auto handle = ospNewFrameBuffer(width, height, format, channels);

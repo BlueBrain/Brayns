@@ -37,9 +37,9 @@ std::uint32_t getImageFormat(ImageFormat format)
 {
     switch (format)
     {
-    case ImageFormat::Rgb:
+    case ImageFormat::Rgb8:
         return PNG_FORMAT_RGB;
-    case ImageFormat::Rgba:
+    case ImageFormat::Rgba8:
         return PNG_FORMAT_RGBA;
     default:
         throw std::invalid_argument("Image format not supported by PNG encoder");

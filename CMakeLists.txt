@@ -30,6 +30,7 @@ find_package(rkcommon REQUIRED)
 find_package(ZLIB REQUIRED)
 find_package(PNG REQUIRED)
 find_package(libjpeg-turbo REQUIRED)
+find_package(OpenEXR REQUIRED)
 
 if(BRAYNS_ENABLE_CIRCUITS)
     find_package(HDF5 REQUIRED)

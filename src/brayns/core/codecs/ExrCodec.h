@@ -21,29 +21,41 @@
 
 #pragma once
 
-#include <stdexcept>
+#include <string>
+#include <vector>
 
 #include <brayns/core/utils/Math.h>
 
+#include "ImageView.h"
+
 namespace brayns::experimental
 {
-enum class ImageFormat
+enum class ExrDataType
 {
-    Rgb8,
-    Rgba8,
+    U32,
+    F32,
 };
 
-enum class RowOrder
+struct ExrChannel
 {
-    TopDown,
-    BottomUp,
-};
-
-struct ImageView
-{
+    std::string name;
     const void *data;
+    ExrDataType dataType;
+    std::size_t stride = 0;
+};
+
+struct ExrLayer
+{
+    std::string name = {};
+    std::vector<ExrChannel> channels;
+};
+
+struct ExrImage
+{
     Size2 size;
-    ImageFormat format;
+    std::vector<ExrLayer> layers;
     RowOrder rowOrder = RowOrder::BottomUp;
 };
+
+std::string encodeExr(const ExrImage &image);
 }
