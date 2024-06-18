@@ -39,8 +39,8 @@ struct TestImage
 
 TestImage createTestImage(ImageFormat format)
 {
-    auto width = std::size_t(50);
-    auto height = std::size_t(50);
+    auto width = std::size_t(100);
+    auto height = std::size_t(100);
     auto pixelSize = format == ImageFormat::Rgb8 ? 3 : 4;
     auto rowSize = width * pixelSize;
     auto size = rowSize * height;
@@ -99,8 +99,8 @@ TEST_CASE("PngCodec")
 
 TEST_CASE("ExrCodec")
 {
-    auto width = std::size_t(50);
-    auto height = std::size_t(50);
+    auto width = std::size_t(100);
+    auto height = std::size_t(100);
     auto size = width * height;
 
     auto colors = std::vector<Color4>(size);
@@ -120,55 +120,40 @@ TEST_CASE("ExrCodec")
 
     auto image = ExrImage{
         .size = {width, height},
-        .layers = {
-            ExrLayer{
-                .channels =
-                    {
-                        ExrChannel{
-                            .name = "R",
-                            .data = &colors[0],
-                            .dataType = ExrDataType::F32,
-                            .stride = sizeof(Color4),
-                        },
-                        ExrChannel{
-                            .name = "G",
-                            .data = &colors[1],
-                            .dataType = ExrDataType::F32,
-                            .stride = sizeof(Color4),
-                        },
-                        ExrChannel{
-                            .name = "B",
-                            .data = &colors[2],
-                            .dataType = ExrDataType::F32,
-                            .stride = sizeof(Color4),
-                        },
-                        ExrChannel{
-                            .name = "A",
-                            .data = &colors[3],
-                            .dataType = ExrDataType::F32,
-                            .stride = sizeof(Color4),
-                        },
-                    },
+        .channels = {
+            ExrChannel{
+                .name = "R",
+                .data = &colors[0],
+                .dataType = ExrDataType::F32,
+                .stride = sizeof(Color4),
             },
-            ExrLayer{
-                .channels =
-                    {
-                        ExrChannel{
-                            .name = "Z",
-                            .data = &depths[0],
-                            .dataType = ExrDataType::F32,
-                        },
-                    },
+            ExrChannel{
+                .name = "G",
+                .data = &colors[1],
+                .dataType = ExrDataType::F32,
+                .stride = sizeof(Color4),
             },
-            ExrLayer{
-                .channels =
-                    {
-                        ExrChannel{
-                            .name = "ID",
-                            .data = &ids[0],
-                            .dataType = ExrDataType::U32,
-                        },
-                    },
+            ExrChannel{
+                .name = "B",
+                .data = &colors[2],
+                .dataType = ExrDataType::F32,
+                .stride = sizeof(Color4),
+            },
+            ExrChannel{
+                .name = "A",
+                .data = &colors[3],
+                .dataType = ExrDataType::F32,
+                .stride = sizeof(Color4),
+            },
+            ExrChannel{
+                .name = "Z",
+                .data = &depths[0],
+                .dataType = ExrDataType::F32,
+            },
+            ExrChannel{
+                .name = "ID",
+                .data = &ids[0],
+                .dataType = ExrDataType::U32,
             },
         }};
 

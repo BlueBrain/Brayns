@@ -21,6 +21,7 @@
 
 #include "ExrCodec.h"
 
+#include <ImathVec.h>
 #include <ImfChannelList.h>
 #include <ImfFrameBuffer.h>
 #include <ImfHeader.h>
@@ -52,39 +53,33 @@ std::string encodeExr(const ExrImage &image)
 {
     auto width = static_cast<int>(image.size[0]);
     auto height = static_cast<int>(image.size[1]);
-    auto pixelAspect = 1.0F;
-    auto windowCenter = Imath::V2f(0.0F, 0.0F);
-    auto windowWidth = 1.0F;
     auto lineOrder = image.rowOrder == RowOrder::TopDown ? Imf::INCREASING_Y : Imf::DECREASING_Y;
 
-    auto header = Imf::Header(width, height, pixelAspect, windowCenter, windowWidth, lineOrder);
-    auto framebuffer = Imf::FrameBuffer();
+    auto header = Imf::Header(width, height);
+    header.lineOrder() = lineOrder;
 
     auto &channels = header.channels();
+    auto framebuffer = Imf::FrameBuffer();
 
-    for (const auto &layer : image.layers)
+    for (const auto &channel : image.channels)
     {
-        for (const auto &channel : layer.channels)
-        {
-            auto name = layer.name + "." + channel.name;
-            auto type = getPixelType(channel.dataType);
-            auto strideX = channel.stride == 0 ? 4 : channel.stride;
-            auto strideY = strideX * width;
-            auto bytes = static_cast<const char *>(channel.data);
-            auto fakeMutable = const_cast<char *>(bytes);
+        auto name = channel.name;
+        auto type = getPixelType(channel.dataType);
+        auto strideX = channel.stride;
+        auto data = channel.data;
+        auto origin = Imath::V2f(0.0F, 0.0F);
 
-            channels.insert(name, Imf::Channel(type));
-            framebuffer.insert(name, Imf::Slice(type, fakeMutable, strideX, strideY));
-        }
+        channels.insert(name, Imf::Channel(type));
+        framebuffer.insert(name, Imf::Slice::Make(type, data, origin, width, height, strideX));
     }
 
     auto stream = Imf::StdOSStream();
 
-    auto output = Imf::OutputFile(stream, header);
-
-    output.setFrameBuffer(framebuffer);
-
-    output.writePixels(height);
+    {
+        auto output = Imf::OutputFile(stream, header);
+        output.setFrameBuffer(framebuffer);
+        output.writePixels(height);
+    }
 
     return stream.str();
 }

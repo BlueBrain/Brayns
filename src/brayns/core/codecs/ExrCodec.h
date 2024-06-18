@@ -44,16 +44,10 @@ struct ExrChannel
     std::size_t stride = 0;
 };
 
-struct ExrLayer
-{
-    std::string name = {};
-    std::vector<ExrChannel> channels;
-};
-
 struct ExrImage
 {
     Size2 size;
-    std::vector<ExrLayer> layers;
+    std::vector<ExrChannel> channels;
     RowOrder rowOrder = RowOrder::BottomUp;
 };
 
