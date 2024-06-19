@@ -45,6 +45,62 @@ Imf::PixelType getPixelType(ExrDataType type)
         throw std::runtime_error("Invalid EXR pixel type");
     }
 }
+
+std::size_t getPixelSize(ExrDataType type)
+{
+    switch (type)
+    {
+    case ExrDataType::U32:
+    case ExrDataType::F32:
+        return 4;
+    default:
+        throw std::runtime_error("Invalid EXR pixel type");
+    }
+}
+
+std::vector<std::string> packChannels(const ExrImage &image)
+{
+    const auto &channels = image.channels;
+
+    auto packedChannels = std::vector<std::string>();
+    packedChannels.reserve(channels.size());
+
+    auto [width, height] = image.size;
+    auto pixelCount = width * height;
+
+    for (const auto &channel : channels)
+    {
+        auto pixelSize = getPixelSize(channel.dataType);
+        auto channelSize = pixelCount * pixelSize;
+
+        auto packedChannel = std::string();
+        packedChannel.reserve(channelSize);
+
+        auto bytes = static_cast<const char *>(channel.data);
+        auto strideX = channel.stride == 0 ? pixelSize : channel.stride;
+        auto strideY = width * strideX;
+
+        auto topDown = image.rowOrder == RowOrder::TopDown;
+
+        for (auto y = std::size_t(0); y < height; ++y)
+        {
+            auto rowIndex = topDown ? y : height - y - 1;
+
+            auto offsetY = rowIndex * strideY;
+
+            for (auto x = std::size_t(0); x < width; ++x)
+            {
+                auto offsetX = offsetY + x * strideX;
+
+                packedChannel.append(bytes + offsetX, pixelSize);
+            }
+        }
+
+        packedChannels.push_back(std::move(packedChannel));
+    }
+
+    return packedChannels;
+}
 }
 
 namespace brayns::experimental
@@ -53,24 +109,26 @@ std::string encodeExr(const ExrImage &image)
 {
     auto width = static_cast<int>(image.size[0]);
     auto height = static_cast<int>(image.size[1]);
-    auto lineOrder = image.rowOrder == RowOrder::TopDown ? Imf::INCREASING_Y : Imf::DECREASING_Y;
+    auto origin = Imath::V2i(0, 0);
 
     auto header = Imf::Header(width, height);
-    header.lineOrder() = lineOrder;
-
     auto &channels = header.channels();
+
     auto framebuffer = Imf::FrameBuffer();
 
-    for (const auto &channel : image.channels)
+    auto packedChannels = packChannels(image);
+
+    for (auto i = std::size_t(0); i < packedChannels.size(); ++i)
     {
-        auto name = channel.name;
+        auto &channel = image.channels[i];
+        auto &packedChannel = packedChannels[i];
+
+        const auto &name = channel.name;
         auto type = getPixelType(channel.dataType);
-        auto strideX = channel.stride;
-        auto data = channel.data;
-        auto origin = Imath::V2f(0.0F, 0.0F);
+        auto *data = packedChannel.data();
 
         channels.insert(name, Imf::Channel(type));
-        framebuffer.insert(name, Imf::Slice::Make(type, data, origin, width, height, strideX));
+        framebuffer.insert(name, Imf::Slice::Make(type, data, origin, width, height));
     }
 
     auto stream = Imf::StdOSStream();
