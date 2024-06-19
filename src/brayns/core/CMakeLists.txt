@@ -23,4 +23,7 @@ target_link_libraries(
     ${ZLIB_LIBRARIES}
     stb
     tinyexr
+    PNG::PNG
+    libjpeg-turbo::turbojpeg
+    OpenEXR::OpenEXR
 )

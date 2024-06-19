@@ -10,7 +10,6 @@ project(BraynsSuperbuild)
 
 option(CMAKE_BUILD_TYPE "CMake build type" Release)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(BRAYNS_ENABLE_INSTALL "Install Brayns with dependencies" OFF)
 
 include(ExternalProject)
 
@@ -18,6 +17,17 @@ ExternalProject_Add(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
     GIT_TAG 10.2.1
+    GIT_SHALLOW ON
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+)
+
+ExternalProject_Add(
+    libjpeg-turbo
+    GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
+    GIT_TAG 3.0.3
     GIT_SHALLOW ON
     CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
@@ -49,6 +59,27 @@ ExternalProject_Add(
     -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
     -DBUILD_BINDINGS=OFF
     -DMORPHIO_TESTS=OFF
+)
+
+ExternalProject_Add(
+    openexr
+    GIT_REPOSITORY https://github.com/AcademySoftwareFoundation/openexr.git
+    GIT_TAG v3.2.4
+    GIT_SHALLOW ON
+    CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+    -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+    -DOPENEXR_BUILD_TOOLS=OFF
+    -DOPENEXR_INSTALL_TOOLS=OFF
+    -DOPENEXR_BUILD_EXAMPLES=OFF
+    -DOPENEXR_BUILD_PYTHON=OFF
+    -DOPENEXR_TEST_LIBRARIES=OFF
+    -DOPENEXR_TEST_TOOLS=OFF
+    -DOPENEXR_TEST_PYTHON=OFF
+    -DBUILD_TESTING=OFF
+    -DOPENEXR_FORCE_INTERNAL_DEFLATE=ON
+    -DOPENEXR_FORCE_INTERNAL_IMATH=ON
 )
 
 ExternalProject_Add(
@@ -99,24 +130,3 @@ ExternalProject_Add(
     -DENABLE_ACTIVERECORD=OFF
     -DENABLE_ACTIVERECORD_COMPILER=OFF
 )
-
-if(BRAYNS_ENABLE_INSTALL)
-    ExternalProject_Add(
-        Brayns
-        SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/../..
-        CMAKE_ARGS
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
-        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-        -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
-        -DBRAYNS_ENABLE_TESTS=OFF
-    )
-    ExternalProject_Add_StepDependencies(
-        Brayns
-        configure
-        fmt
-        libsonata
-        morphio
-        ospray
-        poco
-    )
-endif()

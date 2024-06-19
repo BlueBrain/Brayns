@@ -1,16 +1,14 @@
 {
-    "version": 5,
+    "version": 3,
     "configurePresets": [
         {
             "name": "default",
             "hidden": true,
             "binaryDir": "${sourceDir}/build/${presetName}",
-            "installDir": "${sourceDir}/install/${presetName}",
             "generator": "Ninja",
             "cacheVariables": {
                 "BRAYNS_ENABLE_ATLAS": true,
                 "BRAYNS_ENABLE_CIRCUITS": true,
-                "BRAYNS_ENABLE_TESTS": true,
                 "BRAYNS_ENABLE_APPS": true
             }
         },
@@ -19,7 +17,8 @@
             "displayName": "Debug",
             "inherits": "default",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BRAYNS_ENABLE_TESTS": true
             }
         },
         {
@@ -27,7 +26,17 @@
             "displayName": "Release",
             "inherits": "default",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "BRAYNS_ENABLE_TESTS": true
+            }
+        },
+        {
+            "name": "distribution",
+            "displayName": "Distribution",
+            "inherits": "default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "BRAYNS_ENABLE_TESTS": false
             }
         }
     ],
@@ -41,6 +50,11 @@
             "name": "release",
             "displayName": "Release",
             "configurePreset": "release"
+        },
+        {
+            "name": "distribution",
+            "displayName": "Distribution",
+            "configurePreset": "distribution"
         }
     ],
     "testPresets": [

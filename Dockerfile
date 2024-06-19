@@ -1,9 +1,3 @@
-# Docker container for running Brayns as a service
-# Check https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#user for best practices.
-
-# This Dockerfile leverages multi-stage builds, available since Docker 17.05
-# See: https://docs.docker.com/engine/userguide/eng-image/multistage-build/#use-multi-stage-builds
-
 # Image where Brayns is built
 FROM ubuntu:22.04 as builder
 
@@ -20,6 +14,7 @@ COPY scripts/superbuild/CMakeLists.txt ${BRAYNS_SRC}/scripts/superbuild/CMakeLis
 COPY scripts/install_packages.sh ${BRAYNS_SRC}/scripts/install_packages.sh
 COPY src ${BRAYNS_SRC}/src
 COPY CMakeLists.txt ${BRAYNS_SRC}/CMakeLists.txt
+COPY CMakePresets.json ${BRAYNS_SRC}/CMakePresets.json
 
 # Install APT packages
 RUN bash ${BRAYNS_SRC}/scripts/install_packages.sh
@@ -30,12 +25,24 @@ RUN cd ${BRAYNS_SRC}/scripts/superbuild \
    && cmake ..  \
    -GNinja \
    -DCMAKE_INSTALL_PREFIX=${DIST_PATH} \
-   -DCMAKE_BUILD_TYPE=Release \
-   -DBRAYNS_ENABLE_INSTALL=ON
+   -DCMAKE_BUILD_TYPE=Release
 
-# Build Brayns and dependencies
+# Build Brayns dependencies
 RUN cd ${BRAYNS_SRC}/scripts/superbuild/build \
    && cmake --build . -j4
+
+# Configure Brayns with distribution preset
+RUN cd ${BRAYNS_SRC} \
+   && mkdir -p build && cd build \
+   && cmake .. \
+   --preset distribution \
+   -DCMAKE_PREFIX_PATH=${DIST_PATH} \
+   -DCMAKE_INSTALL_PREFIX=${DIST_PATH}
+
+# Build Brayns with distribution preset
+RUN cd ${BRAYNS_SRC} \
+   && cmake --build --preset distribution -j4 \
+   && cmake --install build/distribution
 
 # Only keep runtime libraries
 RUN rm -rf \
