@@ -109,11 +109,11 @@ private:
     static void _parseIndex(std::string_view &data, std::vector<uint32_t> &indices, size_t elementCount)
     {
         auto token = StringExtractor::extractUntil(data, '/');
+        StringExtractor::extract(data, 1);
         if (token.empty())
         {
             return;
         }
-        StringExtractor::extract(data, 1);
         auto index = Parser::parseString<uint32_t>(token);
         if (index < 1 || index > elementCount)
         {
