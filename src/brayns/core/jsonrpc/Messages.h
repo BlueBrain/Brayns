@@ -21,11 +21,30 @@
 
 #pragma once
 
+#include <string>
+
 #include <brayns/core/jsonv2/Json.h>
+
+#include <fmt/format.h>
 
 namespace brayns::experimental
 {
 using JsonRpcId = std::variant<NullJson, int, std::string>;
+
+inline std::string toString(const JsonRpcId &id)
+{
+    if (std::get_if<NullJson>(&id))
+    {
+        return "null";
+    }
+
+    if (const auto *value = std::get_if<int>(&id))
+    {
+        return std::to_string(*value);
+    }
+
+    return std::get<std::string>(id);
+}
 
 struct JsonRpcRequest
 {
@@ -107,24 +126,17 @@ struct JsonObjectReflector<JsonRpcErrorResponse>
         return builder.build();
     }
 };
+}
 
-struct JsonRpcProgress
+namespace fmt
 {
-    JsonRpcId id;
-    std::string operation;
-    float amount;
-};
-
 template<>
-struct JsonObjectReflector<JsonRpcProgress>
+struct formatter<brayns::experimental::JsonRpcId> : formatter<string_view>
 {
-    static auto reflect()
+    template<typename FmtContext>
+    auto format(const brayns::experimental::JsonRpcId &id, FmtContext &context)
     {
-        auto builder = JsonObjectInfoBuilder<JsonRpcProgress>();
-        builder.field("id", [](auto &object) { return &object.id; });
-        builder.field("operation", [](auto &object) { return &object.operation; });
-        builder.field("amount", [](auto &object) { return &object.amount; });
-        return builder.build();
+        return formatter<string_view>::format(brayns::experimental::toString(id), context);
     }
 };
 }

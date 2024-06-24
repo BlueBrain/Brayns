@@ -91,4 +91,4 @@ InternalError::InternalError(const std::string &message):
     JsonRpcException(-32603, message)
 {
 }
-} // namespace brayns
+}

@@ -65,14 +65,14 @@ inline std::string_view extractBytes(std::string_view &bytes, std::size_t count)
 template<typename T>
 T extractBytesAs(std::string_view &bytes, std::endian bytesEndian)
 {
-    static constexpr auto valueSize = sizeof(T);
+    static constexpr auto size = sizeof(T);
 
-    assert(bytes.size() >= valueSize);
+    assert(bytes.size() >= size);
 
-    auto extracted = extractBytes(bytes, valueSize);
+    auto extracted = extractBytes(bytes, size);
 
     T value;
-    std::memcpy(&value, extracted.data(), valueSize);
+    std::memcpy(&value, extracted.data(), size);
 
     if (bytesEndian != std::endian::native)
     {

@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -19,19 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "RequestQueue.h"
 
-#include <string>
-
-#include "Errors.h"
-#include "Messages.h"
+#include <utility>
 
 namespace brayns::experimental
 {
-JsonRpcRequest parseJsonRpcRequest(const std::string &text);
-JsonRpcRequest parseBinaryJsonRpcRequest(std::string binary);
-std::string composeAsText(const JsonRpcResponse &response);
-std::string composeAsBinary(const JsonRpcResponse &response);
-std::string composeError(const JsonRpcErrorResponse &response);
-std::string composeError(const JsonRpcId &id, const JsonRpcException &e);
+void RequestQueue::push(RawRequest request)
+{
+    auto lock = std::lock_guard(_mutex);
+
+    _requests.push_back(std::move(request));
+    _condition.notify_all();
+}
+
+std::vector<RawRequest> RequestQueue::wait()
+{
+    auto lock = std::unique_lock(_mutex);
+
+    if (_requests.empty())
+    {
+        _condition.wait(lock);
+    }
+
+    return std::exchange(_requests, {});
+}
 }

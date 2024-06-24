@@ -23,10 +23,6 @@
 
 namespace brayns
 {
-class Version
-{
-public:
-    static std::string getTag();
-    static std::string getCopyright();
-};
+std::string getVersionTag();
+std::string getCopyright();
 }

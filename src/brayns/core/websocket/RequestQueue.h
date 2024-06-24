@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,17 +21,40 @@
 
 #pragma once
 
-#include <string>
-
-#include "Errors.h"
-#include "Messages.h"
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <vector>
 
 namespace brayns::experimental
 {
-JsonRpcRequest parseJsonRpcRequest(const std::string &text);
-JsonRpcRequest parseBinaryJsonRpcRequest(std::string binary);
-std::string composeAsText(const JsonRpcResponse &response);
-std::string composeAsBinary(const JsonRpcResponse &response);
-std::string composeError(const JsonRpcErrorResponse &response);
-std::string composeError(const JsonRpcId &id, const JsonRpcException &e);
+using ClientId = std::uint32_t;
+
+struct RawResponse
+{
+    std::string_view data;
+    bool binary = false;
+};
+
+using ResponseHandler = std::function<void(const RawResponse &)>;
+
+struct RawRequest
+{
+    ClientId clientId;
+    std::string data;
+    bool binary = false;
+    ResponseHandler respond;
+};
+
+class RequestQueue
+{
+public:
+    void push(RawRequest request);
+    std::vector<RawRequest> wait();
+
+private:
+    std::mutex _mutex;
+    std::condition_variable _condition;
+    std::vector<RawRequest> _requests;
+};
 }

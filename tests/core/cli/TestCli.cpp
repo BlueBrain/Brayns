@@ -36,7 +36,7 @@ struct SomeSettings
 template<>
 struct ArgvSettingsReflector<SomeSettings>
 {
-    static ArgvInfo<SomeSettings> reflect()
+    static auto reflect()
     {
         auto builder = ArgvBuilder<SomeSettings>();
         builder.description("This is a test");

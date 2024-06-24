@@ -20,65 +20,101 @@
 
 #include <iostream>
 
-#include <brayns/core/Brayns.h>
-#include <brayns/core/CommandLine.h>
-#include <brayns/core/utils/Log.h>
-#include <brayns/core/utils/Timer.h>
+#include <brayns/core/Version.h>
+#include <brayns/core/cli/CommandLine.h>
+#include <brayns/core/utils/Logger.h>
 
-#ifdef BRAYNS_ENABLE_CIRCUITS
-    #include <brayns/circuits/CircuitExplorerPlugin.h>
-#endif
+using namespace brayns::experimental;
+using brayns::createConsoleLogger;
+using brayns::getCopyright;
 
-#ifdef BRAYNS_ENABLE_ATLAS
-    #include <brayns/atlas/AtlasExplorerPlugin.h>
-#endif
+namespace brayns::experimental
+{
+struct Settings
+{
+    bool help = false;
+    bool version = false;
+    std::string host;
+    std::uint16_t port = 0;
+    std::size_t maxClient = 0;
+    std::size_t maxFrameSize = 0;
+    bool sslEnabled = false;
+    // SslSettings ssl = {};
+};
+
+template<>
+struct ArgvSettingsReflector<Settings>
+{
+    static auto reflect()
+    {
+        auto builder = ArgvBuilder<Settings>();
+        builder.description(getCopyright());
+        builder.option("help", [](auto &settings) { return &settings.help; })
+            .description("Display this help message")
+            .defaultValue(false);
+        builder.option("version", [](auto &settings) { return &settings.version; })
+            .description("Display brayns copyright with version")
+            .defaultValue(false);
+        builder.option("host", [](auto &settings) { return &settings.host; })
+            .description("Websocket server hostname, use 0.0.0.0 to allow any host to connect")
+            .defaultValue("localhost");
+        builder.option("port", [](auto &settings) { return &settings.port; })
+            .description("Websocket server port")
+            .defaultValue(5000);
+        builder.option("max-client", [](auto &settings) { return &settings.maxClient; })
+            .description("Maximum number of simultaneously connected clients")
+            .defaultValue(2);
+        builder.option("max-frame-size", [](auto &settings) { return &settings.maxFrameSize; })
+            .description("Maximum frame size the websocket server accepts")
+            .defaultValue(std::numeric_limits<int>::max());
+        builder.option("ssl", [](auto &settings) { return &settings.sslEnabled; })
+            .description("Enable SSL for websocket server, requires a certificate and a private key")
+            .defaultValue(false);
+        /*builder.option("private-key-file", [](auto &settings) { return &settings.ssl.privateKeyFile; })
+            .description("SSL private key used by the websocket server")
+            .defaultValue("");
+        builder.option("certificate-file", [](auto &settings) { return &settings.ssl.certificateFile; })
+            .description("SSL certificate the websocket server will provide to clients")
+            .defaultValue("");
+        builder.option("ca-location", [](auto &settings) { return &settings.ssl.caLocation; })
+            .description("Path to a certificate file to use as certification authority or a CA directory")
+            .defaultValue("");
+        builder.option("private-key-passphrase", [](auto &settings) { return &settings.ssl.privateKeyPassphrase; })
+            .description("Passphrase for the private key if encrypted")
+            .defaultValue("");*/
+        return builder.build();
+    }
+};
+}
 
 int main(int argc, const char **argv)
 {
+    auto logger = createConsoleLogger("Brayns");
+
     try
     {
-        auto commandLine = brayns::CommandLine(argc, argv);
+        auto settings = parseArgvAs<Settings>(argc, argv);
 
-        if (commandLine.hasVersion())
+        if (settings.version)
         {
-            auto version = commandLine.getVersion();
-            std::cout << version << '\n';
+            std::cout << getCopyright() << '\n';
             return 0;
         }
 
-        if (commandLine.hasHelp())
+        if (settings.help)
         {
-            auto help = commandLine.getHelp();
-            std::cout << help << '\n';
+            std::cout << getArgvHelp<Settings>() << '\n';
             return 0;
         }
-
-        auto instance = brayns::Brayns(argc, argv);
-
-#ifdef BRAYNS_ENABLE_CIRCUITS
-        brayns::loadCircuitExplorer(instance);
-#endif
-
-#ifdef BRAYNS_ENABLE_ATLAS
-        brayns::loadAtlasExplorer(instance);
-#endif
-
-        brayns::Log::info("Starting Brayns service.");
-
-        auto timer = brayns::Timer();
-
-        instance.runAsService();
-
-        brayns::Log::info("Service was running for {} seconds.", timer.seconds());
     }
     catch (const std::exception &e)
     {
-        brayns::Log::fatal("Fatal error: '{}'.", e.what());
+        logger.fatal("Fatal error: '{}'.", e.what());
         return 1;
     }
     catch (...)
     {
-        brayns::Log::fatal("Unknown fatal error.");
+        logger.fatal("Unknown fatal error.");
         return 1;
     }
 

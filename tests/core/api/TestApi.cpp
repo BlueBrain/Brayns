@@ -21,93 +21,112 @@
 
 #include <doctest.h>
 
-#include <brayns/core/api/Api.h>
+#include <brayns/core/api/ApiBuilder.h>
 
 using namespace brayns::experimental;
 
-TEST_CASE("Api")
+TEST_CASE("Basic")
 {
-    SUBCASE("Basic")
-    {
-        auto offset = 1;
+    auto offset = 1;
 
-        auto builder = ApiBuilder();
+    auto builder = ApiBuilder();
 
-        builder.endpoint("test", [&](int value) { return float(offset + value); }).description("Test");
+    builder.endpoint("test", [&](int value) { return float(offset + value); }).description("Test");
 
-        auto api = builder.build();
+    auto endpoints = builder.build();
 
-        auto methods = api.getMethods();
+    auto methods = endpoints.getMethods();
 
-        CHECK_EQ(methods.size(), 1);
-        CHECK_EQ(methods[0], "test");
+    CHECK_EQ(methods.size(), 1);
+    CHECK_EQ(methods[0], "test");
 
-        auto schema = api.getSchema("test");
+    const auto *endpoint = endpoints.find("test");
 
-        CHECK_EQ(schema.method, "test");
-        CHECK_EQ(schema.description, "Test");
-        CHECK_EQ(schema.params, getJsonSchema<int>());
-        CHECK_EQ(schema.result, getJsonSchema<float>());
-        CHECK_FALSE(schema.binary_params);
-        CHECK_FALSE(schema.binary_result);
+    CHECK(endpoint != nullptr);
 
-        auto request = JsonRpcRequest{
-            .id = 0,
-            .method = "test",
-            .params = 2,
-        };
+    const auto &schema = endpoint->schema;
 
-        auto response = api.execute(request);
+    CHECK_EQ(schema.method, "test");
+    CHECK_EQ(schema.description, "Test");
+    CHECK_EQ(schema.params, getJsonSchema<int>());
+    CHECK_EQ(schema.result, getJsonSchema<float>());
 
-        CHECK_EQ(std::get<int>(response.id), 0);
-        CHECK_EQ(response.result.extract<float>(), 3.0f);
-        CHECK_EQ(response.binary, "");
+    auto params = RawParams{2};
 
-        request.method = "invalid";
-        CHECK_THROWS_AS(api.execute(request), MethodNotFound);
-        request.method = "test";
+    auto result = endpoint->run(params);
 
-        request.params = "invalidString";
-        CHECK_THROWS_AS(api.execute(request), InvalidParams);
-        request.params = 2;
+    CHECK_EQ(result.json.extract<float>(), 3.0f);
+    CHECK_EQ(result.binary, "");
+}
 
-        request.binary = "123";
-        CHECK_THROWS_AS(api.execute(request), InvalidParams);
-        request.binary = "";
+TEST_CASE("No params or no results")
+{
+    auto called = false;
+    auto buffer = 0;
 
-        CHECK_THROWS_AS(api.getSchema("invalidParams"), InvalidParams);
-    }
-    SUBCASE("No params or no results")
-    {
-        auto called = false;
-        auto buffer = 0;
+    auto builder = ApiBuilder();
 
-        auto builder = ApiBuilder();
+    builder.endpoint("test1", [] { return 0; });
+    builder.endpoint("test2", [&] { called = true; });
+    builder.endpoint("test3", [&](int value) { buffer = value; });
 
-        builder.endpoint("test1", [] { return 0; });
-        builder.endpoint("test2", [&] { called = true; });
-        builder.endpoint("test3", [&](int value) { buffer = value; });
+    auto endpoints = builder.build();
 
-        auto api = builder.build();
+    auto params = RawParams();
 
-        auto request = JsonRpcRequest{
-            .id = 0,
-            .method = "test1",
-            .params = {},
-        };
+    const auto *endpoint = endpoints.find("test1");
+    CHECK(endpoint != nullptr);
+    auto result = endpoint->run(params);
+    CHECK_EQ(result.json.extract<int>(), 0);
 
-        auto response = api.execute(request);
-        CHECK_EQ(response.result.extract<int>(), 0);
+    endpoint = endpoints.find("test2");
+    CHECK(endpoint != nullptr);
+    result = endpoint->run(params);
+    CHECK(called);
+    CHECK(result.json.isEmpty());
 
-        request.method = "test2";
-        response = api.execute(request);
-        CHECK(called);
-        CHECK(response.result.isEmpty());
+    endpoint = endpoints.find("test3");
+    CHECK(endpoint != nullptr);
+    params.json = 3;
+    result = endpoint->run(params);
+    CHECK(result.json.isEmpty());
+    CHECK_EQ(buffer, 3);
+}
 
-        request.method = "test3";
-        request.params = 3;
-        response = api.execute(request);
-        CHECK(response.result.isEmpty());
-        CHECK_EQ(buffer, 3);
-    }
+TEST_CASE("With binary")
+{
+    auto builder = ApiBuilder();
+
+    auto value = 0;
+    auto buffer = std::string();
+
+    builder.endpoint("test1", [](int) {});
+    builder.endpoint(
+        "test2",
+        [&](Params<int> params)
+        {
+            value = params.value;
+            buffer = params.binary;
+            return Result<int>{2, "1234"};
+        });
+
+    auto endpoints = builder.build();
+
+    auto normal = endpoints.find("test1");
+    CHECK(normal != nullptr);
+
+    auto params = RawParams{1, "123"};
+
+    CHECK_THROWS_AS(normal->run(params), InvalidParams);
+
+    auto binary = endpoints.find("test2");
+    CHECK(binary != nullptr);
+
+    auto result = binary->run(params);
+
+    CHECK_EQ(value, 1);
+    CHECK_EQ(buffer, "123");
+
+    CHECK_EQ(result.json, 2);
+    CHECK_EQ(result.binary, "1234");
 }

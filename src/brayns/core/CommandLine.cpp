@@ -66,7 +66,7 @@ public:
     static std::string format(const std::vector<brayns::ArgvProperty> &properties)
     {
         std::ostringstream stream;
-        stream << brayns::Version::getCopyright() << '.';
+        stream << brayns::getCopyright() << '.';
         stream << "\n\nBrayns can be configured using command line options with keyword arguments (--name value).";
         stream << "\n\nExample: braynsService --uri 0.0.0.0:5000 --window-size '1920 1080'";
         stream << "\n\nThe supported options are the following:";
@@ -157,7 +157,7 @@ std::string CommandLine::getHelp()
 
 std::string CommandLine::getVersion()
 {
-    return Version::getCopyright();
+    return getCopyright();
 }
 
 CommandLine::CommandLine(int argc, const char **argv):

@@ -34,6 +34,8 @@
 #include <Poco/Net/SecureServerSocket.h>
 #include <Poco/Net/ServerSocket.h>
 
+#include "WebSocketHandler.h"
+
 namespace
 {
 using brayns::Logger;
@@ -76,14 +78,14 @@ public:
     {
         _logger->info("Upgrading to websocket");
 
-        auto websocket = _upgrade(request, response);
+        auto websocket = _tryUpgrade(request, response);
 
         if (!websocket)
         {
             return;
         }
 
-        _logger->info("Upgrade complete, {} is now connected", request.getHost());
+        _logger->info("Upgrade complete, host {} is now connected", request.getHost());
 
         try
         {
@@ -101,7 +103,7 @@ private:
     std::size_t _maxFrameSize;
     Logger *_logger;
 
-    std::optional<WebSocket> _upgrade(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
+    std::optional<WebSocket> _tryUpgrade(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
     {
         try
         {
@@ -220,8 +222,9 @@ Poco::Net::HTTPServerParams::Ptr extractServerParams(const WebSocketServerSettin
 
 namespace brayns::experimental
 {
-WebSocketServer::WebSocketServer(std::unique_ptr<Poco::Net::HTTPServer> server):
-    _server(std::move(server))
+WebSocketServer::WebSocketServer(std::unique_ptr<Poco::Net::HTTPServer> server, std::unique_ptr<RequestQueue> requests):
+    _server(std::move(server)),
+    _requests(std::move(requests))
 {
 }
 
@@ -233,26 +236,30 @@ WebSocketServer::~WebSocketServer()
     }
 }
 
-WebSocketServer startWebSocketServer(const WebSocketServerSettings &settings, WebSocketHandler handler, Logger &logger)
+std::vector<RawRequest> WebSocketServer::waitForRequest()
+{
+    return _requests->wait();
+}
+
+WebSocketServer startServer(const WebSocketServerSettings &settings, Logger &logger)
 {
     if (settings.maxFrameSize > static_cast<std::size_t>(std::numeric_limits<int>::max()))
     {
-        throw std::runtime_error("Max frame size cannot be above 2 ** 31");
+        throw std::invalid_argument("Max frame size cannot be above 2 ** 31");
     }
 
     try
     {
+        auto requests = std::make_unique<RequestQueue>();
+        auto handler = WebSocketHandler(*requests, logger);
         auto factory = Poco::makeShared<RequestHandlerFactory>(std::move(handler), settings.maxFrameSize, logger);
-
         auto socket = createServerSocket(settings);
-
         auto params = extractServerParams(settings);
-
         auto server = std::make_unique<Poco::Net::HTTPServer>(factory, socket, params);
 
         server->start();
 
-        return WebSocketServer(std::move(server));
+        return WebSocketServer(std::move(server), std::move(requests));
     }
     catch (const Poco::Exception &e)
     {

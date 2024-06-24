@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -19,19 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "Endpoint.h"
 
-#include <string>
-
-#include "Errors.h"
-#include "Messages.h"
+#include <stdexcept>
 
 namespace brayns::experimental
 {
-JsonRpcRequest parseJsonRpcRequest(const std::string &text);
-JsonRpcRequest parseBinaryJsonRpcRequest(std::string binary);
-std::string composeAsText(const JsonRpcResponse &response);
-std::string composeAsBinary(const JsonRpcResponse &response);
-std::string composeError(const JsonRpcErrorResponse &response);
-std::string composeError(const JsonRpcId &id, const JsonRpcException &e);
+EndpointRegistry::EndpointRegistry(std::map<std::string, Endpoint> endpoints):
+    _endpoints(std::move(endpoints))
+{
+}
+
+std::vector<std::string> EndpointRegistry::getMethods() const
+{
+    auto result = std::vector<std::string>();
+    result.reserve(_endpoints.size());
+
+    for (const auto &[method, endpoint] : _endpoints)
+    {
+        result.push_back(method);
+    }
+
+    return result;
+}
+
+const Endpoint *EndpointRegistry::find(const std::string &method) const
+{
+    auto i = _endpoints.find(method);
+    return i == _endpoints.end() ? nullptr : &i->second;
+}
 }
