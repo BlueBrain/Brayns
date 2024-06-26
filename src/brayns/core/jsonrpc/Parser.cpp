@@ -55,7 +55,7 @@ JsonRpcRequest parseJsonRpcRequest(const std::string &text)
     return deserializeAs<JsonRpcRequest>(json);
 }
 
-JsonRpcRequest parseBinaryJsonRpcRequest(std::string binary)
+JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary)
 {
     auto data = std::string_view(binary);
 
@@ -75,9 +75,7 @@ JsonRpcRequest parseBinaryJsonRpcRequest(std::string binary)
 
     auto request = parseJsonRpcRequest(std::string(text));
 
-    binary.erase(0, 4 + textSize);
-
-    request.binary = std::move(binary);
+    request.binary = binary.substr(4 + textSize);
 
     return request;
 }

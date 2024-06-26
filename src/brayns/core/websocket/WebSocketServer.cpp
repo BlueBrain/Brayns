@@ -214,7 +214,7 @@ Poco::Net::HTTPServerParams::Ptr extractServerParams(const WebSocketServerSettin
     auto params = Poco::makeAuto<Poco::Net::HTTPServerParams>();
 
     params->setMaxThreads(static_cast<int>(settings.maxThreadCount));
-    params->setMaxQueued(static_cast<int>(settings.queueSize));
+    params->setMaxQueued(static_cast<int>(settings.maxQueueSize));
 
     return params;
 }
@@ -236,7 +236,7 @@ WebSocketServer::~WebSocketServer()
     }
 }
 
-std::vector<RawRequest> WebSocketServer::waitForRequest()
+std::vector<RawRequest> WebSocketServer::waitForRequests()
 {
     return _requests->wait();
 }

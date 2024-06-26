@@ -32,7 +32,7 @@ class RequestHandler
 public:
     explicit RequestHandler(const EndpointRegistry &endpoints, TaskManager &tasks, Logger &logger);
 
-    void handle(RawRequest request);
+    void handle(const RawRequest &request);
 
 private:
     const EndpointRegistry *_endpoints;

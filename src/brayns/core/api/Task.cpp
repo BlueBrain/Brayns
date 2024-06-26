@@ -44,6 +44,14 @@ const RawTask &getTask(const std::map<TaskId, RawTask> &tasks, TaskId id)
 
 namespace brayns::experimental
 {
+TaskManager::~TaskManager()
+{
+    for (const auto &[id, task] : _tasks)
+    {
+        task.cancel();
+    }
+}
+
 std::vector<TaskInfo> TaskManager::getTasks() const
 {
     auto infos = std::vector<TaskInfo>();

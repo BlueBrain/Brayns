@@ -72,6 +72,14 @@ struct TaskInfo
 class TaskManager
 {
 public:
+    explicit TaskManager() = default;
+    ~TaskManager();
+
+    TaskManager(const TaskManager &) = delete;
+    TaskManager(TaskManager &&) = default;
+    TaskManager &operator=(const TaskManager &) = delete;
+    TaskManager &operator=(TaskManager &&) = default;
+
     std::vector<TaskInfo> getTasks() const;
     TaskId add(RawTask task);
     ProgressInfo getProgress(TaskId id) const;

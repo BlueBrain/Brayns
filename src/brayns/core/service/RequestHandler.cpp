@@ -108,18 +108,19 @@ RawResult getResult(RawTask task, const Endpoint &endpoint, TaskManager &tasks, 
 {
     if (!endpoint.schema.async)
     {
-        logger.info("Request handled synchronously");
+        logger.info("Result already available as request is not async");
         return task.wait();
     }
 
     auto id = tasks.add(std::move(task));
+    logger.info("Task created with ID {}", id);
 
     return {serializeToJson(TaskResult{id})};
 }
 
 RawResponse executeRequest(JsonRpcRequest request, const EndpointRegistry &endpoints, TaskManager &tasks, Logger &logger)
 {
-    logger.info("Looking for an endpoint '{}'", request.method);
+    logger.info("Searching endpoint '{}'", request.method);
     const auto &endpoint = findEndpoint(request, endpoints);
     logger.info("Endpoint found");
 
@@ -181,9 +182,9 @@ RequestHandler::RequestHandler(const EndpointRegistry &endpoints, TaskManager &t
 {
 }
 
-void RequestHandler::handle(RawRequest request)
+void RequestHandler::handle(const RawRequest &request)
 {
-    auto jsonRpcRequest = tryParseRequest(std::move(request), *_logger);
+    auto jsonRpcRequest = tryParseRequest(request, *_logger);
 
     if (!jsonRpcRequest)
     {

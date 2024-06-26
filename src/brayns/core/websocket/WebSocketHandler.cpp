@@ -209,10 +209,9 @@ void WebSocketHandler::handle(WebSocket &websocket)
 {
     auto clientId = _clientIds.next();
 
-    _logger->info("New client connected with ID {}", clientId);
-
     try
     {
+        _logger->info("New client connected with ID {}", clientId);
         runClientLoop(clientId, websocket, *_requests, *_logger);
     }
     catch (const WebSocketClosed &e)

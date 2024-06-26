@@ -29,7 +29,7 @@
 namespace brayns::experimental
 {
 JsonRpcRequest parseJsonRpcRequest(const std::string &text);
-JsonRpcRequest parseBinaryJsonRpcRequest(std::string binary);
+JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary);
 std::string composeAsText(const JsonRpcResponse &response);
 std::string composeAsBinary(const JsonRpcResponse &response);
 std::string composeError(const JsonRpcErrorResponse &response);
