@@ -151,3 +151,36 @@ TEST_CASE("Duplication")
     builder.endpoint("test", handler);
     CHECK_THROWS_AS(builder.endpoint("test", handler), std::invalid_argument);
 }
+
+TEST_CASE("Task")
+{
+    auto builder = ApiBuilder();
+
+    auto offset = 1;
+
+    auto worker = [&](Progress progress, int value)
+    {
+        progress.nextOperation("1");
+        progress.update(0.5F);
+        return value + offset;
+    };
+
+    builder.task("test", [=](int value) { return startTask(worker, value); });
+
+    auto endpoints = builder.build();
+
+    auto endpoint = endpoints.find("test");
+    CHECK(endpoint != nullptr);
+
+    auto task = endpoint->startTask(RawParams{2});
+
+    auto result = task.wait();
+
+    CHECK_EQ(result.json.extract<int>(), 3);
+    CHECK(result.binary.empty());
+
+    auto progress = task.getProgress();
+
+    CHECK_EQ(progress.currentOperation, "1");
+    CHECK_EQ(progress.currentOperationProgress, 0.5F);
+}

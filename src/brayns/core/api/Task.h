@@ -170,13 +170,12 @@ auto addParsingToTaskHandler(T handler)
     };
 }
 
-template<ApiReflected T, typename... Args>
-Task<T> startTask(std::invocable<Progress, Args...> auto task, Args &&...args)
+template<ApiReflected ParamsType, std::invocable<Progress, ParamsType> Handler>
+Task<std::invoke_result_t<Handler, Progress, ParamsType>> startTask(Handler handler, ParamsType params)
 {
     auto state = std::make_shared<ProgressState>();
-    auto progress = Progress(state);
 
-    auto future = std::async(std::launch::async, std::move(task), progress, std::forward<Args>(args)...);
+    auto future = std::async(std::launch::async, std::move(handler), Progress(state), std::move(params));
     auto shared = std::make_shared<decltype(future)>(std::move(future));
 
     return {
