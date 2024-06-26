@@ -59,7 +59,7 @@ struct JsonObjectReflector<JsonRpcRequest>
 {
     static auto reflect()
     {
-        auto builder = JsonObjectInfoBuilder<JsonRpcRequest>();
+        auto builder = JsonBuilder<JsonRpcRequest>();
         builder.constant("jsonrpc", "2.0");
         builder.field("id", [](auto &object) { return &object.id; }).required(false);
         builder.field("method", [](auto &object) { return &object.method; });
@@ -80,7 +80,7 @@ struct JsonObjectReflector<JsonRpcResponse>
 {
     static auto reflect()
     {
-        auto builder = JsonObjectInfoBuilder<JsonRpcResponse>();
+        auto builder = JsonBuilder<JsonRpcResponse>();
         builder.constant("jsonrpc", "2.0");
         builder.field("id", [](auto &object) { return &object.id; });
         builder.field("result", [](auto &object) { return &object.result; });
@@ -100,7 +100,7 @@ struct JsonObjectReflector<JsonRpcError>
 {
     static auto reflect()
     {
-        auto builder = JsonObjectInfoBuilder<JsonRpcError>();
+        auto builder = JsonBuilder<JsonRpcError>();
         builder.field("code", [](auto &object) { return &object.code; });
         builder.field("message", [](auto &object) { return &object.message; });
         builder.field("data", [](auto &object) { return &object.data; }).required(false);
@@ -119,7 +119,7 @@ struct JsonObjectReflector<JsonRpcErrorResponse>
 {
     static auto reflect()
     {
-        auto builder = JsonObjectInfoBuilder<JsonRpcErrorResponse>();
+        auto builder = JsonBuilder<JsonRpcErrorResponse>();
         builder.constant("jsonrpc", "2.0");
         builder.field("id", [](auto &object) { return &object.id; });
         builder.field("error", [](auto &object) { return &object.error; });

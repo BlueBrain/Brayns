@@ -115,23 +115,12 @@ private:
 };
 
 template<typename T>
-struct ArgvReflector
-{
-    static std::string getType()
-    {
-        return std::is_integral_v<T> ? "integer" : "number";
-    }
+struct ArgvReflector;
 
-    static std::string display(const T &value)
-    {
-        return fmt::format("{}", value);
-    }
-
-    static T parse(std::string_view data)
-    {
-        return parseStringAs<T>(data);
-    }
-};
+template<typename T>
+concept ReflectedArgvOption = std::same_as<std::string, decltype(ArgvReflector<T>::getType())>
+    && std::same_as<std::string, decltype(ArgvReflector<T>::display(T()))>
+    && std::same_as<T, decltype(ArgvReflector<T>::parse(std::string_view()))>;
 
 template<>
 struct ArgvReflector<bool>
@@ -154,6 +143,26 @@ struct ArgvReflector<bool>
         }
 
         return parseStringAs<bool>(data);
+    }
+};
+
+template<typename T>
+    requires std::is_arithmetic_v<T>
+struct ArgvReflector<T>
+{
+    static std::string getType()
+    {
+        return std::is_integral_v<T> ? "integer" : "number";
+    }
+
+    static std::string display(const T &value)
+    {
+        return fmt::format("{}", value);
+    }
+
+    static T parse(std::string_view data)
+    {
+        return parseStringAs<T>(data);
     }
 };
 
@@ -191,7 +200,7 @@ public:
         return *this;
     }
 
-    template<typename T>
+    template<ReflectedArgvOption T>
     ArgvOptionBuilder defaultValue(const T &value)
     {
         _option->defaultValue = ArgvReflector<T>::display(value);
@@ -207,6 +216,14 @@ private:
     ArgvOption<SettingsType> *_option;
 };
 
+template<typename GetterType, typename SettingsType>
+using GetOptionType = std::decay_t<std::remove_pointer_t<std::invoke_result_t<GetterType, SettingsType &>>>;
+
+template<typename GetterType, typename SettingsType>
+concept ArgvOptionGetter =
+    std::invocable<GetterType, SettingsType &> && std::is_pointer_v<std::invoke_result_t<GetterType, SettingsType &>>
+    && ReflectedArgvOption<GetOptionType<GetterType, SettingsType>>;
+
 template<typename SettingsType>
 class ArgvBuilder
 {
@@ -216,14 +233,11 @@ public:
         _description = std::move(value);
     }
 
-    ArgvOptionBuilder<SettingsType> option(std::string key, auto &&getPtr)
+    template<ArgvOptionGetter<SettingsType> T>
+    ArgvOptionBuilder<SettingsType> option(std::string key, T getOptionPtr)
     {
-        using FieldPtr = decltype(getPtr(std::declval<SettingsType &>()));
-
-        static_assert(std::is_pointer_v<FieldPtr>, "getPtr must return a pointer to the object field");
-
-        using FieldType = std::decay_t<std::remove_pointer_t<FieldPtr>>;
-        using Reflector = ArgvReflector<FieldType>;
+        using OptionType = GetOptionType<T, SettingsType>;
+        using Reflector = ArgvReflector<OptionType>;
 
         if (_options.contains(key))
         {
@@ -234,7 +248,7 @@ public:
 
         option.key = std::move(key);
         option.type = Reflector::getType();
-        option.parse = [=](auto data, auto &settings) { *getPtr(settings) = Reflector::parse(data); };
+        option.parse = [=](auto data, auto &settings) { *getOptionPtr(settings) = Reflector::parse(data); };
 
         return ArgvOptionBuilder<SettingsType>(option);
     }

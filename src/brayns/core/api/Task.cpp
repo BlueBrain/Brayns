@@ -25,13 +25,11 @@
 
 #include <fmt/format.h>
 
-#include <brayns/core/jsonv2/JsonValidator.h>
-
 namespace
 {
 using namespace brayns::experimental;
 
-const RawTask &getTask(const std::unordered_map<TaskId, RawTask> &tasks, TaskId id)
+const RawTask &getTask(const std::map<TaskId, RawTask> &tasks, TaskId id)
 {
     auto i = tasks.find(id);
 
@@ -46,34 +44,27 @@ const RawTask &getTask(const std::unordered_map<TaskId, RawTask> &tasks, TaskId 
 
 namespace brayns::experimental
 {
-TaskManager::TaskManager(std::unordered_map<std::string, TaskDefinition> definitions):
-    _definitions(std::move(definitions))
+std::vector<TaskInfo> TaskManager::getTasks() const
 {
+    auto infos = std::vector<TaskInfo>();
+    infos.reserve(_tasks.size());
+
+    for (const auto &[id, task] : _tasks)
+    {
+        infos.push_back({id, task.getProgress()});
+    }
+
+    return infos;
 }
 
-TaskId TaskManager::start(const std::string &name, RawParams params)
+TaskId TaskManager::add(RawTask task)
 {
-    auto i = _definitions.find(name);
-
-    if (i == _definitions.end())
-    {
-        throw InvalidParams(fmt::format("Invalid task name: '{}'", name));
-    }
-
-    const auto &definition = i->second;
-
-    auto errors = validate(params.json, definition.schema.params);
-
-    if (!errors.empty())
-    {
-        throw InvalidParams("Invalid task params schema", errors);
-    }
-
     auto id = _ids.next();
+    assert(!_tasks.contains(id));
 
     try
     {
-        _tasks[id] = definition.start(std::move(params));
+        _tasks[id] = std::move(task);
     }
     catch (...)
     {
@@ -84,7 +75,7 @@ TaskId TaskManager::start(const std::string &name, RawParams params)
     return id;
 }
 
-ProgressInfo TaskManager::getProgress(TaskId id)
+ProgressInfo TaskManager::getProgress(TaskId id) const
 {
     const auto &task = getTask(_tasks, id);
     return task.getProgress();
@@ -93,7 +84,10 @@ ProgressInfo TaskManager::getProgress(TaskId id)
 RawResult TaskManager::wait(TaskId id)
 {
     const auto &task = getTask(_tasks, id);
-    return task.wait();
+    auto result = task.wait();
+    _tasks.erase(id);
+    _ids.recycle(id);
+    return result;
 }
 
 void TaskManager::cancel(TaskId id)
@@ -101,5 +95,6 @@ void TaskManager::cancel(TaskId id)
     const auto &task = getTask(_tasks, id);
     task.cancel();
     _tasks.erase(id);
+    _ids.recycle(id);
 }
 }

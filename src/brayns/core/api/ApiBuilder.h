@@ -22,148 +22,15 @@
 #pragma once
 
 #include <string>
-#include <type_traits>
+#include <utility>
 
-#include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/jsonv2/Json.h>
-#include <brayns/core/utils/FunctorReflector.h>
 
 #include "Endpoint.h"
+#include "Task.h"
 
 namespace brayns::experimental
 {
-template<typename T>
-struct ApiReflector
-{
-    static JsonSchema getSchema()
-    {
-        return getJsonSchema<T>();
-    }
-
-    static RawResult serialize(T value)
-    {
-        return {serializeToJson(value)};
-    }
-
-    static T deserialize(RawParams params)
-    {
-        if (!params.binary.empty())
-        {
-            throw InvalidParams("This endpoint does not accept additional binary data");
-        }
-
-        return deserializeAs<T>(params.json);
-    }
-};
-
-template<typename T>
-struct Params
-{
-    T value;
-    std::string binary = {};
-};
-
-template<typename T>
-struct ApiReflector<Params<T>>
-{
-    static JsonSchema getSchema()
-    {
-        return getJsonSchema<T>();
-    }
-
-    static Params<T> deserialize(RawParams params)
-    {
-        return {deserializeAs<T>(params.json), std::move(params.binary)};
-    }
-};
-
-template<typename T>
-struct Result
-{
-    T value;
-    std::string binary = {};
-};
-
-template<typename T>
-struct ApiReflector<Result<T>>
-{
-    static JsonSchema getSchema()
-    {
-        return getJsonSchema<T>();
-    }
-
-    static RawResult serialize(Result<T> result)
-    {
-        return {serializeToJson(result.value), std::move(result.binary)};
-    }
-};
-
-template<typename T>
-using GetParamsType = std::decay_t<GetArgType<T, 0>>;
-
-template<typename T>
-using GetResultType = std::decay_t<GetReturnType<T>>;
-
-template<typename HandlerType>
-auto ensureHasParams(HandlerType handler)
-    requires(getArgCount<HandlerType> == 1)
-{
-    return handler;
-}
-
-template<typename HandlerType>
-auto ensureHasParams(HandlerType handler)
-    requires(getArgCount<HandlerType> == 0)
-{
-    return [handler = std::move(handler)](NullJson) { return handler(); };
-}
-
-template<typename HandlerType>
-auto ensureHasResult(HandlerType handler)
-    requires(!std::is_void_v<GetResultType<HandlerType>>)
-{
-    return handler;
-}
-
-template<typename HandlerType>
-auto ensureHasResult(HandlerType handler)
-    requires(std::is_void_v<GetResultType<HandlerType>>)
-{
-    using Params = GetParamsType<HandlerType>;
-    return [handler = std::move(handler)](Params params)
-    {
-        handler(std::move(params));
-        return NullJson();
-    };
-}
-
-template<typename HandlerType>
-EndpointSchema reflectEndpointSchema(std::string method)
-{
-    using ParamsReflector = ApiReflector<GetParamsType<HandlerType>>;
-    using ResultReflector = ApiReflector<GetResultType<HandlerType>>;
-
-    return {
-        .method = std::move(method),
-        .params = ParamsReflector::getSchema(),
-        .result = ResultReflector::getSchema(),
-    };
-}
-
-template<typename HandlerType>
-auto addEndpointParsing(HandlerType handler)
-{
-    using ParamsReflector = ApiReflector<GetParamsType<HandlerType>>;
-    using ResultReflector = ApiReflector<GetResultType<HandlerType>>;
-
-    return [handler = std::move(handler)](auto rawParams)
-    {
-        auto params = ParamsReflector::deserialize(std::move(rawParams));
-        auto result = handler(std::move(params));
-        return ResultReflector::serialize(std::move(result));
-    };
-}
-
 class EndpointBuilder
 {
 public:
@@ -185,18 +52,42 @@ private:
 class ApiBuilder
 {
 public:
-    EndpointRegistry build();
-
-    EndpointBuilder endpoint(std::string method, auto handler)
+    template<TaskLauncher T>
+    EndpointBuilder task(std::string method, T launcher)
     {
-        auto wrapper = ensureHasResult(ensureHasParams(std::move(handler)));
-        auto schema = reflectEndpointSchema<decltype(wrapper)>(std::move(method));
-        auto run = addEndpointParsing(std::move(wrapper));
-        _endpoints.push_back({std::move(schema), std::move(run)});
-        return EndpointBuilder(_endpoints.back());
+        auto schema = reflectEndpointSchema<T>(std::move(method));
+        auto startTask = addParsingToTaskLauncher(std::move(launcher));
+        auto &endpoint = add({std::move(schema), std::move(startTask)});
+        return EndpointBuilder(endpoint);
+    }
+
+    template<TaskHandler T>
+    EndpointBuilder endpoint(std::string method, T handler)
+    {
+        auto schema = reflectEndpointSchema<T>(std::move(method));
+        auto runTask = addParsingToTaskHandler(std::move(handler));
+        auto &endpoint = add({std::move(schema), std::move(runTask)});
+        return EndpointBuilder(endpoint);
+    }
+
+    EndpointRegistry build()
+    {
+        return EndpointRegistry(std::exchange(_endpoints, {}));
     }
 
 private:
-    std::vector<Endpoint> _endpoints;
+    std::map<std::string, Endpoint> _endpoints;
+
+    Endpoint &add(Endpoint endpoint)
+    {
+        const auto &method = endpoint.schema.method;
+
+        if (_endpoints.contains(method))
+        {
+            throw std::invalid_argument("Duplicated endpoint method");
+        }
+
+        return _endpoints[method] = std::move(endpoint);
+    }
 };
 }

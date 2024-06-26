@@ -50,47 +50,14 @@ TEST_CASE("Basic")
     CHECK_EQ(schema.description, "Test");
     CHECK_EQ(schema.params, getJsonSchema<int>());
     CHECK_EQ(schema.result, getJsonSchema<float>());
+    CHECK_FALSE(schema.async);
 
     auto params = RawParams{2};
 
-    auto result = endpoint->run(params);
+    auto result = endpoint->startTask(params).wait();
 
     CHECK_EQ(result.json.extract<float>(), 3.0f);
     CHECK_EQ(result.binary, "");
-}
-
-TEST_CASE("No params or no results")
-{
-    auto called = false;
-    auto buffer = 0;
-
-    auto builder = ApiBuilder();
-
-    builder.endpoint("test1", [] { return 0; });
-    builder.endpoint("test2", [&] { called = true; });
-    builder.endpoint("test3", [&](int value) { buffer = value; });
-
-    auto endpoints = builder.build();
-
-    auto params = RawParams();
-
-    const auto *endpoint = endpoints.find("test1");
-    CHECK(endpoint != nullptr);
-    auto result = endpoint->run(params);
-    CHECK_EQ(result.json.extract<int>(), 0);
-
-    endpoint = endpoints.find("test2");
-    CHECK(endpoint != nullptr);
-    result = endpoint->run(params);
-    CHECK(called);
-    CHECK(result.json.isEmpty());
-
-    endpoint = endpoints.find("test3");
-    CHECK(endpoint != nullptr);
-    params.json = 3;
-    result = endpoint->run(params);
-    CHECK(result.json.isEmpty());
-    CHECK_EQ(buffer, 3);
 }
 
 TEST_CASE("With binary")
@@ -100,7 +67,7 @@ TEST_CASE("With binary")
     auto value = 0;
     auto buffer = std::string();
 
-    builder.endpoint("test1", [](int) {});
+    builder.endpoint("test1", [](int) { return NullJson(); });
     builder.endpoint(
         "test2",
         [&](Params<int> params)
@@ -112,21 +79,75 @@ TEST_CASE("With binary")
 
     auto endpoints = builder.build();
 
-    auto normal = endpoints.find("test1");
-    CHECK(normal != nullptr);
+    auto regularEndpoint = endpoints.find("test1");
+    CHECK(regularEndpoint != nullptr);
 
     auto params = RawParams{1, "123"};
 
-    CHECK_THROWS_AS(normal->run(params), InvalidParams);
+    CHECK_THROWS_AS(regularEndpoint->startTask(params), InvalidParams);
 
-    auto binary = endpoints.find("test2");
-    CHECK(binary != nullptr);
+    auto endpointWithBinary = endpoints.find("test2");
+    CHECK(endpointWithBinary != nullptr);
 
-    auto result = binary->run(params);
+    auto result = endpointWithBinary->startTask(params).wait();
 
     CHECK_EQ(value, 1);
     CHECK_EQ(buffer, "123");
 
     CHECK_EQ(result.json, 2);
     CHECK_EQ(result.binary, "1234");
+}
+
+struct NonCopyable
+{
+    NonCopyable() = default;
+    ~NonCopyable() = default;
+
+    NonCopyable(const NonCopyable &) = delete;
+    NonCopyable(NonCopyable &&) = default;
+
+    NonCopyable &operator=(const NonCopyable &) = delete;
+    NonCopyable &operator=(NonCopyable &&) = default;
+};
+
+namespace brayns::experimental
+{
+template<>
+struct JsonObjectReflector<NonCopyable>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<NonCopyable>();
+        return builder.build();
+    }
+};
+}
+
+TEST_CASE("Copy")
+{
+    auto builder = ApiBuilder();
+
+    builder.endpoint("test", [](NonCopyable) { return NonCopyable(); });
+
+    auto endpoints = builder.build();
+
+    auto endpoint = endpoints.find("test");
+    CHECK(endpoint != nullptr);
+
+    auto params = RawParams{createJsonObject()};
+
+    auto result = endpoint->startTask(std::move(params)).wait();
+
+    CHECK(getObject(result.json).size() == 0);
+    CHECK(result.binary.empty());
+}
+
+TEST_CASE("Duplication")
+{
+    auto builder = ApiBuilder();
+
+    auto handler = [](NullJson) { return NullJson(); };
+
+    builder.endpoint("test", handler);
+    CHECK_THROWS_AS(builder.endpoint("test", handler), std::invalid_argument);
 }

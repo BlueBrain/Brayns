@@ -21,9 +21,6 @@
 
 #pragma once
 
-#include <optional>
-#include <string>
-
 #include <brayns/core/api/Endpoint.h>
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/websocket/WebSocketHandler.h>
@@ -33,12 +30,13 @@ namespace brayns::experimental
 class RequestHandler
 {
 public:
-    explicit RequestHandler(const EndpointRegistry &endpoints, Logger &logger);
+    explicit RequestHandler(const EndpointRegistry &endpoints, TaskManager &tasks, Logger &logger);
 
     void handle(RawRequest request);
 
 private:
     const EndpointRegistry *_endpoints;
+    TaskManager *_tasks;
     Logger *_logger;
 };
 }

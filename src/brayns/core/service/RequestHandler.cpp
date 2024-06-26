@@ -87,24 +87,37 @@ std::optional<JsonRpcRequest> tryParseRequest(const RawRequest &request, Logger 
     }
     catch (const JsonRpcException &e)
     {
-        logger.warn("Error while preparing request: '{}'", e.what());
+        logger.warn("Error while parsing request: '{}'", e.what());
         request.respond({composeError(NullJson(), e)});
     }
     catch (const std::exception &e)
     {
-        logger.error("Unexpected error while preparing request: '{}'", e.what());
+        logger.error("Unexpected error while parsing request: '{}'", e.what());
         request.respond({composeError(NullJson(), InternalError(e.what()))});
     }
     catch (...)
     {
-        logger.error("Unknown error while preparing request");
+        logger.error("Unknown error while parsing request");
         request.respond({composeError(NullJson(), InternalError("Unknown parsing error"))});
     }
 
     return std::nullopt;
 }
 
-RawResponse executeRequest(JsonRpcRequest request, const EndpointRegistry &endpoints, Logger &logger)
+RawResult getResult(RawTask task, const Endpoint &endpoint, TaskManager &tasks, Logger &logger)
+{
+    if (!endpoint.schema.async)
+    {
+        logger.info("Request handled synchronously");
+        return task.wait();
+    }
+
+    auto id = tasks.add(std::move(task));
+
+    return {serializeToJson(TaskResult{id})};
+}
+
+RawResponse executeRequest(JsonRpcRequest request, const EndpointRegistry &endpoints, TaskManager &tasks, Logger &logger)
 {
     logger.info("Looking for an endpoint '{}'", request.method);
     const auto &endpoint = findEndpoint(request, endpoints);
@@ -116,9 +129,11 @@ RawResponse executeRequest(JsonRpcRequest request, const EndpointRegistry &endpo
 
     auto params = RawParams{std::move(request.params), std::move(request.binary)};
 
-    logger.info("Executing request {}", request.id);
-    auto result = endpoint.run(std::move(params));
-    logger.info("Successfully executed request");
+    logger.info("Calling endpoint for request {}", request.id);
+    auto task = endpoint.startTask(std::move(params));
+    logger.info("Successfully called endpoint");
+
+    auto result = getResult(std::move(task), endpoint, tasks, logger);
 
     logger.info("Composing response");
     auto response = composeResponse(request.id, std::move(result));
@@ -129,13 +144,14 @@ RawResponse executeRequest(JsonRpcRequest request, const EndpointRegistry &endpo
 
 void tryExecuteRequest(
     JsonRpcRequest request,
-    const EndpointRegistry &endpoints,
     const ResponseHandler &respond,
+    const EndpointRegistry &endpoints,
+    TaskManager &tasks,
     Logger &logger)
 {
     try
     {
-        auto response = executeRequest(std::move(request), endpoints, logger);
+        auto response = executeRequest(std::move(request), endpoints, tasks, logger);
         respond(response);
     }
     catch (const JsonRpcException &e)
@@ -158,8 +174,9 @@ void tryExecuteRequest(
 
 namespace brayns::experimental
 {
-RequestHandler::RequestHandler(const EndpointRegistry &endpoints, Logger &logger):
+RequestHandler::RequestHandler(const EndpointRegistry &endpoints, TaskManager &tasks, Logger &logger):
     _endpoints(&endpoints),
+    _tasks(&tasks),
     _logger(&logger)
 {
 }
@@ -173,6 +190,6 @@ void RequestHandler::handle(RawRequest request)
         return;
     }
 
-    tryExecuteRequest(std::move(*jsonRpcRequest), *_endpoints, request.respond, *_logger);
+    tryExecuteRequest(std::move(*jsonRpcRequest), request.respond, *_endpoints, *_tasks, *_logger);
 }
 }

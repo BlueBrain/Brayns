@@ -56,7 +56,7 @@ struct JsonObjectReflector<Internal>
 {
     static auto reflect()
     {
-        auto builder = JsonObjectInfoBuilder<Internal>();
+        auto builder = JsonBuilder<Internal>();
         builder.field("value", [](auto &object) { return &object.value; });
         return builder.build();
     }
@@ -79,7 +79,7 @@ struct JsonObjectReflector<SomeObject>
 {
     static auto reflect()
     {
-        auto builder = JsonObjectInfoBuilder<SomeObject>();
+        auto builder = JsonBuilder<SomeObject>();
         builder.constant("constant", "test");
         builder.field("required", [](auto &object) { return &object.required; });
         builder.field("bounded", [](auto &object) { return &object.bounded; }).minimum(1).maximum(3);

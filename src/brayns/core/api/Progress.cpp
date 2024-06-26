@@ -25,6 +25,11 @@
 
 namespace brayns::experimental
 {
+TaskCancelledException::TaskCancelledException():
+    JsonRpcException(0, "Task has been cancelled")
+{
+}
+
 ProgressInfo ProgressState::get()
 {
     auto lock = std::lock_guard(_mutex);
@@ -38,23 +43,23 @@ void ProgressState::update(float currentOperationProgress)
 
     if (_cancelled)
     {
-        throw TaskCancelledException("Cancelled in update");
+        throw TaskCancelledException();
     }
 
     assert(currentOperationProgress >= 0.0F && currentOperationProgress <= 1.0F);
     _info.currentOperationProgress = currentOperationProgress;
 }
 
-void ProgressState::nextOperation(std::string name)
+void ProgressState::nextOperation(std::string value)
 {
     auto lock = std::lock_guard(_mutex);
 
     if (_cancelled)
     {
-        throw TaskCancelledException("Cancelled in next operation");
+        throw TaskCancelledException();
     }
 
-    _info.operationName = std::move(name);
+    _info.currentOperation = std::move(value);
     _info.currentOperationProgress = 0.0F;
 }
 
@@ -66,8 +71,8 @@ void ProgressState::cancel()
     _cancelled = true;
 }
 
-Progress::Progress(ProgressState &state):
-    _state(&state)
+Progress::Progress(std::shared_ptr<ProgressState> state):
+    _state(std::move(state))
 {
 }
 
@@ -76,8 +81,8 @@ void Progress::update(float currentOperationProgress)
     _state->update(currentOperationProgress);
 }
 
-void Progress::nextOperation(std::string name)
+void Progress::nextOperation(std::string value)
 {
-    _state->nextOperation(std::move(name));
+    _state->nextOperation(std::move(value));
 }
 }

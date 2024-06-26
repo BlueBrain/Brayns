@@ -26,13 +26,14 @@
 #include <stdexcept>
 #include <string>
 
+#include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/jsonv2/Json.h>
 
 namespace brayns::experimental
 {
 struct ProgressInfo
 {
-    std::string operationName;
+    std::string currentOperation;
     float currentOperationProgress = 0.0F;
 };
 
@@ -41,8 +42,8 @@ struct JsonReflector<ProgressInfo>
 {
     static auto reflect()
     {
-        auto builder = JsonObjectInfoBuilder<ProgressInfo>();
-        builder.field("operation_name", [](auto &object) { return &object.operationName; })
+        auto builder = JsonBuilder<ProgressInfo>();
+        builder.field("current_operation", [](auto &object) { return &object.currentOperation; })
             .description("Description of the current operation");
         builder.field("current_operation_progress", [](auto &object) { return &object.currentOperationProgress; })
             .description("Progress of the current operation between 0 and 1");
@@ -50,10 +51,10 @@ struct JsonReflector<ProgressInfo>
     }
 };
 
-class TaskCancelledException : public std::runtime_error
+class TaskCancelledException : public JsonRpcException
 {
 public:
-    using runtime_error::runtime_error;
+    explicit TaskCancelledException();
 };
 
 class ProgressState
@@ -61,7 +62,7 @@ class ProgressState
 public:
     ProgressInfo get();
     void update(float currentOperationProgress);
-    void nextOperation(std::string name);
+    void nextOperation(std::string value);
     void cancel();
 
 private:
@@ -73,12 +74,12 @@ private:
 class Progress
 {
 public:
-    explicit Progress(ProgressState &state);
+    explicit Progress(std::shared_ptr<ProgressState> state);
 
     void update(float currentOperationProgress);
-    void nextOperation(std::string name);
+    void nextOperation(std::string value);
 
 private:
-    ProgressState *_state;
+    std::shared_ptr<ProgressState> _state;
 };
 }

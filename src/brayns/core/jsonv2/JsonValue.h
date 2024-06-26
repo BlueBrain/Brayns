@@ -39,6 +39,7 @@ using JsonObject = Poco::JSON::Object;
 
 struct NullJson
 {
+    auto operator<=>(const NullJson &) const = default;
 };
 
 class JsonException : public std::runtime_error
@@ -55,4 +56,16 @@ const JsonArray &getArray(const JsonValue &json);
 const JsonObject &getObject(const JsonValue &json);
 std::string stringify(const JsonValue &json);
 JsonValue parseJson(const std::string &data);
+}
+
+namespace std
+{
+template<>
+struct hash<brayns::experimental::NullJson>
+{
+    std::size_t operator()(const brayns::experimental::NullJson &) const
+    {
+        return std::size_t(-1);
+    }
+};
 }

@@ -21,8 +21,6 @@
 
 #include "Endpoint.h"
 
-#include <stdexcept>
-
 namespace brayns::experimental
 {
 EndpointRegistry::EndpointRegistry(std::map<std::string, Endpoint> endpoints):
