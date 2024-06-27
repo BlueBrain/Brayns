@@ -19,10 +19,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <string>
+#include "Volume.h"
+
+namespace
+{
+using namespace brayns::experimental;
+
+Data toSharedData3D(const void *data, VoxelDataType voxelDataType, const Size3 &size)
+{
+    auto type = static_cast<OSPDataType>(voxelDataType);
+    auto handle = ospNewSharedData(data, type, size[0], 0, size[1], 0, size[2]);
+    return Data(handle);
+}
+}
 
 namespace brayns::experimental
 {
-std::string getVersionTag();
-std::string getCopyright();
+OSPVolume ObjectReflector<RegularVolume>::createHandle(OSPDevice device, const Settings &settings)
+{
+    auto handle = ospNewVolume("structuredRegular");
+    throwLastDeviceErrorIfNull(device, handle);
+
+    auto data = toSharedData3D(settings.data, settings.voxelDataType, settings.size);
+
+    setObjectParam(handle, "data", data);
+    setObjectParam(handle, "cellCentered", settings.cellCentered);
+    setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
+    setObjectParam(handle, "background", settings.background);
+
+    commitObject(handle);
+
+    return handle;
+}
 }

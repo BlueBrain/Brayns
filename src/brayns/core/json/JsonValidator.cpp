@@ -21,343 +21,310 @@
 
 #include "JsonValidator.h"
 
-#include <sstream>
+#include <ranges>
+#include <stdexcept>
+#include <utility>
 
-#include <brayns/core/utils/EnumInfo.h>
+#include <fmt/format.h>
 
 namespace
 {
-class TypeValidator
+using namespace brayns::experimental;
+
+class ErrorContext
 {
 public:
-    static bool validate(const brayns::JsonValue &json, brayns::JsonType required, brayns::JsonErrorBuilder &errors)
+    void push(JsonPathItem item)
     {
-        auto type = brayns::JsonTypeInfo::getType(json);
-        return _validate(type, required, errors);
+        _path.push_back(std::move(item));
+    }
+
+    void pop()
+    {
+        _path.pop_back();
+    }
+
+    void add(JsonError error)
+    {
+        _errors.push_back({_path, std::move(error)});
+    }
+
+    std::vector<JsonSchemaError> build()
+    {
+        return std::exchange(_errors, {});
     }
 
 private:
-    static bool _validate(brayns::JsonType type, brayns::JsonType required)
-    {
-        if (type == required)
-        {
-            return true;
-        }
-        if (required == brayns::JsonType::Undefined)
-        {
-            return true;
-        }
-        if (required == brayns::JsonType::Number && type == brayns::JsonType::Integer)
-        {
-            return true;
-        }
-        return false;
-    }
-
-    static bool _validate(brayns::JsonType type, brayns::JsonType required, brayns::JsonErrorBuilder &errors)
-    {
-        if (_validate(type, required))
-        {
-            return true;
-        }
-        errors.add("invalid type, expected {} got {}", required, type);
-        return false;
-    }
+    JsonPath _path;
+    std::vector<JsonSchemaError> _errors;
 };
 
-class NumberValidator
+void check(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors);
+
+void checkOneOf(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors)
 {
-public:
-    static void validate(
-        const brayns::JsonValue &json,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
+    for (const auto &oneof : schema.oneOf)
+    {
+        auto suberrors = validate(json, oneof);
+        if (suberrors.empty())
+        {
+            return;
+        }
+    }
+    errors.add(InvalidOneOf{});
+}
+
+bool checkType(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors)
+{
+    auto required = RequiredJsonType{schema.type};
+    auto type = getJsonType(json);
+    if (required.isCompatible(type))
+    {
+        return true;
+    }
+    errors.add(InvalidType{type, required.value});
+    return false;
+}
+
+void checkConst(const std::string &value, const JsonSchema &schema, ErrorContext &errors)
+{
+    if (value != schema.constant)
+    {
+        errors.add(InvalidConst{value, schema.constant});
+    }
+}
+
+void checkRange(double value, const JsonSchema &schema, ErrorContext &errors)
+{
+    if (schema.minimum && value < *schema.minimum)
+    {
+        errors.add(BelowMinimum{value, *schema.minimum});
+    }
+    if (schema.maximum && value > *schema.maximum)
+    {
+        errors.add(AboveMaximum{value, *schema.maximum});
+    }
+}
+
+void checkItemCount(std::size_t count, const JsonSchema &schema, ErrorContext &errors)
+{
+    if (schema.minItems && count < *schema.minItems)
+    {
+        errors.add(NotEnoughItems{count, *schema.minItems});
+    }
+    if (schema.maxItems && count > *schema.maxItems)
+    {
+        errors.add(TooManyItems{count, *schema.maxItems});
+    }
+}
+
+void checkArrayItems(const JsonArray &array, const JsonSchema &schema, ErrorContext &errors)
+{
+    const auto &itemSchema = schema.items.at(0);
+
+    auto index = std::size_t(0);
+    for (const auto &value : array)
+    {
+        errors.push(index);
+        check(value, itemSchema, errors);
+        errors.pop();
+
+        ++index;
+    }
+}
+
+void checkMapItems(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+{
+    const auto &itemSchema = schema.items.at(0);
+
+    for (const auto &[key, value] : object)
+    {
+        errors.push(key);
+        check(value, itemSchema, errors);
+        errors.pop();
+    }
+}
+
+void checkRequiredProperties(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+{
+    for (const auto &[key, property] : schema.properties)
+    {
+        if (!property.required)
+        {
+            continue;
+        }
+        if (object.has(key))
+        {
+            continue;
+        }
+        errors.add(MissingRequiredProperty{key});
+    }
+}
+
+void checkUnknownProperties(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+{
+    for (const auto &[key, value] : object)
+    {
+        if (schema.properties.contains(key))
+        {
+            continue;
+        }
+        errors.add(UnknownProperty{key});
+    }
+}
+
+void checkProperties(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+{
+    for (const auto &[key, itemSchema] : schema.properties)
+    {
+        if (!object.has(key))
+        {
+            continue;
+        }
+        errors.push(key);
+        check(object.get(key), itemSchema, errors);
+        errors.pop();
+    }
+}
+
+void checkObject(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+{
+    if (!schema.items.empty())
+    {
+        checkMapItems(object, schema, errors);
+        return;
+    }
+    checkUnknownProperties(object, schema, errors);
+    checkRequiredProperties(object, schema, errors);
+    checkProperties(object, schema, errors);
+}
+
+void check(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors)
+{
+    if (!schema.oneOf.empty())
+    {
+        checkOneOf(json, schema, errors);
+        return;
+    }
+    if (!checkType(json, schema, errors))
+    {
+        return;
+    }
+    if (!schema.constant.empty())
+    {
+        const auto &value = json.extract<std::string>();
+        checkConst(value, schema, errors);
+        return;
+    }
+    if (isNumeric(schema.type))
     {
         auto value = json.convert<double>();
         checkRange(value, schema, errors);
-    }
-
-    static void checkRange(double value, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
-    {
-        if (schema.minimum && value < *schema.minimum)
-        {
-            errors.add("value below minimum {} < {}", value, *schema.minimum);
-        }
-        if (schema.maximum && value > *schema.maximum)
-        {
-            errors.add("value above maximum {} > {}", value, *schema.maximum);
-        }
-    }
-};
-
-class ArrayValidator
-{
-public:
-    static void validate(
-        const brayns::JsonValue &json,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        if (schema.items.empty())
-        {
-            throw std::invalid_argument("Invalid array schema without items");
-        }
-        auto &array = brayns::JsonExtractor::extractArray(json);
-        checkItemSchema(array, schema.items[0], errors);
-        checkItemCount(array.size(), schema, errors);
-    }
-
-    static void checkItemSchema(
-        const brayns::JsonArray &array,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        auto i = size_t(0);
-        for (const auto &item : array)
-        {
-            errors.push(i);
-            brayns::JsonValidator::validate(item, schema, errors);
-            errors.pop();
-            ++i;
-        }
-    }
-
-    static void checkItemCount(size_t size, const brayns::JsonSchema &schema, brayns::JsonErrorBuilder &errors)
-    {
-        if (schema.minItems && size < *schema.minItems)
-        {
-            errors.add("item count below minimum {} < {}", size, *schema.minItems);
-        }
-        if (schema.maxItems && size > *schema.maxItems)
-        {
-            errors.add("item count above maximum {} > {}", size, *schema.maxItems);
-        }
-    }
-};
-
-class MapValidator
-{
-public:
-    static void validate(
-        const brayns::JsonValue &json,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        if (schema.items.empty())
-        {
-            throw std::invalid_argument("Invalid map schema without items");
-        }
-        auto &object = brayns::JsonExtractor::extractObject(json);
-        checkItemSchema(object, schema.items[0], errors);
-    }
-
-    static void checkItemSchema(
-        const brayns::JsonObject &object,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        for (const auto &[key, value] : object)
-        {
-            errors.push(key);
-            brayns::JsonValidator::validate(value, schema, errors);
-            errors.pop();
-        }
-    }
-};
-
-class ObjectValidator
-{
-public:
-    static void validate(
-        const brayns::JsonValue &json,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        auto &object = brayns::JsonExtractor::extractObject(json);
-        auto &properties = schema.properties;
-        checkPropertiesSchema(object, properties, errors);
-        checkRequired(object, properties, errors);
-    }
-
-    static void checkPropertiesSchema(
-        const brayns::JsonObject &object,
-        const std::map<std::string, brayns::JsonSchema> &properties,
-        brayns::JsonErrorBuilder &errors)
-    {
-        for (const auto &[key, value] : object)
-        {
-            auto i = properties.find(key);
-            if (i == properties.end())
-            {
-                errors.add("unknown property '{}'", key);
-                continue;
-            }
-            auto &schema = i->second;
-            if (schema.readOnly)
-            {
-                errors.add("read only property '{}'", key);
-                continue;
-            }
-            errors.push(key);
-            brayns::JsonValidator::validate(value, schema, errors);
-            errors.pop();
-        }
-    }
-
-    static void checkRequired(
-        const brayns::JsonObject &json,
-        const std::map<std::string, brayns::JsonSchema> &properties,
-        brayns::JsonErrorBuilder &errors)
-    {
-        for (const auto &[key, value] : properties)
-        {
-            if (!value.required)
-            {
-                continue;
-            }
-            if (value.readOnly)
-            {
-                continue;
-            }
-            if (json.has(key))
-            {
-                continue;
-            }
-            errors.add("missing required property '{}'", key);
-        }
-    }
-};
-
-class EnumValidator
-{
-public:
-    static void validate(
-        const brayns::JsonValue &json,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        auto &value = json.extract<std::string>();
-        checkValues(value, schema.enums, errors);
-    }
-
-    static void checkValues(
-        const std::string &value,
-        const std::vector<std::string> &values,
-        brayns::JsonErrorBuilder &errors)
-    {
-        if (std::find(values.begin(), values.end(), value) != values.end())
-        {
-            return;
-        }
-        auto stream = std::ostringstream();
-        stream << '[';
-        if (!values.empty())
-        {
-            stream << "'" << values[0] << "'";
-        }
-        for (size_t i = 1; i < values.size(); ++i)
-        {
-            stream << ", '" << values[i] << "'";
-        }
-        stream << ']';
-        errors.add("invalid enum '{}' not in {}", value, stream.str());
-    }
-};
-
-class OneOfValidator
-{
-public:
-    static void validate(
-        const brayns::JsonValue &json,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        checkAtLeastOneSchemaMatches(json, schema.oneOf, errors);
-    }
-
-    static void checkAtLeastOneSchemaMatches(
-        const brayns::JsonValue &json,
-        const std::vector<brayns::JsonSchema> &schemas,
-        brayns::JsonErrorBuilder &errors)
-    {
-        for (const auto &schema : schemas)
-        {
-            auto builder = brayns::JsonErrorBuilder();
-            brayns::JsonValidator::validate(json, schema, builder);
-            auto buffer = builder.build();
-            if (buffer.empty())
-            {
-                return;
-            }
-        }
-        errors.add("invalid oneOf, no schemas match input");
-    }
-};
-
-class ValidationDispatcher
-{
-public:
-    static void validate(
-        const brayns::JsonValue &json,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        if (!schema.oneOf.empty())
-        {
-            OneOfValidator::validate(json, schema, errors);
-            return;
-        }
-        if (!TypeValidator::validate(json, schema.type, errors))
-        {
-            return;
-        }
-        if (brayns::JsonTypeInfo::isNumeric(schema.type))
-        {
-            NumberValidator::validate(json, schema, errors);
-            return;
-        }
-        if (!schema.enums.empty())
-        {
-            EnumValidator::validate(json, schema, errors);
-            return;
-        }
-        if (schema.type == brayns::JsonType::Array)
-        {
-            ArrayValidator::validate(json, schema, errors);
-            return;
-        }
-        if (schema.type == brayns::JsonType::Object)
-        {
-            _validateObject(json, schema, errors);
-            return;
-        }
-    }
-
-private:
-    static void _validateObject(
-        const brayns::JsonValue &json,
-        const brayns::JsonSchema &schema,
-        brayns::JsonErrorBuilder &errors)
-    {
-        if (!schema.items.empty())
-        {
-            MapValidator::validate(json, schema, errors);
-            return;
-        }
-        ObjectValidator::validate(json, schema, errors);
-    }
-};
-} // namespace
-
-namespace brayns
-{
-void JsonValidator::validate(const JsonValue &json, const JsonSchema &schema, JsonErrorBuilder &errors)
-{
-    if (json.isEmpty())
-    {
-        ValidationDispatcher::validate(schema.defaultValue, schema, errors);
         return;
     }
-    ValidationDispatcher::validate(json, schema, errors);
+    if (schema.type == JsonType::Array)
+    {
+        const auto &value = getArray(json);
+        checkItemCount(value.size(), schema, errors);
+        checkArrayItems(value, schema, errors);
+        return;
+    }
+    if (schema.type == JsonType::Object)
+    {
+        const auto &object = getObject(json);
+        checkObject(object, schema, errors);
+        return;
+    }
 }
-} // namespace brayns
+}
+
+namespace brayns::experimental
+{
+std::string toString(const JsonPath &path)
+{
+    auto result = std::string();
+
+    for (const auto &item : path)
+    {
+        const auto *index = std::get_if<std::size_t>(&item);
+
+        if (index != nullptr)
+        {
+            result.append(fmt::format("[{}]", *index));
+            continue;
+        }
+
+        const auto &key = std::get<std::string>(item);
+
+        if (result.empty())
+        {
+            result.append(key);
+            continue;
+        }
+
+        result.push_back('.');
+        result.append(key);
+    }
+
+    return result;
+}
+
+std::string toString(const InvalidType &error)
+{
+    auto type = getEnumName(error.type);
+    auto expected = getEnumName(error.expected);
+    return fmt::format("Invalid type: expected {} got {}", expected, type);
+}
+
+std::string toString(const InvalidConst &error)
+{
+    return fmt::format("Invalid const: expected '{}' got '{}'", error.expected, error.value);
+}
+
+std::string toString(const BelowMinimum &error)
+{
+    return fmt::format("Value below minimum: {} < {}", error.value, error.minimum);
+}
+
+std::string toString(const AboveMaximum &error)
+{
+    return fmt::format("Value above maximum: {} > {}", error.value, error.maximum);
+}
+
+std::string toString(const NotEnoughItems &error)
+{
+    return fmt::format("Not enough items: {} < {}", error.count, error.minItems);
+}
+
+std::string toString(const TooManyItems &error)
+{
+    return fmt::format("Too many items: {} > {}", error.count, error.maxItems);
+}
+
+std::string toString(const MissingRequiredProperty &error)
+{
+    return fmt::format("Missing required property: '{}'", error.name);
+}
+
+std::string toString(const UnknownProperty &error)
+{
+    return fmt::format("Unknown property: '{}'", error.name);
+}
+
+std::string toString(const InvalidOneOf &)
+{
+    return "Invalid oneOf";
+}
+
+std::string toString(const JsonError &error)
+{
+    return std::visit([](const auto &value) { return toString(value); }, error);
+}
+
+std::vector<JsonSchemaError> validate(const JsonValue &json, const JsonSchema &schema)
+{
+    auto errors = ErrorContext();
+    check(json, schema, errors);
+    return errors.build();
+}
+}

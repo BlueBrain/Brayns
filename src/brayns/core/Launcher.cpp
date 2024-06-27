@@ -28,7 +28,7 @@ namespace brayns::experimental
 {
 void runService(const ServiceSettings &settings)
 {
-    auto level = brayns::EnumInfo::getValue<LogLevel>(settings.logLevel);
+    auto level = getEnumValue<LogLevel>(settings.logLevel);
 
     auto logger = createConsoleLogger("brayns");
     logger.setLevel(level);

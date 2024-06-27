@@ -26,8 +26,6 @@
 #include <brayns/core/utils/Filesystem.h>
 
 using namespace brayns::experimental;
-using brayns::Color4;
-using brayns::Size2;
 
 struct TestImage
 {

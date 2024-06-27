@@ -21,8 +21,6 @@ target_link_libraries(
     rkcommon::rkcommon
     PRIVATE
     ${ZLIB_LIBRARIES}
-    stb
-    tinyexr
     PNG::PNG
     libjpeg-turbo::turbojpeg
     OpenEXR::OpenEXR

@@ -23,7 +23,7 @@
 
 #include <stdexcept>
 
-#include <brayns/core/jsonv2/Json.h>
+#include <brayns/core/json/Json.h>
 
 namespace brayns::experimental
 {

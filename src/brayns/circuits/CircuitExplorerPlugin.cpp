@@ -21,39 +21,9 @@
 
 #include "CircuitExplorerPlugin.h"
 
-#include <brayns/core/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/core/utils/Log.h>
-
-#include <brayns/circuits/io/CellPlacementLoader.h>
-#include <brayns/circuits/io/NeuronMorphologyLoader.h>
-#include <brayns/circuits/io/SonataLoader.h>
-#include <brayns/circuits/network/entrypoints/GetCircuitIdsEntrypoint.h>
-#include <brayns/circuits/network/entrypoints/SetCircuitThicknessEntrypoint.h>
-
-namespace brayns
+namespace brayns::experimental
 {
-void loadCircuitExplorer(PluginAPI &api)
+void loadCircuitExplorer()
 {
-    auto name = "Circuit Explorer";
-
-    auto &registry = api.getLoaderRegistry();
-    auto loaders = LoaderRegistryBuilder(name, registry);
-
-    loaders.add<CellPlacementLoader>();
-    loaders.add<NeuronMorphologyLoader>();
-    loaders.add<SonataLoader>();
-
-    auto interface = api.getNetworkInterface();
-    if (!interface)
-    {
-        return;
-    }
-    auto &engine = api.getEngine();
-    auto &scene = engine.getScene();
-    auto &models = scene.getModels();
-    auto entrypoints = EntrypointBuilder(name, *interface);
-
-    entrypoints.add<GetCircuitIdsEntrypoint>(models);
-    entrypoints.add<SetCircuitThicknessEntrypoint>(models);
 }
 }

@@ -26,7 +26,6 @@
 #include <brayns/core/cli/CommandLine.h>
 
 using namespace brayns::experimental;
-using brayns::getCopyright;
 
 int main(int argc, const char **argv)
 {

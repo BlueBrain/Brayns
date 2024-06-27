@@ -21,25 +21,106 @@
 
 #pragma once
 
-#include "JsonError.h"
-#include "JsonSchema.h"
+#include <string>
+#include <variant>
+#include <vector>
 
-namespace brayns
+#include "JsonSchema.h"
+#include "JsonValue.h"
+
+namespace brayns::experimental
 {
-/**
- * @brief JSON schema validator.
- *
- */
-class JsonValidator
+using JsonPathItem = std::variant<std::size_t, std::string>;
+using JsonPath = std::vector<JsonPathItem>;
+
+std::string toString(const JsonPath &path);
+
+struct InvalidType
 {
-public:
-    /**
-     * @brief Validate JSON using schema and store result into errors.
-     *
-     * @param json JSON to validate.
-     * @param schema JSON schema.
-     * @param errors Output errors.
-     */
-    static void validate(const JsonValue &json, const JsonSchema &schema, JsonErrorBuilder &errors);
+    JsonType type;
+    JsonType expected;
 };
-} // namespace brayns
+
+std::string toString(const InvalidType &error);
+
+struct InvalidConst
+{
+    std::string value;
+    std::string expected;
+};
+
+std::string toString(const InvalidConst &error);
+
+struct BelowMinimum
+{
+    double value;
+    double minimum;
+};
+
+std::string toString(const BelowMinimum &error);
+
+struct AboveMaximum
+{
+    double value;
+    double maximum;
+};
+
+std::string toString(const AboveMaximum &error);
+
+struct NotEnoughItems
+{
+    std::size_t count;
+    std::size_t minItems;
+};
+
+std::string toString(const NotEnoughItems &error);
+
+struct TooManyItems
+{
+    std::size_t count;
+    std::size_t maxItems;
+};
+
+std::string toString(const TooManyItems &error);
+
+struct MissingRequiredProperty
+{
+    std::string name;
+};
+
+std::string toString(const MissingRequiredProperty &error);
+
+struct UnknownProperty
+{
+    std::string name;
+};
+
+std::string toString(const UnknownProperty &error);
+
+struct InvalidOneOf
+{
+};
+
+std::string toString(const InvalidOneOf &error);
+
+using JsonError = std::variant<
+    InvalidType,
+    InvalidConst,
+    AboveMaximum,
+    BelowMinimum,
+    TooManyItems,
+    NotEnoughItems,
+    MissingRequiredProperty,
+    UnknownProperty,
+    InvalidOneOf>;
+
+std::string toString(const JsonError &error);
+
+struct JsonSchemaError
+{
+    JsonPath path;
+    JsonError error;
+};
+
+std::vector<JsonSchemaError> validate(const JsonValue &json, const JsonSchema &schema);
+}

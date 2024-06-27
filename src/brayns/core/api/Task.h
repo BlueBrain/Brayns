@@ -30,7 +30,7 @@
 #include <string>
 #include <type_traits>
 
-#include <brayns/core/jsonv2/Json.h>
+#include <brayns/core/json/Json.h>
 #include <brayns/core/utils/IdGenerator.h>
 
 #include "ApiReflector.h"

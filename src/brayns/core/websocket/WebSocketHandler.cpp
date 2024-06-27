@@ -29,7 +29,6 @@
 namespace
 {
 using namespace brayns::experimental;
-using brayns::Logger;
 
 struct WebSocketBuffer
 {

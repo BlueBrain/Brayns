@@ -24,25 +24,11 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace brayns
+namespace brayns::experimental
 {
-EnumMap<LogLevel> EnumReflector<LogLevel>::reflect()
-{
-    return {
-        {"trace", LogLevel::Trace},
-        {"debug", LogLevel::Debug},
-        {"info", LogLevel::Info},
-        {"warn", LogLevel::Warn},
-        {"warning", LogLevel::Warn},
-        {"error", LogLevel::Error},
-        {"fatal", LogLevel::Fatal},
-        {"off", LogLevel::Off},
-    };
-}
-
 std::string toString(const LogRecord &record)
 {
-    auto level = EnumInfo::getName(record.level);
+    auto level = getEnumName(record.level);
     return fmt::format("[{}][{}]: {}", record.name, level, record.message);
 }
 

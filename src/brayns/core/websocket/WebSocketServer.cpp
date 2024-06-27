@@ -38,7 +38,6 @@
 
 namespace
 {
-using brayns::Logger;
 using namespace brayns::experimental;
 
 class HealthcheckRequestHandler : public Poco::Net::HTTPRequestHandler

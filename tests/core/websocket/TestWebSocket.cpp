@@ -28,9 +28,6 @@
 #include <brayns/core/websocket/WebSocketServer.h>
 
 using namespace brayns::experimental;
-using brayns::createConsoleLogger;
-using brayns::Logger;
-using brayns::LogLevel;
 
 TEST_CASE("WebSocket")
 {

@@ -26,7 +26,7 @@
 #include <rkcommon/math/Quaternion.h>
 #include <rkcommon/math/vec.h>
 
-namespace brayns
+namespace brayns::experimental
 {
 template<typename T, int S>
 using Vector = rkcommon::math::vec_t<T, S>;

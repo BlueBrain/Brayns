@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,11 +21,15 @@
 
 #pragma once
 
-/**
- * @brief The AtlasExplorer plugin offer capabilities to visualize NRRD volumes, focusing on the
- * AIBS/BBP Atlases
- */
+#include <brayns/core/json/JsonReflector.h>
+
 namespace brayns::experimental
 {
-void loadAtlasExplorer();
+template<>
+struct JsonReflector<JsonSchema>
+{
+    static JsonSchema getSchema();
+    static JsonValue serialize(const JsonSchema &schema);
+    static JsonSchema deserialize(const JsonValue &json);
+};
 }

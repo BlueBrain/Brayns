@@ -150,7 +150,7 @@ private:
 };
 
 template<typename T>
-class EnumInfoBuilder
+class EnumBuilder
 {
 public:
     EnumFieldBuilder<T> field(std::string name, T value)

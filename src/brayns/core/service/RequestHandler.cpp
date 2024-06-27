@@ -23,13 +23,12 @@
 
 #include <fmt/format.h>
 
+#include <brayns/core/json/JsonValidator.h>
 #include <brayns/core/jsonrpc/Parser.h>
-#include <brayns/core/jsonv2/JsonValidator.h>
 
 namespace
 {
 using namespace brayns::experimental;
-using brayns::Logger;
 
 JsonRpcRequest parseRequest(const RawRequest &request)
 {

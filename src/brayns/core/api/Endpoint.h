@@ -27,7 +27,7 @@
 #include <string>
 #include <type_traits>
 
-#include <brayns/core/jsonv2/Json.h>
+#include <brayns/core/json/Json.h>
 
 #include "ApiReflector.h"
 #include "Task.h"
