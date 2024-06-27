@@ -70,6 +70,25 @@ struct Params
     std::string binary = {};
 };
 
+template<>
+struct ApiReflector<RawParams>
+{
+    static JsonSchema getSchema()
+    {
+        return getJsonSchema<JsonValue>();
+    }
+
+    static RawResult serialize(RawParams)
+    {
+        throw std::invalid_argument("Cannot serialize params");
+    }
+
+    static RawParams deserialize(RawParams params)
+    {
+        return params;
+    }
+};
+
 template<ReflectedJson T>
 struct ApiReflector<Params<T>>
 {
@@ -78,7 +97,7 @@ struct ApiReflector<Params<T>>
         return getJsonSchema<T>();
     }
 
-    static RawResult serialize(Params<T> value)
+    static RawResult serialize(Params<T>)
     {
         throw std::invalid_argument("Cannot serialize params");
     }
@@ -96,6 +115,25 @@ struct Result
     std::string binary = {};
 };
 
+template<>
+struct ApiReflector<RawResult>
+{
+    static JsonSchema getSchema()
+    {
+        return getJsonSchema<JsonValue>();
+    }
+
+    static RawResult serialize(RawResult value)
+    {
+        return value;
+    }
+
+    static RawResult deserialize(RawParams)
+    {
+        throw std::invalid_argument("Cannot deserialize result");
+    }
+};
+
 template<ReflectedJson T>
 struct ApiReflector<Result<T>>
 {
@@ -109,7 +147,7 @@ struct ApiReflector<Result<T>>
         return {serializeToJson(result.value), std::move(result.binary)};
     }
 
-    static Result<T> deserialize(RawParams params)
+    static Result<T> deserialize(RawParams)
     {
         throw std::invalid_argument("Cannot deserialize result");
     }

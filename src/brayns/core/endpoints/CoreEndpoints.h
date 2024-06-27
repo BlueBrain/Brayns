@@ -19,11 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/core/Launcher.h>
+#pragma once
 
-using namespace brayns;
+#include <brayns/core/api/Api.h>
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/service/Service.h>
 
-int main(int argc, const char **argv)
+namespace brayns
 {
-    return runServiceFromArgv(argc, argv);
+void addCoreEndpoints(ApiBuilder &builder, Api &api, StopToken &token);
 }

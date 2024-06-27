@@ -37,22 +37,5 @@ private:
     bool _stopped = false;
 };
 
-struct ServiceContext
-{
-    Logger logger;
-    WebSocketServerSettings server;
-    Api api;
-    StopToken token = {};
-};
-
-class Service
-{
-public:
-    explicit Service(std::unique_ptr<ServiceContext> context);
-
-    void run();
-
-private:
-    std::unique_ptr<ServiceContext> _context;
-};
+void runService(WebSocketServer &server, Api &api, StopToken &token, Logger &logger);
 }

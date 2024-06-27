@@ -41,7 +41,7 @@ struct EndpointSchema
 };
 
 template<>
-struct JsonReflector<EndpointSchema>
+struct JsonObjectReflector<EndpointSchema>
 {
     static auto reflect()
     {

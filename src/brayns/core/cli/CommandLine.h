@@ -47,6 +47,7 @@ struct ArgvOption
     std::string description;
     std::string defaultValue;
     std::function<void(std::string_view, SettingsType &)> parse;
+    std::function<std::string(const SettingsType &)> toString;
 };
 
 template<typename SettingsType>
@@ -109,6 +110,18 @@ public:
         return result;
     }
 
+    std::string toString(const SettingsType &settings) const
+    {
+        auto stream = std::ostringstream();
+
+        for (const auto &[key, option] : _options)
+        {
+            stream << "\n    --" << key << ": " << option.toString(settings);
+        }
+
+        return stream.str();
+    }
+
 private:
     std::string _description;
     ArgvOptions<SettingsType> _options;
@@ -119,7 +132,7 @@ struct ArgvReflector;
 
 template<typename T>
 concept ReflectedArgvOption = std::same_as<std::string, decltype(ArgvReflector<T>::getType())>
-    && std::same_as<std::string, decltype(ArgvReflector<T>::display(T()))>
+    && std::same_as<std::string, decltype(ArgvReflector<T>::toString(T()))>
     && std::same_as<T, decltype(ArgvReflector<T>::parse(std::string_view()))>;
 
 template<>
@@ -130,7 +143,7 @@ struct ArgvReflector<bool>
         return "boolean";
     }
 
-    static std::string display(bool value)
+    static std::string toString(bool value)
     {
         return value ? "true" : "false";
     }
@@ -155,7 +168,7 @@ struct ArgvReflector<T>
         return std::is_integral_v<T> ? "integer" : "number";
     }
 
-    static std::string display(const T &value)
+    static std::string toString(const T &value)
     {
         return fmt::format("{}", value);
     }
@@ -174,7 +187,7 @@ struct ArgvReflector<std::string>
         return "string";
     }
 
-    static std::string display(const std::string &value)
+    static std::string toString(const std::string &value)
     {
         return value;
     }
@@ -203,7 +216,7 @@ public:
     template<ReflectedArgvOption T>
     ArgvOptionBuilder defaultValue(const T &value)
     {
-        _option->defaultValue = ArgvReflector<T>::display(value);
+        _option->defaultValue = ArgvReflector<T>::toString(value);
         return *this;
     }
 
@@ -221,7 +234,8 @@ using GetOptionType = std::decay_t<std::remove_pointer_t<std::invoke_result_t<Ge
 
 template<typename GetterType, typename SettingsType>
 concept ArgvOptionGetter =
-    std::invocable<GetterType, SettingsType &> && std::is_pointer_v<std::invoke_result_t<GetterType, SettingsType &>>
+    std::invocable<GetterType, SettingsType &> && std::invocable<GetterType, const SettingsType &>
+    && std::is_pointer_v<std::invoke_result_t<GetterType, SettingsType &>>
     && ReflectedArgvOption<GetOptionType<GetterType, SettingsType>>;
 
 template<typename SettingsType>
@@ -249,6 +263,7 @@ public:
         option.key = std::move(key);
         option.type = Reflector::getType();
         option.parse = [=](auto data, auto &settings) { *getOptionPtr(settings) = Reflector::parse(data); };
+        option.toString = [=](const auto &settings) { return Reflector::toString(*getOptionPtr(settings)); };
 
         return ArgvOptionBuilder<SettingsType>(option);
     }
@@ -293,5 +308,11 @@ SettingsType parseArgvAs(int argc, const char **argv)
 {
     auto map = parseArgv(argc, argv);
     return parseArgvAs<SettingsType>(map);
+}
+
+template<ReflectedArgvSettings SettingsType>
+std::string stringifyArgvSettings(const SettingsType &settings)
+{
+    return reflectArgvSettings<SettingsType>().toString(settings);
 }
 }

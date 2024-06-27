@@ -23,17 +23,38 @@
 
 #include <iostream>
 
+#include <brayns/core/endpoints/CoreEndpoints.h>
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
+#include <brayns/core/utils/String.h>
 
 namespace
 {
 using namespace brayns;
 
-Service createService(const ServiceSettings &settings, Logger &logger)
+void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 {
     auto level = getEnumValue<LogLevel>(settings.logLevel);
     logger.setLevel(level);
+
+    auto token = StopToken();
+
+    logger.info("Building JSON-RPC API");
+
+    auto api = Api();
+
+    auto builder = ApiBuilder();
+
+    addCoreEndpoints(builder, api, token);
+
+    api = builder.build();
+
+    logger.info("JSON-RCP API ready");
+
+    auto methods = api.getMethods();
+    logger.debug("Available methods:\n    {}", join(methods, "\n    "));
+
+    logger.info("Starting websocket server on {}:{}", settings.host, settings.port);
 
     auto ssl = std::optional<SslSettings>();
 
@@ -47,7 +68,7 @@ Service createService(const ServiceSettings &settings, Logger &logger)
         };
     }
 
-    auto server = WebSocketServerSettings{
+    auto serverSettings = WebSocketServerSettings{
         .host = settings.host,
         .port = settings.port,
         .maxThreadCount = settings.maxThreadCount,
@@ -56,21 +77,19 @@ Service createService(const ServiceSettings &settings, Logger &logger)
         .ssl = std::move(ssl),
     };
 
-    auto api = Api({});
+    auto server = startServer(serverSettings, logger);
 
-    auto context = std::make_unique<ServiceContext>(ServiceContext{
-        .logger = logger,
-        .server = std::move(server),
-        .api = std::move(api),
-    });
+    logger.info("Websocket server started");
 
-    return Service(std::move(context));
+    logger.info("Service running");
+
+    runService(server, api, token, logger);
 }
 }
 
 namespace brayns
 {
-int runService(int argc, const char **argv)
+int runServiceFromArgv(int argc, const char **argv)
 {
     auto logger = createConsoleLogger("brayns");
 
@@ -90,20 +109,22 @@ int runService(int argc, const char **argv)
             return 0;
         }
 
-        auto service = createService(settings, logger);
+        logger.info("{}", getCopyright());
 
-        service.run();
+        logger.debug("Service options:{}", stringifyArgvSettings(settings));
+
+        startServerAndRunService(settings, logger);
 
         return 0;
     }
     catch (const std::exception &e)
     {
-        logger.fatal("Cannot start service: {}", e.what());
+        logger.fatal("Fatal error: {}", e.what());
         return 1;
     }
     catch (...)
     {
-        logger.fatal("Cannot start service for unknown reason");
+        logger.fatal("Unknown fatal error");
         return 1;
     }
 }

@@ -62,7 +62,8 @@ struct JsonObjectReflector<TaskResult>
     static auto reflect()
     {
         auto builder = JsonBuilder<TaskResult>();
-        builder.field("task_id", [](auto &object) { return &object.taskId; });
+        builder.field("task_id", [](auto &object) { return &object.taskId; })
+            .description("ID of the task started by the method");
         return builder.build();
     }
 };
@@ -71,5 +72,17 @@ struct TaskInfo
 {
     TaskId id;
     ProgressInfo progress;
+};
+
+template<>
+struct JsonObjectReflector<TaskInfo>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<TaskInfo>();
+        builder.field("id", [](auto &object) { return &object.id; }).description("Task ID to monitor it");
+        builder.field("progress", [](auto &object) { return &object.progress; }).description("Current task progress");
+        return builder.build();
+    }
 };
 }

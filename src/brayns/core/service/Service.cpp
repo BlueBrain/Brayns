@@ -144,19 +144,8 @@ void StopToken::stop()
     _stopped = true;
 }
 
-Service::Service(std::unique_ptr<ServiceContext> context):
-    _context(std::move(context))
+void runService(WebSocketServer &server, Api &api, StopToken &token, Logger &logger)
 {
-}
-
-void Service::run()
-{
-    auto &[logger, serverSettings, api, token] = *_context;
-
-    logger.info("Starting websocket server");
-    auto server = startServer(serverSettings, logger);
-    logger.info("Websocket server started");
-
     while (true)
     {
         logger.info("Waiting for incoming requests");

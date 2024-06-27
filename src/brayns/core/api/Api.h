@@ -33,7 +33,7 @@ namespace brayns
 class Api
 {
 public:
-    explicit Api(std::map<std::string, Endpoint> endpoints);
+    explicit Api(std::map<std::string, Endpoint> endpoints = {});
     ~Api();
 
     Api(const Api &) = delete;

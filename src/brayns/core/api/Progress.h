@@ -38,7 +38,7 @@ struct ProgressInfo
 };
 
 template<>
-struct JsonReflector<ProgressInfo>
+struct JsonObjectReflector<ProgressInfo>
 {
     static auto reflect()
     {
