@@ -33,7 +33,7 @@ namespace brayns
 {
 struct ProgressInfo
 {
-    std::string currentOperation;
+    std::string currentOperation = "Task startup";
     float currentOperationProgress = 0.0F;
 };
 

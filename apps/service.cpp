@@ -19,43 +19,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
-
 #include <brayns/core/Launcher.h>
-#include <brayns/core/Version.h>
-#include <brayns/core/cli/CommandLine.h>
 
 using namespace brayns;
 
 int main(int argc, const char **argv)
 {
-    try
-    {
-        auto settings = parseArgvAs<ServiceSettings>(argc, argv);
-
-        if (settings.version)
-        {
-            std::cout << getCopyright() << '\n';
-            return 0;
-        }
-
-        if (settings.help)
-        {
-            std::cout << getArgvHelp<ServiceSettings>() << '\n';
-            return 0;
-        }
-
-        runService(settings);
-    }
-    catch (const std::exception &e)
-    {
-        std::cout << "Fatal error: " << e.what() << ".\n";
-    }
-    catch (...)
-    {
-        std::cout << "Unknown fatal error.";
-        return 1;
-    }
-
-    return 0;
+    return runService(argc, argv);
 }

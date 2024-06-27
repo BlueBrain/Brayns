@@ -21,16 +21,18 @@
 
 #include "Launcher.h"
 
+#include <iostream>
+
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
 
-namespace brayns
+namespace
 {
-void runService(const ServiceSettings &settings)
+using namespace brayns;
+
+Service createService(const ServiceSettings &settings, Logger &logger)
 {
     auto level = getEnumValue<LogLevel>(settings.logLevel);
-
-    auto logger = createConsoleLogger("brayns");
     logger.setLevel(level);
 
     auto ssl = std::optional<SslSettings>();
@@ -54,19 +56,55 @@ void runService(const ServiceSettings &settings)
         .ssl = std::move(ssl),
     };
 
-    auto endpoints = EndpointRegistry({});
-
-    auto tasks = TaskManager();
+    auto api = Api({});
 
     auto context = std::make_unique<ServiceContext>(ServiceContext{
-        .logger = std::move(logger),
+        .logger = logger,
         .server = std::move(server),
-        .endpoints = std::move(endpoints),
-        .tasks = std::move(tasks),
+        .api = std::move(api),
     });
 
-    auto service = Service(std::move(context));
+    return Service(std::move(context));
+}
+}
 
-    service.run();
+namespace brayns
+{
+int runService(int argc, const char **argv)
+{
+    auto logger = createConsoleLogger("brayns");
+
+    try
+    {
+        auto settings = parseArgvAs<ServiceSettings>(argc, argv);
+
+        if (settings.help)
+        {
+            std::cout << getArgvHelp<ServiceSettings>() << '\n';
+            return 0;
+        }
+
+        if (settings.version)
+        {
+            std::cout << getCopyright() << '\n';
+            return 0;
+        }
+
+        auto service = createService(settings, logger);
+
+        service.run();
+
+        return 0;
+    }
+    catch (const std::exception &e)
+    {
+        logger.fatal("Cannot start service: {}", e.what());
+        return 1;
+    }
+    catch (...)
+    {
+        logger.fatal("Cannot start service for unknown reason");
+        return 1;
+    }
 }
 }

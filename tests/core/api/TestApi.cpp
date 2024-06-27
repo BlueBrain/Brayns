@@ -33,18 +33,14 @@ TEST_CASE("Basic")
 
     builder.endpoint("test", [&](int value) { return float(offset + value); }).description("Test");
 
-    auto endpoints = builder.build();
+    auto api = builder.build();
 
-    auto methods = endpoints.getMethods();
+    auto methods = api.getMethods();
 
     CHECK_EQ(methods.size(), 1);
     CHECK_EQ(methods[0], "test");
 
-    const auto *endpoint = endpoints.find("test");
-
-    CHECK(endpoint != nullptr);
-
-    const auto &schema = endpoint->schema;
+    const auto &schema = api.getSchema("test");
 
     CHECK_EQ(schema.method, "test");
     CHECK_EQ(schema.description, "Test");
@@ -54,7 +50,7 @@ TEST_CASE("Basic")
 
     auto params = RawParams{2};
 
-    auto result = endpoint->startTask(params).wait();
+    auto result = api.execute("test", params);
 
     CHECK_EQ(result.json.extract<float>(), 3.0f);
     CHECK_EQ(result.binary, "");
@@ -77,19 +73,13 @@ TEST_CASE("With binary")
             return Result<int>{2, "1234"};
         });
 
-    auto endpoints = builder.build();
-
-    auto regularEndpoint = endpoints.find("test1");
-    CHECK(regularEndpoint != nullptr);
+    auto api = builder.build();
 
     auto params = RawParams{1, "123"};
 
-    CHECK_THROWS_AS(regularEndpoint->startTask(params), InvalidParams);
+    CHECK_THROWS_AS(api.execute("test1", params), InvalidParams);
 
-    auto endpointWithBinary = endpoints.find("test2");
-    CHECK(endpointWithBinary != nullptr);
-
-    auto result = endpointWithBinary->startTask(params).wait();
+    auto result = api.execute("test2", params);
 
     CHECK_EQ(value, 1);
     CHECK_EQ(buffer, "123");
@@ -129,14 +119,11 @@ TEST_CASE("Copy")
 
     builder.endpoint("test", [](NonCopyable) { return NonCopyable(); });
 
-    auto endpoints = builder.build();
-
-    auto endpoint = endpoints.find("test");
-    CHECK(endpoint != nullptr);
+    auto api = builder.build();
 
     auto params = RawParams{createJsonObject()};
 
-    auto result = endpoint->startTask(std::move(params)).wait();
+    auto result = api.execute("test", params);
 
     CHECK(getObject(result.json).size() == 0);
     CHECK(result.binary.empty());
@@ -167,20 +154,43 @@ TEST_CASE("Task")
 
     builder.task("test", [=](int value) { return startTask(worker, value); });
 
-    auto endpoints = builder.build();
+    auto api = builder.build();
 
-    auto endpoint = endpoints.find("test");
-    CHECK(endpoint != nullptr);
+    auto params = RawParams{2};
 
-    auto task = endpoint->startTask(RawParams{2});
+    auto [json, binary] = api.execute("test", params);
 
-    auto result = task.wait();
+    CHECK(binary.empty());
+
+    auto object = getObject(json);
+    auto taskId = object.get("task_id").extract<TaskId>();
+
+    CHECK_EQ(taskId, 0);
+
+    auto tasks = api.getTasks();
+
+    CHECK_EQ(tasks.size(), 1);
+
+    while (true)
+    {
+        auto progress = api.getTaskProgress(taskId);
+
+        if (progress.currentOperationProgress != 0.0F)
+        {
+            CHECK_EQ(progress.currentOperation, "1");
+            CHECK_EQ(progress.currentOperationProgress, 0.5F);
+            break;
+        }
+    }
+
+    auto result = api.waitForTaskResult(taskId);
 
     CHECK_EQ(result.json.extract<int>(), 3);
     CHECK(result.binary.empty());
 
-    auto progress = task.getProgress();
+    CHECK_THROWS_AS(api.cancelTask(taskId), InvalidParams);
+    CHECK_THROWS_AS(api.waitForTaskResult(taskId), InvalidParams);
+    CHECK_THROWS_AS(api.getTaskProgress(taskId), InvalidParams);
 
-    CHECK_EQ(progress.currentOperation, "1");
-    CHECK_EQ(progress.currentOperationProgress, 0.5F);
+    CHECK(api.getTasks().empty());
 }

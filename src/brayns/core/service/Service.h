@@ -21,8 +21,7 @@
 
 #pragma once
 
-#include <brayns/core/api/Endpoint.h>
-#include <brayns/core/api/Task.h>
+#include <brayns/core/api/Api.h>
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/websocket/WebSocketServer.h>
 
@@ -42,8 +41,7 @@ struct ServiceContext
 {
     Logger logger;
     WebSocketServerSettings server;
-    EndpointRegistry endpoints;
-    TaskManager tasks;
+    Api api;
     StopToken token = {};
 };
 

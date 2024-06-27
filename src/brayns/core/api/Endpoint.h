@@ -21,15 +21,12 @@
 
 #pragma once
 
-#include <concepts>
 #include <functional>
-#include <map>
 #include <string>
-#include <type_traits>
+#include <variant>
 
 #include <brayns/core/json/Json.h>
 
-#include "ApiReflector.h"
 #include "Task.h"
 
 namespace brayns
@@ -58,48 +55,13 @@ struct JsonReflector<EndpointSchema>
     }
 };
 
+using TaskLauncher = std::function<RawTask(RawParams)>;
+using TaskRunner = std::function<RawResult(RawParams)>;
+using EndpointHandler = std::variant<TaskLauncher, TaskRunner>;
+
 struct Endpoint
 {
     EndpointSchema schema;
-    std::function<RawTask(RawParams)> startTask;
+    EndpointHandler handler;
 };
-
-class EndpointRegistry
-{
-public:
-    explicit EndpointRegistry(std::map<std::string, Endpoint> endpoints);
-
-    std::vector<std::string> getMethods() const;
-    const Endpoint *find(const std::string &method) const;
-
-private:
-    std::map<std::string, Endpoint> _endpoints;
-};
-
-template<TaskHandler T>
-EndpointSchema reflectEndpointSchema(std::string method)
-{
-    using ParamsReflector = ApiReflector<GetParamsType<T>>;
-    using ResultReflector = ApiReflector<GetResultType<T>>;
-
-    return {
-        .method = std::move(method),
-        .params = ParamsReflector::getSchema(),
-        .result = ResultReflector::getSchema(),
-    };
-}
-
-template<TaskLauncher T>
-EndpointSchema reflectEndpointSchema(std::string method)
-{
-    using ParamsReflector = ApiReflector<GetParamsType<T>>;
-    using ResultReflector = ApiReflector<GetTaskResultType<GetResultType<T>>>;
-
-    return {
-        .method = std::move(method),
-        .params = ParamsReflector::getSchema(),
-        .result = ResultReflector::getSchema(),
-        .async = true,
-    };
-}
 }

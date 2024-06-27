@@ -24,26 +24,13 @@
 #include <concepts>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 
 #include <brayns/core/json/Json.h>
-#include <brayns/core/jsonrpc/Errors.h>
-#include <brayns/core/utils/FunctorReflector.h>
+
+#include "Task.h"
 
 namespace brayns
 {
-struct RawParams
-{
-    JsonValue json;
-    std::string binary = {};
-};
-
-struct RawResult
-{
-    JsonValue json;
-    std::string binary = {};
-};
-
 template<typename T>
 struct ApiReflector;
 
@@ -127,10 +114,4 @@ struct ApiReflector<Result<T>>
         throw std::invalid_argument("Cannot deserialize result");
     }
 };
-
-template<typename T>
-using GetParamsType = std::decay_t<GetArgType<T, 0>>;
-
-template<typename T>
-using GetResultType = std::decay_t<GetReturnType<T>>;
 }
