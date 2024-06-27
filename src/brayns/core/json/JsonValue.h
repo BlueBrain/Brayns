@@ -31,7 +31,7 @@
 #include <Poco/JSON/Object.h>
 #include <Poco/SharedPtr.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 using JsonValue = Poco::Dynamic::Var;
 using JsonArray = Poco::JSON::Array;
@@ -61,9 +61,9 @@ JsonValue parseJson(const std::string &data);
 namespace std
 {
 template<>
-struct hash<brayns::experimental::NullJson>
+struct hash<brayns::NullJson>
 {
-    std::size_t operator()(const brayns::experimental::NullJson &) const
+    std::size_t operator()(const brayns::NullJson &) const
     {
         return std::size_t(-1);
     }

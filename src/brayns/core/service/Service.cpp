@@ -23,7 +23,7 @@
 
 #include "RequestHandler.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 bool StopToken::isStopped() const
 {

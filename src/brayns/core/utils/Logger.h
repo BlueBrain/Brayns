@@ -29,7 +29,7 @@
 
 #include <brayns/core/utils/EnumReflector.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 enum class LogLevel
 {

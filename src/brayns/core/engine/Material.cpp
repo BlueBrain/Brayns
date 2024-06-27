@@ -25,7 +25,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 void setTextureParam(OSPMaterial handle, const std::string &id, std::monostate)
 {
@@ -69,7 +69,7 @@ void setMaterialParam(OSPMaterial handle, const char *id, const MaterialField<T>
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 OSPMaterial ObjectReflector<AmbientOcclusionMaterial>::createHandle(OSPDevice device, const Settings &settings)
 {

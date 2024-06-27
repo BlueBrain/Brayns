@@ -21,7 +21,7 @@
 
 #include "TransferFunction.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 OSPTransferFunction ObjectReflector<LinearTransferFunction>::createHandle(OSPDevice device, const Settings &settings)
 {

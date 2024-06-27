@@ -26,7 +26,7 @@
 #include "TransferFunction.h"
 #include "Volume.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 class Texture : public Managed<OSPTexture>
 {

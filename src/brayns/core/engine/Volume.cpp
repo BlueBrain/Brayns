@@ -23,7 +23,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 Data toSharedData3D(const void *data, VoxelDataType voxelDataType, const Size3 &size)
 {
@@ -33,7 +33,7 @@ Data toSharedData3D(const void *data, VoxelDataType voxelDataType, const Size3 &
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 OSPVolume ObjectReflector<RegularVolume>::createHandle(OSPDevice device, const Settings &settings)
 {

@@ -29,7 +29,7 @@
 #include <string>
 #include <string_view>
 
-namespace brayns::experimental
+namespace brayns
 {
 static_assert(std::endian::native == std::endian::little || std::endian::native == std::endian::big);
 

@@ -23,7 +23,7 @@
 
 #include <fmt/format.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string getVersionTag()
 {

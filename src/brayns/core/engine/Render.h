@@ -29,7 +29,7 @@
 #include "Renderer.h"
 #include "World.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct Context
 {

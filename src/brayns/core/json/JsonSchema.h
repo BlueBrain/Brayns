@@ -31,7 +31,7 @@
 
 #include "JsonValue.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 enum class JsonType
 {

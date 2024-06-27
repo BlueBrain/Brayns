@@ -24,7 +24,7 @@
 #include "Object.h"
 #include "Texture.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct LightSettings
 {

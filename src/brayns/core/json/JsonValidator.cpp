@@ -29,7 +29,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 class ErrorContext
 {
@@ -238,7 +238,7 @@ void check(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string toString(const JsonPath &path)
 {

@@ -23,7 +23,7 @@
 
 #include <stdexcept>
 
-namespace brayns::experimental
+namespace brayns
 {
 EnumInfo<JsonType> EnumReflector<JsonType>::reflect()
 {

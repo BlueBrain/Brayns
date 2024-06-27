@@ -21,7 +21,7 @@
 
 #pragma once
 
-namespace brayns::experimental
+namespace brayns
 {
 void loadCircuitExplorer();
 }

@@ -26,7 +26,7 @@
 
 #include <brayns/core/json/JsonReflector.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 template<typename T>
 struct JsonReflector<std::optional<T>>

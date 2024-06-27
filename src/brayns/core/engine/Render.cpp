@@ -21,7 +21,7 @@
 
 #include "Render.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 bool Future::isReady() const
 {

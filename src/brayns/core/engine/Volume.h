@@ -26,7 +26,7 @@
 #include "Data.h"
 #include "Object.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 class Volume : public Managed<OSPVolume>
 {

@@ -28,7 +28,7 @@
 #include "ImageOperation.h"
 #include "Object.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 enum class FramebufferFormat
 {

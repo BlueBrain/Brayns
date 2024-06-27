@@ -25,7 +25,7 @@
 
 #include "Primitives.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 template<typename T>
 struct JsonMathReflector

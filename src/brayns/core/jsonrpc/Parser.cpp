@@ -28,7 +28,7 @@
 
 #include "Errors.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 JsonRpcRequest parseJsonRpcRequest(const std::string &text)
 {

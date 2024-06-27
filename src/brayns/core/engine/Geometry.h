@@ -27,7 +27,7 @@
 #include "Object.h"
 #include "Volume.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 class Geometry : public Managed<OSPGeometry>
 {

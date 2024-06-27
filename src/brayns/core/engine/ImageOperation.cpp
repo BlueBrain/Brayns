@@ -21,7 +21,7 @@
 
 #include "ImageOperation.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 OSPImageOperation ObjectReflector<ToneMapper>::createHandle(OSPDevice device, const Settings &settings)
 {

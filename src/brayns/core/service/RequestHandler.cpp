@@ -28,7 +28,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 JsonRpcRequest parseRequest(const RawRequest &request)
 {
@@ -172,7 +172,7 @@ void tryExecuteRequest(
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 RequestHandler::RequestHandler(const EndpointRegistry &endpoints, TaskManager &tasks, Logger &logger):
     _endpoints(&endpoints),

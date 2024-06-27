@@ -26,7 +26,7 @@
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/websocket/WebSocketServer.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 class StopToken
 {

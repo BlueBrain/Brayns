@@ -25,7 +25,7 @@
 
 #include "Object.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 class Data : public Managed<OSPData>
 {

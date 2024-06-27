@@ -42,7 +42,7 @@
 #include "VolumetricModel.h"
 #include "World.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 class Device
 {

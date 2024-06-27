@@ -27,7 +27,7 @@
 
 #include "Primitives.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 template<ReflectedEnum T>
 struct JsonReflector<T>

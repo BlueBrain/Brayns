@@ -23,7 +23,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 {
@@ -34,7 +34,7 @@ void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 OSPCamera ObjectReflector<PerspectiveCamera>::createHandle(OSPDevice device, const Settings &settings)
 {

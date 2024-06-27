@@ -20,7 +20,7 @@
 
 #include "AtlasExplorerPlugin.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 void loadAtlasExplorer()
 {

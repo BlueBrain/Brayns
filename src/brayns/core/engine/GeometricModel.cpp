@@ -23,7 +23,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 void setMaterialParams(OSPGeometricModel handle, const PrimitiveMaterials &materials)
 {
@@ -33,7 +33,7 @@ void setMaterialParams(OSPGeometricModel handle, const PrimitiveMaterials &mater
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 void GeometricModel::setMaterials(const PrimitiveMaterials &materials)
 {

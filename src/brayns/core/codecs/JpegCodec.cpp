@@ -30,7 +30,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 struct Deleter
 {
@@ -71,7 +71,7 @@ void setParam(tjhandle handle, TJPARAM param, int value)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string encodeJpeg(const ImageView &image, const JpegSettings &settings)
 {

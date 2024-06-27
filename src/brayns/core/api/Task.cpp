@@ -27,7 +27,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 const RawTask &getTask(const std::map<TaskId, RawTask> &tasks, TaskId id)
 {
@@ -42,7 +42,7 @@ const RawTask &getTask(const std::map<TaskId, RawTask> &tasks, TaskId id)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 TaskManager::~TaskManager()
 {

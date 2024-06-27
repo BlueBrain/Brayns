@@ -23,7 +23,7 @@
 
 #include <vector>
 
-namespace brayns::experimental
+namespace brayns
 {
 template<typename T>
 class IdGenerator

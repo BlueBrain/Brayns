@@ -26,7 +26,7 @@
 #include "JsonSchema.h"
 #include "JsonValue.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 template<typename T>
 struct JsonReflector;

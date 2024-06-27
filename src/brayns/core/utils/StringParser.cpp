@@ -175,7 +175,7 @@ T parseAs(std::string_view data)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 bool StringParser<bool>::parse(std::string_view data)
 {

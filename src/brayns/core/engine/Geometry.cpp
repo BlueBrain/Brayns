@@ -25,7 +25,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 void setMeshVerticesParams(OSPGeometry handle, const MeshVertices &vertices)
 {
@@ -102,7 +102,7 @@ void setCurveBasis(OSPGeometry handle, CatmullRomCurve)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 void Mesh::setColors(std::span<Color4> colors)
 {

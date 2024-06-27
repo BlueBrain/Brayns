@@ -25,7 +25,7 @@
 
 #include <brayns/core/json/Json.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 class JsonRpcException : public std::runtime_error
 {

@@ -24,7 +24,7 @@
 #include "Data.h"
 #include "Object.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 class TransferFunction : public Managed<OSPTransferFunction>
 {

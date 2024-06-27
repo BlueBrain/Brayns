@@ -25,7 +25,7 @@
 
 #include <brayns/core/utils/Math.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 enum class ImageFormat
 {

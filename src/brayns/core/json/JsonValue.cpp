@@ -26,7 +26,7 @@
 #include <Poco/JSON/Parser.h>
 #include <Poco/JSON/Stringifier.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 JsonArray::Ptr createJsonArray()
 {

@@ -24,7 +24,7 @@
 #include <iostream>
 #include <stdexcept>
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string toString(const LogRecord &record)
 {

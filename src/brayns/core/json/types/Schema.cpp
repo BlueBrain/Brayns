@@ -30,7 +30,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 template<typename T>
 void set(JsonObject &object, const std::string &key, const T &value)
@@ -121,7 +121,7 @@ void serializeObject(JsonObject &object, const JsonSchema &schema)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 JsonSchema JsonReflector<JsonSchema>::getSchema()
 {

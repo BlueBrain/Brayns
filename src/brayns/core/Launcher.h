@@ -24,7 +24,7 @@
 #include <brayns/core/Version.h>
 #include <brayns/core/cli/CommandLine.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 struct ServiceSettings
 {

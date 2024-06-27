@@ -22,9 +22,9 @@
 
 #include <brayns/core/json/Json.h>
 
-using namespace brayns::experimental;
+using namespace brayns;
 
-namespace brayns::experimental
+namespace brayns
 {
 enum class SomeEnum
 {

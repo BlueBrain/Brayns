@@ -28,7 +28,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 struct WebSocketBuffer
 {
@@ -196,7 +196,7 @@ void runClientLoop(ClientId clientId, WebSocket &websocket, RequestQueue &reques
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 WebSocketHandler::WebSocketHandler(RequestQueue &requests, Logger &logger):
     _requests(&requests),

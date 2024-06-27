@@ -27,7 +27,7 @@
 #include <brayns/core/websocket/WebSocketHandler.h>
 #include <brayns/core/websocket/WebSocketServer.h>
 
-using namespace brayns::experimental;
+using namespace brayns;
 
 TEST_CASE("WebSocket")
 {

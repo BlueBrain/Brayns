@@ -30,7 +30,7 @@
 
 #include <brayns/core/utils/Math.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 class Object
 {
@@ -186,7 +186,7 @@ concept ReflectedObject = ReflectedObjectSettings<T> && ReflectorObjectHandle<T>
 
 namespace ospray
 {
-template<std::derived_from<brayns::experimental::Object> T>
+template<std::derived_from<brayns::Object> T>
 struct OSPTypeFor<T>
 {
     using Handle = typename T::Handle;

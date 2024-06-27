@@ -25,7 +25,7 @@
 #include "TransferFunction.h"
 #include "Volume.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct VolumetricModelSettings
 {

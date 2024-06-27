@@ -28,7 +28,7 @@
 #include <brayns/core/engine/Device.h>
 
 using namespace brayns;
-using namespace brayns::experimental;
+using namespace brayns;
 
 TEST_CASE("Render")
 {

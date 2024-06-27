@@ -23,7 +23,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 void setLightParams(OSPLight handle, const LightSettings &settings)
 {
@@ -33,7 +33,7 @@ void setLightParams(OSPLight handle, const LightSettings &settings)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 OSPLight ObjectReflector<DistantLight>::createHandle(OSPDevice device, const Settings &settings)
 {

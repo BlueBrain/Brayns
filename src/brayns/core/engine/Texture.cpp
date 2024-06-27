@@ -23,7 +23,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
 {
@@ -33,7 +33,7 @@ Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 DataType getTextureDataType(TextureFormat format)
 {

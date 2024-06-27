@@ -21,7 +21,7 @@
 
 #include "String.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string join(std::span<std::string> values, char separator)
 {

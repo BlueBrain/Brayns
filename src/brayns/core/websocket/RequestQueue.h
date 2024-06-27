@@ -26,7 +26,7 @@
 #include <mutex>
 #include <vector>
 
-namespace brayns::experimental
+namespace brayns
 {
 using ClientId = std::uint32_t;
 

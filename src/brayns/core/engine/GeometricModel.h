@@ -25,7 +25,7 @@
 #include "Geometry.h"
 #include "Object.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct PrimitiveMaterials
 {

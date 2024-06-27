@@ -21,7 +21,7 @@
 
 #include "Framebuffer.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 const void *Framebuffer::map(FramebufferChannel channel)
 {

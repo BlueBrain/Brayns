@@ -25,7 +25,7 @@
 #include <string>
 #include <string_view>
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string readFile(const std::filesystem::path &path);
 void writeFile(std::string_view data, const std::filesystem::path &path);

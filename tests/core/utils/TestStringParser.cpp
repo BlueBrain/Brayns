@@ -21,7 +21,7 @@
 
 #include <doctest.h>
 
-using namespace brayns::experimental;
+using namespace brayns;
 
 TEST_CASE("Boolean")
 {

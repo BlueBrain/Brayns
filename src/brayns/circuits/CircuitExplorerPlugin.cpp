@@ -21,7 +21,7 @@
 
 #include "CircuitExplorerPlugin.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 void loadCircuitExplorer()
 {

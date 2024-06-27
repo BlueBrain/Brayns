@@ -31,7 +31,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 Imf::PixelType getPixelType(ExrDataType type)
 {
@@ -103,7 +103,7 @@ std::vector<std::string> packChannels(const ExrImage &image)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string encodeExr(const ExrImage &image)
 {

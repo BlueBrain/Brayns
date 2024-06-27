@@ -21,7 +21,7 @@
 
 #include "VolumetricModel.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 OSPVolumetricModel ObjectReflector<VolumetricModel>::createHandle(OSPDevice device, const Settings &settings)
 {

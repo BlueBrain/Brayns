@@ -24,7 +24,7 @@
 #include <brayns/core/jsonrpc/Parser.h>
 #include <brayns/core/utils/Binary.h>
 
-using namespace brayns::experimental;
+using namespace brayns;
 
 TEST_CASE("JsonRpcParser")
 {

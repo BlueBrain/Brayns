@@ -24,7 +24,7 @@
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 void runService(const ServiceSettings &settings)
 {

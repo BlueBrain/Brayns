@@ -25,7 +25,7 @@
 #include <string>
 #include <string_view>
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string join(std::span<std::string> values, char separator);
 std::string join(std::span<std::string> values, std::string_view separator);

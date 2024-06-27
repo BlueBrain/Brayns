@@ -36,7 +36,7 @@
 #include "ApiReflector.h"
 #include "Progress.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 using TaskId = std::uint32_t;
 

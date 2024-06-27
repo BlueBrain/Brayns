@@ -21,7 +21,7 @@
 
 #include "Endpoint.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 EndpointRegistry::EndpointRegistry(std::map<std::string, Endpoint> endpoints):
     _endpoints(std::move(endpoints))

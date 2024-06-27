@@ -21,7 +21,7 @@
 
 #include "Device.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 Device::Device(OSPDevice handle):
     _handle(handle)

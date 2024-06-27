@@ -29,7 +29,7 @@
 #include "Endpoint.h"
 #include "Task.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 class EndpointBuilder
 {

@@ -32,7 +32,7 @@
 #include "ApiReflector.h"
 #include "Task.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct EndpointSchema
 {

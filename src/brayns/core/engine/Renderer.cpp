@@ -23,7 +23,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 void setBackgroundParam(OSPRenderer handle, const Color4 &color)
 {
@@ -58,7 +58,7 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice device, const Settings &settings)
 {

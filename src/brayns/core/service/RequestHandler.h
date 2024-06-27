@@ -25,7 +25,7 @@
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/websocket/WebSocketHandler.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 class RequestHandler
 {

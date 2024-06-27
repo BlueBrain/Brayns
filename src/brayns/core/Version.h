@@ -21,7 +21,7 @@
 
 #include <string>
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string getVersionTag();
 std::string getCopyright();

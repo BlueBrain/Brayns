@@ -23,7 +23,7 @@
 
 #include <tuple>
 
-namespace brayns::experimental
+namespace brayns
 {
 template<typename T>
 struct FunctorReflector : FunctorReflector<decltype(&T::operator())>

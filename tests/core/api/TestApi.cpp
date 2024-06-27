@@ -23,7 +23,7 @@
 
 #include <brayns/core/api/ApiBuilder.h>
 
-using namespace brayns::experimental;
+using namespace brayns;
 
 TEST_CASE("Basic")
 {
@@ -110,7 +110,7 @@ struct NonCopyable
     NonCopyable &operator=(NonCopyable &&) = default;
 };
 
-namespace brayns::experimental
+namespace brayns
 {
 template<>
 struct JsonObjectReflector<NonCopyable>

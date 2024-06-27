@@ -31,7 +31,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 WebSocketFrame receiveFrame(Poco::Net::WebSocket &websocket)
 {
@@ -89,7 +89,7 @@ WebSocketException websocketException(const Poco::Exception &e)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 WebSocketException::WebSocketException(WebSocketStatus status, const std::string &message):
     runtime_error(message),

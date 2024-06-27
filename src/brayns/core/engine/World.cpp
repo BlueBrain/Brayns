@@ -21,7 +21,7 @@
 
 #include "World.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 Box3 Group::getBounds() const
 {

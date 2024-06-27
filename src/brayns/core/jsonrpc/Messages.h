@@ -27,7 +27,7 @@
 
 #include <fmt/format.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 using JsonRpcId = std::variant<NullJson, int, std::string>;
 
@@ -131,12 +131,12 @@ struct JsonObjectReflector<JsonRpcErrorResponse>
 namespace fmt
 {
 template<>
-struct formatter<brayns::experimental::JsonRpcId> : formatter<string_view>
+struct formatter<brayns::JsonRpcId> : formatter<string_view>
 {
     template<typename FmtContext>
-    auto format(const brayns::experimental::JsonRpcId &id, FmtContext &context)
+    auto format(const brayns::JsonRpcId &id, FmtContext &context)
     {
-        return formatter<string_view>::format(brayns::experimental::toString(id), context);
+        return formatter<string_view>::format(brayns::toString(id), context);
     }
 };
 }

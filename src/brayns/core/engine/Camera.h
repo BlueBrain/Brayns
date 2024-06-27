@@ -23,7 +23,7 @@
 
 #include "Object.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct CameraSettings
 {

@@ -27,7 +27,7 @@
 #include "Object.h"
 #include "VolumetricModel.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct GroupSettings
 {

@@ -28,7 +28,7 @@
 #include "JsonSchema.h"
 #include "JsonValue.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 using JsonPathItem = std::variant<std::size_t, std::string>;
 using JsonPath = std::vector<JsonPathItem>;
