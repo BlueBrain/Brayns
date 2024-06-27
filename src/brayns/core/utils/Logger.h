@@ -27,7 +27,7 @@
 
 #include <fmt/format.h>
 
-#include <brayns/core/utils/EnumInfo.h>
+#include <brayns/core/utils/EnumReflector.h>
 
 namespace brayns
 {
@@ -45,7 +45,18 @@ enum class LogLevel
 template<>
 struct EnumReflector<LogLevel>
 {
-    static EnumMap<LogLevel> reflect();
+    static EnumInfo<LogLevel> reflect()
+    {
+        auto builder = EnumBuilder<LogLevel>();
+        builder.field("trace", LogLevel::Trace);
+        builder.field("debug", LogLevel::Debug);
+        builder.field("info", LogLevel::Info);
+        builder.field("warn", LogLevel::Warn);
+        builder.field("error", LogLevel::Error);
+        builder.field("fatal", LogLevel::Fatal);
+        builder.field("off", LogLevel::Off);
+        return builder.build();
+    }
 };
 
 struct LogRecord

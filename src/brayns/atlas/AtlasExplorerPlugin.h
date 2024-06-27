@@ -20,13 +20,11 @@
 
 #pragma once
 
-#include <brayns/core/PluginAPI.h>
-
 /**
  * @brief The AtlasExplorer plugin offer capabilities to visualize NRRD volumes, focusing on the
  * AIBS/BBP Atlases
  */
 namespace brayns
 {
-void loadAtlasExplorer(PluginAPI &api);
+void loadAtlasExplorer();
 }

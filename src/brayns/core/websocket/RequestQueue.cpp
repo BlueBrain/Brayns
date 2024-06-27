@@ -23,7 +23,7 @@
 
 #include <utility>
 
-namespace brayns::experimental
+namespace brayns
 {
 void RequestQueue::push(RawRequest request)
 {

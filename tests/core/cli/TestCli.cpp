@@ -21,9 +21,9 @@
 
 #include <doctest.h>
 
-using namespace brayns::experimental;
+using namespace brayns;
 
-namespace brayns::experimental
+namespace brayns
 {
 struct SomeSettings
 {

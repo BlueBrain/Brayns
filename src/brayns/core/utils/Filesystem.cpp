@@ -27,7 +27,7 @@
 #include <fmt/format.h>
 #include <fmt/std.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string readFile(const std::filesystem::path &path)
 {

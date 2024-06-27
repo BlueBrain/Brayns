@@ -27,7 +27,7 @@
 
 #include <Poco/Net/WebSocket.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 enum class WebSocketStatus
 {

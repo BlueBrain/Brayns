@@ -32,7 +32,7 @@
 
 #include <fmt/format.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 template<typename T>
 struct EnumField
@@ -150,7 +150,7 @@ private:
 };
 
 template<typename T>
-class EnumInfoBuilder
+class EnumBuilder
 {
 public:
     EnumFieldBuilder<T> field(std::string name, T value)

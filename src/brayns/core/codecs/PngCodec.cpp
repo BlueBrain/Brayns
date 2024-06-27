@@ -31,7 +31,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 std::uint32_t getImageFormat(ImageFormat format)
 {
@@ -47,7 +47,7 @@ std::uint32_t getImageFormat(ImageFormat format)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 std::string encodePng(const ImageView &image)
 {

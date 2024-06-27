@@ -24,12 +24,12 @@
 #include <string>
 #include <utility>
 
-#include <brayns/core/jsonv2/Json.h>
+#include <brayns/core/json/Json.h>
 
 #include "Endpoint.h"
 #include "Task.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 class EndpointBuilder
 {

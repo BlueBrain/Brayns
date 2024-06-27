@@ -20,37 +20,9 @@
 
 #include "AtlasExplorerPlugin.h"
 
-#include <brayns/core/network/entrypoint/EntrypointBuilder.h>
-#include <brayns/core/utils/Log.h>
-
-#include <brayns/atlas/io/NRRDLoader.h>
-
-#include <brayns/atlas/network/entrypoints/GetAvailableAtlasUseCasesEntrypoint.h>
-#include <brayns/atlas/network/entrypoints/VisualizeAtlasUseCaseEntrypoint.h>
-
 namespace brayns
 {
-void loadAtlasExplorer(PluginAPI &api)
+void loadAtlasExplorer()
 {
-    auto name = "Atlas Explorer";
-
-    auto &registry = api.getLoaderRegistry();
-    auto loaders = LoaderRegistryBuilder(name, registry);
-
-    loaders.add<NRRDLoader>();
-
-    auto interface = api.getNetworkInterface();
-    if (!interface)
-    {
-        return;
-    }
-
-    auto &engine = api.getEngine();
-    auto &scene = engine.getScene();
-    auto &models = scene.getModels();
-    auto entrypoints = EntrypointBuilder(name, *interface);
-
-    entrypoints.add<GetAvailableAtlasUseCasesEntrypoint>(models);
-    entrypoints.add<VisualizeAtlasUseCaseEntrypoint>(models);
 }
 }

@@ -32,7 +32,7 @@
 #include "RequestQueue.h"
 #include "WebSocket.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct SslSettings
 {

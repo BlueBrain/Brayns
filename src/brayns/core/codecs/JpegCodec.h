@@ -25,7 +25,7 @@
 
 #include "ImageView.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 struct JpegSettings
 {

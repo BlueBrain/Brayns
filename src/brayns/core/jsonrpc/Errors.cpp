@@ -21,7 +21,7 @@
 
 #include "Errors.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 template<>
 struct JsonReflector<JsonSchemaError>

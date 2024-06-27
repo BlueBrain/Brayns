@@ -23,7 +23,7 @@
 
 namespace
 {
-using namespace brayns::experimental;
+using namespace brayns;
 
 bool isKey(std::string_view arg)
 {
@@ -51,7 +51,7 @@ void addKeyValue(ArgvMap &result, std::string key, std::string value)
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 ArgvMap parseArgv(int argc, const char **argv)
 {

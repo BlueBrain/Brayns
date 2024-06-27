@@ -25,9 +25,7 @@
 #include <brayns/core/codecs/PngCodec.h>
 #include <brayns/core/utils/Filesystem.h>
 
-using namespace brayns::experimental;
-using brayns::Color4;
-using brayns::Size2;
+using namespace brayns;
 
 struct TestImage
 {

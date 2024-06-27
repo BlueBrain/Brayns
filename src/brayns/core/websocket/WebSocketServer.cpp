@@ -38,8 +38,7 @@
 
 namespace
 {
-using brayns::Logger;
-using namespace brayns::experimental;
+using namespace brayns;
 
 class HealthcheckRequestHandler : public Poco::Net::HTTPRequestHandler
 {
@@ -220,7 +219,7 @@ Poco::Net::HTTPServerParams::Ptr extractServerParams(const WebSocketServerSettin
 }
 }
 
-namespace brayns::experimental
+namespace brayns
 {
 WebSocketServer::WebSocketServer(std::unique_ptr<Poco::Net::HTTPServer> server, std::unique_ptr<RequestQueue> requests):
     _server(std::move(server)),

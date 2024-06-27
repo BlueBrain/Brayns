@@ -24,11 +24,11 @@
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 void runService(const ServiceSettings &settings)
 {
-    auto level = brayns::EnumInfo::getValue<LogLevel>(settings.logLevel);
+    auto level = getEnumValue<LogLevel>(settings.logLevel);
 
     auto logger = createConsoleLogger("brayns");
     logger.setLevel(level);

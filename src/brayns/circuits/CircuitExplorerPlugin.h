@@ -21,9 +21,7 @@
 
 #pragma once
 
-#include <brayns/core/PluginAPI.h>
-
 namespace brayns
 {
-void loadCircuitExplorer(PluginAPI &api);
+void loadCircuitExplorer();
 }

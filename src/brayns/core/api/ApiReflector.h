@@ -26,11 +26,11 @@
 #include <string>
 #include <type_traits>
 
+#include <brayns/core/json/Json.h>
 #include <brayns/core/jsonrpc/Errors.h>
-#include <brayns/core/jsonv2/Json.h>
 #include <brayns/core/utils/FunctorReflector.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 struct RawParams
 {

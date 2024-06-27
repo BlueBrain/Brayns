@@ -24,7 +24,7 @@
 #include <brayns/core/Version.h>
 #include <brayns/core/cli/CommandLine.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 struct ServiceSettings
 {
@@ -61,7 +61,7 @@ struct ArgvSettingsReflector<ServiceSettings>
             .defaultValue(false);
 
         builder.option("log-level", [](auto &settings) { return &settings.logLevel; })
-            .description("Log level among [trace, debug, info, warn, error, fatal]")
+            .description("Log level among [trace, debug, info, warn, error, fatal, off]")
             .defaultValue("info");
 
         builder.option("host", [](auto &settings) { return &settings.host; })

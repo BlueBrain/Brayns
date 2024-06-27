@@ -24,7 +24,7 @@
 #include <concepts>
 #include <string_view>
 
-namespace brayns::experimental
+namespace brayns
 {
 template<typename T>
 struct StringParser;

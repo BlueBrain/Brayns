@@ -26,7 +26,7 @@
 #include "Errors.h"
 #include "Messages.h"
 
-namespace brayns::experimental
+namespace brayns
 {
 JsonRpcRequest parseJsonRpcRequest(const std::string &text);
 JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary);

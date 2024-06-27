@@ -33,7 +33,7 @@
 
 #include <brayns/core/utils/StringParser.h>
 
-namespace brayns::experimental
+namespace brayns
 {
 using ArgvMap = std::unordered_map<std::string, std::string>;
 

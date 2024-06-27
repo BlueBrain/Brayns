@@ -23,7 +23,7 @@
 
 #include <cassert>
 
-namespace brayns::experimental
+namespace brayns
 {
 TaskCancelledException::TaskCancelledException():
     JsonRpcException(0, "Task has been cancelled")
