@@ -29,6 +29,12 @@ namespace
 {
 using namespace brayns;
 
+struct ResponseData
+{
+    std::string data;
+    bool binary = false;
+};
+
 JsonRpcRequest parseRequest(const RawRequest &request)
 {
     if (request.binary)
@@ -39,7 +45,7 @@ JsonRpcRequest parseRequest(const RawRequest &request)
     return parseJsonRpcRequest(request.data);
 }
 
-RawResponse composeResponse(const JsonRpcId &id, RawResult result)
+ResponseData composeResponse(const JsonRpcId &id, RawResult result)
 {
     if (result.binary.empty())
     {
@@ -80,13 +86,19 @@ std::optional<JsonRpcRequest> tryParseRequest(const RawRequest &request, Logger 
     return std::nullopt;
 }
 
-RawResponse executeRequest(JsonRpcRequest request, Api &api, Logger &logger)
+ResponseData executeRequest(JsonRpcRequest request, Api &api, Logger &logger)
 {
     auto params = RawParams{std::move(request.params), std::move(request.binary)};
 
     logger.info("Calling endpoint for request {}", request.id);
     auto result = api.execute(request.method, std::move(params));
     logger.info("Successfully called endpoint");
+
+    if (std::holds_alternative<NullJson>(request.id))
+    {
+        logger.info("No ID in request, skipping response");
+        return {};
+    }
 
     logger.info("Composing response");
     auto response = composeResponse(request.id, std::move(result));
@@ -99,8 +111,12 @@ void tryExecuteRequest(JsonRpcRequest request, const ResponseHandler &respond, A
 {
     try
     {
-        auto response = executeRequest(std::move(request), api, logger);
-        respond(response);
+        auto [data, binary] = executeRequest(std::move(request), api, logger);
+
+        if (!data.empty())
+        {
+            respond({data, binary});
+        }
     }
     catch (const JsonRpcException &e)
     {

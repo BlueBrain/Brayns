@@ -32,10 +32,38 @@ namespace
 {
 using namespace brayns;
 
+WebSocketServerSettings extractServerSettings(const ServiceSettings &settings)
+{
+    auto ssl = std::optional<SslSettings>();
+
+    if (settings.ssl)
+    {
+        ssl = SslSettings{
+            .privateKeyFile = settings.privateKeyFile,
+            .certificateFile = settings.certificateFile,
+            .caLocation = settings.caLocation,
+            .privateKeyPassphrase = settings.privateKeyPassphrase,
+        };
+    }
+
+    return {
+        .host = settings.host,
+        .port = settings.port,
+        .maxThreadCount = settings.maxThreadCount,
+        .maxQueueSize = settings.maxQueueSize,
+        .maxFrameSize = settings.maxFrameSize,
+        .ssl = std::move(ssl),
+    };
+}
+
 void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 {
     auto level = getEnumValue<LogLevel>(settings.logLevel);
     logger.setLevel(level);
+
+    logger.info("{}", getCopyright());
+
+    logger.debug("Service options:{}", stringifyArgvSettings(settings));
 
     auto token = StopToken();
 
@@ -56,33 +84,12 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     logger.info("Starting websocket server on {}:{}", settings.host, settings.port);
 
-    auto ssl = std::optional<SslSettings>();
-
-    if (settings.ssl)
-    {
-        ssl = SslSettings{
-            .privateKeyFile = settings.privateKeyFile,
-            .certificateFile = settings.certificateFile,
-            .caLocation = settings.caLocation,
-            .privateKeyPassphrase = settings.privateKeyPassphrase,
-        };
-    }
-
-    auto serverSettings = WebSocketServerSettings{
-        .host = settings.host,
-        .port = settings.port,
-        .maxThreadCount = settings.maxThreadCount,
-        .maxQueueSize = settings.maxQueueSize,
-        .maxFrameSize = settings.maxFrameSize,
-        .ssl = std::move(ssl),
-    };
-
+    auto serverSettings = extractServerSettings(settings);
     auto server = startServer(serverSettings, logger);
 
     logger.info("Websocket server started");
 
     logger.info("Service running");
-
     runService(server, api, token, logger);
 }
 }
@@ -108,10 +115,6 @@ int runServiceFromArgv(int argc, const char **argv)
             std::cout << getCopyright() << '\n';
             return 0;
         }
-
-        logger.info("{}", getCopyright());
-
-        logger.debug("Service options:{}", stringifyArgvSettings(settings));
 
         startServerAndRunService(settings, logger);
 

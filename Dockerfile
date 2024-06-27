@@ -74,4 +74,3 @@ ENV PATH ${DIST_PATH}/bin:$PATH
 # Default entrypoint and exposed port
 EXPOSE 5000
 ENTRYPOINT ["braynsService"]
-CMD ["--uri", "0.0.0.0:5000"]

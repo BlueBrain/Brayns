@@ -138,7 +138,7 @@ void addCoreEndpoints(ApiBuilder &builder, Api &api, StopToken &token)
     builder.endpoint("get-methods", [&](NullJson) { return MethodsResult{api.getMethods()}; })
         .description("Get available JSON-RPC methods");
     builder.endpoint("get-schema", [&](SchemaParams params) { return api.getSchema(params.method); })
-        .description("Get the schema of the given JSON-RCP method");
+        .description("Get the schema of the given JSON-RPC method");
 
     builder.endpoint("get-tasks", [&](NullJson) { return TasksResult{api.getTasks()}; })
         .description("Get tasks that are currently running");
