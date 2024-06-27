@@ -52,7 +52,7 @@ private:
 
     static void _logVersion()
     {
-        auto copyright = brayns::Version::getCopyright();
+        auto copyright = brayns::getCopyright();
         brayns::Log::info("{}.", copyright);
     }
 

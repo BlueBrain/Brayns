@@ -21,93 +21,166 @@
 
 #include <doctest.h>
 
-#include <brayns/core/api/Api.h>
+#include <brayns/core/api/ApiBuilder.h>
 
 using namespace brayns::experimental;
 
-TEST_CASE("Api")
+TEST_CASE("Basic")
 {
-    SUBCASE("Basic")
+    auto offset = 1;
+
+    auto builder = ApiBuilder();
+
+    builder.endpoint("test", [&](int value) { return float(offset + value); }).description("Test");
+
+    auto endpoints = builder.build();
+
+    auto methods = endpoints.getMethods();
+
+    CHECK_EQ(methods.size(), 1);
+    CHECK_EQ(methods[0], "test");
+
+    const auto *endpoint = endpoints.find("test");
+
+    CHECK(endpoint != nullptr);
+
+    const auto &schema = endpoint->schema;
+
+    CHECK_EQ(schema.method, "test");
+    CHECK_EQ(schema.description, "Test");
+    CHECK_EQ(schema.params, getJsonSchema<int>());
+    CHECK_EQ(schema.result, getJsonSchema<float>());
+    CHECK_FALSE(schema.async);
+
+    auto params = RawParams{2};
+
+    auto result = endpoint->startTask(params).wait();
+
+    CHECK_EQ(result.json.extract<float>(), 3.0f);
+    CHECK_EQ(result.binary, "");
+}
+
+TEST_CASE("With binary")
+{
+    auto builder = ApiBuilder();
+
+    auto value = 0;
+    auto buffer = std::string();
+
+    builder.endpoint("test1", [](int) { return NullJson(); });
+    builder.endpoint(
+        "test2",
+        [&](Params<int> params)
+        {
+            value = params.value;
+            buffer = params.binary;
+            return Result<int>{2, "1234"};
+        });
+
+    auto endpoints = builder.build();
+
+    auto regularEndpoint = endpoints.find("test1");
+    CHECK(regularEndpoint != nullptr);
+
+    auto params = RawParams{1, "123"};
+
+    CHECK_THROWS_AS(regularEndpoint->startTask(params), InvalidParams);
+
+    auto endpointWithBinary = endpoints.find("test2");
+    CHECK(endpointWithBinary != nullptr);
+
+    auto result = endpointWithBinary->startTask(params).wait();
+
+    CHECK_EQ(value, 1);
+    CHECK_EQ(buffer, "123");
+
+    CHECK_EQ(result.json, 2);
+    CHECK_EQ(result.binary, "1234");
+}
+
+struct NonCopyable
+{
+    NonCopyable() = default;
+    ~NonCopyable() = default;
+
+    NonCopyable(const NonCopyable &) = delete;
+    NonCopyable(NonCopyable &&) = default;
+
+    NonCopyable &operator=(const NonCopyable &) = delete;
+    NonCopyable &operator=(NonCopyable &&) = default;
+};
+
+namespace brayns::experimental
+{
+template<>
+struct JsonObjectReflector<NonCopyable>
+{
+    static auto reflect()
     {
-        auto offset = 1;
-
-        auto builder = ApiBuilder();
-
-        builder.endpoint("test", [&](int value) { return float(offset + value); }).description("Test");
-
-        auto api = builder.build();
-
-        auto methods = api.getMethods();
-
-        CHECK_EQ(methods.size(), 1);
-        CHECK_EQ(methods[0], "test");
-
-        auto schema = api.getSchema("test");
-
-        CHECK_EQ(schema.method, "test");
-        CHECK_EQ(schema.description, "Test");
-        CHECK_EQ(schema.params, getJsonSchema<int>());
-        CHECK_EQ(schema.result, getJsonSchema<float>());
-        CHECK_FALSE(schema.binary_params);
-        CHECK_FALSE(schema.binary_result);
-
-        auto request = JsonRpcRequest{
-            .id = 0,
-            .method = "test",
-            .params = 2,
-        };
-
-        auto response = api.execute(request);
-
-        CHECK_EQ(std::get<int>(response.id), 0);
-        CHECK_EQ(response.result.extract<float>(), 3.0f);
-        CHECK_EQ(response.binary, "");
-
-        request.method = "invalid";
-        CHECK_THROWS_AS(api.execute(request), MethodNotFound);
-        request.method = "test";
-
-        request.params = "invalidString";
-        CHECK_THROWS_AS(api.execute(request), InvalidParams);
-        request.params = 2;
-
-        request.binary = "123";
-        CHECK_THROWS_AS(api.execute(request), InvalidParams);
-        request.binary = "";
-
-        CHECK_THROWS_AS(api.getSchema("invalidParams"), InvalidParams);
+        auto builder = JsonBuilder<NonCopyable>();
+        return builder.build();
     }
-    SUBCASE("No params or no results")
+};
+}
+
+TEST_CASE("Copy")
+{
+    auto builder = ApiBuilder();
+
+    builder.endpoint("test", [](NonCopyable) { return NonCopyable(); });
+
+    auto endpoints = builder.build();
+
+    auto endpoint = endpoints.find("test");
+    CHECK(endpoint != nullptr);
+
+    auto params = RawParams{createJsonObject()};
+
+    auto result = endpoint->startTask(std::move(params)).wait();
+
+    CHECK(getObject(result.json).size() == 0);
+    CHECK(result.binary.empty());
+}
+
+TEST_CASE("Duplication")
+{
+    auto builder = ApiBuilder();
+
+    auto handler = [](NullJson) { return NullJson(); };
+
+    builder.endpoint("test", handler);
+    CHECK_THROWS_AS(builder.endpoint("test", handler), std::invalid_argument);
+}
+
+TEST_CASE("Task")
+{
+    auto builder = ApiBuilder();
+
+    auto offset = 1;
+
+    auto worker = [&](Progress progress, int value)
     {
-        auto called = false;
-        auto buffer = 0;
+        progress.nextOperation("1");
+        progress.update(0.5F);
+        return value + offset;
+    };
 
-        auto builder = ApiBuilder();
+    builder.task("test", [=](int value) { return startTask(worker, value); });
 
-        builder.endpoint("test1", [] { return 0; });
-        builder.endpoint("test2", [&] { called = true; });
-        builder.endpoint("test3", [&](int value) { buffer = value; });
+    auto endpoints = builder.build();
 
-        auto api = builder.build();
+    auto endpoint = endpoints.find("test");
+    CHECK(endpoint != nullptr);
 
-        auto request = JsonRpcRequest{
-            .id = 0,
-            .method = "test1",
-            .params = {},
-        };
+    auto task = endpoint->startTask(RawParams{2});
 
-        auto response = api.execute(request);
-        CHECK_EQ(response.result.extract<int>(), 0);
+    auto result = task.wait();
 
-        request.method = "test2";
-        response = api.execute(request);
-        CHECK(called);
-        CHECK(response.result.isEmpty());
+    CHECK_EQ(result.json.extract<int>(), 3);
+    CHECK(result.binary.empty());
 
-        request.method = "test3";
-        request.params = 3;
-        response = api.execute(request);
-        CHECK(response.result.isEmpty());
-        CHECK_EQ(buffer, 3);
-    }
+    auto progress = task.getProgress();
+
+    CHECK_EQ(progress.currentOperation, "1");
+    CHECK_EQ(progress.currentOperationProgress, 0.5F);
 }

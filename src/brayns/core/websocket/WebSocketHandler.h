@@ -25,45 +25,23 @@
 #include <string>
 #include <string_view>
 
-#include "WebSocket.h"
-
 #include <brayns/core/utils/IdGenerator.h>
 #include <brayns/core/utils/Logger.h>
 
+#include "RequestQueue.h"
+#include "WebSocket.h"
+
 namespace brayns::experimental
 {
-using ClientId = std::uint32_t;
-
-struct RawResponse
-{
-    std::string_view data;
-    bool binary;
-};
-
-struct RawRequest
-{
-    ClientId clientId;
-    std::string data;
-    bool binary;
-    std::function<void(const RawResponse &)> respond;
-};
-
-struct WebSocketListener
-{
-    std::function<void(ClientId)> onConnect;
-    std::function<void(ClientId)> onDisconnect;
-    std::function<void(RawRequest)> onRequest;
-};
-
 class WebSocketHandler
 {
 public:
-    explicit WebSocketHandler(WebSocketListener listener, Logger &logger);
+    explicit WebSocketHandler(RequestQueue &requests, Logger &logger);
 
     void handle(WebSocket &websocket);
 
 private:
-    WebSocketListener _listener;
+    RequestQueue *_requests;
     Logger *_logger;
     IdGenerator<ClientId> _clientIds;
 };

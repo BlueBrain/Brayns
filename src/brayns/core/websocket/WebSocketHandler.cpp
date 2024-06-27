@@ -33,8 +33,8 @@ using brayns::Logger;
 
 struct WebSocketBuffer
 {
-    bool binary = false;
     std::string data;
+    bool binary = false;
 };
 
 void onContinuation(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger &logger)
@@ -55,7 +55,7 @@ void onText(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger &logger
 
     if (!buffer.data.empty())
     {
-        throw WebSocketException(WebSocketStatus::PayloadNotAcceptable, "Incomplete fragmented frame");
+        throw WebSocketException(WebSocketStatus::PayloadNotAcceptable, "Incomplete text frame");
     }
 
     buffer.data.append(frame.data);
@@ -68,7 +68,7 @@ void onBinary(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger &logg
 
     if (!buffer.data.empty())
     {
-        throw WebSocketException(WebSocketStatus::PayloadNotAcceptable, "Incomplete fragmented frame");
+        throw WebSocketException(WebSocketStatus::PayloadNotAcceptable, "Incomplete binary frame");
     }
 
     buffer.data.append(frame.data);
@@ -112,12 +112,12 @@ void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const RawR
     while (true)
     {
         auto chunk = extractBytes(data, maxFrameSize);
-
-        logger.info("Sending websocket frame of {} bytes", data.size());
+        auto finalFrame = data.empty();
 
         try
         {
-            websocket.send({opcode, chunk});
+            logger.info("Sending websocket frame of {} bytes", data.size());
+            websocket.send({opcode, chunk, finalFrame});
         }
         catch (const WebSocketException &e)
         {
@@ -132,14 +132,15 @@ void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const RawR
             return;
         }
 
-        if (data.empty())
+        if (finalFrame)
         {
+            logger.info("Successfully sent websocket response frame(s)");
             return;
         }
     }
 }
 
-void runClientLoop(ClientId clientId, WebSocket &websocket, const WebSocketListener &listener, Logger &logger)
+void runClientLoop(ClientId clientId, WebSocket &websocket, RequestQueue &requests, Logger &logger)
 {
     auto buffer = WebSocketBuffer();
 
@@ -191,15 +192,15 @@ void runClientLoop(ClientId clientId, WebSocket &websocket, const WebSocketListe
             logger.debug("Text request data: {}", request.data);
         }
 
-        listener.onRequest(request);
+        requests.push(std::move(request));
     }
 }
 }
 
 namespace brayns::experimental
 {
-WebSocketHandler::WebSocketHandler(WebSocketListener listener, Logger &logger):
-    _listener(std::move(listener)),
+WebSocketHandler::WebSocketHandler(RequestQueue &requests, Logger &logger):
+    _requests(&requests),
     _logger(&logger)
 {
 }
@@ -208,11 +209,10 @@ void WebSocketHandler::handle(WebSocket &websocket)
 {
     auto clientId = _clientIds.next();
 
-    _listener.onConnect(clientId);
-
     try
     {
-        runClientLoop(clientId, websocket, _listener, *_logger);
+        _logger->info("New client connected with ID {}", clientId);
+        runClientLoop(clientId, websocket, *_requests, *_logger);
     }
     catch (const WebSocketClosed &e)
     {
@@ -223,9 +223,14 @@ void WebSocketHandler::handle(WebSocket &websocket)
         _logger->warn("Error while processing websocket: '{}'", e.what());
         websocket.close(e.getStatus(), e.what());
     }
-
-    _listener.onDisconnect(clientId);
+    catch (...)
+    {
+        _logger->error("Unknown error in websocket handler");
+        websocket.close(WebSocketStatus::UnexpectedCondition, "Internal error");
+    }
 
     _clientIds.recycle(clientId);
+
+    _logger->info("Client {} disconnected", clientId);
 }
 }

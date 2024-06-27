@@ -19,44 +19,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
+#pragma once
 
-#include <brayns/core/Launcher.h>
-#include <brayns/core/Version.h>
-#include <brayns/core/cli/CommandLine.h>
+#include <brayns/core/api/Endpoint.h>
+#include <brayns/core/api/Task.h>
+#include <brayns/core/utils/Logger.h>
+#include <brayns/core/websocket/WebSocketServer.h>
 
-using namespace brayns::experimental;
-using brayns::getCopyright;
-
-int main(int argc, const char **argv)
+namespace brayns::experimental
 {
-    try
-    {
-        auto settings = parseArgvAs<ServiceSettings>(argc, argv);
+class StopToken
+{
+public:
+    bool isStopped() const;
+    void stop();
 
-        if (settings.version)
-        {
-            std::cout << getCopyright() << '\n';
-            return 0;
-        }
+private:
+    bool _stopped = false;
+};
 
-        if (settings.help)
-        {
-            std::cout << getArgvHelp<ServiceSettings>() << '\n';
-            return 0;
-        }
+struct ServiceContext
+{
+    Logger logger;
+    WebSocketServerSettings server;
+    EndpointRegistry endpoints;
+    TaskManager tasks;
+    StopToken token = {};
+};
 
-        runService(settings);
-    }
-    catch (const std::exception &e)
-    {
-        std::cout << "Fatal error: " << e.what() << ".\n";
-    }
-    catch (...)
-    {
-        std::cout << "Unknown fatal error.";
-        return 1;
-    }
+class Service
+{
+public:
+    explicit Service(std::unique_ptr<ServiceContext> context);
 
-    return 0;
+    void run();
+
+private:
+    std::unique_ptr<ServiceContext> _context;
+};
 }

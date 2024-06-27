@@ -98,7 +98,7 @@ template<typename T>
 struct EnumReflector;
 
 template<typename T>
-concept ReflectedEnum = std::same_as<decltype(EnumReflector<T>::reflect()), EnumInfo<T>>;
+concept ReflectedEnum = std::same_as<EnumInfo<T>, decltype(EnumReflector<T>::reflect())>;
 
 template<ReflectedEnum T>
 const EnumInfo<T> &reflectEnum()

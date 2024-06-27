@@ -25,22 +25,24 @@
 
 namespace brayns
 {
-std::string Version::getTag()
+std::string getVersionTag()
 {
     constexpr auto major = BRAYNS_VERSION_MAJOR;
     constexpr auto minor = BRAYNS_VERSION_MINOR;
     constexpr auto patch = BRAYNS_VERSION_PATCH;
     constexpr auto preRelease = BRAYNS_VERSION_PRE_RELEASE;
+
     if (preRelease == 0)
     {
         return fmt::format("{}.{}.{}", major, minor, patch);
     }
+
     return fmt::format("{}.{}.{}-{}", major, minor, patch, preRelease);
 }
 
-std::string Version::getCopyright()
+std::string getCopyright()
 {
-    auto tag = getTag();
+    auto tag = getVersionTag();
     return fmt::format("Brayns version {} Copyright (c) 2015-2024, EPFL/Blue Brain Project", tag);
 }
 }

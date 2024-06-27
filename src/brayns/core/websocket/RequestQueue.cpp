@@ -19,44 +19,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
+#include "RequestQueue.h"
 
-#include <brayns/core/Launcher.h>
-#include <brayns/core/Version.h>
-#include <brayns/core/cli/CommandLine.h>
+#include <utility>
 
-using namespace brayns::experimental;
-using brayns::getCopyright;
-
-int main(int argc, const char **argv)
+namespace brayns::experimental
 {
-    try
-    {
-        auto settings = parseArgvAs<ServiceSettings>(argc, argv);
+void RequestQueue::push(RawRequest request)
+{
+    auto lock = std::lock_guard(_mutex);
 
-        if (settings.version)
-        {
-            std::cout << getCopyright() << '\n';
-            return 0;
-        }
+    _requests.push_back(std::move(request));
+    _condition.notify_all();
+}
 
-        if (settings.help)
-        {
-            std::cout << getArgvHelp<ServiceSettings>() << '\n';
-            return 0;
-        }
+std::vector<RawRequest> RequestQueue::wait()
+{
+    auto lock = std::unique_lock(_mutex);
 
-        runService(settings);
-    }
-    catch (const std::exception &e)
+    if (_requests.empty())
     {
-        std::cout << "Fatal error: " << e.what() << ".\n";
-    }
-    catch (...)
-    {
-        std::cout << "Unknown fatal error.";
-        return 1;
+        _condition.wait(lock);
     }
 
-    return 0;
+    return std::exchange(_requests, {});
+}
 }

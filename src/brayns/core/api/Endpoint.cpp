@@ -19,44 +19,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
+#include "Endpoint.h"
 
-#include <brayns/core/Launcher.h>
-#include <brayns/core/Version.h>
-#include <brayns/core/cli/CommandLine.h>
-
-using namespace brayns::experimental;
-using brayns::getCopyright;
-
-int main(int argc, const char **argv)
+namespace brayns::experimental
 {
-    try
-    {
-        auto settings = parseArgvAs<ServiceSettings>(argc, argv);
+EndpointRegistry::EndpointRegistry(std::map<std::string, Endpoint> endpoints):
+    _endpoints(std::move(endpoints))
+{
+}
 
-        if (settings.version)
-        {
-            std::cout << getCopyright() << '\n';
-            return 0;
-        }
+std::vector<std::string> EndpointRegistry::getMethods() const
+{
+    auto result = std::vector<std::string>();
+    result.reserve(_endpoints.size());
 
-        if (settings.help)
-        {
-            std::cout << getArgvHelp<ServiceSettings>() << '\n';
-            return 0;
-        }
-
-        runService(settings);
-    }
-    catch (const std::exception &e)
+    for (const auto &[method, endpoint] : _endpoints)
     {
-        std::cout << "Fatal error: " << e.what() << ".\n";
-    }
-    catch (...)
-    {
-        std::cout << "Unknown fatal error.";
-        return 1;
+        result.push_back(method);
     }
 
-    return 0;
+    return result;
+}
+
+const Endpoint *EndpointRegistry::find(const std::string &method) const
+{
+    auto i = _endpoints.find(method);
+    return i == _endpoints.end() ? nullptr : &i->second;
+}
 }

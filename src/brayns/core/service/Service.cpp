@@ -19,44 +19,46 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
+#include "Service.h"
 
-#include <brayns/core/Launcher.h>
-#include <brayns/core/Version.h>
-#include <brayns/core/cli/CommandLine.h>
+#include "RequestHandler.h"
 
-using namespace brayns::experimental;
-using brayns::getCopyright;
-
-int main(int argc, const char **argv)
+namespace brayns::experimental
 {
-    try
-    {
-        auto settings = parseArgvAs<ServiceSettings>(argc, argv);
+bool StopToken::isStopped() const
+{
+    return _stopped;
+}
 
-        if (settings.version)
+void StopToken::stop()
+{
+    _stopped = true;
+}
+
+Service::Service(std::unique_ptr<ServiceContext> context):
+    _context(std::move(context))
+{
+}
+
+void Service::run()
+{
+    auto handler = RequestHandler(_context->endpoints, _context->tasks, _context->logger);
+
+    auto server = startServer(_context->server, _context->logger);
+
+    while (true)
+    {
+        auto requests = server.waitForRequests();
+
+        for (const auto &request : requests)
         {
-            std::cout << getCopyright() << '\n';
-            return 0;
+            handler.handle(request);
+
+            if (_context->token.isStopped())
+            {
+                return;
+            }
         }
-
-        if (settings.help)
-        {
-            std::cout << getArgvHelp<ServiceSettings>() << '\n';
-            return 0;
-        }
-
-        runService(settings);
     }
-    catch (const std::exception &e)
-    {
-        std::cout << "Fatal error: " << e.what() << ".\n";
-    }
-    catch (...)
-    {
-        std::cout << "Unknown fatal error.";
-        return 1;
-    }
-
-    return 0;
+}
 }

@@ -42,8 +42,8 @@ void VersionEntrypoint::onRequest(const Request &request)
     message.minor = BRAYNS_VERSION_MINOR;
     message.patch = BRAYNS_VERSION_PATCH;
     message.pre_release = BRAYNS_VERSION_PRE_RELEASE;
-    message.tag = Version::getTag();
-    message.copyright = Version::getCopyright();
+    message.tag = getVersionTag();
+    message.copyright = getCopyright();
     request.reply(message);
 }
 } // namespace brayns

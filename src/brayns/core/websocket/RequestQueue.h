@@ -19,44 +19,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <iostream>
+#pragma once
 
-#include <brayns/core/Launcher.h>
-#include <brayns/core/Version.h>
-#include <brayns/core/cli/CommandLine.h>
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <vector>
 
-using namespace brayns::experimental;
-using brayns::getCopyright;
-
-int main(int argc, const char **argv)
+namespace brayns::experimental
 {
-    try
-    {
-        auto settings = parseArgvAs<ServiceSettings>(argc, argv);
+using ClientId = std::uint32_t;
 
-        if (settings.version)
-        {
-            std::cout << getCopyright() << '\n';
-            return 0;
-        }
+struct RawResponse
+{
+    std::string_view data;
+    bool binary = false;
+};
 
-        if (settings.help)
-        {
-            std::cout << getArgvHelp<ServiceSettings>() << '\n';
-            return 0;
-        }
+using ResponseHandler = std::function<void(const RawResponse &)>;
 
-        runService(settings);
-    }
-    catch (const std::exception &e)
-    {
-        std::cout << "Fatal error: " << e.what() << ".\n";
-    }
-    catch (...)
-    {
-        std::cout << "Unknown fatal error.";
-        return 1;
-    }
+struct RawRequest
+{
+    ClientId clientId;
+    std::string data;
+    bool binary = false;
+    ResponseHandler respond;
+};
 
-    return 0;
+class RequestQueue
+{
+public:
+    void push(RawRequest request);
+    std::vector<RawRequest> wait();
+
+private:
+    std::mutex _mutex;
+    std::condition_variable _condition;
+    std::vector<RawRequest> _requests;
+};
 }

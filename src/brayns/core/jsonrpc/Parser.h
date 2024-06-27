@@ -22,14 +22,16 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
+#include "Errors.h"
 #include "Messages.h"
 
 namespace brayns::experimental
 {
-JsonRpcRequest parseJsonRpcRequest(const std::string &data);
-JsonRpcRequest parseBinaryJsonRpcRequest(std::string_view data);
+JsonRpcRequest parseJsonRpcRequest(const std::string &text);
+JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary);
 std::string composeAsText(const JsonRpcResponse &response);
 std::string composeAsBinary(const JsonRpcResponse &response);
+std::string composeError(const JsonRpcErrorResponse &response);
+std::string composeError(const JsonRpcId &id, const JsonRpcException &e);
 }

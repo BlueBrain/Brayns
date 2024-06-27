@@ -22,6 +22,7 @@
 #include "Parser.h"
 
 #include <limits>
+#include <string_view>
 
 #include <brayns/core/utils/Binary.h>
 
@@ -29,13 +30,13 @@
 
 namespace brayns::experimental
 {
-JsonRpcRequest parseJsonRpcRequest(const std::string &data)
+JsonRpcRequest parseJsonRpcRequest(const std::string &text)
 {
     auto json = JsonValue();
 
     try
     {
-        json = parseJson(data);
+        json = parseJson(text);
     }
     catch (const JsonException &e)
     {
@@ -54,25 +55,27 @@ JsonRpcRequest parseJsonRpcRequest(const std::string &data)
     return deserializeAs<JsonRpcRequest>(json);
 }
 
-JsonRpcRequest parseBinaryJsonRpcRequest(std::string_view data)
+JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary)
 {
+    auto data = std::string_view(binary);
+
     if (data.size() < 4)
     {
-        throw ParseError("Invalid binary: expected at least 4 bytes header.");
+        throw ParseError("Invalid binary request: expected at least 4 bytes header.");
     }
 
     auto textSize = extractBytesAs<std::uint32_t>(data, std::endian::little);
 
     if (data.size() < textSize)
     {
-        throw ParseError("Invalid binary: text size is bigger than total size");
+        throw ParseError("Invalid binary request: text size is bigger than total size");
     }
 
     auto text = extractBytes(data, textSize);
 
     auto request = parseJsonRpcRequest(std::string(text));
 
-    request.binary = std::string(data);
+    request.binary = binary.substr(4 + textSize);
 
     return request;
 }
@@ -96,5 +99,23 @@ std::string composeAsBinary(const JsonRpcResponse &response)
     auto header = composeBytes(static_cast<std::uint32_t>(textSize), std::endian::little);
 
     return header + text + response.binary;
+}
+
+std::string composeError(const JsonRpcErrorResponse &response)
+{
+    return stringifyToJson(response);
+}
+
+std::string composeError(const JsonRpcId &id, const JsonRpcException &e)
+{
+    return composeError({
+        .id = id,
+        .error =
+            {
+                .code = e.getCode(),
+                .message = e.what(),
+                .data = e.getData(),
+            },
+    });
 }
 }

@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <functional>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -30,8 +29,8 @@
 
 #include <brayns/core/utils/Logger.h>
 
+#include "RequestQueue.h"
 #include "WebSocket.h"
-#include "WebSocketHandler.h"
 
 namespace brayns::experimental
 {
@@ -47,8 +46,8 @@ struct WebSocketServerSettings
 {
     std::string host = "localhost";
     std::uint16_t port = 5000;
-    std::size_t maxThreadCount = 2;
-    std::size_t queueSize = 2;
+    std::size_t maxThreadCount = 1;
+    std::size_t maxQueueSize = 64;
     std::size_t maxFrameSize = std::numeric_limits<int>::max();
     std::optional<SslSettings> ssl = std::nullopt;
 };
@@ -56,7 +55,7 @@ struct WebSocketServerSettings
 class WebSocketServer
 {
 public:
-    explicit WebSocketServer(std::unique_ptr<Poco::Net::HTTPServer> server);
+    explicit WebSocketServer(std::unique_ptr<Poco::Net::HTTPServer> server, std::unique_ptr<RequestQueue> requests);
     ~WebSocketServer();
 
     WebSocketServer(const WebSocketServer &) = delete;
@@ -64,9 +63,12 @@ public:
     WebSocketServer &operator=(const WebSocketServer &) = delete;
     WebSocketServer &operator=(WebSocketServer &&) = default;
 
+    std::vector<RawRequest> waitForRequests();
+
 private:
     std::unique_ptr<Poco::Net::HTTPServer> _server;
+    std::unique_ptr<RequestQueue> _requests;
 };
 
-WebSocketServer startWebSocketServer(const WebSocketServerSettings &settings, WebSocketHandler handler, Logger &logger);
+WebSocketServer startServer(const WebSocketServerSettings &settings, Logger &logger);
 }
