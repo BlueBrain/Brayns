@@ -88,6 +88,28 @@ TEST_CASE("With binary")
     CHECK_EQ(result.binary, "1234");
 }
 
+TEST_CASE("No params or result")
+{
+    auto builder = ApiBuilder();
+
+    builder.endpoint("test1", [] { return 0; });
+    builder.endpoint("test2", [](int) {});
+    builder.endpoint("test3", [] {});
+
+    auto api = builder.build();
+
+    CHECK_EQ(api.getSchema("test1").params, getJsonSchema<NullJson>());
+    CHECK_EQ(api.getSchema("test1").result, getJsonSchema<int>());
+    CHECK_EQ(api.getSchema("test2").params, getJsonSchema<int>());
+    CHECK_EQ(api.getSchema("test2").result, getJsonSchema<NullJson>());
+    CHECK_EQ(api.getSchema("test3").params, getJsonSchema<NullJson>());
+    CHECK_EQ(api.getSchema("test3").result, getJsonSchema<NullJson>());
+
+    CHECK_EQ(api.execute("test1", RawParams()).json, serializeToJson(0));
+    CHECK_EQ(api.execute("test2", RawParams(0)).json, serializeToJson(NullJson()));
+    CHECK_EQ(api.execute("test3", RawParams()).json, serializeToJson(NullJson()));
+}
+
 struct NonCopyable
 {
     NonCopyable() = default;
