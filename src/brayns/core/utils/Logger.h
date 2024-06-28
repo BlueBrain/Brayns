@@ -88,7 +88,7 @@ public:
             return;
         }
         auto message = fmt::format(format, std::forward<Args>(args)...);
-        auto record = LogRecord(_name, _level, message);
+        auto record = LogRecord(_name, level, message);
         _handler(record);
     }
 

@@ -21,15 +21,12 @@
 
 #pragma once
 
-#include <concepts>
 #include <functional>
-#include <map>
 #include <string>
-#include <type_traits>
+#include <variant>
 
 #include <brayns/core/json/Json.h>
 
-#include "ApiReflector.h"
 #include "Task.h"
 
 namespace brayns
@@ -44,62 +41,34 @@ struct EndpointSchema
 };
 
 template<>
-struct JsonReflector<EndpointSchema>
+struct JsonObjectReflector<EndpointSchema>
 {
     static auto reflect()
     {
         auto builder = JsonBuilder<EndpointSchema>();
-        builder.field("method", [](auto &object) { return &object.method; }).description("Endpoint method");
-        builder.field("description", [](auto &object) { return &object.method; }).description("Endpoint description");
-        builder.field("params", [](auto &object) { return &object.params; }).description("Endpoint params JSON schema");
-        builder.field("result", [](auto &object) { return &object.result; }).description("Endpoint result JSON schema");
-        builder.field("async", [](auto &object) { return &object.async; }).description("Wether the endpoint is async");
+        builder.field("method", [](auto &object) { return &object.method; })
+            .description("JSON-RPC method that has to be specified to reach the endpoint");
+        builder.field("description", [](auto &object) { return &object.description; })
+            .description("Short description of what the method does");
+        builder.field("params", [](auto &object) { return &object.params; })
+            .description("JSON schema of the method params");
+        builder.field("result", [](auto &object) { return &object.result; })
+            .description("JSON schema of the method result");
+        builder.field("async", [](auto &object) { return &object.async; })
+            .description(
+                "If true, the endpoint does not return its result directly but instead an object {\"task_id\": ID}. "
+                "This ID can be used to get the method result, cancel it or get its progress");
         return builder.build();
     }
 };
 
+using TaskLauncher = std::function<RawTask(RawParams)>;
+using TaskRunner = std::function<RawResult(RawParams)>;
+using EndpointHandler = std::variant<TaskLauncher, TaskRunner>;
+
 struct Endpoint
 {
     EndpointSchema schema;
-    std::function<RawTask(RawParams)> startTask;
+    EndpointHandler handler;
 };
-
-class EndpointRegistry
-{
-public:
-    explicit EndpointRegistry(std::map<std::string, Endpoint> endpoints);
-
-    std::vector<std::string> getMethods() const;
-    const Endpoint *find(const std::string &method) const;
-
-private:
-    std::map<std::string, Endpoint> _endpoints;
-};
-
-template<TaskHandler T>
-EndpointSchema reflectEndpointSchema(std::string method)
-{
-    using ParamsReflector = ApiReflector<GetParamsType<T>>;
-    using ResultReflector = ApiReflector<GetResultType<T>>;
-
-    return {
-        .method = std::move(method),
-        .params = ParamsReflector::getSchema(),
-        .result = ResultReflector::getSchema(),
-    };
-}
-
-template<TaskLauncher T>
-EndpointSchema reflectEndpointSchema(std::string method)
-{
-    using ParamsReflector = ApiReflector<GetParamsType<T>>;
-    using ResultReflector = ApiReflector<GetTaskResultType<GetResultType<T>>>;
-
-    return {
-        .method = std::move(method),
-        .params = ParamsReflector::getSchema(),
-        .result = ResultReflector::getSchema(),
-        .async = true,
-    };
-}
 }

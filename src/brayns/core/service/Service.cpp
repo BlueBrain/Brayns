@@ -21,7 +21,132 @@
 
 #include "Service.h"
 
-#include "RequestHandler.h"
+#include <fmt/format.h>
+
+#include <brayns/core/jsonrpc/Parser.h>
+
+namespace
+{
+using namespace brayns;
+
+struct ResponseData
+{
+    std::string data;
+    bool binary = false;
+};
+
+JsonRpcRequest parseRequest(const RawRequest &request)
+{
+    if (request.binary)
+    {
+        return parseBinaryJsonRpcRequest(request.data);
+    }
+
+    return parseJsonRpcRequest(request.data);
+}
+
+ResponseData composeResponse(const JsonRpcId &id, RawResult result)
+{
+    if (result.binary.empty())
+    {
+        auto data = composeAsText({id, result.json});
+        return {.data = std::move(data), .binary = false};
+    }
+
+    auto data = composeAsBinary({id, result.json, std::move(result.binary)});
+    return {.data = std::move(data), .binary = true};
+}
+
+std::optional<JsonRpcRequest> tryParseRequest(const RawRequest &request, Logger &logger)
+{
+    try
+    {
+        logger.info("Parsing JSON-RPC request from client {}", request.clientId);
+        auto jsonRpcRequest = parseRequest(request);
+        logger.info("Successfully parsed request");
+
+        return jsonRpcRequest;
+    }
+    catch (const JsonRpcException &e)
+    {
+        logger.warn("Error while parsing request: '{}'", e.what());
+        request.respond({composeError(NullJson(), e)});
+    }
+    catch (const std::exception &e)
+    {
+        logger.error("Unexpected error while parsing request: '{}'", e.what());
+        request.respond({composeError(NullJson(), InternalError(e.what()))});
+    }
+    catch (...)
+    {
+        logger.error("Unknown error while parsing request");
+        request.respond({composeError(NullJson(), InternalError("Unknown parsing error"))});
+    }
+
+    return std::nullopt;
+}
+
+ResponseData executeRequest(JsonRpcRequest request, Api &api, Logger &logger)
+{
+    auto params = RawParams{std::move(request.params), std::move(request.binary)};
+
+    logger.info("Calling endpoint for request {}", request.id);
+    auto result = api.execute(request.method, std::move(params));
+    logger.info("Successfully called endpoint");
+
+    if (std::holds_alternative<NullJson>(request.id))
+    {
+        logger.info("No ID in request, skipping response");
+        return {};
+    }
+
+    logger.info("Composing response");
+    auto response = composeResponse(request.id, std::move(result));
+    logger.info("Successfully composed response");
+
+    return response;
+}
+
+void tryExecuteRequest(JsonRpcRequest request, const ResponseHandler &respond, Api &api, Logger &logger)
+{
+    try
+    {
+        auto [data, binary] = executeRequest(std::move(request), api, logger);
+
+        if (!data.empty())
+        {
+            respond({data, binary});
+        }
+    }
+    catch (const JsonRpcException &e)
+    {
+        logger.warn("Error during request execution: '{}'", e.what());
+        respond({composeError(request.id, e)});
+    }
+    catch (const std::exception &e)
+    {
+        logger.error("Unexpected error during request execution: '{}'", e.what());
+        respond({composeError(request.id, InternalError(e.what()))});
+    }
+    catch (...)
+    {
+        logger.error("Unknown error during request execution");
+        respond({composeError(request.id, InternalError("Unknown handling error"))});
+    }
+}
+
+void handleRequest(const RawRequest &request, Api &api, Logger &logger)
+{
+    auto jsonRpcRequest = tryParseRequest(request, logger);
+
+    if (!jsonRpcRequest)
+    {
+        return;
+    }
+
+    tryExecuteRequest(std::move(*jsonRpcRequest), request.respond, api, logger);
+}
+}
 
 namespace brayns
 {
@@ -35,27 +160,21 @@ void StopToken::stop()
     _stopped = true;
 }
 
-Service::Service(std::unique_ptr<ServiceContext> context):
-    _context(std::move(context))
+void runService(WebSocketServer &server, Api &api, StopToken &token, Logger &logger)
 {
-}
-
-void Service::run()
-{
-    auto handler = RequestHandler(_context->endpoints, _context->tasks, _context->logger);
-
-    auto server = startServer(_context->server, _context->logger);
-
     while (true)
     {
+        logger.info("Waiting for incoming requests");
         auto requests = server.waitForRequests();
 
+        logger.info("Received {} requests", requests.size());
         for (const auto &request : requests)
         {
-            handler.handle(request);
+            handleRequest(request, api, logger);
 
-            if (_context->token.isStopped())
+            if (token.isStopped())
             {
+                logger.info("Service stopped");
                 return;
             }
         }

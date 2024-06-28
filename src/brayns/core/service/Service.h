@@ -21,8 +21,7 @@
 
 #pragma once
 
-#include <brayns/core/api/Endpoint.h>
-#include <brayns/core/api/Task.h>
+#include <brayns/core/api/Api.h>
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/websocket/WebSocketServer.h>
 
@@ -38,23 +37,5 @@ private:
     bool _stopped = false;
 };
 
-struct ServiceContext
-{
-    Logger logger;
-    WebSocketServerSettings server;
-    EndpointRegistry endpoints;
-    TaskManager tasks;
-    StopToken token = {};
-};
-
-class Service
-{
-public:
-    explicit Service(std::unique_ptr<ServiceContext> context);
-
-    void run();
-
-private:
-    std::unique_ptr<ServiceContext> _context;
-};
+void runService(WebSocketServer &server, Api &api, StopToken &token, Logger &logger);
 }

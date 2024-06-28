@@ -21,18 +21,19 @@
 
 #include "Launcher.h"
 
+#include <iostream>
+
+#include <brayns/core/endpoints/CoreEndpoints.h>
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
+#include <brayns/core/utils/String.h>
 
-namespace brayns
+namespace
 {
-void runService(const ServiceSettings &settings)
+using namespace brayns;
+
+WebSocketServerSettings extractServerSettings(const ServiceSettings &settings)
 {
-    auto level = getEnumValue<LogLevel>(settings.logLevel);
-
-    auto logger = createConsoleLogger("brayns");
-    logger.setLevel(level);
-
     auto ssl = std::optional<SslSettings>();
 
     if (settings.ssl)
@@ -45,7 +46,7 @@ void runService(const ServiceSettings &settings)
         };
     }
 
-    auto server = WebSocketServerSettings{
+    return {
         .host = settings.host,
         .port = settings.port,
         .maxThreadCount = settings.maxThreadCount,
@@ -53,20 +54,81 @@ void runService(const ServiceSettings &settings)
         .maxFrameSize = settings.maxFrameSize,
         .ssl = std::move(ssl),
     };
+}
 
-    auto endpoints = EndpointRegistry({});
+void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
+{
+    auto level = getEnumValue<LogLevel>(settings.logLevel);
+    logger.setLevel(level);
 
-    auto tasks = TaskManager();
+    logger.info("{}", getCopyright());
 
-    auto context = std::make_unique<ServiceContext>(ServiceContext{
-        .logger = std::move(logger),
-        .server = std::move(server),
-        .endpoints = std::move(endpoints),
-        .tasks = std::move(tasks),
-    });
+    logger.debug("Service options:{}", stringifyArgvSettings(settings));
 
-    auto service = Service(std::move(context));
+    auto token = StopToken();
 
-    service.run();
+    logger.info("Building JSON-RPC API");
+
+    auto api = Api();
+
+    auto builder = ApiBuilder();
+
+    addCoreEndpoints(builder, api, token);
+
+    api = builder.build();
+
+    logger.info("JSON-RCP API ready");
+
+    auto methods = api.getMethods();
+    logger.debug("Available methods:\n    {}", join(methods, "\n    "));
+
+    logger.info("Starting websocket server on {}:{}", settings.host, settings.port);
+
+    auto serverSettings = extractServerSettings(settings);
+    auto server = startServer(serverSettings, logger);
+
+    logger.info("Websocket server started");
+
+    logger.info("Service running");
+    runService(server, api, token, logger);
+}
+}
+
+namespace brayns
+{
+int runServiceFromArgv(int argc, const char **argv)
+{
+    auto logger = createConsoleLogger("brayns");
+
+    try
+    {
+        auto settings = parseArgvAs<ServiceSettings>(argc, argv);
+
+        if (settings.help)
+        {
+            std::cout << getArgvHelp<ServiceSettings>() << '\n';
+            return 0;
+        }
+
+        if (settings.version)
+        {
+            std::cout << getCopyright() << '\n';
+            return 0;
+        }
+
+        startServerAndRunService(settings, logger);
+
+        return 0;
+    }
+    catch (const std::exception &e)
+    {
+        logger.fatal("Fatal error: {}", e.what());
+        return 1;
+    }
+    catch (...)
+    {
+        logger.fatal("Unknown fatal error");
+        return 1;
+    }
 }
 }

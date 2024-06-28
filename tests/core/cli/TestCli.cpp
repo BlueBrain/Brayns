@@ -122,3 +122,23 @@ TEST_CASE("Help")
 
     CHECK_EQ(help, ref);
 }
+
+TEST_CASE("ToString")
+{
+    auto settings = SomeSettings{
+        .someBool = true,
+        .someInt = 3,
+        .someFloat = 1.0F,
+        .someString = "abc",
+    };
+
+    auto string = stringifyArgvSettings(settings);
+
+    auto ref =
+        "\n    --some-bool: true"
+        "\n    --some-float: 1"
+        "\n    --some-int: 3"
+        "\n    --some-string: abc";
+
+    CHECK_EQ(string, ref);
+}

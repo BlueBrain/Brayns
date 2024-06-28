@@ -1,6 +1,7 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -18,22 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/core/engine/core/Engine.h>
+#pragma once
 
-class PlaceholderEngine
+#include <brayns/core/api/Api.h>
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/service/Service.h>
+
+namespace brayns
 {
-public:
-    PlaceholderEngine():
-        _parameters(0, nullptr),
-        _engine(_parameters)
-    {
-    }
-
-private:
-    brayns::ParametersManager _parameters;
-    brayns::Engine _engine;
-};
-
-#define BRAYNS_TESTS_PLACEHOLDER_ENGINE \
-    auto engine = PlaceholderEngine(); \
-    (void)engine;
+void addCoreEndpoints(ApiBuilder &builder, Api &api, StopToken &token);
+}

@@ -19,31 +19,39 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#pragma once
+
+#include <map>
+
+#include <brayns/core/utils/IdGenerator.h>
+
 #include "Endpoint.h"
+#include "Task.h"
 
 namespace brayns
 {
-EndpointRegistry::EndpointRegistry(std::map<std::string, Endpoint> endpoints):
-    _endpoints(std::move(endpoints))
+class Api
 {
-}
+public:
+    explicit Api(std::map<std::string, Endpoint> endpoints = {});
+    ~Api();
 
-std::vector<std::string> EndpointRegistry::getMethods() const
-{
-    auto result = std::vector<std::string>();
-    result.reserve(_endpoints.size());
+    Api(const Api &) = delete;
+    Api(Api &&) = default;
+    Api &operator=(const Api &) = delete;
+    Api &operator=(Api &&) = default;
 
-    for (const auto &[method, endpoint] : _endpoints)
-    {
-        result.push_back(method);
-    }
+    std::vector<std::string> getMethods() const;
+    const EndpointSchema &getSchema(const std::string &method) const;
+    RawResult execute(const std::string &method, RawParams params);
+    std::vector<TaskInfo> getTasks() const;
+    ProgressInfo getTaskProgress(TaskId id) const;
+    RawResult waitForTaskResult(TaskId id);
+    void cancelTask(TaskId id);
 
-    return result;
-}
-
-const Endpoint *EndpointRegistry::find(const std::string &method) const
-{
-    auto i = _endpoints.find(method);
-    return i == _endpoints.end() ? nullptr : &i->second;
-}
+private:
+    std::map<std::string, Endpoint> _endpoints;
+    std::map<TaskId, RawTask> _tasks;
+    IdGenerator<TaskId> _ids;
+};
 }

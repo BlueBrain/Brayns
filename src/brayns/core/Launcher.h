@@ -101,5 +101,5 @@ struct ArgvSettingsReflector<ServiceSettings>
     }
 };
 
-void runService(const ServiceSettings &settings);
+int runServiceFromArgv(int argc, const char **argv);
 }
