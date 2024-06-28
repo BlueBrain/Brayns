@@ -26,43 +26,13 @@ Or from source:
 ```bash
 git clone https://github.com/BlueBrain/Brayns.git
 cd Brayns/python
-python setup.py sdist
-pip install dist/* # Output in dist folder
+pip install .
 ```
 
 ## Usage
 --------
 
-### Connection
-
-Connect to a renderer backend instance:
-
-```py
-import brayns
-
-connector = brayns.Connector('localhost:5000')
-
-with connector.connect() as instance:
-    print(brayns.get_version(instance))
-```
-
-### Raw requests
-
-Raw JSON-RPC requests can be sent using the instance:
-
-```py
-result = instance.request('schema', {'endpoint': 'get-version'})
-```
-
-It will throw a brayns.RequestError if an error occurs.
-
-### API
-
-As raw requests can be tedious, a higher level API is also provided.
-
-```py
-models = brayns.get_models(instance)
-```
+TODO
 
 ## Documentation
 -----------------

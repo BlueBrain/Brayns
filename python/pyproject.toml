@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brayns"
+dynamic = ["version"]
+description = "Brayns client Python API"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "../LICENSE.txt" }
+authors = [
+    { "name" = "Blue Brain Project", "email" = "bbp-open-source@googlegroups.com" },
+]
+dependencies = ["websockets"]
+keywords = ["brayns", "raytracing", "bbp", "BlueBrain"]
+
+[project.optional-dependencies]
+dev = ["mypy", "pytest", "ruff"]
+
+[project.urls]
+"Homepage" = "https://github.com/BlueBrain/Brayns"
+"Bug Tracker" = "https://github.com/BlueBrain/Brayns/issues"
+
+[tool.setuptools.packages.find]
+include = ["brayns*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "brayns.version.VERSION" }
+
+[tool.ruff]
+lint.ignore = ["E501"]
+line-length = 119
+
+[tool.mypy]
+ignore_missing_imports = true

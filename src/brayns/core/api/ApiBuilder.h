@@ -67,8 +67,96 @@ template<ReflectedTask T>
 using GetTaskResultType = typename TaskReflector<T>::Result;
 
 template<typename T>
-concept ReflectedLauncher =
-    getArgCount<T> == 1 && ApiReflected<GetParamsType<T>> && ApiReflected<GetTaskResultType<GetResultType<T>>>;
+concept WithReflectedParams = getArgCount<T> == 1 && ApiReflected<GetParamsType<T>>;
+
+template<typename T>
+concept WithoutParams = getArgCount<T> == 0;
+
+template<typename T>
+concept WithReflectableParams = WithReflectedParams<T> || WithoutParams<T>;
+
+template<typename T>
+concept WithReflectedResult = ApiReflected<GetResultType<T>>;
+
+template<typename T>
+concept WithoutResult = std::is_void_v<GetResultType<T>>;
+
+template<typename T>
+concept WithReflectableResult = WithReflectedResult<T> || WithoutResult<T>;
+
+template<typename T>
+concept WithReflectedTaskResult = ApiReflected<GetTaskResultType<GetResultType<T>>>;
+
+template<typename T>
+concept WithoutTaskResult = std::is_void_v<GetTaskResultType<GetResultType<T>>>;
+
+template<typename T>
+concept WithReflectableTaskResult = WithReflectedTaskResult<T> || WithoutTaskResult<T>;
+
+template<typename T>
+concept ReflectedLauncher = WithReflectedParams<T> && WithReflectedTaskResult<T>;
+
+template<typename T>
+concept ReflectableLauncher = WithReflectableParams<T> && WithReflectableTaskResult<T>;
+
+template<typename T>
+concept ReflectedRunner = WithReflectedParams<T> && WithReflectedResult<T>;
+
+template<typename T>
+concept ReflectableRunner = WithReflectableParams<T> && WithReflectableResult<T>;
+
+auto ensureHasParams(WithReflectedParams auto launcher)
+{
+    return launcher;
+}
+
+auto ensureHasParams(WithoutParams auto launcher)
+{
+    return [launcher = std::move(launcher)](NullJson) { return launcher(); };
+}
+
+auto ensureHasResult(WithReflectedResult auto launcher)
+{
+    return launcher;
+}
+
+auto ensureHasResult(WithoutResult auto launcher)
+{
+    using Params = GetParamsType<decltype(launcher)>;
+
+    return [launcher = std::move(launcher)](Params params)
+    {
+        launcher(std::move(params));
+        return NullJson();
+    };
+}
+
+auto ensureHasTaskResult(WithReflectedTaskResult auto launcher)
+{
+    return launcher;
+}
+
+auto ensureHasTaskResult(WithoutTaskResult auto launcher)
+{
+    using Params = GetParamsType<decltype(launcher)>;
+
+    return [launcher = std::move(launcher)](Params params)
+    {
+        auto task = launcher(std::move(params));
+
+        auto waitAndReturnNull = [wait = std::move(task.wait)]
+        {
+            wait();
+            return NullJson();
+        };
+
+        return Task<NullJson>{
+            .getProgress = std::move(task.getProgress),
+            .wait = std::move(waitAndReturnNull),
+            .cancel = std::move(task.cancel),
+        };
+    };
+}
 
 template<ApiReflected T>
 RawTask addParsingToTask(Task<T> task)
@@ -108,9 +196,6 @@ EndpointSchema reflectAsyncEndpointSchema(std::string method)
         .async = true,
     };
 }
-
-template<typename T>
-concept ReflectedRunner = getArgCount<T> == 1 && ApiReflected<GetParamsType<T>> && ApiReflected<GetResultType<T>>;
 
 template<ReflectedRunner T>
 TaskRunner addParsingToTaskRunner(T handler)
@@ -175,22 +260,20 @@ private:
 class ApiBuilder
 {
 public:
-    template<ReflectedLauncher T>
-    EndpointBuilder task(std::string method, T launcher)
+    EndpointBuilder task(std::string method, ReflectableLauncher auto launcher)
     {
-        auto schema = reflectAsyncEndpointSchema<T>(std::move(method));
-        auto startTask = addParsingToTaskLauncher(std::move(launcher));
-        auto &endpoint = add({std::move(schema), std::move(startTask)});
-        return EndpointBuilder(endpoint);
+        auto reflected = ensureHasTaskResult(ensureHasParams(std::move(launcher)));
+        auto schema = reflectAsyncEndpointSchema<decltype(reflected)>(std::move(method));
+        auto startTask = addParsingToTaskLauncher(std::move(reflected));
+        return add({std::move(schema), std::move(startTask)});
     }
 
-    template<ReflectedRunner T>
-    EndpointBuilder endpoint(std::string method, T handler)
+    EndpointBuilder endpoint(std::string method, ReflectableRunner auto runner)
     {
-        auto schema = reflectEndpointSchema<T>(std::move(method));
-        auto runTask = addParsingToTaskRunner(std::move(handler));
-        auto &endpoint = add({std::move(schema), std::move(runTask)});
-        return EndpointBuilder(endpoint);
+        auto reflected = ensureHasResult(ensureHasParams(std::move(runner)));
+        auto schema = reflectEndpointSchema<decltype(reflected)>(std::move(method));
+        auto runTask = addParsingToTaskRunner(std::move(reflected));
+        return add({std::move(schema), std::move(runTask)});
     }
 
     Api build()
@@ -201,7 +284,7 @@ public:
 private:
     std::map<std::string, Endpoint> _endpoints;
 
-    Endpoint &add(Endpoint endpoint)
+    EndpointBuilder add(Endpoint endpoint)
     {
         const auto &method = endpoint.schema.method;
 
@@ -210,7 +293,9 @@ private:
             throw std::invalid_argument("Duplicated endpoint method");
         }
 
-        return _endpoints[method] = std::move(endpoint);
+        auto &emplaced = _endpoints[method] = std::move(endpoint);
+
+        return EndpointBuilder(emplaced);
     }
 };
 }
