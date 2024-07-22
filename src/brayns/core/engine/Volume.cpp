@@ -31,7 +31,7 @@ RegularVolume createRegularVolume(Device &device, const RegularVolumeSettings &s
     auto type = static_cast<OSPDataType>(settings.voxelDataType);
     auto [x, y, z] = settings.size;
     auto dataHandle = ospNewSharedData(settings.data, type, x, 0, y, 0, z);
-    auto data = Data(dataHandle);
+    auto data = wrapData(dataHandle);
 
     setObjectParam(handle, "data", data);
     setObjectParam(handle, "cellCentered", settings.cellCentered);

@@ -45,10 +45,10 @@ void setInterleavedSpheresParams(OSPGeometry handle, std::span<Vector4> position
     const auto *positions = positionsAndRadii.data();
     const auto *radii = &positions[0].w;
 
-    auto positionData = Data(ospNewSharedData(positions, OSP_VEC3F, size, stride));
+    auto positionData = wrapData(ospNewSharedData(positions, OSP_VEC3F, size, stride));
     setObjectParam(handle, "sphere.position", positionData);
 
-    auto radiusData = Data(ospNewSharedData(radii, OSP_FLOAT, size, stride));
+    auto radiusData = wrapData(ospNewSharedData(radii, OSP_FLOAT, size, stride));
     setObjectParam(handle, "sphere.radius", radiusData);
 }
 

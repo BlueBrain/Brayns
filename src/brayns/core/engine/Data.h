@@ -34,6 +34,16 @@ public:
     using Managed::Managed;
 };
 
+inline Data wrapData(OSPData handle)
+{
+    if (handle == nullptr)
+    {
+        throw DeviceException(OSP_UNKNOWN_ERROR, "Failed to wrap data");
+    }
+
+    return Data(handle);
+}
+
 template<OsprayDataType T>
 void setObjectData(OSPObject handle, const char *id, std::span<T> items)
 {
@@ -42,13 +52,7 @@ void setObjectData(OSPObject handle, const char *id, std::span<T> items)
     auto itemCount = items.size();
 
     auto dataHandle = ospNewSharedData(ptr, type, itemCount);
-
-    if (dataHandle == nullptr)
-    {
-        throw DeviceException(OSP_UNKNOWN_ERROR, "Failed to wrap data");
-    }
-
-    auto data = Data(dataHandle);
+    auto data = wrapData(dataHandle);
 
     setObjectParam(handle, id, data);
 }
