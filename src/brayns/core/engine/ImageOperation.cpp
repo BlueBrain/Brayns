@@ -23,10 +23,10 @@
 
 namespace brayns
 {
-OSPImageOperation ObjectReflector<ToneMapper>::createHandle(OSPDevice device, const Settings &settings)
+ToneMapper createToneMapper(Device &device, const ToneMapperSettings &settings)
 {
     auto handle = ospNewImageOperation("tonemapper");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto toneMapper = wrapObjectHandleAs<ToneMapper>(device, handle);
 
     setObjectParam(handle, "exposure", settings.exposure);
     setObjectParam(handle, "contrast", settings.contrast);
@@ -37,6 +37,6 @@ OSPImageOperation ObjectReflector<ToneMapper>::createHandle(OSPDevice device, co
 
     commitObject(handle);
 
-    return handle;
+    return toneMapper;
 }
 }

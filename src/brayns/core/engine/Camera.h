@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "Device.h"
 #include "Object.h"
 
 namespace brayns
@@ -52,13 +53,7 @@ public:
     using Camera::Camera;
 };
 
-template<>
-struct ObjectReflector<PerspectiveCamera>
-{
-    using Settings = PerspectiveCameraSettings;
-
-    static OSPCamera createHandle(OSPDevice device, const Settings &settings);
-};
+PerspectiveCamera createPerspectiveCamera(Device &device, const PerspectiveCameraSettings &settings);
 
 struct OrthographicCameraSettings
 {
@@ -73,11 +68,5 @@ public:
     using Camera::Camera;
 };
 
-template<>
-struct ObjectReflector<OrthographicCamera>
-{
-    using Settings = OrthographicCameraSettings;
-
-    static OSPCamera createHandle(OSPDevice device, const Settings &settings);
-};
+OrthographicCamera createOrthographicCamera(Device &device, const OrthographicCameraSettings &settings);
 }

@@ -23,10 +23,10 @@
 
 namespace brayns
 {
-OSPVolumetricModel ObjectReflector<VolumetricModel>::createHandle(OSPDevice device, const Settings &settings)
+VolumetricModel createVolumetricModel(Device &device, const VolumetricModelSettings &settings)
 {
     auto handle = ospNewVolumetricModel();
-    throwLastDeviceErrorIfNull(device, handle);
+    auto model = wrapObjectHandleAs<VolumetricModel>(device, handle);
 
     setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "transferFunction", settings.transferFunction);
@@ -36,6 +36,6 @@ OSPVolumetricModel ObjectReflector<VolumetricModel>::createHandle(OSPDevice devi
 
     commitObject(handle);
 
-    return handle;
+    return model;
 }
 }

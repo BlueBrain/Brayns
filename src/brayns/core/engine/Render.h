@@ -24,6 +24,7 @@
 #include <optional>
 
 #include "Camera.h"
+#include "Device.h"
 #include "Framebuffer.h"
 #include "Object.h"
 #include "Renderer.h"
@@ -31,7 +32,7 @@
 
 namespace brayns
 {
-struct Context
+struct RenderSettings
 {
     Framebuffer framebuffer;
     Renderer renderer;
@@ -50,13 +51,7 @@ public:
     float waitAndGetDuration();
 };
 
-Future startRendering(OSPDevice device, const Context &context);
-
-struct PickSettings
-{
-    Context context;
-    Vector2 normalizedScreenPosition;
-};
+Future render(Device &device, const RenderSettings &settings);
 
 struct PickResult
 {
@@ -66,5 +61,5 @@ struct PickResult
     std::uint32_t primitiveIndex;
 };
 
-std::optional<PickResult> tryPick(OSPDevice device, const PickSettings &settings);
+std::optional<PickResult> pick(Device &device, const RenderSettings &settings, Vector2 normalizedScreenPosition);
 }

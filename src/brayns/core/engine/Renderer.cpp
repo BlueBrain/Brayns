@@ -60,10 +60,10 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 
 namespace brayns
 {
-OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice device, const Settings &settings)
+AoRenderer createAoRenderer(Device &device, const AoRendererSettings &settings)
 {
     auto handle = ospNewRenderer("ao");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto renderer = wrapObjectHandleAs<AoRenderer>(device, handle);
 
     setRendererParams(handle, settings.base);
 
@@ -74,13 +74,13 @@ OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice de
 
     commitObject(handle);
 
-    return handle;
+    return renderer;
 }
 
-OSPRenderer ObjectReflector<ScivisRenderer>::createHandle(OSPDevice device, const Settings &settings)
+ScivisRenderer createScivisRenderer(Device &device, const ScivisRendererSettings &settings)
 {
     auto handle = ospNewRenderer("scivis");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto renderer = wrapObjectHandleAs<ScivisRenderer>(device, handle);
 
     setRendererParams(handle, settings.base);
 
@@ -92,18 +92,18 @@ OSPRenderer ObjectReflector<ScivisRenderer>::createHandle(OSPDevice device, cons
 
     commitObject(handle);
 
-    return handle;
+    return renderer;
 }
 
-OSPRenderer ObjectReflector<PathTracer>::createHandle(OSPDevice device, const Settings &settings)
+PathTracer createPathTracer(Device &device, const PathTracerSettings &settings)
 {
     auto handle = ospNewRenderer("pathtracer");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto renderer = wrapObjectHandleAs<PathTracer>(device, handle);
 
     setRendererParams(handle, settings.base);
 
     commitObject(handle);
 
-    return handle;
+    return renderer;
 }
 }

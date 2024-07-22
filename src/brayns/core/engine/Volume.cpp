@@ -21,26 +21,17 @@
 
 #include "Volume.h"
 
-namespace
-{
-using namespace brayns;
-
-Data toSharedData3D(const void *data, VoxelDataType voxelDataType, const Size3 &size)
-{
-    auto type = static_cast<OSPDataType>(voxelDataType);
-    auto handle = ospNewSharedData(data, type, size[0], 0, size[1], 0, size[2]);
-    return Data(handle);
-}
-}
-
 namespace brayns
 {
-OSPVolume ObjectReflector<RegularVolume>::createHandle(OSPDevice device, const Settings &settings)
+RegularVolume createRegularVolume(Device &device, const RegularVolumeSettings &settings)
 {
     auto handle = ospNewVolume("structuredRegular");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto volume = wrapObjectHandleAs<RegularVolume>(device, handle);
 
-    auto data = toSharedData3D(settings.data, settings.voxelDataType, settings.size);
+    auto type = static_cast<OSPDataType>(settings.voxelDataType);
+    auto [x, y, z] = settings.size;
+    auto dataHandle = ospNewSharedData(settings.data, type, x, 0, y, 0, z);
+    auto data = Data(dataHandle);
 
     setObjectParam(handle, "data", data);
     setObjectParam(handle, "cellCentered", settings.cellCentered);
@@ -49,6 +40,6 @@ OSPVolume ObjectReflector<RegularVolume>::createHandle(OSPDevice device, const S
 
     commitObject(handle);
 
-    return handle;
+    return volume;
 }
 }

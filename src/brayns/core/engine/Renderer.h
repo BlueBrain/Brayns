@@ -25,6 +25,7 @@
 #include <variant>
 
 #include "Data.h"
+#include "Device.h"
 #include "Material.h"
 #include "Object.h"
 #include "Texture.h"
@@ -60,7 +61,7 @@ public:
     using Managed::Managed;
 };
 
-struct AmbientOcclusionRendererSettings
+struct AoRendererSettings
 {
     RendererSettings base = {};
     std::size_t aoSamples = 1;
@@ -69,19 +70,13 @@ struct AmbientOcclusionRendererSettings
     float volumeSamplingRate = 1.0F;
 };
 
-class AmbientOcclusionRenderer : public Renderer
+class AoRenderer : public Renderer
 {
 public:
     using Renderer::Renderer;
 };
 
-template<>
-struct ObjectReflector<AmbientOcclusionRenderer>
-{
-    using Settings = AmbientOcclusionRendererSettings;
-
-    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
-};
+AoRenderer createAoRenderer(Device &device, const AoRendererSettings &settings);
 
 struct ScivisRendererSettings
 {
@@ -99,13 +94,7 @@ public:
     using Renderer::Renderer;
 };
 
-template<>
-struct ObjectReflector<ScivisRenderer>
-{
-    using Settings = ScivisRendererSettings;
-
-    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
-};
+ScivisRenderer createScivisRenderer(Device &device, const ScivisRendererSettings &settings);
 
 struct PathTracerSettings
 {
@@ -118,11 +107,5 @@ public:
     using Renderer::Renderer;
 };
 
-template<>
-struct ObjectReflector<PathTracer>
-{
-    using Settings = PathTracerSettings;
-
-    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
-};
+PathTracer createPathTracer(Device &device, const PathTracerSettings &settings);
 }

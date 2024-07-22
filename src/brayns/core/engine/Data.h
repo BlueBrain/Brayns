@@ -23,6 +23,7 @@
 
 #include <span>
 
+#include "Device.h"
 #include "Object.h"
 
 namespace brayns
@@ -34,19 +35,22 @@ public:
 };
 
 template<OsprayDataType T>
-Data toSharedData(std::span<T> items)
-{
-    auto data = items.data();
-    auto type = ospray::OSPTypeFor<T>::value;
-    auto size = items.size();
-    auto handle = ospNewSharedData(data, type, size);
-    return Data(handle);
-}
-
-template<OsprayDataType T>
 void setObjectData(OSPObject handle, const char *id, std::span<T> items)
 {
-    setObjectParam(handle, id, toSharedData(items));
+    auto ptr = items.data();
+    auto type = dataTypeOf<T>;
+    auto itemCount = items.size();
+
+    auto dataHandle = ospNewSharedData(ptr, type, itemCount);
+
+    if (dataHandle == nullptr)
+    {
+        throw DeviceException(OSP_UNKNOWN_ERROR, "Failed to wrap data");
+    }
+
+    auto data = Data(dataHandle);
+
+    setObjectParam(handle, id, data);
 }
 
 template<OsprayDataType T>
@@ -57,6 +61,7 @@ void setObjectDataIfNotEmpty(OSPObject handle, const char *id, std::span<T> item
         removeObjectParam(handle, id);
         return;
     }
+
     setObjectData(handle, id, items);
 }
 }

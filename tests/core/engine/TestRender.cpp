@@ -25,7 +25,21 @@
 
 #include <rkcommon/utility/SaveImage.h>
 
+#include <brayns/core/engine/Camera.h>
 #include <brayns/core/engine/Device.h>
+#include <brayns/core/engine/Framebuffer.h>
+#include <brayns/core/engine/GeometricModel.h>
+#include <brayns/core/engine/Geometry.h>
+#include <brayns/core/engine/ImageOperation.h>
+#include <brayns/core/engine/Light.h>
+#include <brayns/core/engine/Material.h>
+#include <brayns/core/engine/Render.h>
+#include <brayns/core/engine/Renderer.h>
+#include <brayns/core/engine/Texture.h>
+#include <brayns/core/engine/TransferFunction.h>
+#include <brayns/core/engine/Volume.h>
+#include <brayns/core/engine/VolumetricModel.h>
+#include <brayns/core/engine/World.h>
 
 using namespace brayns;
 using namespace brayns;
@@ -43,64 +57,73 @@ TEST_CASE("Render")
     auto width = 480;
     auto height = 360;
 
-    auto toneMapper = device.create<ToneMapper>({});
+    auto toneMapper = createToneMapper(device, {});
 
     auto imageOperations = std::vector<ImageOperation>{toneMapper};
 
-    auto framebuffer = device.create<Framebuffer>({
-        .width = std::size_t(width),
-        .height = std::size_t(height),
-        .format = FramebufferFormat::Srgba8,
-        .channels = {FramebufferChannel::Color},
-        .operations = imageOperations,
-    });
+    auto framebuffer = createFramebuffer(
+        device,
+        {
+            .width = std::size_t(width),
+            .height = std::size_t(height),
+            .format = FramebufferFormat::Srgba8,
+            .channels = {FramebufferChannel::Color},
+            .operations = imageOperations,
+        });
 
-    auto material = device.create<ScivisMaterial>({});
+    auto material = createScivisMaterial(device, {});
 
     auto materials = std::vector<Material>{material};
 
-    auto renderer = device.create<ScivisRenderer>({.base = {.materials = materials}});
+    auto renderer = createScivisRenderer(device, {{.materials = materials}});
 
-    auto camera = device.create<PerspectiveCamera>({
-        .fovy = 45.0F,
-        .aspectRatio = float(width) / float(height),
-    });
+    auto camera = createPerspectiveCamera(
+        device,
+        {
+            .fovy = 45.0F,
+            .aspectRatio = float(width) / float(height),
+        });
 
-    auto points = std::vector<Vector4>{{0, 0, 3, 0.25F}, {1, 0, 3, 0.25F}, {1, 1, 3, 0.25F}};
+    auto positionsAndRadii = std::vector<Vector4>{{0, 0, 3, 0.25F}, {1, 0, 3, 0.25F}, {1, 1, 3, 0.25F}};
     auto colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}};
 
-    auto spheres = device.create<Spheres>({.points = points});
+    auto spheres = createSpheres(device, {positionsAndRadii});
 
     auto materialIndices = std::vector<std::uint32_t>{0};
 
-    auto model = device.create<GeometricModel>({
-        .geometry = spheres,
-        .materials = {.rendererIndices = materialIndices, .colors = colors},
-        .id = 0,
-    });
+    auto model = createGeometricModel(
+        device,
+        {
+            .geometry = spheres,
+            .materials = {materialIndices, colors},
+            .id = 0,
+        });
 
-    auto light = device.create<AmbientLight>({});
+    auto light = createAmbientLight(device, {});
 
     auto models = std::vector<GeometricModel>{model};
     auto lights = std::vector<Light>{light};
 
-    auto group = device.create<Group>({.geometries = models, .lights = lights});
+    auto group = createGroup(device, {.geometries = models, .lights = lights});
 
-    auto instance = device.create<Instance>({.group = group, .transform = {}, .id = 0});
+    auto instance = createInstance(device, {.group = group, .transform = {}, .id = 0});
 
     auto instances = std::vector<Instance>{instance};
 
-    auto world = device.create<World>({instances});
+    auto world = createWorld(device, {instances});
 
     CHECK_EQ(world.getBounds(), instance.getBounds());
     CHECK_EQ(world.getBounds(), group.getBounds());
 
-    auto future = device.render({
-        .framebuffer = framebuffer,
-        .renderer = renderer,
-        .camera = camera,
-        .world = world,
-    });
+    auto future = render(
+        device,
+        {
+            .framebuffer = framebuffer,
+            .renderer = renderer,
+            .camera = camera,
+            .world = world,
+        });
+
     auto duration = future.waitAndGetDuration();
 
     CHECK(duration > 0);
@@ -108,7 +131,7 @@ TEST_CASE("Render")
 
     auto data = framebuffer.map(FramebufferChannel::Color);
 
-    /*rkcommon::utility::writePPM("test.ppm", width, height, static_cast<const std::uint32_t *>(data));*/
+    rkcommon::utility::writePPM("test.ppm", width, height, static_cast<const std::uint32_t *>(data));
 
     framebuffer.unmap(data);
 

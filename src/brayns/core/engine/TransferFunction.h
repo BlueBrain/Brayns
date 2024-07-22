@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Data.h"
+#include "Device.h"
 #include "Object.h"
 
 namespace brayns
@@ -45,11 +46,5 @@ public:
     using TransferFunction::TransferFunction;
 };
 
-template<>
-struct ObjectReflector<LinearTransferFunction>
-{
-    using Settings = LinearTransferFunctionSettings;
-
-    static OSPTransferFunction createHandle(OSPDevice device, const Settings &settings);
-};
+LinearTransferFunction createLinearTransferFunction(Device &device, const LinearTransferFunctionSettings &settings);
 }

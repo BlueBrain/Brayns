@@ -23,24 +23,56 @@
 
 namespace brayns
 {
-Device::Device(OSPDevice handle):
-    _handle(handle)
+DeviceException::DeviceException(OSPError error, const char *message):
+    std::runtime_error(message),
+    _error(error)
+{
+}
+
+OSPError DeviceException::getError() const
+{
+    return _error;
+}
+
+DeviceErrorHandler::DeviceErrorHandler(Logger &logger):
+    _logger(&logger)
+{
+}
+
+void DeviceErrorHandler::handle(DeviceException e)
+{
+    _logger->error("Device error (code = {}): {}", static_cast<int>(e.getError()), e.what());
+    _exception = std::move(e);
+}
+
+void DeviceErrorHandler::throwIfError()
+{
+    if (!_exception)
+    {
+        return;
+    }
+
+    auto e = std::move(*_exception);
+
+    _exception.reset();
+
+    throw e;
+}
+
+Device::Device(OSPDevice device, std::unique_ptr<DeviceErrorHandler> handler):
+    _device(device),
+    _handler(std::move(handler))
 {
 }
 
 OSPDevice Device::getHandle() const
 {
-    return _handle.get();
+    return _device.get();
 }
 
-Future Device::render(const Context &context)
+void Device::throwIfError()
 {
-    return startRendering(_handle.get(), context);
-}
-
-std::optional<PickResult> Device::pick(const PickSettings &settings)
-{
-    return tryPick(_handle.get(), settings);
+    _handler->throwIfError();
 }
 
 void Device::Deleter::operator()(OSPDevice device) const
@@ -60,6 +92,7 @@ Device createDevice(Logger &logger)
     }
 
     auto currentDevice = ospGetCurrentDevice();
+
     if (currentDevice != nullptr)
     {
         throw std::invalid_argument("OSPRay only accepts one device created at a time");
@@ -72,18 +105,20 @@ Device createDevice(Logger &logger)
         throw std::runtime_error("Failed to create device");
     }
 
+    auto handler = std::make_unique<DeviceErrorHandler>(logger);
+
     auto logLevel = OSP_LOG_DEBUG;
     ospDeviceSetParam(device, "logLevel", OSP_UINT, &logLevel);
 
     auto warnAsError = true;
     ospDeviceSetParam(device, "warnAsError", OSP_BOOL, &warnAsError);
 
-    auto errorCallback = [](auto *userData, auto code, const auto *message)
+    auto errorCallback = [](auto *userData, auto error, const auto *message)
     {
-        auto &logger = *static_cast<Logger *>(userData);
-        logger.error("Device error (code = {}): {}", static_cast<int>(code), message);
+        auto &handler = *static_cast<DeviceErrorHandler *>(userData);
+        handler.handle(DeviceException(error, message));
     };
-    ospDeviceSetErrorCallback(device, errorCallback, &logger);
+    ospDeviceSetErrorCallback(device, errorCallback, handler.get());
 
     auto statusCallback = [](auto *userData, const auto *message)
     {
@@ -95,6 +130,6 @@ Device createDevice(Logger &logger)
     ospDeviceCommit(device);
     ospSetCurrentDevice(device);
 
-    return Device(device);
+    return Device(device, std::move(handler));
 }
 }

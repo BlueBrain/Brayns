@@ -23,6 +23,7 @@
 
 #include <variant>
 
+#include "Device.h"
 #include "Object.h"
 #include "Texture.h"
 
@@ -55,25 +56,19 @@ public:
     using Managed::Managed;
 };
 
-struct AmbientOcclusionMaterialSettings
+struct AoMaterialSettings
 {
     MaterialField<Color3> diffuse = {{0.8F, 0.8F, 0.8F}};
     MaterialField<float> opacity = {1.0F};
 };
 
-class AmbientOcclusionMaterial : public Material
+class AoMaterial : public Material
 {
 public:
     using Material::Material;
 };
 
-template<>
-struct ObjectReflector<AmbientOcclusionMaterial>
-{
-    using Settings = AmbientOcclusionMaterialSettings;
-
-    static OSPMaterial createHandle(OSPDevice device, const Settings &settings);
-};
+AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings);
 
 struct ScivisMaterialSettings
 {
@@ -90,13 +85,7 @@ public:
     using Material::Material;
 };
 
-template<>
-struct ObjectReflector<ScivisMaterial>
-{
-    using Settings = ScivisMaterialSettings;
-
-    static OSPMaterial createHandle(OSPDevice device, const Settings &settings);
-};
+ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings &settings);
 
 struct PrincipledMaterialSettings
 {
@@ -139,11 +128,5 @@ public:
     using Material::Material;
 };
 
-template<>
-struct ObjectReflector<PrincipledMaterial>
-{
-    using Settings = PrincipledMaterialSettings;
-
-    static OSPMaterial createHandle(OSPDevice device, const Settings &settings);
-};
+PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMaterialSettings &settings);
 }

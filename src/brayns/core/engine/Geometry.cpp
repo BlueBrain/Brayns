@@ -27,22 +27,22 @@ namespace
 {
 using namespace brayns;
 
-void setMeshVerticesParams(OSPGeometry handle, const MeshVertices &vertices)
+void setMeshParams(OSPGeometry handle, const MeshSettings &settings)
 {
-    setObjectData(handle, "vertex.position", vertices.positions);
-    setObjectDataIfNotEmpty(handle, "vertex.normal", vertices.normals);
-    setObjectDataIfNotEmpty(handle, "vertex.color", vertices.colors);
-    setObjectDataIfNotEmpty(handle, "vertex.texcoord", vertices.uvs);
+    setObjectData(handle, "vertex.position", settings.positions);
+    setObjectDataIfNotEmpty(handle, "vertex.normal", settings.normals);
+    setObjectDataIfNotEmpty(handle, "vertex.color", settings.colors);
+    setObjectDataIfNotEmpty(handle, "vertex.texcoord", settings.uvs);
 }
 
 // TODO remove when OSPRay exposes sphere.position_radius to match embree internal layout
-void setInterleavedSpheresParams(OSPGeometry handle, std::span<PositionRadius> points)
+void setInterleavedSpheresParams(OSPGeometry handle, std::span<Vector4> positionsAndRadii)
 {
-    constexpr auto stride = sizeof(PositionRadius);
+    constexpr auto stride = sizeof(Vector4);
 
-    auto size = points.size();
+    auto size = positionsAndRadii.size();
 
-    const auto *positions = points.data();
+    const auto *positions = positionsAndRadii.data();
     const auto *radii = &positions[0].w;
 
     auto positionData = Data(ospNewSharedData(positions, OSP_VEC3F, size, stride));
@@ -50,13 +50,6 @@ void setInterleavedSpheresParams(OSPGeometry handle, std::span<PositionRadius> p
 
     auto radiusData = Data(ospNewSharedData(radii, OSP_FLOAT, size, stride));
     setObjectParam(handle, "sphere.radius", radiusData);
-}
-
-void setCurveVerticesParams(OSPGeometry handle, const CurveVertices &vertices)
-{
-    setObjectData(handle, "vertex.position_radius", vertices.points);
-    setObjectDataIfNotEmpty(handle, "vertex.texcoord", vertices.uvs);
-    setObjectDataIfNotEmpty(handle, "vertex.color", vertices.colors);
 }
 
 void setCurveType(OSPGeometry handle, FlatCurve)
@@ -111,25 +104,32 @@ void Mesh::setColors(std::span<Color4> colors)
     commitObject(handle);
 }
 
-OSPGeometry ObjectReflector<TriangleMesh>::createHandle(OSPDevice device, const Settings &settings)
+void Cylinders::setColors(std::span<Color4> colors)
+{
+    auto handle = getHandle();
+    setObjectDataIfNotEmpty(handle, "vertex.color", colors);
+    commitObject(handle);
+}
+
+TriangleMesh createTriangleMesh(Device &device, const TriangleMeshSettings &settings)
 {
     auto handle = ospNewGeometry("mesh");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto mesh = wrapObjectHandleAs<TriangleMesh>(device, handle);
 
-    setMeshVerticesParams(handle, settings.vertices);
+    setMeshParams(handle, settings.base);
     setObjectDataIfNotEmpty(handle, "index", settings.indices);
 
     commitObject(handle);
 
-    return handle;
+    return mesh;
 }
 
-OSPGeometry ObjectReflector<QuadMesh>::createHandle(OSPDevice device, const Settings &settings)
+QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings)
 {
     auto handle = ospNewGeometry("mesh");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto mesh = wrapObjectHandleAs<QuadMesh>(device, handle);
 
-    setMeshVerticesParams(handle, settings.vertices);
+    setMeshParams(handle, settings.base);
 
     if (settings.indices.empty())
     {
@@ -142,29 +142,29 @@ OSPGeometry ObjectReflector<QuadMesh>::createHandle(OSPDevice device, const Sett
 
     commitObject(handle);
 
-    return handle;
+    return mesh;
 }
 
-OSPGeometry ObjectReflector<Spheres>::createHandle(OSPDevice device, const Settings &settings)
+Spheres createSpheres(Device &device, const SphereSettings &settings)
 {
     auto handle = ospNewGeometry("sphere");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto spheres = wrapObjectHandleAs<Spheres>(device, handle);
 
-    setInterleavedSpheresParams(handle, settings.points);
+    setInterleavedSpheresParams(handle, settings.positionsAndRadii);
     setObjectDataIfNotEmpty(handle, "sphere.texcoord", settings.uvs);
     setObjectParam(handle, "type", OSP_SPHERE);
 
     commitObject(handle);
 
-    return handle;
+    return spheres;
 }
 
-OSPGeometry ObjectReflector<Discs>::createHandle(OSPDevice device, const Settings &settings)
+Discs createDiscs(Device &device, const DiscSettings &settings)
 {
     auto handle = ospNewGeometry("sphere");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto discs = wrapObjectHandleAs<Discs>(device, handle);
 
-    setInterleavedSpheresParams(handle, settings.points);
+    setInterleavedSpheresParams(handle, settings.positionsAndRadii);
     setObjectDataIfNotEmpty(handle, "sphere.texcoord", settings.uvs);
 
     if (settings.normals.empty())
@@ -179,22 +179,17 @@ OSPGeometry ObjectReflector<Discs>::createHandle(OSPDevice device, const Setting
 
     commitObject(handle);
 
-    return handle;
+    return discs;
 }
 
-void Cylinders::setColors(std::span<Color4> colors)
-{
-    auto handle = getHandle();
-    setObjectDataIfNotEmpty(handle, "vertex.color", colors);
-    commitObject(handle);
-}
-
-OSPGeometry ObjectReflector<Cylinders>::createHandle(OSPDevice device, const Settings &settings)
+Cylinders createCylinders(Device &device, const CylinderSettings &settings)
 {
     auto handle = ospNewGeometry("curve");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto cylinders = wrapObjectHandleAs<Cylinders>(device, handle);
 
-    setCurveVerticesParams(handle, settings.vertices);
+    setObjectData(handle, "vertex.position_radius", settings.positionsAndRadii);
+    setObjectDataIfNotEmpty(handle, "vertex.texcoord", settings.uvs);
+    setObjectDataIfNotEmpty(handle, "vertex.color", settings.colors);
     setObjectData(handle, "indices", settings.indices);
 
     setObjectParam(handle, "type", OSP_DISJOINT);
@@ -202,10 +197,10 @@ OSPGeometry ObjectReflector<Cylinders>::createHandle(OSPDevice device, const Set
 
     commitObject(handle);
 
-    return handle;
+    return cylinders;
 }
 
-OSPGeometry ObjectReflector<Curve>::createHandle(OSPDevice device, const Settings &settings)
+Curve createCurve(Device &device, const CurveSettings &settings)
 {
     if (std::holds_alternative<RibbonCurve>(settings.type) && std::holds_alternative<LinearCurve>(settings.basis))
     {
@@ -213,9 +208,11 @@ OSPGeometry ObjectReflector<Curve>::createHandle(OSPDevice device, const Setting
     }
 
     auto handle = ospNewGeometry("curve");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto curve = wrapObjectHandleAs<Curve>(device, handle);
 
-    setCurveVerticesParams(handle, settings.vertices);
+    setObjectData(handle, "vertex.position_radius", settings.positionsAndRadii);
+    setObjectDataIfNotEmpty(handle, "vertex.texcoord", settings.uvs);
+    setObjectDataIfNotEmpty(handle, "vertex.color", settings.colors);
     setObjectData(handle, "indices", settings.indices);
 
     std::visit([=](const auto &value) { setCurveType(handle, value); }, settings.type);
@@ -223,44 +220,44 @@ OSPGeometry ObjectReflector<Curve>::createHandle(OSPDevice device, const Setting
 
     commitObject(handle);
 
-    return handle;
+    return curve;
 }
 
-OSPGeometry ObjectReflector<Boxes>::createHandle(OSPDevice device, const Settings &settings)
+Boxes createBoxes(Device &device, const BoxSettings &settings)
 {
     auto handle = ospNewGeometry("box");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto boxes = wrapObjectHandleAs<Boxes>(device, handle);
 
     setObjectData(handle, "box", settings.boxes);
 
     commitObject(handle);
 
-    return handle;
+    return boxes;
 }
 
-OSPGeometry ObjectReflector<Planes>::createHandle(OSPDevice device, const Settings &settings)
+Planes createPlanes(Device &device, const PlaneSettings &settings)
 {
     auto handle = ospNewGeometry("plane");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto planes = wrapObjectHandleAs<Planes>(device, handle);
 
     setObjectData(handle, "plane.coefficients", settings.coefficients);
     setObjectDataIfNotEmpty(handle, "plane.bounds", settings.bounds);
 
     commitObject(handle);
 
-    return handle;
+    return planes;
 }
 
-OSPGeometry ObjectReflector<Isosurfaces>::createHandle(OSPDevice device, const Settings &settings)
+Isosurfaces createIsosurfaces(Device &device, const IsosurfaceSettings &settings)
 {
     auto handle = ospNewGeometry("isosurface");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto isosurfaces = wrapObjectHandleAs<Isosurfaces>(device, handle);
 
     setObjectParam(handle, "volume", settings.volume);
     setObjectData(handle, "isovalue", settings.isovalues);
 
     commitObject(handle);
 
-    return handle;
+    return isosurfaces;
 }
 }

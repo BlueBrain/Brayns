@@ -21,14 +21,15 @@
 
 #pragma once
 
-#include <algorithm>
 #include <concepts>
-#include <string>
+#include <utility>
 
 #include <ospray/ospray_cpp.h>
 #include <ospray/ospray_cpp/ext/rkcommon.h>
 
 #include <brayns/core/utils/Math.h>
+
+#include "Device.h"
 
 namespace brayns
 {
@@ -124,6 +125,19 @@ public:
     }
 };
 
+template<std::derived_from<Object> T>
+T wrapObjectHandleAs(Device &device, typename T::Handle handle)
+{
+    device.throwIfError();
+
+    if (handle == nullptr)
+    {
+        throw DeviceException(OSP_UNKNOWN_ERROR, "Null object returned for unknown reason");
+    }
+
+    return T(handle);
+}
+
 inline Box3 getObjectBounds(OSPObject handle)
 {
     auto [lower, upper] = ospGetBounds(handle);
@@ -151,37 +165,9 @@ concept OsprayDataType = (dataTypeOf<T> != OSP_UNKNOWN);
 template<OsprayDataType T>
 void setObjectParam(OSPObject handle, const char *id, const T &value)
 {
-    constexpr auto type = ospray::OSPTypeFor<T>::value;
+    constexpr auto type = dataTypeOf<T>;
     ospSetParam(handle, id, type, &value);
 }
-
-inline void throwLastDeviceErrorIfNull(OSPDevice device, OSPObject object)
-{
-    if (object != nullptr)
-    {
-        return;
-    }
-
-    const auto *message = ospDeviceGetLastErrorMsg(device);
-
-    throw std::runtime_error(message);
-}
-
-template<typename T>
-struct ObjectReflector;
-
-template<typename T>
-concept ReflectedObjectSettings = requires { typename ObjectReflector<T>::Settings; };
-
-template<ReflectedObjectSettings T>
-using SettingsOf = typename ObjectReflector<T>::Settings;
-
-template<typename T>
-concept ReflectorObjectHandle =
-    requires(OSPDevice device, SettingsOf<T> settings) { T(ObjectReflector<T>::createHandle(device, settings)); };
-
-template<typename T>
-concept ReflectedObject = ReflectedObjectSettings<T> && ReflectorObjectHandle<T>;
 }
 
 namespace ospray

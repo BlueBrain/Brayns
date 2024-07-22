@@ -24,6 +24,7 @@
 #include <limits>
 
 #include "Data.h"
+#include "Device.h"
 #include "Object.h"
 
 namespace brayns
@@ -67,11 +68,5 @@ public:
     using Volume::Volume;
 };
 
-template<>
-struct ObjectReflector<RegularVolume>
-{
-    using Settings = RegularVolumeSettings;
-
-    static OSPVolume createHandle(OSPDevice device, const Settings &settings);
-};
+RegularVolume createRegularVolume(Device &device, const RegularVolumeSettings &settings);
 }

@@ -24,6 +24,7 @@
 #include <variant>
 
 #include "Data.h"
+#include "Device.h"
 #include "Object.h"
 #include "Volume.h"
 
@@ -35,7 +36,7 @@ public:
     using Managed::Managed;
 };
 
-struct MeshVertices
+struct MeshSettings
 {
     std::span<Vector3> positions;
     std::span<Vector3> normals = {};
@@ -53,7 +54,7 @@ public:
 
 struct TriangleMeshSettings
 {
-    MeshVertices vertices;
+    MeshSettings base;
     std::span<Index3> indices = {};
 };
 
@@ -63,17 +64,11 @@ public:
     using Mesh::Mesh;
 };
 
-template<>
-struct ObjectReflector<TriangleMesh>
-{
-    using Settings = TriangleMeshSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+TriangleMesh createTriangleMesh(Device &device, const TriangleMeshSettings &settings);
 
 struct QuadMeshSettings
 {
-    MeshVertices vertices;
+    MeshSettings base;
     std::span<Index4> indices = {};
 };
 
@@ -83,19 +78,11 @@ public:
     using Mesh::Mesh;
 };
 
-template<>
-struct ObjectReflector<QuadMesh>
-{
-    using Settings = QuadMeshSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
-
-using PositionRadius = Vector4;
+QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings);
 
 struct SphereSettings
 {
-    std::span<PositionRadius> points;
+    std::span<Vector4> positionsAndRadii;
     std::span<Vector2> uvs = {};
 };
 
@@ -105,17 +92,11 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Spheres>
-{
-    using Settings = SphereSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Spheres createSpheres(Device &device, const SphereSettings &settings);
 
 struct DiscSettings
 {
-    std::span<PositionRadius> points;
+    std::span<Vector4> positionsAndRadii;
     std::span<Vector3> normals = {};
     std::span<Vector2> uvs = {};
 };
@@ -126,25 +107,14 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Discs>
-{
-    using Settings = DiscSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
-
-struct CurveVertices
-{
-    std::span<PositionRadius> points;
-    std::span<Color4> colors = {};
-    std::span<Vector2> uvs = {};
-};
+Discs createDiscs(Device &device, const DiscSettings &settings);
 
 struct CylinderSettings
 {
-    CurveVertices vertices;
+    std::span<Vector4> positionsAndRadii;
     std::span<std::uint32_t> indices;
+    std::span<Color4> colors = {};
+    std::span<Vector2> uvs = {};
 };
 
 class Cylinders : public Geometry
@@ -155,13 +125,7 @@ public:
     void setColors(std::span<Color4> colors);
 };
 
-template<>
-struct ObjectReflector<Cylinders>
-{
-    using Settings = CylinderSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Cylinders createCylinders(Device &device, const CylinderSettings &settings);
 
 struct FlatCurve
 {
@@ -203,8 +167,10 @@ using CurveBasis = std::variant<LinearCurve, BezierCurve, BsplineCurve, HermiteC
 
 struct CurveSettings
 {
-    CurveVertices vertices;
+    std::span<Vector4> positionsAndRadii;
     std::span<std::uint32_t> indices;
+    std::span<Color4> colors = {};
+    std::span<Vector2> uvs = {};
     CurveType type = RoundCurve();
     CurveBasis basis = LinearCurve();
 };
@@ -215,13 +181,7 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Curve>
-{
-    using Settings = CurveSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Curve createCurve(Device &device, const CurveSettings &settings);
 
 struct BoxSettings
 {
@@ -234,18 +194,12 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Boxes>
-{
-    using Settings = BoxSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Boxes createBoxes(Device &device, const BoxSettings &settings);
 
 struct PlaneSettings
 {
     std::span<Vector4> coefficients;
-    std::span<Box3> bounds;
+    std::span<Box3> bounds = {};
 };
 
 class Planes : public Geometry
@@ -254,13 +208,7 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Planes>
-{
-    using Settings = PlaneSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Planes createPlanes(Device &device, const PlaneSettings &settings);
 
 struct IsosurfaceSettings
 {
@@ -274,11 +222,5 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Isosurfaces>
-{
-    using Settings = IsosurfaceSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Isosurfaces createIsosurfaces(Device &device, const IsosurfaceSettings &settings);
 }

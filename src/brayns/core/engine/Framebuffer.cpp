@@ -47,7 +47,7 @@ float Framebuffer::getVariance()
     return ospGetVariance(handle);
 }
 
-OSPFrameBuffer ObjectReflector<Framebuffer>::createHandle(OSPDevice device, const FramebufferSettings &settings)
+Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings)
 {
     auto width = static_cast<int>(settings.width);
     auto height = static_cast<int>(settings.height);
@@ -72,12 +72,12 @@ OSPFrameBuffer ObjectReflector<Framebuffer>::createHandle(OSPDevice device, cons
     }
 
     auto handle = ospNewFrameBuffer(width, height, format, channels);
-    throwLastDeviceErrorIfNull(device, handle);
+    auto framebuffer = wrapObjectHandleAs<Framebuffer>(device, handle);
 
     setObjectDataIfNotEmpty(handle, "imageOperation", settings.operations);
 
     commitObject(handle);
 
-    return handle;
+    return framebuffer;
 }
 }

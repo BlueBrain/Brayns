@@ -35,10 +35,10 @@ void setLightParams(OSPLight handle, const LightSettings &settings)
 
 namespace brayns
 {
-OSPLight ObjectReflector<DistantLight>::createHandle(OSPDevice device, const Settings &settings)
+DistantLight createDistantLight(Device &device, const DistantLightSettings &settings)
 {
     auto handle = ospNewLight("distant");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto light = wrapObjectHandleAs<DistantLight>(device, handle);
 
     setLightParams(handle, settings.base);
 
@@ -47,13 +47,13 @@ OSPLight ObjectReflector<DistantLight>::createHandle(OSPDevice device, const Set
 
     commitObject(handle);
 
-    return handle;
+    return light;
 }
 
-OSPLight ObjectReflector<SphereLight>::createHandle(OSPDevice device, const Settings &settings)
+SphereLight createSphereLight(Device &device, const SphereLightSettings &settings)
 {
     auto handle = ospNewLight("sphere");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto light = wrapObjectHandleAs<SphereLight>(device, handle);
 
     setLightParams(handle, settings.base);
 
@@ -62,13 +62,13 @@ OSPLight ObjectReflector<SphereLight>::createHandle(OSPDevice device, const Sett
 
     commitObject(handle);
 
-    return handle;
+    return light;
 }
 
-OSPLight ObjectReflector<SpotLight>::createHandle(OSPDevice device, const Settings &settings)
+SpotLight createSphereLight(Device &device, const SpotLightSettings &settings)
 {
     auto handle = ospNewLight("spot");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto light = wrapObjectHandleAs<SpotLight>(device, handle);
 
     setLightParams(handle, settings.base);
 
@@ -81,13 +81,13 @@ OSPLight ObjectReflector<SpotLight>::createHandle(OSPDevice device, const Settin
 
     commitObject(handle);
 
-    return handle;
+    return light;
 }
 
-OSPLight ObjectReflector<QuadLight>::createHandle(OSPDevice device, const Settings &settings)
+QuadLight createQuadLight(Device &device, const QuadLightSettings &settings)
 {
     auto handle = ospNewLight("quad");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto light = wrapObjectHandleAs<QuadLight>(device, handle);
 
     setLightParams(handle, settings.base);
 
@@ -97,13 +97,13 @@ OSPLight ObjectReflector<QuadLight>::createHandle(OSPDevice device, const Settin
 
     commitObject(handle);
 
-    return handle;
+    return light;
 }
 
-OSPLight ObjectReflector<CylinderLight>::createHandle(OSPDevice device, const Settings &settings)
+CylinderLight createCylinderLight(Device &device, const CylinderLightSettings &settings)
 {
     auto handle = ospNewLight("cylinder");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto light = wrapObjectHandleAs<CylinderLight>(device, handle);
 
     setLightParams(handle, settings.base);
 
@@ -113,13 +113,13 @@ OSPLight ObjectReflector<CylinderLight>::createHandle(OSPDevice device, const Se
 
     commitObject(handle);
 
-    return handle;
+    return light;
 }
 
-OSPLight ObjectReflector<HdriLight>::createHandle(OSPDevice device, const Settings &settings)
+HdriLight createHdriLight(Device &device, const HdriLightSettings &settings)
 {
     auto handle = ospNewLight("hdri");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto light = wrapObjectHandleAs<HdriLight>(device, handle);
 
     setLightParams(handle, settings.base);
 
@@ -129,25 +129,25 @@ OSPLight ObjectReflector<HdriLight>::createHandle(OSPDevice device, const Settin
 
     commitObject(handle);
 
-    return handle;
+    return light;
 }
 
-OSPLight ObjectReflector<AmbientLight>::createHandle(OSPDevice device, const Settings &settings)
+AmbientLight createAmbientLight(Device &device, const AmbientLightSettings &settings)
 {
     auto handle = ospNewLight("ambient");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto light = wrapObjectHandleAs<AmbientLight>(device, handle);
 
     setLightParams(handle, settings.base);
 
     commitObject(handle);
 
-    return handle;
+    return light;
 }
 
-OSPLight ObjectReflector<SunSkyLight>::createHandle(OSPDevice device, const Settings &settings)
+SunSkyLight createSunSkyLight(Device &device, const SunSkyLightSettings &settings)
 {
     auto handle = ospNewLight("sunSky");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto light = wrapObjectHandleAs<SunSkyLight>(device, handle);
 
     setLightParams(handle, settings.base);
 
@@ -159,6 +159,6 @@ OSPLight ObjectReflector<SunSkyLight>::createHandle(OSPDevice device, const Sett
 
     commitObject(handle);
 
-    return handle;
+    return light;
 }
 }

@@ -25,16 +25,6 @@ namespace
 {
 using namespace brayns;
 
-Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
-{
-    auto type = getTextureDataType(format);
-    auto handle = ospNewSharedData(data, type, size[0], 0, size[1]);
-    return Data(handle);
-}
-}
-
-namespace brayns
-{
 DataType getTextureDataType(TextureFormat format)
 {
     switch (format)
@@ -69,13 +59,20 @@ DataType getTextureDataType(TextureFormat format)
         throw std::invalid_argument("Invalid texture format");
     }
 }
+}
 
-OSPTexture ObjectReflector<Texture2D>::createHandle(OSPDevice device, const Settings &settings)
+namespace brayns
+{
+Texture2D createTexture2D(Device &device, const Texture2DSettings &settings)
 {
     auto handle = ospNewTexture("texture2D");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto texture = wrapObjectHandleAs<Texture2D>(device, handle);
 
-    auto data = toSharedData2D(settings.data, settings.format, settings.size);
+    auto type = getTextureDataType(settings.format);
+    auto [width, height] = settings.size;
+
+    auto dataHandle = ospNewSharedData(settings.data, type, width, 0, height);
+    auto data = wrapObjectHandleAs<Data>(device, dataHandle);
 
     setObjectParam(handle, "format", static_cast<OSPTextureFormat>(settings.format));
     setObjectParam(handle, "filter", static_cast<OSPTextureFilter>(settings.filter));
@@ -84,19 +81,19 @@ OSPTexture ObjectReflector<Texture2D>::createHandle(OSPDevice device, const Sett
 
     commitObject(handle);
 
-    return handle;
+    return texture;
 }
 
-OSPTexture ObjectReflector<VolumeTexture>::createHandle(OSPDevice device, const Settings &settings)
+VolumeTexture createVolumeTexture(Device &device, const VolumeTextureSettings &settings)
 {
     auto handle = ospNewTexture("volume");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto texture = wrapObjectHandleAs<VolumeTexture>(device, handle);
 
     setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "transferFunction", settings.transferFunction);
 
     commitObject(handle);
 
-    return handle;
+    return texture;
 }
 }

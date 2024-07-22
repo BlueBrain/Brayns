@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Data.h"
+#include "Device.h"
 #include "Object.h"
 #include "TransferFunction.h"
 #include "Volume.h"
@@ -52,8 +53,6 @@ enum class TextureFormat
     Ra16 = OSP_TEXTURE_RA16,
     R16 = OSP_TEXTURE_R16,
 };
-
-DataType getTextureDataType(TextureFormat format);
 
 enum class TextureFilter
 {
@@ -90,13 +89,7 @@ public:
     using Texture::Texture;
 };
 
-template<>
-struct ObjectReflector<Texture2D>
-{
-    using Settings = Texture2DSettings;
-
-    static OSPTexture createHandle(OSPDevice device, const Settings &settings);
-};
+Texture2D createTexture2D(Device &device, const Texture2DSettings &settings);
 
 struct VolumeTextureSettings
 {
@@ -110,11 +103,5 @@ public:
     using Texture::Texture;
 };
 
-template<>
-struct ObjectReflector<VolumeTexture>
-{
-    using Settings = VolumeTextureSettings;
-
-    static OSPTexture createHandle(OSPDevice device, const Settings &settings);
-};
+VolumeTexture createVolumeTexture(Device &device, const VolumeTextureSettings &settings);
 }

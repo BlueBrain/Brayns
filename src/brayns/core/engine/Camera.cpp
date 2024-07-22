@@ -36,10 +36,10 @@ void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 
 namespace brayns
 {
-OSPCamera ObjectReflector<PerspectiveCamera>::createHandle(OSPDevice device, const Settings &settings)
+PerspectiveCamera createPerspectiveCamera(Device &device, const PerspectiveCameraSettings &settings)
 {
     auto handle = ospNewCamera("perspective");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto camera = wrapObjectHandleAs<PerspectiveCamera>(device, handle);
 
     setCameraParams(handle, settings.base);
 
@@ -48,13 +48,13 @@ OSPCamera ObjectReflector<PerspectiveCamera>::createHandle(OSPDevice device, con
 
     commitObject(handle);
 
-    return handle;
+    return camera;
 }
 
-OSPCamera ObjectReflector<OrthographicCamera>::createHandle(OSPDevice device, const Settings &settings)
+OrthographicCamera createOrthographicCamera(Device &device, const OrthographicCameraSettings &settings)
 {
-    auto handle = ospNewCamera("perspective");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto handle = ospNewCamera("orthographic");
+    auto camera = wrapObjectHandleAs<OrthographicCamera>(device, handle);
 
     setCameraParams(handle, settings.base);
 
@@ -63,6 +63,6 @@ OSPCamera ObjectReflector<OrthographicCamera>::createHandle(OSPDevice device, co
 
     commitObject(handle);
 
-    return handle;
+    return camera;
 }
 }

@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "Device.h"
 #include "Object.h"
 #include "TransferFunction.h"
 #include "Volume.h"
@@ -42,11 +43,5 @@ public:
     using Managed::Managed;
 };
 
-template<>
-struct ObjectReflector<VolumetricModel>
-{
-    using Settings = VolumetricModelSettings;
-
-    static OSPVolumetricModel createHandle(OSPDevice device, const Settings &settings);
-};
+VolumetricModel createVolumetricModel(Device &device, const VolumetricModelSettings &settings);
 }

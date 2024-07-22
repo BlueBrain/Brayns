@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include "Device.h"
 #include "Object.h"
 #include "Texture.h"
 
@@ -52,13 +53,7 @@ public:
     using Light::Light;
 };
 
-template<>
-struct ObjectReflector<DistantLight>
-{
-    using Settings = DistantLightSettings;
-
-    static OSPLight createHandle(OSPDevice device, const Settings &settings);
-};
+DistantLight createDistantLight(Device &device, const DistantLightSettings &settings);
 
 struct SphereLightSettings
 {
@@ -73,13 +68,7 @@ public:
     using Light::Light;
 };
 
-template<>
-struct ObjectReflector<SphereLight>
-{
-    using Settings = SphereLightSettings;
-
-    static OSPLight createHandle(OSPDevice device, const Settings &settings);
-};
+SphereLight createSphereLight(Device &device, const SphereLightSettings &settings);
 
 struct SpotLightSettings
 {
@@ -98,13 +87,7 @@ public:
     using Light::Light;
 };
 
-template<>
-struct ObjectReflector<SpotLight>
-{
-    using Settings = SpotLightSettings;
-
-    static OSPLight createHandle(OSPDevice device, const Settings &settings);
-};
+SpotLight createSpotLight(Device &device, const SpotLightSettings &settings);
 
 struct QuadLightSettings
 {
@@ -120,13 +103,7 @@ public:
     using Light::Light;
 };
 
-template<>
-struct ObjectReflector<QuadLight>
-{
-    using Settings = QuadLightSettings;
-
-    static OSPLight createHandle(OSPDevice device, const Settings &settings);
-};
+QuadLight createQuadLight(Device &device, const QuadLightSettings &settings);
 
 struct CylinderLightSettings
 {
@@ -142,13 +119,7 @@ public:
     using Light::Light;
 };
 
-template<>
-struct ObjectReflector<CylinderLight>
-{
-    using Settings = CylinderLightSettings;
-
-    static OSPLight createHandle(OSPDevice device, const Settings &settings);
-};
+CylinderLight createCylinderLight(Device &device, const CylinderLightSettings &settings);
 
 struct HdriLightSettings
 {
@@ -164,13 +135,7 @@ public:
     using Light::Light;
 };
 
-template<>
-struct ObjectReflector<HdriLight>
-{
-    using Settings = HdriLightSettings;
-
-    static OSPLight createHandle(OSPDevice device, const Settings &settings);
-};
+HdriLight createHdriLight(Device &device, const HdriLightSettings &settings);
 
 struct AmbientLightSettings
 {
@@ -183,13 +148,7 @@ public:
     using Light::Light;
 };
 
-template<>
-struct ObjectReflector<AmbientLight>
-{
-    using Settings = AmbientLightSettings;
-
-    static OSPLight createHandle(OSPDevice device, const Settings &settings);
-};
+AmbientLight createAmbientLight(Device &device, const AmbientLightSettings &settings);
 
 struct SunSkyLightSettings
 {
@@ -207,11 +166,5 @@ public:
     using Light::Light;
 };
 
-template<>
-struct ObjectReflector<SunSkyLight>
-{
-    using Settings = SunSkyLightSettings;
-
-    static OSPLight createHandle(OSPDevice device, const Settings &settings);
-};
+SunSkyLight createSunSkyLight(Device &device, const SunSkyLightSettings &settings);
 }

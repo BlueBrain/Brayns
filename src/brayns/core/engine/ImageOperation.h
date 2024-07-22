@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Data.h"
+#include "Device.h"
 #include "Object.h"
 
 namespace brayns
@@ -49,12 +50,5 @@ public:
     using ImageOperation::ImageOperation;
 };
 
-template<>
-struct ObjectReflector<ToneMapper>
-{
-    using Settings = ToneMapperSettings;
-
-    static OSPImageOperation createHandle(OSPDevice device, const Settings &settings);
-};
-
+ToneMapper createToneMapper(Device &device, const ToneMapperSettings &settings);
 }

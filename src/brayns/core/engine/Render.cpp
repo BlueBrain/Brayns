@@ -48,31 +48,29 @@ float Future::waitAndGetDuration()
     return ospGetTaskDuration(handle);
 }
 
-Future startRendering(OSPDevice device, const Context &context)
+Future render(Device &device, const RenderSettings &settings)
 {
-    auto framebuffer = context.framebuffer.getHandle();
-    auto renderer = context.renderer.getHandle();
-    auto camera = context.camera.getHandle();
-    auto world = context.world.getHandle();
+    auto framebuffer = settings.framebuffer.getHandle();
+    auto renderer = settings.renderer.getHandle();
+    auto camera = settings.camera.getHandle();
+    auto world = settings.world.getHandle();
 
     auto handle = ospRenderFrame(framebuffer, renderer, camera, world);
-    throwLastDeviceErrorIfNull(device, handle);
 
-    return Future(handle);
+    return wrapObjectHandleAs<Future>(device, handle);
 }
 
-std::optional<PickResult> tryPick(OSPDevice device, const PickSettings &settings)
+std::optional<PickResult> pick(Device &device, const RenderSettings &settings, Vector2 normalizedScreenPosition)
 {
-    (void)device;
-
-    auto framebuffer = settings.context.framebuffer.getHandle();
-    auto renderer = settings.context.renderer.getHandle();
-    auto camera = settings.context.camera.getHandle();
-    auto world = settings.context.world.getHandle();
-    auto [screenX, screenY] = settings.normalizedScreenPosition;
+    auto framebuffer = settings.framebuffer.getHandle();
+    auto renderer = settings.renderer.getHandle();
+    auto camera = settings.camera.getHandle();
+    auto world = settings.world.getHandle();
+    auto [screenX, screenY] = normalizedScreenPosition;
 
     auto result = OSPPickResult();
     ospPick(&result, framebuffer, renderer, camera, world, screenX, screenY);
+    device.throwIfError();
 
     if (!result.hasHit)
     {

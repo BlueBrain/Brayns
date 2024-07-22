@@ -25,6 +25,7 @@
 #include <set>
 
 #include "Data.h"
+#include "Device.h"
 #include "ImageOperation.h"
 #include "Object.h"
 
@@ -74,11 +75,5 @@ public:
     float getVariance();
 };
 
-template<>
-struct ObjectReflector<Framebuffer>
-{
-    using Settings = FramebufferSettings;
-
-    static OSPFrameBuffer createHandle(OSPDevice device, const Settings &settings);
-};
+Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings);
 }
