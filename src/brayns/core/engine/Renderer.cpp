@@ -53,7 +53,7 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
         setObjectParam(handle, "maxDepth", *settings.maxDepth);
     }
 
-    setObjectData(handle, "material", settings.materials);
+    setObjectParam(handle, "material", settings.materials);
     setObjectParam(handle, "pixelFilter", static_cast<OSPPixelFilterType>(settings.pixelFilter));
 }
 }

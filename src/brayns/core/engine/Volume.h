@@ -35,16 +35,6 @@ public:
     using Managed::Managed;
 };
 
-enum class VoxelDataType
-{
-    UChar = OSP_UCHAR,
-    Short = OSP_SHORT,
-    UShort = OSP_USHORT,
-    Half = OSP_HALF,
-    Float = OSP_FLOAT,
-    Double = OSP_DOUBLE,
-};
-
 enum class VolumeFilter
 {
     Nearest = OSP_VOLUME_FILTER_NEAREST,
@@ -52,12 +42,18 @@ enum class VolumeFilter
     Cubic = OSP_VOLUME_FILTER_CUBIC,
 };
 
+using VolumeData = std::variant<Data3D<std::uint8_t>, Data3D<std::uint16_t>, Data3D<float>, Data3D<double>>;
+
+enum class VoxelType
+{
+    CellCentered,
+    VertexCentered,
+};
+
 struct RegularVolumeSettings
 {
-    const void *data;
-    VoxelDataType voxelDataType;
-    Size3 size;
-    bool cellCentered = false;
+    VolumeData data;
+    VoxelType voxelType = VoxelType::VertexCentered;
     VolumeFilter filter = VolumeFilter::Linear;
     float background = std::numeric_limits<float>::quiet_NaN();
 };

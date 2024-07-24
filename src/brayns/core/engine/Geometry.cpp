@@ -29,26 +29,27 @@ using namespace brayns;
 
 void setMeshParams(OSPGeometry handle, const MeshSettings &settings)
 {
-    setObjectData(handle, "vertex.position", settings.positions);
-    setObjectDataIfNotEmpty(handle, "vertex.normal", settings.normals);
-    setObjectDataIfNotEmpty(handle, "vertex.color", settings.colors);
-    setObjectDataIfNotEmpty(handle, "vertex.texcoord", settings.uvs);
+    setObjectParam(handle, "vertex.position", settings.positions);
+    setObjectParam(handle, "vertex.normal", settings.normals);
+    setObjectParam(handle, "vertex.color", settings.colors);
+    setObjectParam(handle, "vertex.texcoord", settings.uvs);
 }
 
 // TODO remove when OSPRay exposes sphere.position_radius to match embree internal layout
-void setInterleavedSpheresParams(OSPGeometry handle, std::span<Vector4> positionsAndRadii)
+void setInterleavedSpheresParams(OSPGeometry handle, const Data<Vector4> &positionsAndRadii)
 {
     constexpr auto stride = sizeof(Vector4);
 
-    auto size = positionsAndRadii.size();
+    auto itemCount = positionsAndRadii.getItemCount();
 
-    const auto *positions = positionsAndRadii.data();
-    const auto *radii = &positions[0].w;
-
-    auto positionData = wrapData(ospNewSharedData(positions, OSP_VEC3F, size, stride));
+    auto positionOffset = std::size_t(0);
+    auto positionRegion = DataRegion{itemCount, stride, positionOffset};
+    auto positionData = createDataView<Vector3>(positionsAndRadii, positionRegion);
     setObjectParam(handle, "sphere.position", positionData);
 
-    auto radiusData = wrapData(ospNewSharedData(radii, OSP_FLOAT, size, stride));
+    auto radiusOffset = sizeof(Vector3);
+    auto radiusRegion = DataRegion{itemCount, stride, radiusOffset};
+    auto radiusData = createDataView<float>(positionsAndRadii, radiusRegion);
     setObjectParam(handle, "sphere.radius", radiusData);
 }
 
@@ -65,7 +66,7 @@ void setCurveType(OSPGeometry handle, RoundCurve)
 void setCurveType(OSPGeometry handle, const RibbonCurve &curve)
 {
     setObjectParam(handle, "type", OSP_RIBBON);
-    setObjectData(handle, "vertex.normal", curve.normals);
+    setObjectParam(handle, "vertex.normal", curve.normals);
 }
 
 void setCurveBasis(OSPGeometry handle, LinearCurve)
@@ -86,7 +87,7 @@ void setCurveBasis(OSPGeometry handle, BsplineCurve)
 void setCurveBasis(OSPGeometry handle, const HermiteCurve &curve)
 {
     setObjectParam(handle, "basis", OSP_HERMITE);
-    setObjectData(handle, "vertex.tangent", curve.tangents);
+    setObjectParam(handle, "vertex.tangent", curve.tangents);
 }
 
 void setCurveBasis(OSPGeometry handle, CatmullRomCurve)
@@ -97,17 +98,17 @@ void setCurveBasis(OSPGeometry handle, CatmullRomCurve)
 
 namespace brayns
 {
-void Mesh::setColors(std::span<Color4> colors)
+void Mesh::setColors(const Data<Color4> &colors)
 {
     auto handle = getHandle();
-    setObjectDataIfNotEmpty(handle, "vertex.color", colors);
+    setObjectParam(handle, "vertex.color", colors);
     commitObject(handle);
 }
 
-void Cylinders::setColors(std::span<Color4> colors)
+void Cylinders::setColors(const Data<Color4> &colors)
 {
     auto handle = getHandle();
-    setObjectDataIfNotEmpty(handle, "vertex.color", colors);
+    setObjectParam(handle, "vertex.color", colors);
     commitObject(handle);
 }
 
@@ -117,7 +118,7 @@ TriangleMesh createTriangleMesh(Device &device, const TriangleMeshSettings &sett
     auto mesh = wrapObjectHandleAs<TriangleMesh>(device, handle);
 
     setMeshParams(handle, settings.base);
-    setObjectDataIfNotEmpty(handle, "index", settings.indices);
+    setObjectParam(handle, "index", settings.indices);
 
     commitObject(handle);
 
@@ -131,13 +132,13 @@ QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings)
 
     setMeshParams(handle, settings.base);
 
-    if (settings.indices.empty())
+    if (settings.indices)
     {
-        setObjectParam(handle, "quadSoup", true);
+        setObjectParam(handle, "index", *settings.indices);
     }
     else
     {
-        setObjectData(handle, "index", settings.indices);
+        setObjectParam(handle, "quadSoup", true);
     }
 
     commitObject(handle);
@@ -151,7 +152,7 @@ Spheres createSpheres(Device &device, const SphereSettings &settings)
     auto spheres = wrapObjectHandleAs<Spheres>(device, handle);
 
     setInterleavedSpheresParams(handle, settings.positionsAndRadii);
-    setObjectDataIfNotEmpty(handle, "sphere.texcoord", settings.uvs);
+    setObjectParam(handle, "sphere.texcoord", settings.uvs);
     setObjectParam(handle, "type", OSP_SPHERE);
 
     commitObject(handle);
@@ -165,16 +166,16 @@ Discs createDiscs(Device &device, const DiscSettings &settings)
     auto discs = wrapObjectHandleAs<Discs>(device, handle);
 
     setInterleavedSpheresParams(handle, settings.positionsAndRadii);
-    setObjectDataIfNotEmpty(handle, "sphere.texcoord", settings.uvs);
+    setObjectParam(handle, "sphere.texcoord", settings.uvs);
 
-    if (settings.normals.empty())
+    if (settings.normals)
     {
-        setObjectParam(handle, "type", OSP_DISC);
+        setObjectParam(handle, "type", OSP_ORIENTED_DISC);
+        setObjectParam(handle, "sphere.normal", *settings.normals);
     }
     else
     {
-        setObjectParam(handle, "type", OSP_ORIENTED_DISC);
-        setObjectData(handle, "sphere.normal", settings.normals);
+        setObjectParam(handle, "type", OSP_DISC);
     }
 
     commitObject(handle);
@@ -187,10 +188,10 @@ Cylinders createCylinders(Device &device, const CylinderSettings &settings)
     auto handle = ospNewGeometry("curve");
     auto cylinders = wrapObjectHandleAs<Cylinders>(device, handle);
 
-    setObjectData(handle, "vertex.position_radius", settings.positionsAndRadii);
-    setObjectDataIfNotEmpty(handle, "vertex.texcoord", settings.uvs);
-    setObjectDataIfNotEmpty(handle, "vertex.color", settings.colors);
-    setObjectData(handle, "indices", settings.indices);
+    setObjectParam(handle, "vertex.position_radius", settings.positionsAndRadii);
+    setObjectParam(handle, "vertex.texcoord", settings.uvs);
+    setObjectParam(handle, "vertex.color", settings.colors);
+    setObjectParam(handle, "indices", settings.indices);
 
     setObjectParam(handle, "type", OSP_DISJOINT);
     setObjectParam(handle, "basis", OSP_LINEAR);
@@ -210,10 +211,10 @@ Curve createCurve(Device &device, const CurveSettings &settings)
     auto handle = ospNewGeometry("curve");
     auto curve = wrapObjectHandleAs<Curve>(device, handle);
 
-    setObjectData(handle, "vertex.position_radius", settings.positionsAndRadii);
-    setObjectDataIfNotEmpty(handle, "vertex.texcoord", settings.uvs);
-    setObjectDataIfNotEmpty(handle, "vertex.color", settings.colors);
-    setObjectData(handle, "indices", settings.indices);
+    setObjectParam(handle, "vertex.position_radius", settings.positionsAndRadii);
+    setObjectParam(handle, "vertex.texcoord", settings.uvs);
+    setObjectParam(handle, "vertex.color", settings.colors);
+    setObjectParam(handle, "indices", settings.indices);
 
     std::visit([=](const auto &value) { setCurveType(handle, value); }, settings.type);
     std::visit([=](const auto &value) { setCurveBasis(handle, value); }, settings.basis);
@@ -228,7 +229,7 @@ Boxes createBoxes(Device &device, const BoxSettings &settings)
     auto handle = ospNewGeometry("box");
     auto boxes = wrapObjectHandleAs<Boxes>(device, handle);
 
-    setObjectData(handle, "box", settings.boxes);
+    setObjectParam(handle, "box", settings.boxes);
 
     commitObject(handle);
 
@@ -240,8 +241,8 @@ Planes createPlanes(Device &device, const PlaneSettings &settings)
     auto handle = ospNewGeometry("plane");
     auto planes = wrapObjectHandleAs<Planes>(device, handle);
 
-    setObjectData(handle, "plane.coefficients", settings.coefficients);
-    setObjectDataIfNotEmpty(handle, "plane.bounds", settings.bounds);
+    setObjectParam(handle, "plane.coefficients", settings.coefficients);
+    setObjectParam(handle, "plane.bounds", settings.bounds);
 
     commitObject(handle);
 
@@ -254,7 +255,7 @@ Isosurfaces createIsosurfaces(Device &device, const IsosurfaceSettings &settings
     auto isosurfaces = wrapObjectHandleAs<Isosurfaces>(device, handle);
 
     setObjectParam(handle, "volume", settings.volume);
-    setObjectData(handle, "isovalue", settings.isovalues);
+    setObjectParam(handle, "isovalue", settings.isovalues);
 
     commitObject(handle);
 

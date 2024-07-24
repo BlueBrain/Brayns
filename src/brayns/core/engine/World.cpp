@@ -34,10 +34,10 @@ Group createGroup(Device &device, const GroupSettings &settings)
     auto handle = ospNewGroup();
     auto group = wrapObjectHandleAs<Group>(device, handle);
 
-    setObjectDataIfNotEmpty(handle, "geometry", settings.geometries);
-    setObjectDataIfNotEmpty(handle, "clippingGeometry", settings.clippingGeometries);
-    setObjectDataIfNotEmpty(handle, "volume", settings.volumes);
-    setObjectDataIfNotEmpty(handle, "light", settings.lights);
+    setObjectParam(handle, "geometry", settings.geometries);
+    setObjectParam(handle, "clippingGeometry", settings.clippingGeometries);
+    setObjectParam(handle, "volume", settings.volumes);
+    setObjectParam(handle, "light", settings.lights);
 
     commitObject(handle);
 
@@ -75,7 +75,7 @@ World createWorld(Device &device, const WorldSettings &settings)
     auto handle = ospNewWorld();
     auto world = wrapObjectHandleAs<World>(device, handle);
 
-    setObjectData(handle, "instance", settings.instances);
+    setObjectParam(handle, "instance", settings.instances);
 
     commitObject(handle);
 

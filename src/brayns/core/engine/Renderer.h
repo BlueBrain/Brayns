@@ -51,7 +51,7 @@ struct RendererSettings
     float varianceThreshold = 0.0F;
     Background background = Color4(0.0F, 0.0F, 0.0F, 0.0F);
     std::optional<Texture2D> maxDepth = std::nullopt;
-    std::span<Material> materials = {};
+    Data<Material> materials;
     PixelFilter pixelFilter = PixelFilter::Gauss;
 };
 
@@ -63,7 +63,7 @@ public:
 
 struct AoRendererSettings
 {
-    RendererSettings base = {};
+    RendererSettings base;
     std::size_t aoSamples = 1;
     float aoDistance = 1e20F;
     float aoIntensity = 1.0F;
@@ -80,7 +80,7 @@ AoRenderer createAoRenderer(Device &device, const AoRendererSettings &settings);
 
 struct ScivisRendererSettings
 {
-    RendererSettings base = {};
+    RendererSettings base;
     bool shadows = false;
     std::size_t aoSamples = 0;
     float aoDistance = 1e20F;
@@ -98,7 +98,7 @@ ScivisRenderer createScivisRenderer(Device &device, const ScivisRendererSettings
 
 struct PathTracerSettings
 {
-    RendererSettings base = {};
+    RendererSettings base;
 };
 
 class PathTracer : public Renderer

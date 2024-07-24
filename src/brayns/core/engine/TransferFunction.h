@@ -35,8 +35,8 @@ public:
 
 struct LinearTransferFunctionSettings
 {
-    std::span<Color3> colors;
-    std::span<float> opacities;
+    Data<Color3> colors;
+    std::optional<Data<float>> opacities;
     Box1 scalarRange;
 };
 

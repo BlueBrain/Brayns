@@ -28,8 +28,8 @@ LinearTransferFunction createLinearTransferFunction(Device &device, const Linear
     auto handle = ospNewTransferFunction("piecewiseLinear");
     auto transferFunction = wrapObjectHandleAs<LinearTransferFunction>(device, handle);
 
-    setObjectData(handle, "color", settings.colors);
-    setObjectData(handle, "opacity", settings.opacities);
+    setObjectParam(handle, "color", settings.colors);
+    setObjectParam(handle, "opacity", settings.opacities);
     setObjectParam(handle, "value", settings.scalarRange);
 
     commitObject(handle);

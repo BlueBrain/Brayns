@@ -21,6 +21,9 @@
 
 #pragma once
 
+#include <optional>
+#include <variant>
+
 #include "Data.h"
 #include "Device.h"
 #include "Geometry.h"
@@ -28,11 +31,13 @@
 
 namespace brayns
 {
+using IndexInRenderer = std::uint32_t;
+
 struct Materials
 {
-    std::span<std::uint32_t> materials;
-    std::span<Color4> colors = {};
-    std::span<std::uint8_t> indices = {};
+    std::variant<IndexInRenderer, Data<IndexInRenderer>> materials;
+    std::variant<std::monostate, Color4, Data<Color4>> colors = {};
+    std::optional<Data<std::uint8_t>> indices = std::nullopt;
 };
 
 struct GeometricModelSettings

@@ -59,8 +59,6 @@ TEST_CASE("Render")
 
     auto toneMapper = createToneMapper(device, {});
 
-    auto imageOperations = std::vector<ImageOperation>{toneMapper};
-
     auto framebuffer = createFramebuffer(
         device,
         {
@@ -68,14 +66,12 @@ TEST_CASE("Render")
             .height = std::size_t(height),
             .format = FramebufferFormat::Srgba8,
             .channels = {FramebufferChannel::Color},
-            .operations = imageOperations,
+            .operations = createData<ImageOperation>(device, {toneMapper}),
         });
 
     auto material = createScivisMaterial(device, {});
 
-    auto materials = std::vector<Material>{material};
-
-    auto renderer = createScivisRenderer(device, {{.materials = materials}});
+    auto renderer = createScivisRenderer(device, {{.materials = createData<Material>(device, {material})}});
 
     auto camera = createPerspectiveCamera(
         device,
@@ -87,15 +83,13 @@ TEST_CASE("Render")
     auto positionsAndRadii = std::vector<Vector4>{{0, 0, 3, 0.25F}, {1, 0, 3, 0.25F}, {1, 1, 3, 0.25F}};
     auto colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}};
 
-    auto spheres = createSpheres(device, {positionsAndRadii});
-
-    auto materialIndices = std::vector<std::uint32_t>{0};
+    auto spheres = createSpheres(device, {createData<Vector4>(device, positionsAndRadii)});
 
     auto model = createGeometricModel(
         device,
         {
             .geometry = spheres,
-            .materials = {materialIndices, colors},
+            .materials = {IndexInRenderer(0), createData<Color4>(device, colors)},
             .id = 0,
         });
 
@@ -104,13 +98,16 @@ TEST_CASE("Render")
     auto models = std::vector<GeometricModel>{model};
     auto lights = std::vector<Light>{light};
 
-    auto group = createGroup(device, {.geometries = models, .lights = lights});
+    auto group = createGroup(
+        device,
+        {
+            .geometries = createData<GeometricModel>(device, {model}),
+            .lights = createData<Light>(device, {light}),
+        });
 
     auto instance = createInstance(device, {.group = group, .transform = {}, .id = 0});
 
-    auto instances = std::vector<Instance>{instance};
-
-    auto world = createWorld(device, {instances});
+    auto world = createWorld(device, {createData<Instance>(device, {instance})});
 
     CHECK_EQ(world.getBounds(), instance.getBounds());
     CHECK_EQ(world.getBounds(), group.getBounds());
