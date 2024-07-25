@@ -40,7 +40,7 @@ void setInterleavedSpheresParams(OSPGeometry handle, const Data<Vector4> &positi
 {
     constexpr auto stride = sizeof(Vector4);
 
-    auto itemCount = positionsAndRadii.getItemCount();
+    auto itemCount = positionsAndRadii.getTotalItemCount();
 
     auto positionOffset = std::size_t(0);
     auto positionRegion = DataRegion{itemCount, stride, positionOffset};

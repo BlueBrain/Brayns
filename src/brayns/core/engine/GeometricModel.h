@@ -35,7 +35,7 @@ using IndexInRenderer = std::uint32_t;
 
 struct Materials
 {
-    std::variant<IndexInRenderer, Data<IndexInRenderer>> materials;
+    std::variant<IndexInRenderer, Data<IndexInRenderer>> values;
     std::variant<std::monostate, Color4, Data<Color4>> colors = {};
     std::optional<Data<std::uint8_t>> indices = std::nullopt;
 };

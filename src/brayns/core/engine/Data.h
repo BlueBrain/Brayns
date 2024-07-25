@@ -34,10 +34,10 @@ template<OsprayDataType T>
 class Data3D
 {
 public:
-    explicit Data3D(OSPData handle, T *ptr, const Size3 &dimensions, const Size3 &stride = {0, 0, 0}):
+    explicit Data3D(OSPData handle, T *ptr, const Size3 &itemCount, const Stride3 &stride = {0, 0, 0}):
         _managed(handle),
         _ptr(ptr),
-        _dimensions(dimensions),
+        _itemCount(itemCount),
         _stride(stride)
     {
     }
@@ -52,12 +52,12 @@ public:
         return _ptr;
     }
 
-    const Size3 &getDimensions() const
+    const Size3 &getItemCount() const
     {
-        return _dimensions;
+        return _itemCount;
     }
 
-    const Size3 &getStride() const
+    const Stride3 &getStride() const
     {
         return _stride;
     }
@@ -67,36 +67,26 @@ public:
         return reinterpret_cast<char *>(_ptr);
     }
 
+    std::size_t getSize() const
+    {
+        return getTotalItemCount() * sizeof(T);
+    }
+
     std::span<T> getItems() const
     {
-        return {_ptr, getItemCount()};
+        return {_ptr, getTotalItemCount()};
     }
 
-    std::size_t getItemCount() const
+    std::size_t getTotalItemCount() const
     {
-        return reduceMultiply(_dimensions);
-    }
-
-    std::size_t getWidth() const
-    {
-        return _dimensions[0];
-    }
-
-    std::size_t getHeight() const
-    {
-        return _dimensions[1];
-    }
-
-    std::size_t getDepth() const
-    {
-        return _dimensions[2];
+        return reduceMultiply(_itemCount);
     }
 
 private:
     Managed<OSPData> _managed;
     T *_ptr;
-    Size3 _dimensions;
-    Size3 _stride;
+    Size3 _itemCount;
+    Stride3 _stride;
 };
 
 template<OsprayDataType T>
@@ -106,7 +96,7 @@ public:
     explicit Data2D(Data3D<T> data):
         Data3D<T>(std::move(data))
     {
-        assert(Data3D<T>::getDepth() == 1);
+        assert(Data3D<T>::getItemCount()[2] == 1);
     }
 };
 
@@ -117,7 +107,7 @@ public:
     explicit Data(Data3D<T> data):
         Data2D<T>(std::move(data))
     {
-        assert(Data3D<T>::getHeight() == 1);
+        assert(Data3D<T>::getItemCount()[1] == 1);
     }
 };
 
@@ -141,12 +131,12 @@ struct ObjectParamReflector<Data<T>> : ObjectParamReflector<Data3D<T>>
 };
 
 template<OsprayDataType T>
-Data3D<T> allocateData3D(Device &device, const Size3 &dimensions)
+Data3D<T> allocateData3D(Device &device, const Size3 &itemCount)
 {
-    auto [x, y, z] = dimensions;
-    auto itemCount = reduceMultiply(dimensions);
+    auto [x, y, z] = itemCount;
+    auto totalItemCount = reduceMultiply(itemCount);
 
-    assert(itemCount > 0);
+    assert(totalItemCount > 0);
 
     auto type = dataTypeOf<T>;
 
@@ -157,13 +147,14 @@ Data3D<T> allocateData3D(Device &device, const Size3 &dimensions)
         delete[] ptr;
     };
 
-    auto *ptr = new T[itemCount];
+    auto *ptr = new T[totalItemCount];
 
     try
     {
         auto *handle = ospNewSharedData(ptr, type, x, 0, y, 0, z, 0, deleter, nullptr);
         checkObjectHandle(device, handle);
-        return Data3D<T>(handle, ptr, dimensions);
+
+        return Data3D<T>(handle, ptr, itemCount);
     }
     catch (...)
     {
@@ -173,9 +164,9 @@ Data3D<T> allocateData3D(Device &device, const Size3 &dimensions)
 }
 
 template<OsprayDataType T>
-Data2D<T> allocateData2D(Device &device, const Size2 &dimensions)
+Data2D<T> allocateData2D(Device &device, const Size2 &itemCount)
 {
-    auto data = allocateData3D<T>(device, Size3(dimensions, 1));
+    auto data = allocateData3D<T>(device, Size3(itemCount, 1));
     return Data2D<T>(std::move(data));
 }
 
@@ -204,37 +195,34 @@ Data<T> createData(Device &device, std::initializer_list<U> items)
 
 struct DataRegion3D
 {
-    Size3 dimensions;
-    Size3 stride = {0, 0, 0};
+    Size3 itemCount;
+    Stride3 stride = {0, 0, 0};
     std::size_t offset = 0;
 };
 
 struct DataRegion2D
 {
-    Size2 dimensions;
-    Size2 stride = {0, 0};
+    Size2 itemCount;
+    Stride2 stride = {0, 0};
     std::size_t offset = 0;
 };
 
 struct DataRegion
 {
     std::size_t itemCount;
-    std::size_t stride = 0;
+    std::ptrdiff_t stride = 0;
     std::size_t offset = 0;
 };
 
 template<OsprayDataType OutputType, OsprayDataType T>
-Data3D<OutputType> createData3DView(const Data3D<T> &data, const DataRegion3D &region)
+Data3D<OutputType> createDataView3D(const Data3D<T> &data, const DataRegion3D &region)
 {
     auto *bytes = data.getBytes() + region.offset;
     auto *ptr = reinterpret_cast<OutputType *>(bytes);
 
     auto type = dataTypeOf<OutputType>;
 
-    auto [x, y, z] = region.dimensions;
-
-    assert(x <= data.getWidth() && y <= data.getHeight() && z <= data.getDepth());
-
+    auto [x, y, z] = region.itemCount;
     auto [sx, sy, sz] = region.stride;
 
     auto deleter = [](const void *userData, const void *sharedData)
@@ -255,14 +243,14 @@ Data3D<OutputType> createData3DView(const Data3D<T> &data, const DataRegion3D &r
 
     ospRetain(userData);
 
-    return Data3D<OutputType>(handle, ptr, region.dimensions, region.stride);
+    return Data3D<OutputType>(handle, ptr, region.itemCount, region.stride);
 }
 
 template<OsprayDataType OutputType, OsprayDataType T>
-Data2D<OutputType> createData2DView(const Data2D<T> &data, const DataRegion2D &region)
+Data2D<OutputType> createDataView2D(const Data2D<T> &data, const DataRegion2D &region)
 {
-    auto region3D = DataRegion3D{Size3(region.dimensions, 1), Size3(region.stride, 0), region.offset};
-    auto view = createData3DView<OutputType>(data, region3D);
+    auto region3D = DataRegion3D{Size3(region.itemCount, 1), Size3(region.stride, 0), region.offset};
+    auto view = createDataView3D<OutputType>(data, region3D);
     return Data2D<OutputType>(std::move(view));
 }
 
@@ -270,7 +258,7 @@ template<OsprayDataType OutputType, OsprayDataType T>
 Data<OutputType> createDataView(const Data<T> &data, const DataRegion &region)
 {
     auto region3D = DataRegion3D{Size3(region.itemCount, 1, 1), Size3(region.stride, 0, 0), region.offset};
-    auto view = createData3DView<OutputType>(data, region3D);
+    auto view = createDataView3D<OutputType>(data, region3D);
     return Data<OutputType>(std::move(view));
 }
 }

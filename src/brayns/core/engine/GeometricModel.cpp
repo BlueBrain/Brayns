@@ -27,7 +27,7 @@ using namespace brayns;
 
 void setMaterialParams(OSPGeometricModel handle, const Materials &materials)
 {
-    setObjectParam(handle, "material", materials.materials);
+    setObjectParam(handle, "material", materials.values);
     setObjectParam(handle, "color", materials.colors);
     setObjectParam(handle, "index", materials.indices);
 }
