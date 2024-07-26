@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 namespace brayns
@@ -31,16 +33,21 @@ class IdGenerator
 public:
     T next()
     {
-        if (_recycled.empty())
+        if (!_recycled.empty())
         {
-            return _counter++;
+            auto id = _recycled.back();
+
+            _recycled.pop_back();
+
+            return id;
         }
 
-        auto id = _recycled.back();
+        if (_counter == std::numeric_limits<T>::max())
+        {
+            throw std::out_of_range("No more available IDs");
+        }
 
-        _recycled.pop_back();
-
-        return id;
+        return _counter++;
     }
 
     void recycle(T id)
