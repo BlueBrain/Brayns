@@ -21,8 +21,6 @@
 
 #include "ObjectManager.h"
 
-#include <cassert>
-
 #include <fmt/format.h>
 
 namespace
@@ -111,8 +109,7 @@ void ObjectManager::remove(ObjectId id)
 
     if (!tag.empty())
     {
-        auto count = _idsByTag.erase(tag);
-        assert(count == 1);
+        _idsByTag.erase(tag);
     }
 
     metadata.id = nullId;
@@ -157,14 +154,12 @@ void ObjectManager::addEntry(ObjectId id, ObjectManagerEntry entry)
     {
         checkTagIsNotAlreadyUsed(_idsByTag, tag);
 
-        auto [i, inserted] = _idsByTag.emplace(tag, id);
-        assert(inserted);
+        _idsByTag.emplace(tag, id);
     }
 
     try
     {
-        auto [i, inserted] = _objects.emplace(id, std::move(entry));
-        assert(inserted);
+        _objects.emplace(id, std::move(entry));
     }
     catch (...)
     {
