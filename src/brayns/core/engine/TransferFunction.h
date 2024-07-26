@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Data.h"
+#include "Device.h"
 #include "Object.h"
 
 namespace brayns
@@ -34,9 +35,8 @@ public:
 
 struct LinearTransferFunctionSettings
 {
-    std::span<Color3> colors;
-    std::span<float> opacities;
     Box1 scalarRange;
+    Data<Color4> colors;
 };
 
 class LinearTransferFunction : public TransferFunction
@@ -45,11 +45,5 @@ public:
     using TransferFunction::TransferFunction;
 };
 
-template<>
-struct ObjectReflector<LinearTransferFunction>
-{
-    using Settings = LinearTransferFunctionSettings;
-
-    static OSPTransferFunction createHandle(OSPDevice device, const Settings &settings);
-};
+LinearTransferFunction createLinearTransferFunction(Device &device, const LinearTransferFunctionSettings &settings);
 }

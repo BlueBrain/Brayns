@@ -37,6 +37,9 @@ using Index4 = Vector<std::uint32_t, 4>;
 using Size2 = Vector<std::size_t, 2>;
 using Size3 = Vector<std::size_t, 3>;
 
+using Stride2 = Vector<std::ptrdiff_t, 2>;
+using Stride3 = Vector<std::ptrdiff_t, 3>;
+
 using Vector2 = Vector<float, 2>;
 using Vector3 = Vector<float, 3>;
 using Vector4 = Vector<float, 4>;

@@ -21,9 +21,11 @@
 
 #pragma once
 
+#include <optional>
 #include <variant>
 
 #include "Data.h"
+#include "Device.h"
 #include "Object.h"
 #include "Volume.h"
 
@@ -35,12 +37,12 @@ public:
     using Managed::Managed;
 };
 
-struct MeshVertices
+struct MeshSettings
 {
-    std::span<Vector3> positions;
-    std::span<Vector3> normals = {};
-    std::span<Color4> colors = {};
-    std::span<Vector2> uvs = {};
+    Data<Vector3> positions;
+    std::optional<Data<Vector3>> normals = std::nullopt;
+    std::optional<Data<Color4>> colors = std::nullopt;
+    std::optional<Data<Vector2>> uvs = std::nullopt;
 };
 
 class Mesh : public Geometry
@@ -48,13 +50,13 @@ class Mesh : public Geometry
 public:
     using Geometry::Geometry;
 
-    void setColors(std::span<Color4> colors);
+    void setColors(const Data<Color4> &colors);
 };
 
 struct TriangleMeshSettings
 {
-    MeshVertices vertices;
-    std::span<Index3> indices = {};
+    MeshSettings base;
+    std::optional<Data<Index3>> indices = std::nullopt;
 };
 
 class TriangleMesh : public Mesh
@@ -63,18 +65,12 @@ public:
     using Mesh::Mesh;
 };
 
-template<>
-struct ObjectReflector<TriangleMesh>
-{
-    using Settings = TriangleMeshSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+TriangleMesh createTriangleMesh(Device &device, const TriangleMeshSettings &settings);
 
 struct QuadMeshSettings
 {
-    MeshVertices vertices;
-    std::span<Index4> indices = {};
+    MeshSettings base;
+    std::optional<Data<Index4>> indices = std::nullopt;
 };
 
 class QuadMesh : public Mesh
@@ -83,20 +79,12 @@ public:
     using Mesh::Mesh;
 };
 
-template<>
-struct ObjectReflector<QuadMesh>
-{
-    using Settings = QuadMeshSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
-
-using PositionRadius = Vector4;
+QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings);
 
 struct SphereSettings
 {
-    std::span<PositionRadius> points;
-    std::span<Vector2> uvs = {};
+    Data<Vector4> spheres;
+    std::optional<Data<Vector2>> uvs = std::nullopt;
 };
 
 class Spheres : public Geometry
@@ -105,19 +93,13 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Spheres>
-{
-    using Settings = SphereSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Spheres createSpheres(Device &device, const SphereSettings &settings);
 
 struct DiscSettings
 {
-    std::span<PositionRadius> points;
-    std::span<Vector3> normals = {};
-    std::span<Vector2> uvs = {};
+    Data<Vector4> spheres;
+    std::optional<Data<Vector3>> normals = std::nullopt;
+    std::optional<Data<Vector2>> uvs = std::nullopt;
 };
 
 class Discs : public Geometry
@@ -126,25 +108,14 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Discs>
-{
-    using Settings = DiscSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
-
-struct CurveVertices
-{
-    std::span<PositionRadius> points;
-    std::span<Color4> colors = {};
-    std::span<Vector2> uvs = {};
-};
+Discs createDiscs(Device &device, const DiscSettings &settings);
 
 struct CylinderSettings
 {
-    CurveVertices vertices;
-    std::span<std::uint32_t> indices;
+    Data<Vector4> spheres;
+    Data<std::uint32_t> indices;
+    std::optional<Data<Color4>> colors = std::nullopt;
+    std::optional<Data<Vector2>> uvs = std::nullopt;
 };
 
 class Cylinders : public Geometry
@@ -152,16 +123,10 @@ class Cylinders : public Geometry
 public:
     using Geometry::Geometry;
 
-    void setColors(std::span<Color4> colors);
+    void setColors(const Data<Color4> &colors);
 };
 
-template<>
-struct ObjectReflector<Cylinders>
-{
-    using Settings = CylinderSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Cylinders createCylinders(Device &device, const CylinderSettings &settings);
 
 struct FlatCurve
 {
@@ -173,7 +138,7 @@ struct RoundCurve
 
 struct RibbonCurve
 {
-    std::span<Vector3> normals;
+    Data<Vector3> normals;
 };
 
 using CurveType = std::variant<FlatCurve, RoundCurve, RibbonCurve>;
@@ -192,7 +157,7 @@ struct BsplineCurve
 
 struct HermiteCurve
 {
-    std::span<Vector4> tangents;
+    Data<Vector4> tangents;
 };
 
 struct CatmullRomCurve
@@ -203,8 +168,10 @@ using CurveBasis = std::variant<LinearCurve, BezierCurve, BsplineCurve, HermiteC
 
 struct CurveSettings
 {
-    CurveVertices vertices;
-    std::span<std::uint32_t> indices;
+    Data<Vector4> spheres;
+    Data<std::uint32_t> indices;
+    std::optional<Data<Color4>> colors = std::nullopt;
+    std::optional<Data<Vector2>> uvs = std::nullopt;
     CurveType type = RoundCurve();
     CurveBasis basis = LinearCurve();
 };
@@ -215,17 +182,11 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Curve>
-{
-    using Settings = CurveSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Curve createCurve(Device &device, const CurveSettings &settings);
 
 struct BoxSettings
 {
-    std::span<Box3> boxes;
+    Data<Box3> boxes;
 };
 
 class Boxes : public Geometry
@@ -234,18 +195,12 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Boxes>
-{
-    using Settings = BoxSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Boxes createBoxes(Device &device, const BoxSettings &settings);
 
 struct PlaneSettings
 {
-    std::span<Vector4> coefficients;
-    std::span<Box3> bounds;
+    Data<Vector4> coefficients;
+    std::optional<Data<Box3>> bounds = std::nullopt;
 };
 
 class Planes : public Geometry
@@ -254,18 +209,12 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Planes>
-{
-    using Settings = PlaneSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Planes createPlanes(Device &device, const PlaneSettings &settings);
 
 struct IsosurfaceSettings
 {
     Volume volume;
-    std::span<float> isovalues;
+    Data<float> isovalues;
 };
 
 class Isosurfaces : public Geometry
@@ -274,11 +223,5 @@ public:
     using Geometry::Geometry;
 };
 
-template<>
-struct ObjectReflector<Isosurfaces>
-{
-    using Settings = IsosurfaceSettings;
-
-    static OSPGeometry createHandle(OSPDevice device, const Settings &settings);
-};
+Isosurfaces createIsosurfaces(Device &device, const IsosurfaceSettings &settings);
 }

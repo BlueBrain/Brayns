@@ -42,6 +42,8 @@ void setBackground(OSPRenderer handle, const Background &background)
 
 void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 {
+    setObjectParam(handle, "material", settings.materials);
+
     setObjectParam(handle, "pixelSamples", static_cast<int>(settings.pixelSamples));
     setObjectParam(handle, "maxPathLength", static_cast<int>(settings.maxRayRecursionDepth));
     setObjectParam(handle, "minContribution", settings.minSampleContribution);
@@ -53,17 +55,16 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
         setObjectParam(handle, "maxDepth", *settings.maxDepth);
     }
 
-    setObjectData(handle, "material", settings.materials);
     setObjectParam(handle, "pixelFilter", static_cast<OSPPixelFilterType>(settings.pixelFilter));
 }
 }
 
 namespace brayns
 {
-OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice device, const Settings &settings)
+AoRenderer createAoRenderer(Device &device, const AoRendererSettings &settings)
 {
     auto handle = ospNewRenderer("ao");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto renderer = wrapObjectHandleAs<AoRenderer>(device, handle);
 
     setRendererParams(handle, settings.base);
 
@@ -74,13 +75,13 @@ OSPRenderer ObjectReflector<AmbientOcclusionRenderer>::createHandle(OSPDevice de
 
     commitObject(handle);
 
-    return handle;
+    return renderer;
 }
 
-OSPRenderer ObjectReflector<ScivisRenderer>::createHandle(OSPDevice device, const Settings &settings)
+ScivisRenderer createScivisRenderer(Device &device, const ScivisRendererSettings &settings)
 {
     auto handle = ospNewRenderer("scivis");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto renderer = wrapObjectHandleAs<ScivisRenderer>(device, handle);
 
     setRendererParams(handle, settings.base);
 
@@ -92,18 +93,18 @@ OSPRenderer ObjectReflector<ScivisRenderer>::createHandle(OSPDevice device, cons
 
     commitObject(handle);
 
-    return handle;
+    return renderer;
 }
 
-OSPRenderer ObjectReflector<PathTracer>::createHandle(OSPDevice device, const Settings &settings)
+PathTracer createPathTracer(Device &device, const PathTracerSettings &settings)
 {
     auto handle = ospNewRenderer("pathtracer");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto renderer = wrapObjectHandleAs<PathTracer>(device, handle);
 
     setRendererParams(handle, settings.base);
 
     commitObject(handle);
 
-    return handle;
+    return renderer;
 }
 }

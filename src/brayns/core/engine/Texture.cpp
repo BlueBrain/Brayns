@@ -21,82 +21,33 @@
 
 #include "Texture.h"
 
-namespace
-{
-using namespace brayns;
-
-Data toSharedData2D(const void *data, TextureFormat format, const Size2 &size)
-{
-    auto type = getTextureDataType(format);
-    auto handle = ospNewSharedData(data, type, size[0], 0, size[1]);
-    return Data(handle);
-}
-}
-
 namespace brayns
 {
-DataType getTextureDataType(TextureFormat format)
+Texture2D createTexture2D(Device &device, const Texture2DSettings &settings)
 {
-    switch (format)
-    {
-    case TextureFormat::Rgba8:
-    case TextureFormat::Srgba8:
-        return OSP_UINT;
-    case TextureFormat::Rgba32F:
-        return OSP_VEC4F;
-    case TextureFormat::Rgb8:
-    case TextureFormat::Srgb8:
-        return OSP_VEC3UC;
-    case TextureFormat::Rgb32F:
-        return OSP_VEC3F;
-    case TextureFormat::R8:
-    case TextureFormat::L8:
-        return OSP_UCHAR;
-    case TextureFormat::Ra8:
-    case TextureFormat::La8:
-        return OSP_VEC2UC;
-    case TextureFormat::R32F:
-        return OSP_FLOAT;
-    case TextureFormat::Rgba16:
-        return OSP_VEC4US;
-    case TextureFormat::Rgb16:
-        return OSP_VEC3US;
-    case TextureFormat::Ra16:
-        return OSP_VEC2US;
-    case TextureFormat::R16:
-        return OSP_USHORT;
-    default:
-        throw std::invalid_argument("Invalid texture format");
-    }
-}
-
-OSPTexture ObjectReflector<Texture2D>::createHandle(OSPDevice device, const Settings &settings)
-{
-    auto handle = ospNewTexture("texture2D");
-    throwLastDeviceErrorIfNull(device, handle);
-
-    auto data = toSharedData2D(settings.data, settings.format, settings.size);
+    auto handle = ospNewTexture("texture2d");
+    auto texture = wrapObjectHandleAs<Texture2D>(device, handle);
 
     setObjectParam(handle, "format", static_cast<OSPTextureFormat>(settings.format));
     setObjectParam(handle, "filter", static_cast<OSPTextureFilter>(settings.filter));
-    setObjectParam(handle, "data", data);
+    setObjectParam(handle, "data", settings.data);
     setObjectParam(handle, "wrapMode", static_cast<OSPTextureWrapMode>(settings.wrap));
 
     commitObject(handle);
 
-    return handle;
+    return texture;
 }
 
-OSPTexture ObjectReflector<VolumeTexture>::createHandle(OSPDevice device, const Settings &settings)
+VolumeTexture createVolumeTexture(Device &device, const VolumeTextureSettings &settings)
 {
     auto handle = ospNewTexture("volume");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto texture = wrapObjectHandleAs<VolumeTexture>(device, handle);
 
     setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "transferFunction", settings.transferFunction);
 
     commitObject(handle);
 
-    return handle;
+    return texture;
 }
 }

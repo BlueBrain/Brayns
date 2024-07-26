@@ -1,7 +1,5 @@
-/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- *
- * Responsible Author: adrien.fleury@epfl.ch
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -19,22 +17,37 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Volume.h"
+#include <brayns/core/utils/IdGenerator.h>
 
-namespace brayns
+#include <doctest.h>
+
+using namespace brayns;
+
+TEST_CASE("ID generation")
 {
-RegularVolume createRegularVolume(Device &device, const RegularVolumeSettings &settings)
-{
-    auto handle = ospNewVolume("structuredRegular");
-    auto volume = wrapObjectHandleAs<RegularVolume>(device, handle);
+    auto ids = IdGenerator<std::int32_t>();
 
-    setObjectParam(handle, "data", settings.data);
-    setObjectParam(handle, "cellCentered", settings.voxelType == VoxelType::CellCentered);
-    setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
-    setObjectParam(handle, "background", settings.background);
+    CHECK_EQ(ids.next(), 0);
+    CHECK_EQ(ids.next(), 1);
 
-    commitObject(handle);
+    ids.recycle(0);
+    CHECK_EQ(ids.next(), 0);
 
-    return volume;
+    ids.recycle(1);
+    CHECK_EQ(ids.next(), 1);
 }
+
+TEST_CASE("Limits")
+{
+    auto ids = IdGenerator<std::uint8_t>();
+
+    for (auto i = 0; i < 255; ++i)
+    {
+        ids.next();
+    }
+
+    CHECK_THROWS_AS(ids.next(), std::out_of_range);
+
+    ids.recycle(0);
+    CHECK_EQ(ids.next(), 0);
 }

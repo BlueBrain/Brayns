@@ -25,6 +25,7 @@
 #include <set>
 
 #include "Data.h"
+#include "Device.h"
 #include "ImageOperation.h"
 #include "Object.h"
 
@@ -55,12 +56,11 @@ struct Accumulation
 
 struct FramebufferSettings
 {
-    std::size_t width;
-    std::size_t height;
+    Size2 resolution;
     FramebufferFormat format = FramebufferFormat::Srgba8;
     std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
     std::optional<Accumulation> accumulation = std::nullopt;
-    std::span<ImageOperation> operations = {};
+    std::optional<Data<ImageOperation>> operations = std::nullopt;
 };
 
 class Framebuffer : public Managed<OSPFrameBuffer>
@@ -74,11 +74,5 @@ public:
     float getVariance();
 };
 
-template<>
-struct ObjectReflector<Framebuffer>
-{
-    using Settings = FramebufferSettings;
-
-    static OSPFrameBuffer createHandle(OSPDevice device, const Settings &settings);
-};
+Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings);
 }

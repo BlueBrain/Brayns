@@ -71,23 +71,23 @@ void setMaterialParam(OSPMaterial handle, const char *id, const MaterialField<T>
 
 namespace brayns
 {
-OSPMaterial ObjectReflector<AmbientOcclusionMaterial>::createHandle(OSPDevice device, const Settings &settings)
+AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings)
 {
     auto handle = ospNewMaterial("obj");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto material = wrapObjectHandleAs<AoMaterial>(device, handle);
 
     setMaterialParam(handle, "kd", settings.diffuse);
     setMaterialParam(handle, "d", settings.opacity);
 
     commitObject(handle);
 
-    return handle;
+    return material;
 }
 
-OSPMaterial ObjectReflector<ScivisMaterial>::createHandle(OSPDevice device, const Settings &settings)
+ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings &settings)
 {
     auto handle = ospNewMaterial("obj");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto material = wrapObjectHandleAs<ScivisMaterial>(device, handle);
 
     setMaterialParam(handle, "kd", settings.diffuse);
     setMaterialParam(handle, "d", settings.opacity);
@@ -97,13 +97,13 @@ OSPMaterial ObjectReflector<ScivisMaterial>::createHandle(OSPDevice device, cons
 
     commitObject(handle);
 
-    return handle;
+    return material;
 }
 
-OSPMaterial ObjectReflector<PrincipledMaterial>::createHandle(OSPDevice device, const Settings &settings)
+PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMaterialSettings &settings)
 {
     auto handle = ospNewMaterial("principled");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto material = wrapObjectHandleAs<PrincipledMaterial>(device, handle);
 
     setMaterialParam(handle, "baseColor", settings.baseColor);
     setMaterialParam(handle, "edgeColor", settings.edgeColor);
@@ -137,6 +137,6 @@ OSPMaterial ObjectReflector<PrincipledMaterial>::createHandle(OSPDevice device, 
 
     commitObject(handle);
 
-    return handle;
+    return material;
 }
 }

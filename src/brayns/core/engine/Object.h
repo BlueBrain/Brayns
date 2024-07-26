@@ -21,14 +21,18 @@
 
 #pragma once
 
-#include <algorithm>
 #include <concepts>
-#include <string>
+#include <optional>
+#include <type_traits>
+#include <utility>
+#include <variant>
 
 #include <ospray/ospray_cpp.h>
 #include <ospray/ospray_cpp/ext/rkcommon.h>
 
 #include <brayns/core/utils/Math.h>
+
+#include "Device.h"
 
 namespace brayns
 {
@@ -37,26 +41,20 @@ class Object
 public:
     using Handle = OSPObject;
 
-    explicit Object(Handle handle):
+    explicit Object(Handle handle = nullptr):
         _handle(handle)
     {
     }
 
     ~Object()
     {
-        if (_handle)
-        {
-            ospRelease(_handle);
-        }
+        decrementRefCount();
     }
 
     Object(const Object &other):
         _handle(other._handle)
     {
-        if (_handle)
-        {
-            ospRetain(_handle);
-        }
+        incrementRefCount();
     }
 
     Object(Object &&other) noexcept:
@@ -66,18 +64,9 @@ public:
 
     Object &operator=(const Object &other)
     {
-        if (_handle)
-        {
-            ospRelease(_handle);
-        }
-
+        decrementRefCount();
         _handle = other._handle;
-
-        if (_handle)
-        {
-            ospRetain(_handle);
-        }
-
+        incrementRefCount();
         return *this;
     }
 
@@ -100,11 +89,28 @@ public:
     template<std::derived_from<Object> T>
     T as() const
     {
+        incrementRefCount();
         return T(static_cast<typename T::Handle>(_handle));
     }
 
 private:
     Handle _handle;
+
+    void incrementRefCount() const
+    {
+        if (_handle)
+        {
+            ospRetain(_handle);
+        }
+    }
+
+    void decrementRefCount() const
+    {
+        if (_handle)
+        {
+            ospRelease(_handle);
+        }
+    }
 };
 
 template<std::convertible_to<OSPObject> HandleType>
@@ -113,7 +119,7 @@ class Managed : public Object
 public:
     using Handle = HandleType;
 
-    explicit Managed(Handle handle):
+    explicit Managed(Handle handle = nullptr):
         Object(handle)
     {
     }
@@ -123,6 +129,23 @@ public:
         return static_cast<Handle>(Object::getHandle());
     }
 };
+
+inline void checkObjectHandle(Device &device, OSPObject handle)
+{
+    device.throwIfError();
+
+    if (handle == nullptr)
+    {
+        throw DeviceException(OSP_UNKNOWN_ERROR, "Null object returned without error");
+    }
+}
+
+template<std::derived_from<Object> T>
+T wrapObjectHandleAs(Device &device, typename T::Handle handle)
+{
+    checkObjectHandle(device, handle);
+    return T(handle);
+}
 
 inline Box3 getObjectBounds(OSPObject handle)
 {
@@ -148,40 +171,60 @@ constexpr auto dataTypeOf = ospray::OSPTypeFor<T>::value;
 template<typename T>
 concept OsprayDataType = (dataTypeOf<T> != OSP_UNKNOWN);
 
-template<OsprayDataType T>
+template<typename T>
+struct ObjectParamReflector;
+
+template<typename T>
+concept ObjectParam =
+    std::is_void_v<decltype(ObjectParamReflector<T>::set(OSPObject(), "", std::declval<const T &>()))>;
+
+template<ObjectParam T>
 void setObjectParam(OSPObject handle, const char *id, const T &value)
 {
-    constexpr auto type = ospray::OSPTypeFor<T>::value;
-    ospSetParam(handle, id, type, &value);
+    ObjectParamReflector<T>::set(handle, id, value);
 }
 
-inline void throwLastDeviceErrorIfNull(OSPDevice device, OSPObject object)
+template<OsprayDataType T>
+struct ObjectParamReflector<T>
 {
-    if (object != nullptr)
+    static void set(OSPObject handle, const char *id, const T &value)
     {
-        return;
+        constexpr auto type = dataTypeOf<T>;
+        ospSetParam(handle, id, type, &value);
     }
+};
 
-    const auto *message = ospDeviceGetLastErrorMsg(device);
+template<ObjectParam T>
+struct ObjectParamReflector<std::optional<T>>
+{
+    static void set(OSPObject handle, const char *id, const std::optional<T> &value)
+    {
+        if (!value)
+        {
+            removeObjectParam(handle, id);
+            return;
+        }
+        setObjectParam(handle, id, *value);
+    }
+};
 
-    throw std::runtime_error(message);
-}
+template<ObjectParam... Ts>
+struct ObjectParamReflector<std::variant<Ts...>>
+{
+    static void set(OSPObject handle, const char *id, const std::variant<Ts...> &values)
+    {
+        std::visit([=](const auto &value) { setObjectParam(handle, id, value); }, values);
+    }
+};
 
-template<typename T>
-struct ObjectReflector;
-
-template<typename T>
-concept ReflectedObjectSettings = requires { typename ObjectReflector<T>::Settings; };
-
-template<ReflectedObjectSettings T>
-using SettingsOf = typename ObjectReflector<T>::Settings;
-
-template<typename T>
-concept ReflectorObjectHandle =
-    requires(OSPDevice device, SettingsOf<T> settings) { T(ObjectReflector<T>::createHandle(device, settings)); };
-
-template<typename T>
-concept ReflectedObject = ReflectedObjectSettings<T> && ReflectorObjectHandle<T>;
+template<>
+struct ObjectParamReflector<std::monostate>
+{
+    static void set(OSPObject handle, const char *id, std::monostate)
+    {
+        removeObjectParam(handle, id);
+    }
+};
 }
 
 namespace ospray

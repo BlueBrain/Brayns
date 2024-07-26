@@ -21,23 +21,29 @@
 
 #pragma once
 
+#include <optional>
+#include <variant>
+
 #include "Data.h"
+#include "Device.h"
 #include "Geometry.h"
 #include "Object.h"
 
 namespace brayns
 {
-struct PrimitiveMaterials
+using IndexInRenderer = std::uint32_t;
+
+struct Materials
 {
-    std::span<std::uint32_t> rendererIndices;
-    std::span<Color4> colors = {};
-    std::span<std::uint8_t> indices = {};
+    std::variant<IndexInRenderer, Data<IndexInRenderer>> values;
+    std::variant<std::monostate, Color4, Data<Color4>> colors = {};
+    std::optional<Data<std::uint8_t>> indices = std::nullopt;
 };
 
 struct GeometricModelSettings
 {
     Geometry geometry;
-    PrimitiveMaterials materials;
+    Materials materials;
     bool invertedNormals = false;
     std::uint32_t id = std::uint32_t(-1);
 };
@@ -47,39 +53,9 @@ class GeometricModel : public Managed<OSPGeometricModel>
 public:
     using Managed::Managed;
 
-    void setMaterials(const PrimitiveMaterials &materials);
+    void setMaterials(const Materials &materials);
     void invertNormals(bool inverted);
 };
 
-template<>
-struct ObjectReflector<GeometricModel>
-{
-    using Settings = GeometricModelSettings;
-
-    static OSPGeometricModel createHandle(OSPDevice device, const Settings &settings);
-};
-
-struct ClippingModelSettings
-{
-    Geometry geometry;
-    bool invertedNormals = false;
-    std::uint32_t id = std::uint32_t(-1);
-};
-
-class ClippingModel : public Managed<OSPGeometricModel>
-{
-public:
-    using Managed::Managed;
-
-    void invertNormals(bool inverted);
-};
-
-template<>
-struct ObjectReflector<ClippingModel>
-{
-    using Settings = ClippingModelSettings;
-
-    static OSPGeometricModel createHandle(OSPDevice device, const Settings &settings);
-};
-
+GeometricModel createGeometricModel(Device &device, const GeometricModelSettings &settings);
 }

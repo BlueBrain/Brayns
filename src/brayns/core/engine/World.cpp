@@ -29,10 +29,39 @@ Box3 Group::getBounds() const
     return getObjectBounds(handle);
 }
 
+Group createGroup(Device &device, const GroupSettings &settings)
+{
+    auto handle = ospNewGroup();
+    auto group = wrapObjectHandleAs<Group>(device, handle);
+
+    setObjectParam(handle, "geometry", settings.geometries);
+    setObjectParam(handle, "clippingGeometry", settings.clippingGeometries);
+    setObjectParam(handle, "volume", settings.volumes);
+    setObjectParam(handle, "light", settings.lights);
+
+    commitObject(handle);
+
+    return group;
+}
+
 Box3 Instance::getBounds() const
 {
     auto handle = getHandle();
     return getObjectBounds(handle);
+}
+
+Instance createInstance(Device &device, const InstanceSettings &settings)
+{
+    auto handle = ospNewInstance();
+    auto instance = wrapObjectHandleAs<Instance>(device, handle);
+
+    setObjectParam(handle, "group", settings.group);
+    setObjectParam(handle, "transform", toAffine(settings.transform));
+    setObjectParam(handle, "id", settings.id);
+
+    commitObject(handle);
+
+    return instance;
 }
 
 Box3 World::getBounds() const
@@ -41,44 +70,15 @@ Box3 World::getBounds() const
     return getObjectBounds(handle);
 }
 
-OSPGroup ObjectReflector<Group>::createHandle(OSPDevice device, const Settings &settings)
-{
-    auto handle = ospNewGroup();
-    throwLastDeviceErrorIfNull(device, handle);
-
-    setObjectDataIfNotEmpty(handle, "geometry", settings.geometries);
-    setObjectDataIfNotEmpty(handle, "volume", settings.volumes);
-    setObjectDataIfNotEmpty(handle, "clippingGeometry", settings.clippingGeometries);
-    setObjectDataIfNotEmpty(handle, "light", settings.lights);
-
-    commitObject(handle);
-
-    return handle;
-}
-
-OSPInstance ObjectReflector<Instance>::createHandle(OSPDevice device, const Settings &settings)
-{
-    auto handle = ospNewInstance();
-    throwLastDeviceErrorIfNull(device, handle);
-
-    setObjectParam(handle, "group", settings.group);
-    setObjectParam(handle, "transform", toAffine(settings.transform));
-    setObjectParam(handle, "id", settings.id);
-
-    commitObject(handle);
-
-    return handle;
-}
-
-OSPWorld ObjectReflector<World>::createHandle(OSPDevice device, const Settings &settings)
+World createWorld(Device &device, const WorldSettings &settings)
 {
     auto handle = ospNewWorld();
-    throwLastDeviceErrorIfNull(device, handle);
+    auto world = wrapObjectHandleAs<World>(device, handle);
 
-    setObjectData(handle, "instance", settings.instances);
+    setObjectParam(handle, "instance", settings.instances);
 
     commitObject(handle);
 
-    return handle;
+    return world;
 }
 }

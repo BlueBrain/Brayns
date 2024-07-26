@@ -21,44 +21,46 @@
 
 #pragma once
 
+#include <ospray/ospray.h>
+
 #include <memory>
-#include <optional>
+#include <stdexcept>
 
 #include <brayns/core/utils/Logger.h>
 
-#include "Camera.h"
-#include "Framebuffer.h"
-#include "GeometricModel.h"
-#include "Geometry.h"
-#include "ImageOperation.h"
-#include "Light.h"
-#include "Material.h"
-#include "Object.h"
-#include "Render.h"
-#include "Renderer.h"
-#include "Texture.h"
-#include "TransferFunction.h"
-#include "Volume.h"
-#include "VolumetricModel.h"
-#include "World.h"
-
 namespace brayns
 {
+class DeviceException : public std::runtime_error
+{
+public:
+    explicit DeviceException(OSPError error, const char *message);
+
+    OSPError getError() const;
+
+private:
+    OSPError _error;
+};
+
+class DeviceErrorHandler
+{
+public:
+    explicit DeviceErrorHandler(Logger &logger);
+
+    void handle(DeviceException e);
+    void throwIfError();
+
+private:
+    Logger *_logger;
+    std::optional<DeviceException> _exception;
+};
+
 class Device
 {
 public:
-    explicit Device(OSPDevice handle);
+    explicit Device(OSPDevice device, std::unique_ptr<DeviceErrorHandler> handler);
 
     OSPDevice getHandle() const;
-    Future render(const Context &context);
-    std::optional<PickResult> pick(const PickSettings &settings);
-
-    template<ReflectedObjectSettings T>
-    T create(const SettingsOf<T> &settings)
-    {
-        auto handle = ObjectReflector<T>::createHandle(_handle.get(), settings);
-        return T(handle);
-    }
+    void throwIfError();
 
 private:
     struct Deleter
@@ -66,7 +68,8 @@ private:
         void operator()(OSPDevice device) const;
     };
 
-    std::unique_ptr<osp::Device, Deleter> _handle;
+    std::unique_ptr<osp::Device, Deleter> _device;
+    std::unique_ptr<DeviceErrorHandler> _handler;
 };
 
 Device createDevice(Logger &logger);

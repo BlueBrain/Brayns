@@ -25,6 +25,7 @@
 #include <variant>
 
 #include "Data.h"
+#include "Device.h"
 #include "Material.h"
 #include "Object.h"
 #include "Texture.h"
@@ -44,13 +45,13 @@ using Background = std::variant<Color4, Texture2D>;
 
 struct RendererSettings
 {
+    Data<Material> materials;
     std::size_t pixelSamples = 1;
     std::size_t maxRayRecursionDepth = 20;
     float minSampleContribution = 0.001F;
     float varianceThreshold = 0.0F;
     Background background = Color4(0.0F, 0.0F, 0.0F, 0.0F);
     std::optional<Texture2D> maxDepth = std::nullopt;
-    std::span<Material> materials = {};
     PixelFilter pixelFilter = PixelFilter::Gauss;
 };
 
@@ -60,32 +61,26 @@ public:
     using Managed::Managed;
 };
 
-struct AmbientOcclusionRendererSettings
+struct AoRendererSettings
 {
-    RendererSettings base = {};
+    RendererSettings base;
     std::size_t aoSamples = 1;
     float aoDistance = 1e20F;
     float aoIntensity = 1.0F;
     float volumeSamplingRate = 1.0F;
 };
 
-class AmbientOcclusionRenderer : public Renderer
+class AoRenderer : public Renderer
 {
 public:
     using Renderer::Renderer;
 };
 
-template<>
-struct ObjectReflector<AmbientOcclusionRenderer>
-{
-    using Settings = AmbientOcclusionRendererSettings;
-
-    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
-};
+AoRenderer createAoRenderer(Device &device, const AoRendererSettings &settings);
 
 struct ScivisRendererSettings
 {
-    RendererSettings base = {};
+    RendererSettings base;
     bool shadows = false;
     std::size_t aoSamples = 0;
     float aoDistance = 1e20F;
@@ -99,17 +94,11 @@ public:
     using Renderer::Renderer;
 };
 
-template<>
-struct ObjectReflector<ScivisRenderer>
-{
-    using Settings = ScivisRendererSettings;
-
-    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
-};
+ScivisRenderer createScivisRenderer(Device &device, const ScivisRendererSettings &settings);
 
 struct PathTracerSettings
 {
-    RendererSettings base = {};
+    RendererSettings base;
 };
 
 class PathTracer : public Renderer
@@ -118,11 +107,5 @@ public:
     using Renderer::Renderer;
 };
 
-template<>
-struct ObjectReflector<PathTracer>
-{
-    using Settings = PathTracerSettings;
-
-    static OSPRenderer createHandle(OSPDevice device, const Settings &settings);
-};
+PathTracer createPathTracer(Device &device, const PathTracerSettings &settings);
 }

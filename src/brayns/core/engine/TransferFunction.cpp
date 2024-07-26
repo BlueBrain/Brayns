@@ -23,17 +23,25 @@
 
 namespace brayns
 {
-OSPTransferFunction ObjectReflector<LinearTransferFunction>::createHandle(OSPDevice device, const Settings &settings)
+LinearTransferFunction createLinearTransferFunction(Device &device, const LinearTransferFunctionSettings &settings)
 {
     auto handle = ospNewTransferFunction("piecewiseLinear");
-    throwLastDeviceErrorIfNull(device, handle);
+    auto transferFunction = wrapObjectHandleAs<LinearTransferFunction>(device, handle);
 
-    setObjectData(handle, "color", settings.colors);
-    setObjectData(handle, "opacity", settings.opacities);
     setObjectParam(handle, "value", settings.scalarRange);
+
+    auto stride = static_cast<std::ptrdiff_t>(sizeof(Color4));
+
+    auto colorCount = settings.colors.getTotalItemCount();
+    auto colors = createDataView<Color3>(settings.colors, {colorCount, stride});
+    setObjectParam(handle, "color", colors);
+
+    auto offset = sizeof(Color3);
+    auto opacities = createDataView<float>(settings.colors, {colorCount, stride, offset});
+    setObjectParam(handle, "opacity", opacities);
 
     commitObject(handle);
 
-    return handle;
+    return transferFunction;
 }
 }

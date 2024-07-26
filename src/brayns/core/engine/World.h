@@ -22,6 +22,7 @@
 #pragma once
 
 #include "Data.h"
+#include "Device.h"
 #include "GeometricModel.h"
 #include "Light.h"
 #include "Object.h"
@@ -31,10 +32,10 @@ namespace brayns
 {
 struct GroupSettings
 {
-    std::span<GeometricModel> geometries = {};
-    std::span<VolumetricModel> volumes = {};
-    std::span<ClippingModel> clippingGeometries = {};
-    std::span<Light> lights = {};
+    std::optional<Data<GeometricModel>> geometries = std::nullopt;
+    std::optional<Data<GeometricModel>> clippingGeometries = std::nullopt;
+    std::optional<Data<VolumetricModel>> volumes = std::nullopt;
+    std::optional<Data<Light>> lights = std::nullopt;
 };
 
 class Group : public Managed<OSPGroup>
@@ -45,13 +46,7 @@ public:
     Box3 getBounds() const;
 };
 
-template<>
-struct ObjectReflector<Group>
-{
-    using Settings = GroupSettings;
-
-    static OSPGroup createHandle(OSPDevice device, const Settings &settings);
-};
+Group createGroup(Device &device, const GroupSettings &settings);
 
 struct InstanceSettings
 {
@@ -68,17 +63,11 @@ public:
     Box3 getBounds() const;
 };
 
-template<>
-struct ObjectReflector<Instance>
-{
-    using Settings = InstanceSettings;
-
-    static OSPInstance createHandle(OSPDevice device, const Settings &settings);
-};
+Instance createInstance(Device &device, const InstanceSettings &settings);
 
 struct WorldSettings
 {
-    std::span<Instance> instances;
+    std::optional<Data<Instance>> instances = std::nullopt;
 };
 
 class World : public Managed<OSPWorld>
@@ -89,11 +78,5 @@ public:
     Box3 getBounds() const;
 };
 
-template<>
-struct ObjectReflector<World>
-{
-    using Settings = WorldSettings;
-
-    static OSPWorld createHandle(OSPDevice device, const Settings &settings);
-};
+World createWorld(Device &device, const WorldSettings &settings);
 }

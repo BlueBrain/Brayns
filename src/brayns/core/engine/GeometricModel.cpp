@@ -25,17 +25,17 @@ namespace
 {
 using namespace brayns;
 
-void setMaterialParams(OSPGeometricModel handle, const PrimitiveMaterials &materials)
+void setMaterialParams(OSPGeometricModel handle, const Materials &materials)
 {
-    setObjectData(handle, "material", materials.rendererIndices);
-    setObjectDataIfNotEmpty(handle, "color", materials.colors);
-    setObjectDataIfNotEmpty(handle, "index", materials.indices);
+    setObjectParam(handle, "material", materials.values);
+    setObjectParam(handle, "color", materials.colors);
+    setObjectParam(handle, "index", materials.indices);
 }
 }
 
 namespace brayns
 {
-void GeometricModel::setMaterials(const PrimitiveMaterials &materials)
+void GeometricModel::setMaterials(const Materials &materials)
 {
     auto handle = getHandle();
     setMaterialParams(handle, materials);
@@ -49,10 +49,10 @@ void GeometricModel::invertNormals(bool invert)
     commitObject(handle);
 }
 
-OSPGeometricModel ObjectReflector<GeometricModel>::createHandle(OSPDevice device, const Settings &settings)
+GeometricModel createGeometricModel(Device &device, const GeometricModelSettings &settings)
 {
     auto handle = ospNewGeometricModel();
-    throwLastDeviceErrorIfNull(device, handle);
+    auto model = wrapObjectHandleAs<GeometricModel>(device, handle);
 
     setObjectParam(handle, "geometry", settings.geometry);
     setMaterialParams(handle, settings.materials);
@@ -61,27 +61,6 @@ OSPGeometricModel ObjectReflector<GeometricModel>::createHandle(OSPDevice device
 
     commitObject(handle);
 
-    return handle;
-}
-
-void ClippingModel::invertNormals(bool invert)
-{
-    auto handle = getHandle();
-    setObjectParam(handle, "invertNormals", invert);
-    commitObject(handle);
-}
-
-OSPGeometricModel ObjectReflector<ClippingModel>::createHandle(OSPDevice device, const Settings &settings)
-{
-    auto handle = ospNewGeometricModel();
-    throwLastDeviceErrorIfNull(device, handle);
-
-    setObjectParam(handle, "geometry", settings.geometry);
-    setObjectParam(handle, "invertNormals", settings.invertedNormals);
-    setObjectParam(handle, "id", settings.id);
-
-    commitObject(handle);
-
-    return handle;
+    return model;
 }
 }
