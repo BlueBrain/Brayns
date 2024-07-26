@@ -42,6 +42,8 @@ void setBackground(OSPRenderer handle, const Background &background)
 
 void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 {
+    setObjectParam(handle, "material", settings.materials);
+
     setObjectParam(handle, "pixelSamples", static_cast<int>(settings.pixelSamples));
     setObjectParam(handle, "maxPathLength", static_cast<int>(settings.maxRayRecursionDepth));
     setObjectParam(handle, "minContribution", settings.minSampleContribution);
@@ -53,7 +55,6 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
         setObjectParam(handle, "maxDepth", *settings.maxDepth);
     }
 
-    setObjectParam(handle, "material", settings.materials);
     setObjectParam(handle, "pixelFilter", static_cast<OSPPixelFilterType>(settings.pixelFilter));
 }
 }

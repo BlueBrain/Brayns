@@ -36,20 +36,17 @@ void setMeshParams(OSPGeometry handle, const MeshSettings &settings)
 }
 
 // TODO remove when OSPRay exposes sphere.position_radius to match embree internal layout
-void setInterleavedSpheresParams(OSPGeometry handle, const Data<Vector4> &positionsAndRadii)
+void setInterleavedSpheresParams(OSPGeometry handle, const Data<Vector4> &spheres)
 {
-    constexpr auto stride = sizeof(Vector4);
+    constexpr auto stride = static_cast<std::ptrdiff_t>(sizeof(Vector4));
 
-    auto itemCount = positionsAndRadii.getTotalItemCount();
+    auto itemCount = spheres.getTotalItemCount();
 
-    auto positionOffset = std::size_t(0);
-    auto positionRegion = DataRegion{itemCount, stride, positionOffset};
-    auto positionData = createDataView<Vector3>(positionsAndRadii, positionRegion);
+    auto positionData = createDataView<Vector3>(spheres, {itemCount, stride});
     setObjectParam(handle, "sphere.position", positionData);
 
-    auto radiusOffset = sizeof(Vector3);
-    auto radiusRegion = DataRegion{itemCount, stride, radiusOffset};
-    auto radiusData = createDataView<float>(positionsAndRadii, radiusRegion);
+    auto offset = sizeof(Vector3);
+    auto radiusData = createDataView<float>(spheres, {itemCount, stride, offset});
     setObjectParam(handle, "sphere.radius", radiusData);
 }
 
@@ -151,7 +148,7 @@ Spheres createSpheres(Device &device, const SphereSettings &settings)
     auto handle = ospNewGeometry("sphere");
     auto spheres = wrapObjectHandleAs<Spheres>(device, handle);
 
-    setInterleavedSpheresParams(handle, settings.positionsAndRadii);
+    setInterleavedSpheresParams(handle, settings.spheres);
     setObjectParam(handle, "sphere.texcoord", settings.uvs);
     setObjectParam(handle, "type", OSP_SPHERE);
 
@@ -165,7 +162,7 @@ Discs createDiscs(Device &device, const DiscSettings &settings)
     auto handle = ospNewGeometry("sphere");
     auto discs = wrapObjectHandleAs<Discs>(device, handle);
 
-    setInterleavedSpheresParams(handle, settings.positionsAndRadii);
+    setInterleavedSpheresParams(handle, settings.spheres);
     setObjectParam(handle, "sphere.texcoord", settings.uvs);
 
     if (settings.normals)
@@ -188,10 +185,10 @@ Cylinders createCylinders(Device &device, const CylinderSettings &settings)
     auto handle = ospNewGeometry("curve");
     auto cylinders = wrapObjectHandleAs<Cylinders>(device, handle);
 
-    setObjectParam(handle, "vertex.position_radius", settings.positionsAndRadii);
+    setObjectParam(handle, "vertex.position_radius", settings.spheres);
     setObjectParam(handle, "vertex.texcoord", settings.uvs);
     setObjectParam(handle, "vertex.color", settings.colors);
-    setObjectParam(handle, "indices", settings.indices);
+    setObjectParam(handle, "index", settings.indices);
 
     setObjectParam(handle, "type", OSP_DISJOINT);
     setObjectParam(handle, "basis", OSP_LINEAR);
@@ -211,10 +208,10 @@ Curve createCurve(Device &device, const CurveSettings &settings)
     auto handle = ospNewGeometry("curve");
     auto curve = wrapObjectHandleAs<Curve>(device, handle);
 
-    setObjectParam(handle, "vertex.position_radius", settings.positionsAndRadii);
+    setObjectParam(handle, "vertex.position_radius", settings.spheres);
     setObjectParam(handle, "vertex.texcoord", settings.uvs);
     setObjectParam(handle, "vertex.color", settings.colors);
-    setObjectParam(handle, "indices", settings.indices);
+    setObjectParam(handle, "index", settings.indices);
 
     std::visit([=](const auto &value) { setCurveType(handle, value); }, settings.type);
     std::visit([=](const auto &value) { setCurveBasis(handle, value); }, settings.basis);

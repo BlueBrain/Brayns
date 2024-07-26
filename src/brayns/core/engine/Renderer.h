@@ -45,13 +45,13 @@ using Background = std::variant<Color4, Texture2D>;
 
 struct RendererSettings
 {
+    Data<Material> materials;
     std::size_t pixelSamples = 1;
     std::size_t maxRayRecursionDepth = 20;
     float minSampleContribution = 0.001F;
     float varianceThreshold = 0.0F;
     Background background = Color4(0.0F, 0.0F, 0.0F, 0.0F);
     std::optional<Texture2D> maxDepth = std::nullopt;
-    Data<Material> materials;
     PixelFilter pixelFilter = PixelFilter::Gauss;
 };
 

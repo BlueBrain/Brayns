@@ -83,7 +83,7 @@ QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings);
 
 struct SphereSettings
 {
-    Data<Vector4> positionsAndRadii;
+    Data<Vector4> spheres;
     std::optional<Data<Vector2>> uvs = std::nullopt;
 };
 
@@ -97,7 +97,7 @@ Spheres createSpheres(Device &device, const SphereSettings &settings);
 
 struct DiscSettings
 {
-    Data<Vector4> positionsAndRadii;
+    Data<Vector4> spheres;
     std::optional<Data<Vector3>> normals = std::nullopt;
     std::optional<Data<Vector2>> uvs = std::nullopt;
 };
@@ -112,7 +112,7 @@ Discs createDiscs(Device &device, const DiscSettings &settings);
 
 struct CylinderSettings
 {
-    Data<Vector4> positionsAndRadii;
+    Data<Vector4> spheres;
     Data<std::uint32_t> indices;
     std::optional<Data<Color4>> colors = std::nullopt;
     std::optional<Data<Vector2>> uvs = std::nullopt;
@@ -168,7 +168,7 @@ using CurveBasis = std::variant<LinearCurve, BezierCurve, BsplineCurve, HermiteC
 
 struct CurveSettings
 {
-    Data<Vector4> positionsAndRadii;
+    Data<Vector4> spheres;
     Data<std::uint32_t> indices;
     std::optional<Data<Color4>> colors = std::nullopt;
     std::optional<Data<Vector2>> uvs = std::nullopt;

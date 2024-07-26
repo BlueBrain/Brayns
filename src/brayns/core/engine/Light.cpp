@@ -65,7 +65,7 @@ SphereLight createSphereLight(Device &device, const SphereLightSettings &setting
     return light;
 }
 
-SpotLight createSphereLight(Device &device, const SpotLightSettings &settings)
+SpotLight createSpotLight(Device &device, const SpotLightSettings &settings)
 {
     auto handle = ospNewLight("spot");
     auto light = wrapObjectHandleAs<SpotLight>(device, handle);
@@ -107,8 +107,8 @@ CylinderLight createCylinderLight(Device &device, const CylinderLightSettings &s
 
     setLightParams(handle, settings.base);
 
-    setObjectParam(handle, "position1", settings.start);
-    setObjectParam(handle, "position2", settings.end);
+    setObjectParam(handle, "position0", settings.start);
+    setObjectParam(handle, "position1", settings.end);
     setObjectParam(handle, "radius", settings.radius);
 
     commitObject(handle);

@@ -28,9 +28,17 @@ LinearTransferFunction createLinearTransferFunction(Device &device, const Linear
     auto handle = ospNewTransferFunction("piecewiseLinear");
     auto transferFunction = wrapObjectHandleAs<LinearTransferFunction>(device, handle);
 
-    setObjectParam(handle, "color", settings.colors);
-    setObjectParam(handle, "opacity", settings.opacities);
     setObjectParam(handle, "value", settings.scalarRange);
+
+    auto stride = static_cast<std::ptrdiff_t>(sizeof(Color4));
+
+    auto colorCount = settings.colors.getTotalItemCount();
+    auto colors = createDataView<Color3>(settings.colors, {colorCount, stride});
+    setObjectParam(handle, "color", colors);
+
+    auto offset = sizeof(Color3);
+    auto opacities = createDataView<float>(settings.colors, {colorCount, stride, offset});
+    setObjectParam(handle, "opacity", opacities);
 
     commitObject(handle);
 

@@ -25,7 +25,7 @@ namespace brayns
 {
 Texture2D createTexture2D(Device &device, const Texture2DSettings &settings)
 {
-    auto handle = ospNewTexture("texture2D");
+    auto handle = ospNewTexture("texture2d");
     auto texture = wrapObjectHandleAs<Texture2D>(device, handle);
 
     setObjectParam(handle, "format", static_cast<OSPTextureFormat>(settings.format));

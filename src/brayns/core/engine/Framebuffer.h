@@ -56,8 +56,7 @@ struct Accumulation
 
 struct FramebufferSettings
 {
-    std::size_t width;
-    std::size_t height;
+    Size2 resolution;
     FramebufferFormat format = FramebufferFormat::Srgba8;
     std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
     std::optional<Accumulation> accumulation = std::nullopt;

@@ -49,8 +49,8 @@ float Framebuffer::getVariance()
 
 Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings)
 {
-    auto width = static_cast<int>(settings.width);
-    auto height = static_cast<int>(settings.height);
+    auto width = static_cast<int>(settings.resolution[0]);
+    auto height = static_cast<int>(settings.resolution[1]);
     auto format = static_cast<OSPFrameBufferFormat>(settings.format);
     auto channels = static_cast<std::uint32_t>(OSP_FB_NONE);
     auto accumulation = settings.accumulation.has_value();

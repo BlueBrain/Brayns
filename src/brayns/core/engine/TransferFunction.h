@@ -35,9 +35,8 @@ public:
 
 struct LinearTransferFunctionSettings
 {
-    Data<Color3> colors;
-    std::optional<Data<float>> opacities;
     Box1 scalarRange;
+    Data<Color4> colors;
 };
 
 class LinearTransferFunction : public TransferFunction
