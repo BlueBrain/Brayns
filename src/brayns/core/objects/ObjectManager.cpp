@@ -86,7 +86,7 @@ const Metadata &ObjectManager::getMetadata(ObjectId id) const
 {
     auto i = getObjectIterator(_objects, id);
 
-    return i->second.getMetadata();
+    return *i->second.getMetadata();
 }
 
 ObjectId ObjectManager::getId(const std::string &tag) const
@@ -105,7 +105,7 @@ void ObjectManager::remove(ObjectId id)
 {
     auto i = getObjectIterator(_objects, id);
 
-    auto &metadata = i->second.getMetadata();
+    auto &metadata = *i->second.getMetadata();
 
     const auto &tag = metadata.tag;
 
@@ -119,13 +119,26 @@ void ObjectManager::remove(ObjectId id)
     _objects.erase(i);
 }
 
-InvalidParams ObjectManager::invalidType(const ObjectManagerEntry &entry)
+void ObjectManager::clear()
 {
-    const auto &metadata = entry.getMetadata();
-    auto id = metadata.type;
+    _objects.clear();
+    _idsByTag.clear();
+    _ids = {};
+    disableNullId(_ids);
+}
+
+void ObjectManager::checkType(const ObjectManagerEntry &entry, const std::type_info &expected)
+{
+    if (entry.object.type() == expected)
+    {
+        return;
+    }
+
+    const auto &metadata = *entry.getMetadata();
+    auto id = metadata.id;
     const auto &type = metadata.type;
 
-    return InvalidParams(fmt::format("Invalid type for object with ID {} ('{}')", id, type));
+    throw InvalidParams(fmt::format("Invalid type '{}' for object with ID {}", id, type));
 }
 
 const ObjectManagerEntry &ObjectManager::getEntry(ObjectId id) const
@@ -137,7 +150,7 @@ const ObjectManagerEntry &ObjectManager::getEntry(ObjectId id) const
 
 void ObjectManager::addEntry(ObjectId id, ObjectManagerEntry entry)
 {
-    const auto &metadata = entry.getMetadata();
+    const auto &metadata = *entry.getMetadata();
     const auto &tag = metadata.tag;
 
     if (!tag.empty())

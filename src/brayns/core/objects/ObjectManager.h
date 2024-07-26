@@ -104,7 +104,7 @@ using GetUserObjectProperties = typename UserObjectReflector<T>::Type;
 struct ObjectManagerEntry
 {
     std::any object;
-    std::function<Metadata &()> getMetadata;
+    std::function<Metadata *()> getMetadata;
 };
 
 struct UserObjectSettings
@@ -123,19 +123,16 @@ public:
     const Metadata &getMetadata(ObjectId id) const;
     ObjectId getId(const std::string &tag) const;
     void remove(ObjectId id);
+    void clear();
 
     template<ValidUserObject T>
     const std::shared_ptr<T> &getShared(ObjectId id) const
     {
         auto &entry = getEntry(id);
-        auto &object = entry.object;
 
-        if (object.type() != typeid(T))
-        {
-            throw invalidType(entry);
-        }
+        checkType(entry, typeid(std::shared_ptr<T>));
 
-        return std::any_cast<std::shared_ptr<T>>(object);
+        return std::any_cast<const std::shared_ptr<T> &>(entry.object);
     }
 
     template<ValidUserObject T>
@@ -156,7 +153,7 @@ public:
             auto object = T{std::move(metadata), std::move(properties)};
             auto ptr = std::make_shared<T>(std::move(object));
 
-            auto entry = ObjectManagerEntry{ptr, [=] { return ptr->metadata; }};
+            auto entry = ObjectManagerEntry{ptr, [=] { return &ptr->metadata; }};
 
             addEntry(id, std::move(entry));
 
@@ -174,7 +171,7 @@ private:
     std::unordered_map<std::string, ObjectId> _idsByTag;
     IdGenerator<ObjectId> _ids;
 
-    static InvalidParams invalidType(const ObjectManagerEntry &entry);
+    static void checkType(const ObjectManagerEntry &entry, const std::type_info &expected);
 
     const ObjectManagerEntry &getEntry(ObjectId id) const;
     void addEntry(ObjectId id, ObjectManagerEntry entry);
