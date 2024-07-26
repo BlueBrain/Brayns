@@ -22,9 +22,9 @@
 #pragma once
 
 #include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/service/Service.h>
+#include <brayns/core/objects/ObjectManager.h>
 
 namespace brayns
 {
-void addCoreEndpoints(ApiBuilder &builder, Api &api, StopToken &token);
+void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects);
 }

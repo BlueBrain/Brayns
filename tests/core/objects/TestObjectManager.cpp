@@ -61,7 +61,7 @@ TEST_CASE("Create and remove objects")
     auto &another = objects.create<TestObject>({"type"}, {});
     CHECK_EQ(another.metadata.id, 2);
 
-    CHECK_EQ(objects.getIds(), std::vector<ObjectId>{1, 2});
+    CHECK_EQ(objects.getAllMetadata().size(), 2);
 
     CHECK_EQ(&objects.get<TestObject>(1), &object);
 
@@ -78,7 +78,7 @@ TEST_CASE("Create and remove objects")
 
     objects.clear();
 
-    CHECK(objects.getIds().empty());
+    CHECK(objects.getAllMetadata().empty());
 }
 
 TEST_CASE("Errors")
