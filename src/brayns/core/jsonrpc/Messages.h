@@ -21,7 +21,9 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
+#include <variant>
 
 #include <brayns/core/json/Json.h>
 
@@ -29,26 +31,26 @@
 
 namespace brayns
 {
-using JsonRpcId = std::variant<NullJson, int, std::string>;
+using JsonRpcId = std::variant<int, std::string>;
 
 inline std::string toString(const JsonRpcId &id)
 {
-    if (std::get_if<NullJson>(&id))
-    {
-        return "null";
-    }
-
     if (const auto *value = std::get_if<int>(&id))
     {
         return std::to_string(*value);
     }
 
-    return std::get<std::string>(id);
+    return fmt::format("'{}'", std::get<std::string>(id));
+}
+
+inline std::string toString(const std::optional<JsonRpcId> &id)
+{
+    return id ? toString(*id) : "null";
 }
 
 struct JsonRpcRequest
 {
-    JsonRpcId id;
+    std::optional<JsonRpcId> id;
     std::string method;
     JsonValue params;
     std::string binary = {};
@@ -61,7 +63,7 @@ struct JsonObjectReflector<JsonRpcRequest>
     {
         auto builder = JsonBuilder<JsonRpcRequest>();
         builder.constant("jsonrpc", "2.0");
-        builder.field("id", [](auto &object) { return &object.id; }).required(false);
+        builder.field("id", [](auto &object) { return &object.id; });
         builder.field("method", [](auto &object) { return &object.method; });
         builder.field("params", [](auto &object) { return &object.params; }).required(false);
         return builder.build();
@@ -110,7 +112,7 @@ struct JsonObjectReflector<JsonRpcError>
 
 struct JsonRpcErrorResponse
 {
-    JsonRpcId id;
+    std::optional<JsonRpcId> id;
     JsonRpcError error;
 };
 
@@ -124,19 +126,6 @@ struct JsonObjectReflector<JsonRpcErrorResponse>
         builder.field("id", [](auto &object) { return &object.id; });
         builder.field("error", [](auto &object) { return &object.error; });
         return builder.build();
-    }
-};
-}
-
-namespace fmt
-{
-template<>
-struct formatter<brayns::JsonRpcId> : formatter<string_view>
-{
-    template<typename FmtContext>
-    auto format(const brayns::JsonRpcId &id, FmtContext &context)
-    {
-        return formatter<string_view>::format(brayns::toString(id), context);
     }
 };
 }

@@ -22,15 +22,15 @@ from dataclasses import dataclass
 import json
 from typing import Any, TypeVar
 
-JsonRpcId = int | str | None
+JsonRpcId = int | str
 
 
 @dataclass
 class JsonRpcRequest:
-    id: JsonRpcId
     method: str
     params: Any = None
     binary: bytes = b""
+    id: JsonRpcId | None = None
 
 
 @dataclass
@@ -49,16 +49,19 @@ class JsonRpcError(Exception):
 
 @dataclass
 class JsonRpcErrorResponse:
-    id: JsonRpcId
+    id: JsonRpcId | None
     error: JsonRpcError
+
+
+Response = JsonRpcResponse | JsonRpcErrorResponse
 
 
 def serialize_request(request: JsonRpcRequest) -> dict[str, Any]:
     return {
         "jsonrpc": "2.0",
-        "id": request.id,
         "method": request.method,
         "params": request.params,
+        "id": request.id,
     }
 
 
@@ -95,7 +98,7 @@ def _get(message: dict[str, Any], key: str, t: type[T]) -> T:
     return value
 
 
-def _get_id(message: dict[str, Any]) -> JsonRpcId:
+def _get_id(message: dict[str, Any]) -> JsonRpcId | None:
     id = message.get("id")
 
     if id is None:
@@ -108,9 +111,15 @@ def _get_id(message: dict[str, Any]) -> JsonRpcId:
 
 
 def deserialize_result(message: dict[str, Any], binary: bytes = b"") -> JsonRpcResponse:
+    response_id = _get_id(message)
+
+    if response_id is None:
+        raise ValueError("Result responses must have an ID")
+
     return JsonRpcResponse(
-        id=_get_id(message),
+        id=response_id,
         result=message["result"],
+        binary=binary,
     )
 
 
@@ -127,7 +136,7 @@ def deserialize_error(message: dict[str, Any]) -> JsonRpcErrorResponse:
     )
 
 
-def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> JsonRpcResponse | JsonRpcErrorResponse:
+def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> Response:
     if "result" in message:
         return deserialize_result(message, binary)
 
@@ -140,12 +149,12 @@ def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> JsonRp
     return deserialize_error(message)
 
 
-def parse_text_response(data: str) -> JsonRpcResponse | JsonRpcErrorResponse:
+def parse_text_response(data: str) -> Response:
     message = json.loads(data)
     return deserialize_response(message)
 
 
-def parse_binary_response(data: bytes) -> JsonRpcResponse | JsonRpcErrorResponse:
+def parse_binary_response(data: bytes) -> Response:
     size = len(data)
 
     if size < 4:
@@ -162,7 +171,7 @@ def parse_binary_response(data: bytes) -> JsonRpcResponse | JsonRpcErrorResponse
     return deserialize_response(message, binary_part)
 
 
-def parse_response(data: bytes | str) -> JsonRpcResponse | JsonRpcErrorResponse:
+def parse_response(data: bytes | str) -> Response:
     if isinstance(data, bytes):
         return parse_binary_response(data)
 

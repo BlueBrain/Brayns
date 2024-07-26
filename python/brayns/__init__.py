@@ -28,21 +28,30 @@ The low level JSON-RPC API is also available using the instance directly.
 """
 
 from .version import VERSION
-from .network.connection import Connection, connect
-from .network.json_rpc import JsonRpcError, JsonRpcErrorResponse, JsonRpcId, JsonRpcRequest, JsonRpcResponse
+from .network.connection import Connection, connect, JsonRpcFuture
+from .network.json_rpc import (
+    JsonRpcError,
+    JsonRpcErrorResponse,
+    JsonRpcId,
+    JsonRpcRequest,
+    JsonRpcResponse,
+    Response,
+)
 from .network.websocket import ServiceUnavailable, WebSocketError
 
 __version__ = VERSION
 """Version tag of brayns Python package (major.minor.patch)."""
 
 __all__ = [
-    "Connection",
     "connect",
+    "Connection",
     "JsonRpcError",
     "JsonRpcErrorResponse",
+    "JsonRpcFuture",
     "JsonRpcId",
     "JsonRpcRequest",
     "JsonRpcResponse",
+    "Response",
     "ServiceUnavailable",
     "WebSocketError",
 ]

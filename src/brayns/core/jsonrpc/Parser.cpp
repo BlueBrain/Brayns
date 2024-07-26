@@ -106,7 +106,7 @@ std::string composeError(const JsonRpcErrorResponse &response)
     return stringifyToJson(response);
 }
 
-std::string composeError(const JsonRpcId &id, const JsonRpcException &e)
+std::string composeError(const std::optional<JsonRpcId> &id, const JsonRpcException &e)
 {
     return composeError({
         .id = id,

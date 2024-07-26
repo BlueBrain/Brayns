@@ -33,5 +33,5 @@ JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary);
 std::string composeAsText(const JsonRpcResponse &response);
 std::string composeAsBinary(const JsonRpcResponse &response);
 std::string composeError(const JsonRpcErrorResponse &response);
-std::string composeError(const JsonRpcId &id, const JsonRpcException &e);
+std::string composeError(const std::optional<JsonRpcId> &id, const JsonRpcException &e);
 }

@@ -22,13 +22,22 @@ import asyncio
 from logging import Logger
 from ssl import SSLContext
 from typing import Any, NamedTuple
-from .json_rpc import JsonRpcErrorResponse, JsonRpcId, JsonRpcRequest, JsonRpcResponse, compose_request, parse_response
+from .json_rpc import (
+    JsonRpcErrorResponse,
+    JsonRpcRequest,
+    JsonRpcResponse,
+    JsonRpcError,
+    compose_request,
+    parse_response,
+    JsonRpcId,
+    Response,
+)
 from .websocket import ServiceUnavailable, WebSocket, connect_websocket
 
 
 class JsonRpcBuffer:
     def __init__(self) -> None:
-        self._responses = dict[JsonRpcId, JsonRpcResponse | JsonRpcErrorResponse | None]()
+        self._responses = dict[JsonRpcId, Response | None]()
 
     def is_running(self, request_id: JsonRpcId) -> bool:
         return request_id in self._responses
@@ -42,7 +51,17 @@ class JsonRpcBuffer:
     def add_request(self, request_id: JsonRpcId) -> None:
         self._responses[request_id] = None
 
-    def add_response(self, message: JsonRpcResponse | JsonRpcErrorResponse) -> None:
+    def add_global_error(self, error: JsonRpcError) -> None:
+        response = JsonRpcErrorResponse(None, error)
+
+        for request_id in self._responses:
+            self._responses[request_id] = response
+
+    def add_response(self, message: Response) -> None:
+        if message.id is None:
+            self.add_global_error(message.error)
+            return
+
         if message.id not in self._responses:
             raise ValueError("No requests match given response ID")
 
@@ -51,7 +70,7 @@ class JsonRpcBuffer:
 
         self._responses[message.id] = message
 
-    def get_response(self, request_id: JsonRpcId) -> JsonRpcResponse | JsonRpcErrorResponse | None:
+    def get_response(self, request_id: JsonRpcId) -> Response | None:
         if not self.is_done(request_id):
             return None
 
@@ -64,17 +83,22 @@ class Result(NamedTuple):
 
 
 class JsonRpcFuture:
-    def __init__(self, request_id: JsonRpcId, websocket: WebSocket, buffer: JsonRpcBuffer) -> None:
+    def __init__(
+        self, request_id: JsonRpcId | None, websocket: WebSocket, buffer: JsonRpcBuffer
+    ) -> None:
         self._request_id = request_id
         self._websocket = websocket
         self._buffer = buffer
 
     @property
-    def request_id(self) -> JsonRpcId:
+    def request_id(self) -> JsonRpcId | None:
         return self._request_id
 
     @property
     def done(self) -> bool:
+        if self._request_id is None:
+            return True
+
         return self._buffer.is_done(self._request_id)
 
     async def poll(self) -> None:
@@ -83,6 +107,9 @@ class JsonRpcFuture:
         self._buffer.add_response(message)
 
     async def wait_for_result(self) -> Result:
+        if self._request_id is None:
+            raise ValueError("Cannot wait for result of requests without ID")
+
         while True:
             response = self._buffer.get_response(self._request_id)
 
@@ -106,21 +133,28 @@ class Connection:
 
     async def send(self, request: JsonRpcRequest) -> JsonRpcFuture:
         data = compose_request(request)
+
         await self._websocket.send(data)
+
         return JsonRpcFuture(request.id, self._websocket, self._buffer)
 
-    async def start(self, method: str, params: Any = None, binary: bytes = b"") -> JsonRpcFuture:
+    async def start(
+        self, method: str, params: Any = None, binary: bytes = b""
+    ) -> JsonRpcFuture:
         request_id = 0
 
         while self._buffer.is_running(request_id):
             request_id += 1
 
-        request = JsonRpcRequest(request_id, method, params, binary)
+        request = JsonRpcRequest(method, params, binary, request_id)
 
         return await self.send(request)
 
-    async def request(self, method: str, params: Any = None, binary: bytes = b"") -> Result:
+    async def request(
+        self, method: str, params: Any = None, binary: bytes = b""
+    ) -> Result:
         future = await self.start(method, params, binary)
+
         return await future.wait_for_result()
 
 

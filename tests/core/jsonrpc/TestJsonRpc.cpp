@@ -39,7 +39,8 @@ TEST_CASE("JsonRpcParser")
     {
         auto request = parseJsonRpcRequest(json);
 
-        CHECK_EQ(std::get<int>(request.id), 1);
+        CHECK(request.id);
+        CHECK_EQ(std::get<int>(*request.id), 1);
         CHECK_EQ(request.method, "test");
         CHECK_EQ(request.params, 123);
         CHECK_EQ(request.binary, "");
@@ -52,7 +53,8 @@ TEST_CASE("JsonRpcParser")
 
         auto request = parseBinaryJsonRpcRequest(data);
 
-        CHECK_EQ(std::get<int>(request.id), 1);
+        CHECK(request.id);
+        CHECK_EQ(std::get<int>(*request.id), 1);
         CHECK_EQ(request.method, "test");
         CHECK_EQ(request.params, 123);
         CHECK_EQ(request.binary, "binary");
