@@ -44,14 +44,15 @@ template<typename T>
 class JsonObjectInfo
 {
 public:
-    explicit JsonObjectInfo(std::vector<JsonField<T>> fields):
-        _fields(std::move(fields))
+    explicit JsonObjectInfo(std::vector<JsonField<T>> fields, std::string description):
+        _fields(std::move(fields)),
+        _description(std::move(description))
     {
     }
 
     JsonSchema getSchema() const
     {
-        auto schema = JsonSchema{.type = JsonType::Object};
+        auto schema = JsonSchema{.description = _description, .type = JsonType::Object};
         for (const auto &field : _fields)
         {
             schema.properties[field.name] = field.schema;
@@ -102,6 +103,7 @@ public:
 
 private:
     std::vector<JsonField<T>> _fields;
+    std::string _description;
 };
 
 template<typename T>
@@ -215,6 +217,11 @@ template<typename T>
 class JsonBuilder
 {
 public:
+    void description(std::string value)
+    {
+        _description = std::move(value);
+    }
+
     template<JsonFieldGetter<T> U>
     JsonFieldBuilder<T> field(std::string name, U getFieldPtr)
     {
@@ -267,10 +274,11 @@ public:
 
     JsonObjectInfo<T> build()
     {
-        return JsonObjectInfo<T>(std::exchange(_fields, {}));
+        return JsonObjectInfo<T>(std::exchange(_fields, {}), std::exchange(_description, {}));
     }
 
 private:
     std::vector<JsonField<T>> _fields;
+    std::string _description;
 };
 }

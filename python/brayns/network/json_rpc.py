@@ -34,7 +34,7 @@ class JsonRpcRequest:
 
 
 @dataclass
-class JsonRpcResponse:
+class JsonRpcSuccessResponse:
     id: JsonRpcId
     result: Any = None
     binary: bytes = b""
@@ -53,37 +53,42 @@ class JsonRpcErrorResponse:
     error: JsonRpcError
 
 
-Response = JsonRpcResponse | JsonRpcErrorResponse
+JsonRpcResponse = JsonRpcSuccessResponse | JsonRpcErrorResponse
 
 
 def serialize_request(request: JsonRpcRequest) -> dict[str, Any]:
-    return {
+    message = {
         "jsonrpc": "2.0",
         "method": request.method,
         "params": request.params,
-        "id": request.id,
     }
 
+    if request.id is not None:
+        message["id"] = request.id
 
-def compose_text_request(request: JsonRpcRequest) -> str:
-    message = serialize_request(request)
+    return message
+
+
+def compose_text(message: Any) -> str:
     return json.dumps(message, separators=(",", ":"))
 
 
-def compose_binary_request(request: JsonRpcRequest) -> bytes:
-    json_part = compose_text_request(request).encode()
+def compose_binary(message: Any, binary: bytes) -> bytes:
+    text = compose_text(message)
+    json_part = text.encode()
 
     header = len(json_part).to_bytes(4, byteorder="little", signed=False)
 
-    binary_part = request.binary
-
-    return b"".join([header, json_part, binary_part])
+    return header + json_part + binary
 
 
 def compose_request(request: JsonRpcRequest) -> bytes | str:
+    message = serialize_request(request)
+
     if request.binary:
-        return compose_binary_request(request)
-    return compose_text_request(request)
+        return compose_binary(message, request.binary)
+
+    return compose_text(message)
 
 
 T = TypeVar("T")
@@ -110,13 +115,13 @@ def _get_id(message: dict[str, Any]) -> JsonRpcId | None:
     raise ValueError("Invalid JSON-RPC ID type")
 
 
-def deserialize_result(message: dict[str, Any], binary: bytes = b"") -> JsonRpcResponse:
+def deserialize_result(message: dict[str, Any], binary: bytes = b"") -> JsonRpcSuccessResponse:
     response_id = _get_id(message)
 
     if response_id is None:
         raise ValueError("Result responses must have an ID")
 
-    return JsonRpcResponse(
+    return JsonRpcSuccessResponse(
         id=response_id,
         result=message["result"],
         binary=binary,
@@ -136,7 +141,7 @@ def deserialize_error(message: dict[str, Any]) -> JsonRpcErrorResponse:
     )
 
 
-def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> Response:
+def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> JsonRpcResponse:
     if "result" in message:
         return deserialize_result(message, binary)
 
@@ -149,33 +154,33 @@ def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> Respon
     return deserialize_error(message)
 
 
-def parse_text_response(data: str) -> Response:
-    message = json.loads(data)
-    return deserialize_response(message)
-
-
-def parse_binary_response(data: bytes) -> Response:
+def parse_binary(data: bytes) -> tuple[Any, bytes]:
     size = len(data)
 
     if size < 4:
-        raise ValueError("Invalid binary frame header < 4 bytes")
+        raise ValueError("Invalid binary frame with header < 4 bytes")
 
     header = data[:4]
 
     json_size = int.from_bytes(header, byteorder="little", signed=False)
+
+    if json_size > size - 4:
+        raise ValueError(f"Invalid JSON size: {json_size} > {size - 4}")
+
     json_part = data[4 : 4 + json_size].decode("utf-8")
     message = json.loads(json_part)
 
     binary_part = data[4 + json_size :]
 
-    return deserialize_response(message, binary_part)
+    return message, binary_part
 
 
-def parse_response(data: bytes | str) -> Response:
+def parse_response(data: bytes | str) -> JsonRpcResponse:
     if isinstance(data, bytes):
-        return parse_binary_response(data)
+        message, binary = parse_binary(data)
 
-    if isinstance(data, str):
-        return parse_text_response(data)
+        return deserialize_response(message, binary)
 
-    raise TypeError("Invalid data type")
+    message = json.loads(data)
+
+    return deserialize_response(message)

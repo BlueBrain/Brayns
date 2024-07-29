@@ -23,71 +23,90 @@
 
 namespace brayns
 {
-struct TagParams
+struct TagList
 {
-    std::string tag;
+    std::vector<std::string> tags;
 };
 
 template<>
-struct JsonObjectReflector<TagParams>
+struct JsonObjectReflector<TagList>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<TagParams>();
-        builder.field("tag", [](auto &object) { return &object.tag; }).description("Object tag set by user");
+        auto builder = JsonBuilder<TagList>();
+        builder.field("tags", [](auto &object) { return &object.tags; }).description("List of object tag");
         return builder.build();
     }
 };
 
-struct ObjectsResult
+struct MetadataList
 {
     std::vector<Metadata> objects;
 };
 
 template<>
-struct JsonObjectReflector<ObjectsResult>
+struct JsonObjectReflector<MetadataList>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<ObjectsResult>();
+        auto builder = JsonBuilder<MetadataList>();
         builder.field("objects", [](auto &object) { return &object.objects; })
-            .description("Generic properties of all objects in registry, use get-{type} to get specific properties");
+            .description("List of object generic properties");
         return builder.build();
     }
 };
 
-struct IdParams
+std::vector<Metadata> getMetadata(ObjectManager &objects, const std::vector<ObjectId> &ids)
 {
-    ObjectId id;
-};
+    auto metadatas = std::vector<Metadata>();
+    metadatas.reserve(ids.size());
 
-template<>
-struct JsonObjectReflector<IdParams>
-{
-    static auto reflect()
+    for (auto id : ids)
     {
-        auto builder = JsonBuilder<IdParams>();
-        builder.field("id", [](auto &object) { return &object.id; })
-            .description("Object unique ID generated at object creation");
-        return builder.build();
+        const auto &metadata = objects.getMetadata(id);
+        metadatas.push_back(metadata);
     }
-};
+
+    return metadatas;
+}
+
+std::vector<ObjectId> getIdsFromTags(ObjectManager &objects, const std::vector<std::string> &tags)
+{
+    auto ids = std::vector<ObjectId>();
+    ids.reserve(tags.size());
+
+    for (const auto &tag : tags)
+    {
+        auto id = objects.getId(tag);
+        ids.push_back(id);
+    }
+
+    return ids;
+}
+
+void removeObjects(ObjectManager &objects, const std::vector<ObjectId> &ids)
+{
+    for (auto id : ids)
+    {
+        objects.remove(id);
+    }
+}
 
 void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects)
 {
-    builder.endpoint("get-objects", [&] { return ObjectsResult{objects.getAllMetadata()}; })
-        .description("Return the IDs of all existing objects");
+    builder.endpoint("get-all-objects", [&] { return MetadataList{objects.getAllMetadata()}; })
+        .description("Return the generic properties of all objects, use get-{type} to get specific properties");
 
-    builder.endpoint("get-object", [&](IdParams params) { return objects.getMetadata(params.id); })
-        .description("Get generic object data from given object ID");
+    builder.endpoint("get-objects", [&](IdList params) { return MetadataList{getMetadata(objects, params.ids)}; })
+        .description("Get generic object properties from given object IDs");
 
-    builder.endpoint("get-object-id", [&](TagParams params) { return IdParams{objects.getId(params.tag)}; })
-        .description("Get the object ID associated with the given tag set by user");
+    builder.endpoint("get-object-ids", [&](TagList params) { return IdList{getIdsFromTags(objects, params.tags)}; })
+        .description("Map given list of tags to object IDs (result is an array in the same order as params)");
 
-    builder.endpoint("remove-object", [&](IdParams params) { objects.remove(params.id); })
+    builder.endpoint("remove-objects", [&](IdList params) { removeObjects(objects, params.ids); })
         .description(
-            "Remove object with given ID from the registry, the ID can be reused by future objects. Note that the "
-            "object can stay in memory as long as it is used by other objects");
+            "Remove objects from the registry, the ID can be reused by future objects. Note that the object can stay "
+            "in memory as long as it is used by other objects (using a ref-counted system)");
 
     builder.endpoint("clear-objects", [&] { objects.clear(); }).description("Remove all objects currently in registry");
 }

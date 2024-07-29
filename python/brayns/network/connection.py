@@ -25,19 +25,19 @@ from typing import Any, NamedTuple
 from .json_rpc import (
     JsonRpcErrorResponse,
     JsonRpcRequest,
-    JsonRpcResponse,
+    JsonRpcSuccessResponse,
     JsonRpcError,
     compose_request,
     parse_response,
     JsonRpcId,
-    Response,
+    JsonRpcResponse,
 )
 from .websocket import ServiceUnavailable, WebSocket, connect_websocket
 
 
-class JsonRpcBuffer:
+class ResponseBuffer:
     def __init__(self) -> None:
-        self._responses = dict[JsonRpcId, Response | None]()
+        self._responses = dict[JsonRpcId, JsonRpcResponse | None]()
 
     def is_running(self, request_id: JsonRpcId) -> bool:
         return request_id in self._responses
@@ -49,6 +49,9 @@ class JsonRpcBuffer:
         return self._responses[request_id] is not None
 
     def add_request(self, request_id: JsonRpcId) -> None:
+        if request_id in self._responses:
+            raise ValueError("A request with same ID is already running")
+
         self._responses[request_id] = None
 
     def add_global_error(self, error: JsonRpcError) -> None:
@@ -57,7 +60,7 @@ class JsonRpcBuffer:
         for request_id in self._responses:
             self._responses[request_id] = response
 
-    def add_response(self, message: Response) -> None:
+    def add_response(self, message: JsonRpcResponse) -> None:
         if message.id is None:
             self.add_global_error(message.error)
             return
@@ -70,22 +73,26 @@ class JsonRpcBuffer:
 
         self._responses[message.id] = message
 
-    def get_response(self, request_id: JsonRpcId) -> Response | None:
+    def get_response(self, request_id: JsonRpcId) -> JsonRpcResponse | None:
         if not self.is_done(request_id):
             return None
 
         return self._responses.pop(request_id)
 
 
-class Result(NamedTuple):
-    value: Any
+class Request(NamedTuple):
+    method: str
+    params: Any = None
+    binary: bytes = b""
+
+
+class Response(NamedTuple):
+    result: Any
     binary: bytes
 
 
-class JsonRpcFuture:
-    def __init__(
-        self, request_id: JsonRpcId | None, websocket: WebSocket, buffer: JsonRpcBuffer
-    ) -> None:
+class FutureResponse:
+    def __init__(self, request_id: JsonRpcId | None, websocket: WebSocket, buffer: ResponseBuffer) -> None:
         self._request_id = request_id
         self._websocket = websocket
         self._buffer = buffer
@@ -102,11 +109,16 @@ class JsonRpcFuture:
         return self._buffer.is_done(self._request_id)
 
     async def poll(self) -> None:
+        if self.done:
+            return
+
         data = await self._websocket.receive()
+
         message = parse_response(data)
+
         self._buffer.add_response(message)
 
-    async def wait_for_result(self) -> Result:
+    async def wait(self) -> Response:
         if self._request_id is None:
             raise ValueError("Cannot wait for result of requests without ID")
 
@@ -117,8 +129,8 @@ class JsonRpcFuture:
                 await self.poll()
                 continue
 
-            if isinstance(response, JsonRpcResponse):
-                return Result(response.result, response.binary)
+            if isinstance(response, JsonRpcSuccessResponse):
+                return Response(response.result, response.binary)
 
             if isinstance(response, JsonRpcErrorResponse):
                 raise response.error
@@ -129,33 +141,39 @@ class JsonRpcFuture:
 class Connection:
     def __init__(self, websocket: WebSocket) -> None:
         self._websocket = websocket
-        self._buffer = JsonRpcBuffer()
+        self._buffer = ResponseBuffer()
 
-    async def send(self, request: JsonRpcRequest) -> JsonRpcFuture:
+    async def send_json_rpc(self, request: JsonRpcRequest) -> FutureResponse:
+        if request.id is not None and self._buffer.is_running(request.id):
+            raise ValueError(f"A request with ID {request.id} is already running")
+
         data = compose_request(request)
 
         await self._websocket.send(data)
 
-        return JsonRpcFuture(request.id, self._websocket, self._buffer)
+        if request.id is not None:
+            self._buffer.add_request(request.id)
 
-    async def start(
-        self, method: str, params: Any = None, binary: bytes = b""
-    ) -> JsonRpcFuture:
+        return FutureResponse(request.id, self._websocket, self._buffer)
+
+    async def send(self, request: Request) -> FutureResponse:
         request_id = 0
 
         while self._buffer.is_running(request_id):
             request_id += 1
 
-        request = JsonRpcRequest(method, params, binary, request_id)
+        method, params, binary = request
+        json_rpc_request = JsonRpcRequest(method, params, binary, request_id)
 
+        return await self.send_json_rpc(json_rpc_request)
+
+    async def task(self, method: str, params: Any = None, binary: bytes = b"") -> FutureResponse:
+        request = Request(method, params, binary)
         return await self.send(request)
 
-    async def request(
-        self, method: str, params: Any = None, binary: bytes = b""
-    ) -> Result:
-        future = await self.start(method, params, binary)
-
-        return await future.wait_for_result()
+    async def request(self, method: str, params: Any = None, binary: bytes = b"") -> Response:
+        future = await self.task(method, params, binary)
+        return await future.wait()
 
 
 async def connect(

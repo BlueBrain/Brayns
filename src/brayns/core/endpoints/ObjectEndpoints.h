@@ -26,5 +26,21 @@
 
 namespace brayns
 {
+struct IdList
+{
+    std::vector<ObjectId> ids;
+};
+
+template<>
+struct JsonObjectReflector<IdList>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<IdList>();
+        builder.field("ids", [](auto &object) { return &object.ids; }).description("List of objects ID");
+        return builder.build();
+    }
+};
+
 void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects);
 }

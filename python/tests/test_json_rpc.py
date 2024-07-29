@@ -19,10 +19,13 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from brayns.network.json_rpc import (
+    JsonRpcError,
+    JsonRpcErrorResponse,
     JsonRpcRequest,
-    JsonRpcResponse,
+    JsonRpcSuccessResponse,
     compose_request,
     parse_response,
+    serialize_request,
 )
 
 
@@ -39,7 +42,7 @@ def test_compose_request() -> None:
     data = compose_request(request)
 
     assert isinstance(data, bytes)
-    assert len(data) == len(text) + 4 + 3
+    assert len(data) == 4 + len(text) + len(request.binary)
 
     size = int.from_bytes(data[:4], byteorder="little", signed=False)
 
@@ -48,13 +51,27 @@ def test_compose_request() -> None:
     assert data[size + 4 :] == request.binary
 
 
+def test_no_id() -> None:
+    request = JsonRpcRequest("test")
+
+    message = serialize_request(request)
+
+    assert "id" not in message
+
+
 def test_parse_response() -> None:
     text = """{"jsonrpc":"2.0","id":0,"result":123}"""
 
-    assert parse_response(text) == JsonRpcResponse(0, 123)
+    assert parse_response(text) == JsonRpcSuccessResponse(0, 123)
 
     binary = b"123"
     header = len(text).to_bytes(4, byteorder="little", signed=False)
     binary = header + text.encode() + binary
 
-    assert parse_response(binary) == JsonRpcResponse(0, 123, b"123")
+    assert parse_response(binary) == JsonRpcSuccessResponse(0, 123, b"123")
+
+
+def test_parse_error() -> None:
+    text = """{"jsonrpc":"2.0","id":0,"error":{"code":0,"message": "test"}}"""
+
+    assert parse_response(text) == JsonRpcErrorResponse(0, JsonRpcError(0, "test"))

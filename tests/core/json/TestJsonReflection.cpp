@@ -55,6 +55,7 @@ struct JsonObjectReflector<Internal>
     static auto reflect()
     {
         auto builder = JsonBuilder<Internal>();
+        builder.description("Test child");
         builder.field("value", [](auto &object) { return &object.value; });
         return builder.build();
     }
@@ -78,6 +79,7 @@ struct JsonObjectReflector<SomeObject>
     static auto reflect()
     {
         auto builder = JsonBuilder<SomeObject>();
+        builder.description("Test parent");
         builder.constant("constant", "test");
         builder.field("required", [](auto &object) { return &object.required; });
         builder.field("bounded", [](auto &object) { return &object.bounded; }).minimum(1).maximum(3);
@@ -257,6 +259,7 @@ TEST_CASE("JsonReflection")
     {
         const auto &schema = getJsonSchema<SomeObject>();
 
+        CHECK_EQ(schema.description, "Test parent");
         CHECK_EQ(schema.type, JsonType::Object);
 
         const auto &properties = schema.properties;
@@ -281,6 +284,7 @@ TEST_CASE("JsonReflection")
         CHECK_EQ(
             properties.at("internal"),
             JsonSchema{
+                .description = "Test child",
                 .type = JsonType::Object,
                 .properties = {{"value", getJsonSchema<int>()}},
             });

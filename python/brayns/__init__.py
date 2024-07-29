@@ -21,21 +21,18 @@
 """
 Brayns Python package.
 
-This package provides a high level API to interact with an instance of Brayns
-instance through websockets.
-
-The low level JSON-RPC API is also available using the instance directly.
+This package provides an API to interact with Brayns service.
 """
 
 from .version import VERSION
-from .network.connection import Connection, connect, JsonRpcFuture
+from .network.connection import Connection, connect, FutureResponse, Response, Request
 from .network.json_rpc import (
     JsonRpcError,
     JsonRpcErrorResponse,
     JsonRpcId,
     JsonRpcRequest,
+    JsonRpcSuccessResponse,
     JsonRpcResponse,
-    Response,
 )
 from .network.websocket import ServiceUnavailable, WebSocketError
 
@@ -45,12 +42,14 @@ __version__ = VERSION
 __all__ = [
     "connect",
     "Connection",
+    "FutureResponse",
     "JsonRpcError",
     "JsonRpcErrorResponse",
-    "JsonRpcFuture",
     "JsonRpcId",
     "JsonRpcRequest",
     "JsonRpcResponse",
+    "JsonRpcSuccessResponse",
+    "Request",
     "Response",
     "ServiceUnavailable",
     "WebSocketError",
