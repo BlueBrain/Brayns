@@ -134,9 +134,7 @@ async def get_task_result(connection: Connection, task_id: int) -> Response:
 
 
 class Task(Generic[T]):
-    def __init__(
-        self, connection: Connection, id: int, parser: Callable[[Response], T]
-    ) -> None:
+    def __init__(self, connection: Connection, id: int, parser: Callable[[Response], T]) -> None:
         self._connection = connection
         self._id = id
         self._parser = parser

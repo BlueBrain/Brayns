@@ -93,9 +93,7 @@ class Response(NamedTuple):
 
 
 class FutureResponse:
-    def __init__(
-        self, request_id: JsonRpcId | None, websocket: WebSocket, buffer: ResponseBuffer
-    ) -> None:
+    def __init__(self, request_id: JsonRpcId | None, websocket: WebSocket, buffer: ResponseBuffer) -> None:
         self._request_id = request_id
         self._websocket = websocket
         self._buffer = buffer
@@ -176,23 +174,17 @@ class Connection:
 
         return await self.send_json_rpc(json_rpc_request)
 
-    async def task(
-        self, method: str, params: Any = None, binary: bytes = b""
-    ) -> FutureResponse:
+    async def task(self, method: str, params: Any = None, binary: bytes = b"") -> FutureResponse:
         request = Request(method, params, binary)
 
         return await self.send(request)
 
-    async def request(
-        self, method: str, params: Any = None, binary: bytes = b""
-    ) -> Response:
+    async def request(self, method: str, params: Any = None, binary: bytes = b"") -> Response:
         future = await self.task(method, params, binary)
 
         return await future.wait()
 
-    async def get_result(
-        self, method: str, params: Any = None, binary: bytes = b""
-    ) -> Any:
+    async def get_result(self, method: str, params: Any = None, binary: bytes = b"") -> Any:
         result, binary = await self.request(method, params, binary)
 
         if binary:

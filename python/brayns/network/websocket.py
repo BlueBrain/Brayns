@@ -52,9 +52,7 @@ class WebSocket(Protocol):
     async def receive(self) -> bytes | str: ...
 
 
-def _slice_if_needed(
-    data: bytes | str, max_size: int
-) -> bytes | str | list[bytes | str]:
+def _slice_if_needed(data: bytes | str, max_size: int) -> bytes | str | list[bytes | str]:
     size = len(data)
 
     if size < max_size:
@@ -64,9 +62,7 @@ def _slice_if_needed(
 
 
 class _WebSocket(WebSocket):
-    def __init__(
-        self, websocket: WebSocketClientProtocol, max_frame_size: int, logger: Logger
-    ) -> None:
+    def __init__(self, websocket: WebSocketClientProtocol, max_frame_size: int, logger: Logger) -> None:
         self._websocket = websocket
         self._max_frame_size = max_frame_size
         self._logger = logger
@@ -122,9 +118,7 @@ class _WebSocket(WebSocket):
         return data
 
 
-async def connect_websocket(
-    url: str, ssl: SSLContext | None, max_frame_size: int, logger: Logger
-) -> WebSocket:
+async def connect_websocket(url: str, ssl: SSLContext | None, max_frame_size: int, logger: Logger) -> WebSocket:
     logger.info("Connection to websocket server at URL %s", url)
 
     try:

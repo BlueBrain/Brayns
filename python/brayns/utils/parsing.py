@@ -50,12 +50,9 @@ def has_type(value: Any, t: Any) -> bool:
         return all(has_type(item, arg) for item in items)
 
     if origin is dict:
-        items = cast(dict, value)
+        object = cast(dict, value)
         keytype, valuetype = get_args(t)
-        return all(
-            has_type(key, keytype) and has_type(item, valuetype)
-            for key, item in items.items()
-        )
+        return all(has_type(key, keytype) and has_type(item, valuetype) for key, item in object.items())
 
     return True
 

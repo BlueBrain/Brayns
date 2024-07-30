@@ -29,7 +29,7 @@ from brayns import Connection, connect
 
 HOST = os.getenv("BRAYNS_HOST", "localhost")
 PORT = int(os.getenv("BRAYNS_PORT", "5000"))
-EXECUTABLE = os.getenv("BRAYNS_EXECUTABLE", "braynsService")
+EXECUTABLE = os.getenv("BRAYNS_EXECUTABLE", "")
 
 
 def start_service() -> Popen[str]:
@@ -53,9 +53,13 @@ async def connect_to_service() -> Connection:
 
 
 @pytest.fixture(scope="session")
-def service() -> Iterator[Popen[str]]:
+def service() -> Iterator[None]:
+    if not EXECUTABLE:
+        yield
+        return
+
     with start_service() as process:
-        yield process
+        yield
         process.terminate()
 
 

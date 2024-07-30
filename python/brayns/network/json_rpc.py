@@ -93,9 +93,7 @@ def compose_request(request: JsonRpcRequest) -> bytes | str:
     return compose_text(message)
 
 
-def deserialize_result(
-    message: dict[str, Any], binary: bytes = b""
-) -> JsonRpcSuccessResponse:
+def deserialize_result(message: dict[str, Any], binary: bytes = b"") -> JsonRpcSuccessResponse:
     response_id = get(message, "id", int | str)
 
     return JsonRpcSuccessResponse(
@@ -118,9 +116,7 @@ def deserialize_error(message: dict[str, Any]) -> JsonRpcErrorResponse:
     )
 
 
-def deserialize_response(
-    message: dict[str, Any], binary: bytes = b""
-) -> JsonRpcResponse:
+def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> JsonRpcResponse:
     if "result" in message:
         return deserialize_result(message, binary)
 
