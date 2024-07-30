@@ -53,25 +53,31 @@ public:
     JsonSchema getSchema() const
     {
         auto schema = JsonSchema{.description = _description, .type = JsonType::Object};
+
         for (const auto &field : _fields)
         {
             schema.properties[field.name] = field.schema;
         }
+
         return schema;
     }
 
     JsonValue serialize(const T &value) const
     {
         auto object = createJsonObject();
+
         for (const auto &field : _fields)
         {
             auto jsonItem = field.serialize(value);
+
             if (jsonItem.isEmpty() && !field.schema.required)
             {
                 continue;
             }
+
             object->set(field.name, jsonItem);
         }
+
         return object;
     }
 

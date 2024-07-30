@@ -30,7 +30,7 @@ namespace
 {
 using namespace brayns;
 
-const RawTask &getTask(const std::map<TaskId, RawTask> &tasks, TaskId id)
+const RawTask &getRawTask(const std::map<TaskId, RawTask> &tasks, TaskId id)
 {
     auto i = tasks.find(id);
 
@@ -121,18 +121,18 @@ RawResult Api::execute(const std::string &method, RawParams params)
 
     if (endpoint.schema.async)
     {
-        const auto &launcher = std::get<TaskLauncher>(endpoint.handler);
+        const auto &handler = std::get<AsyncEndpointHandler>(endpoint.handler);
 
-        auto task = launcher(std::move(params));
+        auto task = handler(std::move(params));
 
         auto id = addTask(std::move(task), _tasks, _ids);
 
         return {serializeToJson(TaskResult{id})};
     }
 
-    const auto &runner = std::get<TaskRunner>(endpoint.handler);
+    const auto &handler = std::get<SyncEndpointHandler>(endpoint.handler);
 
-    return runner(std::move(params));
+    return handler(std::move(params));
 }
 
 std::vector<TaskInfo> Api::getTasks() const
@@ -142,31 +142,43 @@ std::vector<TaskInfo> Api::getTasks() const
 
     for (const auto &[id, task] : _tasks)
     {
-        infos.push_back({id, task.getProgress()});
+        auto operationCount = task.operationCount;
+        auto currentOperation = task.getCurrentOperation();
+
+        infos.push_back({id, operationCount, std::move(currentOperation)});
     }
 
     return infos;
 }
 
-ProgressInfo Api::getTaskProgress(TaskId id) const
+TaskInfo Api::getTask(TaskId id) const
 {
-    const auto &task = getTask(_tasks, id);
-    return task.getProgress();
+    const auto &task = getRawTask(_tasks, id);
+
+    auto operationCount = task.operationCount;
+    auto currentOperation = task.getCurrentOperation();
+
+    return {id, operationCount, std::move(currentOperation)};
 }
 
 RawResult Api::waitForTaskResult(TaskId id)
 {
-    const auto &task = getTask(_tasks, id);
+    const auto &task = getRawTask(_tasks, id);
+
     auto result = task.wait();
+
     _tasks.erase(id);
     _ids.recycle(id);
+
     return result;
 }
 
 void Api::cancelTask(TaskId id)
 {
-    const auto &task = getTask(_tasks, id);
+    const auto &task = getRawTask(_tasks, id);
+
     task.cancel();
+
     _tasks.erase(id);
     _ids.recycle(id);
 }

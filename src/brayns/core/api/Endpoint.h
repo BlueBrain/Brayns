@@ -62,9 +62,9 @@ struct JsonObjectReflector<EndpointSchema>
     }
 };
 
-using TaskLauncher = std::function<RawTask(RawParams)>;
-using TaskRunner = std::function<RawResult(RawParams)>;
-using EndpointHandler = std::variant<TaskLauncher, TaskRunner>;
+using SyncEndpointHandler = std::function<RawResult(RawParams)>;
+using AsyncEndpointHandler = std::function<RawTask(RawParams)>;
+using EndpointHandler = std::variant<SyncEndpointHandler, AsyncEndpointHandler>;
 
 struct Endpoint
 {

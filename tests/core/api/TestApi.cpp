@@ -174,7 +174,7 @@ TEST_CASE("Task")
         return value + offset;
     };
 
-    builder.task("test", [=](int value) { return startTask(worker, value); });
+    builder.task("test", [=](int value) { return startTask(worker, value, {2, "Test"}); });
 
     auto api = builder.build();
 
@@ -195,12 +195,12 @@ TEST_CASE("Task")
 
     while (true)
     {
-        auto progress = api.getTaskProgress(taskId);
+        auto info = api.getTask(taskId);
 
-        if (progress.currentOperationProgress != 0.0F)
+        if (info.currentOperation.completion != 0.0F)
         {
-            CHECK_EQ(progress.currentOperation, "1");
-            CHECK_EQ(progress.currentOperationProgress, 0.5F);
+            CHECK_EQ(info.currentOperation.description, "1");
+            CHECK_EQ(info.currentOperation.completion, 0.5F);
             break;
         }
     }
@@ -212,7 +212,7 @@ TEST_CASE("Task")
 
     CHECK_THROWS_AS(api.cancelTask(taskId), InvalidParams);
     CHECK_THROWS_AS(api.waitForTaskResult(taskId), InvalidParams);
-    CHECK_THROWS_AS(api.getTaskProgress(taskId), InvalidParams);
+    CHECK_THROWS_AS(api.getTask(taskId), InvalidParams);
 
     CHECK(api.getTasks().empty());
 }

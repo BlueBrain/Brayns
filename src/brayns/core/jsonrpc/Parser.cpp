@@ -30,7 +30,7 @@
 
 namespace brayns
 {
-JsonRpcRequest parseJsonRpcRequest(const std::string &text)
+JsonRpcRequest parseTextJsonRpcRequest(const std::string &text)
 {
     auto json = JsonValue();
 
@@ -73,19 +73,19 @@ JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary)
 
     auto text = extractBytes(data, textSize);
 
-    auto request = parseJsonRpcRequest(std::string(text));
+    auto request = parseTextJsonRpcRequest(std::string(text));
 
     request.binary = binary.substr(4 + textSize);
 
     return request;
 }
 
-std::string composeAsText(const JsonRpcResponse &response)
+std::string composeAsText(const JsonRpcSuccessResponse &response)
 {
     return stringifyToJson(response);
 }
 
-std::string composeAsBinary(const JsonRpcResponse &response)
+std::string composeAsBinary(const JsonRpcSuccessResponse &response)
 {
     auto text = composeAsText(response);
 

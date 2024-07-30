@@ -42,7 +42,7 @@ JsonRpcRequest parseRequest(const RawRequest &request)
         return parseBinaryJsonRpcRequest(request.data);
     }
 
-    return parseJsonRpcRequest(request.data);
+    return parseTextJsonRpcRequest(request.data);
 }
 
 ResponseData composeResponse(const JsonRpcId &id, RawResult result)

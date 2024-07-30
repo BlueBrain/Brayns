@@ -18,9 +18,10 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
 import json
-from typing import Any, TypeVar
+from dataclasses import dataclass
+from types import UnionType
+from typing import Any, cast, get_args, get_origin
 
 JsonRpcId = int | str
 
@@ -91,35 +92,68 @@ def compose_request(request: JsonRpcRequest) -> bytes | str:
     return compose_text(message)
 
 
-T = TypeVar("T")
+def has_type(value: Any, t: Any) -> bool:
+    if t is Any:
+        return True
+
+    if t is None:
+        return value is None
+
+    origin = get_origin(t)
+
+    if origin is UnionType:
+        args = get_args(t)
+        return any(has_type(value, arg) for arg in args)
+
+    if origin is None:
+        origin = t
+
+    if not isinstance(value, origin):
+        return False
+
+    if origin is list:
+        items = cast(list, value)
+        (arg,) = get_args(t)
+        return all(has_type(item, arg) for item in items)
+
+    if origin is dict:
+        items = cast(dict, value)
+        keytype, valuetype = get_args(t)
+        return all(
+            has_type(key, keytype) and has_type(item, valuetype)
+            for key, item in items.items()
+        )
+
+    return True
 
 
-def _get(message: dict[str, Any], key: str, t: type[T]) -> T:
-    value = message[key]
+def check_type(value: Any, t: Any) -> None:
+    if not has_type(value, t):
+        raise TypeError("Invalid type in JSON-RPC message")
 
-    if not isinstance(value, t):
-        raise ValueError("Invalid JSON-RPC message value type")
+
+def try_get(message: dict[str, Any], key: str, t: Any, default: Any = None) -> Any:
+    value = message.get(key, default)
+
+    check_type(value, t)
 
     return value
 
 
-def _get_id(message: dict[str, Any]) -> JsonRpcId | None:
-    id = message.get("id")
+def get(message: dict[str, Any], key: str, t: Any) -> Any:
+    if key not in message:
+        raise KeyError(f"Missing mandatory key in JSON-RPC message {key}")
 
-    if id is None:
-        return None
+    value = message[key]
+    check_type(value, t)
 
-    if isinstance(id, int | str):
-        return id
-
-    raise ValueError("Invalid JSON-RPC ID type")
+    return value
 
 
-def deserialize_result(message: dict[str, Any], binary: bytes = b"") -> JsonRpcSuccessResponse:
-    response_id = _get_id(message)
-
-    if response_id is None:
-        raise ValueError("Result responses must have an ID")
+def deserialize_result(
+    message: dict[str, Any], binary: bytes = b""
+) -> JsonRpcSuccessResponse:
+    response_id = get(message, "id", int | str)
 
     return JsonRpcSuccessResponse(
         id=response_id,
@@ -129,27 +163,29 @@ def deserialize_result(message: dict[str, Any], binary: bytes = b"") -> JsonRpcS
 
 
 def deserialize_error(message: dict[str, Any]) -> JsonRpcErrorResponse:
-    error = _get(message, "error", dict)
+    error: dict[str, Any] = get(message, "error", dict[str, Any])
 
     return JsonRpcErrorResponse(
-        id=_get_id(message),
+        id=try_get(message, "id", int | str | None, None),
         error=JsonRpcError(
-            code=_get(error, "code", int),
-            message=_get(error, "message", str),
+            code=get(error, "code", int),
+            message=get(error, "message", str),
             data=error.get("data"),
         ),
     )
 
 
-def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> JsonRpcResponse:
+def deserialize_response(
+    message: dict[str, Any], binary: bytes = b""
+) -> JsonRpcResponse:
     if "result" in message:
         return deserialize_result(message, binary)
 
     if "error" not in message:
-        raise ValueError("Invalid JSON-RPC message")
+        raise ValueError("Invalid JSON-RPC message without 'result' and 'error'")
 
     if binary:
-        raise ValueError("Invalid binary in error message")
+        raise ValueError("Invalid error message with binary")
 
     return deserialize_error(message)
 

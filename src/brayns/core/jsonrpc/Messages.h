@@ -25,9 +25,9 @@
 #include <string>
 #include <variant>
 
-#include <brayns/core/json/Json.h>
-
 #include <fmt/format.h>
+
+#include <brayns/core/json/Json.h>
 
 namespace brayns
 {
@@ -70,7 +70,7 @@ struct JsonObjectReflector<JsonRpcRequest>
     }
 };
 
-struct JsonRpcResponse
+struct JsonRpcSuccessResponse
 {
     JsonRpcId id;
     JsonValue result;
@@ -78,11 +78,11 @@ struct JsonRpcResponse
 };
 
 template<>
-struct JsonObjectReflector<JsonRpcResponse>
+struct JsonObjectReflector<JsonRpcSuccessResponse>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<JsonRpcResponse>();
+        auto builder = JsonBuilder<JsonRpcSuccessResponse>();
         builder.constant("jsonrpc", "2.0");
         builder.field("id", [](auto &object) { return &object.id; });
         builder.field("result", [](auto &object) { return &object.result; });
@@ -128,4 +128,6 @@ struct JsonObjectReflector<JsonRpcErrorResponse>
         return builder.build();
     }
 };
+
+using JsonRpcResponse = std::variant<JsonRpcSuccessResponse, JsonRpcErrorResponse>;
 }

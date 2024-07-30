@@ -37,7 +37,7 @@ TEST_CASE("JsonRpcParser")
 
     SUBCASE("Text")
     {
-        auto request = parseJsonRpcRequest(json);
+        auto request = parseTextJsonRpcRequest(json);
 
         CHECK(request.id);
         CHECK_EQ(std::get<int>(*request.id), 1);
@@ -62,7 +62,7 @@ TEST_CASE("JsonRpcParser")
     SUBCASE("Invalid JSON")
     {
         auto data = "{\"test";
-        CHECK_THROWS_AS(parseJsonRpcRequest(data), ParseError);
+        CHECK_THROWS_AS(parseTextJsonRpcRequest(data), ParseError);
     }
     SUBCASE("Invalid schema")
     {
@@ -71,7 +71,7 @@ TEST_CASE("JsonRpcParser")
             "method": "test",
             "params": 123
         })";
-        CHECK_THROWS_AS(parseJsonRpcRequest(data), InvalidRequest);
+        CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
     }
     SUBCASE("Invalid JSON-RPC version")
     {
@@ -81,7 +81,7 @@ TEST_CASE("JsonRpcParser")
             "method": "test",
             "params": 123
         })";
-        CHECK_THROWS_AS(parseJsonRpcRequest(data), InvalidRequest);
+        CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
     }
     SUBCASE("No methods")
     {
@@ -90,7 +90,7 @@ TEST_CASE("JsonRpcParser")
             "id": 1,
             "params": 123
         })";
-        CHECK_THROWS_AS(parseJsonRpcRequest(data), InvalidRequest);
+        CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
     }
     SUBCASE("Binary without size")
     {

@@ -28,10 +28,10 @@
 
 namespace brayns
 {
-JsonRpcRequest parseJsonRpcRequest(const std::string &text);
+JsonRpcRequest parseTextJsonRpcRequest(const std::string &text);
 JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary);
-std::string composeAsText(const JsonRpcResponse &response);
-std::string composeAsBinary(const JsonRpcResponse &response);
+std::string composeAsText(const JsonRpcSuccessResponse &response);
+std::string composeAsBinary(const JsonRpcSuccessResponse &response);
 std::string composeError(const JsonRpcErrorResponse &response);
 std::string composeError(const std::optional<JsonRpcId> &id, const JsonRpcException &e);
 }

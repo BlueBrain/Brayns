@@ -31,22 +31,25 @@
 
 namespace brayns
 {
-struct ProgressInfo
+struct TaskOperation
 {
-    std::string currentOperation = "Task startup";
-    float currentOperationProgress = 0.0F;
+    std::string description;
+    float completion = 0.0F;
+    std::size_t index = 0;
 };
 
 template<>
-struct JsonObjectReflector<ProgressInfo>
+struct JsonObjectReflector<TaskOperation>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<ProgressInfo>();
-        builder.field("current_operation", [](auto &object) { return &object.currentOperation; })
-            .description("Description of the current operation");
-        builder.field("current_operation_progress", [](auto &object) { return &object.currentOperationProgress; })
-            .description("Progress of the current operation between 0 and 1");
+        auto builder = JsonBuilder<TaskOperation>();
+        builder.field("description", [](auto &object) { return &object.description; })
+            .description("Operation description");
+        builder.field("completion", [](auto &object) { return &object.completion; })
+            .description("Operation completion between 0 and 1");
+        builder.field("index", [](auto &object) { return &object.index; })
+            .description("Operation index between 0 and operation_count");
         return builder.build();
     }
 };
@@ -57,29 +60,33 @@ public:
     explicit TaskCancelledException();
 };
 
-class ProgressState
+class TaskMonitor
 {
 public:
-    ProgressInfo get();
-    void update(float currentOperationProgress);
-    void nextOperation(std::string value);
+    explicit TaskMonitor(std::size_t operationCount, std::string initialOperation);
+
+    std::size_t getOperationCount() const;
+    TaskOperation getCurrentOperation();
+    void update(float completion);
+    void nextOperation(std::string description);
     void cancel();
 
 private:
     std::mutex _mutex;
-    ProgressInfo _info;
+    std::size_t _operationCount;
+    TaskOperation _currentOperation;
     bool _cancelled = false;
 };
 
 class Progress
 {
 public:
-    explicit Progress(std::shared_ptr<ProgressState> state);
+    explicit Progress(std::shared_ptr<TaskMonitor> monitor);
 
-    void update(float currentOperationProgress);
-    void nextOperation(std::string value);
+    void update(float completion);
+    void nextOperation(std::string description);
 
 private:
-    std::shared_ptr<ProgressState> _state;
+    std::shared_ptr<TaskMonitor> _monitor;
 };
 }

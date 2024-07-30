@@ -125,15 +125,19 @@ void addCoreEndpoints(ApiBuilder &builder, Api &api, StopToken &token)
 
     builder.endpoint("get-methods", [&] { return MethodsResult{api.getMethods()}; })
         .description("Get available JSON-RPC methods");
+
     builder.endpoint("get-schema", [&](SchemaParams params) { return api.getSchema(params.method); })
         .description("Get the schema of the given JSON-RPC method");
 
     builder.endpoint("get-tasks", [&] { return TasksResult{api.getTasks()}; })
-        .description("Get tasks that are currently running");
-    builder.endpoint("get-task-progress", [&](TaskParams params) { return api.getTaskProgress(params.taskId); })
-        .description("Get progress of the given task");
+        .description("Get tasks which result has not been retreived with wait-for-task-result");
+
+    builder.endpoint("get-task", [&](TaskParams params) { return api.getTask(params.taskId); })
+        .description("Get current state of the given task");
+
     builder.endpoint("cancel-task", [&](TaskParams params) { api.cancelTask(params.taskId); })
         .description("Cancel given task");
+
     builder.endpoint("wait-for-task-result", [&](TaskParams params) { return api.waitForTaskResult(params.taskId); })
         .description("Wait for given task to finish and return its result");
 
