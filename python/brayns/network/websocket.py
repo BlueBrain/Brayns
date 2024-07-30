@@ -20,9 +20,10 @@
 
 from logging import Logger
 from ssl import SSLContext
-from websockets.client import connect, WebSocketClientProtocol
-from websockets.exceptions import WebSocketException
 from typing import Protocol, Self
+
+from websockets.client import WebSocketClientProtocol, connect
+from websockets.exceptions import WebSocketException
 
 
 class WebSocketError(Exception): ...
@@ -51,7 +52,9 @@ class WebSocket(Protocol):
     async def receive(self) -> bytes | str: ...
 
 
-def _slice_if_needed(data: bytes | str, max_size: int) -> bytes | str | list[bytes | str]:
+def _slice_if_needed(
+    data: bytes | str, max_size: int
+) -> bytes | str | list[bytes | str]:
     size = len(data)
 
     if size < max_size:
@@ -61,7 +64,9 @@ def _slice_if_needed(data: bytes | str, max_size: int) -> bytes | str | list[byt
 
 
 class _WebSocket(WebSocket):
-    def __init__(self, websocket: WebSocketClientProtocol, max_frame_size: int, logger: Logger) -> None:
+    def __init__(
+        self, websocket: WebSocketClientProtocol, max_frame_size: int, logger: Logger
+    ) -> None:
         self._websocket = websocket
         self._max_frame_size = max_frame_size
         self._logger = logger
@@ -80,7 +85,7 @@ class _WebSocket(WebSocket):
         try:
             await self._websocket.close()
         except WebSocketException as e:
-            self._logger.warn("Failed to close connection: %s", e)
+            self._logger.warning("Failed to close connection: %s", e)
             raise WebSocketError(str(e))
 
         self._logger.info("Websocket connection closed")
@@ -97,7 +102,7 @@ class _WebSocket(WebSocket):
         try:
             await self._websocket.send(sliced)
         except WebSocketException as e:
-            self._logger.warn("Failed to send frame: %s", e)
+            self._logger.warning("Failed to send frame: %s", e)
             raise WebSocketError(str(e))
 
         self._logger.info("Frame sent")
@@ -117,16 +122,18 @@ class _WebSocket(WebSocket):
         return data
 
 
-async def connect_websocket(url: str, ssl: SSLContext | None, max_frame_size: int, logger: Logger) -> WebSocket:
+async def connect_websocket(
+    url: str, ssl: SSLContext | None, max_frame_size: int, logger: Logger
+) -> WebSocket:
     logger.info("Connection to websocket server at URL %s", url)
 
     try:
         websocket = await connect(url, ssl=ssl, max_size=max_frame_size)
     except WebSocketException as e:
-        logger.warn("Connection failed: %s", e)
+        logger.warning("Connection failed: %s", e)
         raise WebSocketError(str(e))
     except OSError as e:
-        logger.warn("Service not found (probably not ready): %s", e)
+        logger.warning("Service not found (probably not ready): %s", e)
         raise ServiceUnavailable(str(e))
 
     wrapper = _WebSocket(websocket, max_frame_size, logger)

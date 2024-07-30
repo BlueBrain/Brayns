@@ -2,6 +2,7 @@
 .pytest_cache
 .ruff_cache
 .vscode
+.env
 venv
 __pycache__
 *.pyc

@@ -24,25 +24,48 @@ Brayns Python package.
 This package provides an API to interact with Brayns service.
 """
 
-from .version import VERSION
-from .network.connection import Connection, connect, FutureResponse, Response, Request
+from .api.core.service import (
+    Endpoint,
+    Task,
+    TaskInfo,
+    TaskOperation,
+    Version,
+    cancel_task,
+    get_endpoint,
+    get_methods,
+    get_task,
+    get_task_result,
+    get_tasks,
+    get_version,
+    stop_service,
+)
+from .network.connection import Connection, FutureResponse, Request, Response, connect
 from .network.json_rpc import (
     JsonRpcError,
     JsonRpcErrorResponse,
     JsonRpcId,
     JsonRpcRequest,
-    JsonRpcSuccessResponse,
     JsonRpcResponse,
+    JsonRpcSuccessResponse,
 )
 from .network.websocket import ServiceUnavailable, WebSocketError
+from .version import VERSION
 
 __version__ = VERSION
 """Version tag of brayns Python package (major.minor.patch)."""
 
 __all__ = [
+    "cancel_task",
     "connect",
     "Connection",
+    "Endpoint",
     "FutureResponse",
+    "get_endpoint",
+    "get_methods",
+    "get_task_result",
+    "get_task",
+    "get_tasks",
+    "get_version",
     "JsonRpcError",
     "JsonRpcErrorResponse",
     "JsonRpcId",
@@ -52,5 +75,10 @@ __all__ = [
     "Request",
     "Response",
     "ServiceUnavailable",
+    "stop_service",
+    "Task",
+    "TaskInfo",
+    "TaskOperation",
+    "Version",
     "WebSocketError",
 ]

@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "CoreEndpoints.h"
+#include "ServiceEndpoints.h"
 
 #include <brayns/core/Version.h>
 
@@ -118,7 +118,7 @@ struct JsonObjectReflector<TaskParams>
     }
 };
 
-void addCoreEndpoints(ApiBuilder &builder, Api &api, StopToken &token)
+void addServiceEndpoints(ApiBuilder &builder, Api &api, StopToken &token)
 {
     builder.endpoint("get-version", [] { return VersionResult(); })
         .description("Get the build version of the service currently running");
@@ -138,7 +138,7 @@ void addCoreEndpoints(ApiBuilder &builder, Api &api, StopToken &token)
     builder.endpoint("cancel-task", [&](TaskParams params) { api.cancelTask(params.taskId); })
         .description("Cancel given task");
 
-    builder.endpoint("wait-for-task-result", [&](TaskParams params) { return api.waitForTaskResult(params.taskId); })
+    builder.endpoint("get-task-result", [&](TaskParams params) { return api.waitForTaskResult(params.taskId); })
         .description("Wait for given task to finish and return its result");
 
     builder.endpoint("stop", [&] { token.stop(); })

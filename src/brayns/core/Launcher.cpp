@@ -23,8 +23,8 @@
 
 #include <iostream>
 
-#include <brayns/core/endpoints/CoreEndpoints.h>
 #include <brayns/core/endpoints/ObjectEndpoints.h>
+#include <brayns/core/endpoints/ServiceEndpoints.h>
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/utils/String.h>
@@ -74,7 +74,7 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     auto builder = ApiBuilder();
 
-    addCoreEndpoints(builder, api, token);
+    addServiceEndpoints(builder, api, token);
 
     auto objects = ObjectManager();
 

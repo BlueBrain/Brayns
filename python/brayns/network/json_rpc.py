@@ -20,8 +20,9 @@
 
 import json
 from dataclasses import dataclass
-from types import UnionType
-from typing import Any, cast, get_args, get_origin
+from typing import Any
+
+from brayns.utils.parsing import get, try_get
 
 JsonRpcId = int | str
 
@@ -90,64 +91,6 @@ def compose_request(request: JsonRpcRequest) -> bytes | str:
         return compose_binary(message, request.binary)
 
     return compose_text(message)
-
-
-def has_type(value: Any, t: Any) -> bool:
-    if t is Any:
-        return True
-
-    if t is None:
-        return value is None
-
-    origin = get_origin(t)
-
-    if origin is UnionType:
-        args = get_args(t)
-        return any(has_type(value, arg) for arg in args)
-
-    if origin is None:
-        origin = t
-
-    if not isinstance(value, origin):
-        return False
-
-    if origin is list:
-        items = cast(list, value)
-        (arg,) = get_args(t)
-        return all(has_type(item, arg) for item in items)
-
-    if origin is dict:
-        items = cast(dict, value)
-        keytype, valuetype = get_args(t)
-        return all(
-            has_type(key, keytype) and has_type(item, valuetype)
-            for key, item in items.items()
-        )
-
-    return True
-
-
-def check_type(value: Any, t: Any) -> None:
-    if not has_type(value, t):
-        raise TypeError("Invalid type in JSON-RPC message")
-
-
-def try_get(message: dict[str, Any], key: str, t: Any, default: Any = None) -> Any:
-    value = message.get(key, default)
-
-    check_type(value, t)
-
-    return value
-
-
-def get(message: dict[str, Any], key: str, t: Any) -> Any:
-    if key not in message:
-        raise KeyError(f"Missing mandatory key in JSON-RPC message {key}")
-
-    value = message[key]
-    check_type(value, t)
-
-    return value
 
 
 def deserialize_result(

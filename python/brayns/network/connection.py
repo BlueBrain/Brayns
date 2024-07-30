@@ -21,16 +21,17 @@
 import asyncio
 from logging import Logger
 from ssl import SSLContext
-from typing import Any, NamedTuple
+from typing import Any, NamedTuple, Self
+
 from .json_rpc import (
-    JsonRpcErrorResponse,
-    JsonRpcRequest,
-    JsonRpcSuccessResponse,
     JsonRpcError,
+    JsonRpcErrorResponse,
+    JsonRpcId,
+    JsonRpcRequest,
+    JsonRpcResponse,
+    JsonRpcSuccessResponse,
     compose_request,
     parse_response,
-    JsonRpcId,
-    JsonRpcResponse,
 )
 from .websocket import ServiceUnavailable, WebSocket, connect_websocket
 
@@ -92,7 +93,9 @@ class Response(NamedTuple):
 
 
 class FutureResponse:
-    def __init__(self, request_id: JsonRpcId | None, websocket: WebSocket, buffer: ResponseBuffer) -> None:
+    def __init__(
+        self, request_id: JsonRpcId | None, websocket: WebSocket, buffer: ResponseBuffer
+    ) -> None:
         self._request_id = request_id
         self._websocket = websocket
         self._buffer = buffer
@@ -143,6 +146,12 @@ class Connection:
         self._websocket = websocket
         self._buffer = ResponseBuffer()
 
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(self, *args) -> None:
+        await self._websocket.close()
+
     async def send_json_rpc(self, request: JsonRpcRequest) -> FutureResponse:
         if request.id is not None and self._buffer.is_running(request.id):
             raise ValueError(f"A request with ID {request.id} is already running")
@@ -167,17 +176,23 @@ class Connection:
 
         return await self.send_json_rpc(json_rpc_request)
 
-    async def task(self, method: str, params: Any = None, binary: bytes = b"") -> FutureResponse:
+    async def task(
+        self, method: str, params: Any = None, binary: bytes = b""
+    ) -> FutureResponse:
         request = Request(method, params, binary)
 
         return await self.send(request)
 
-    async def request(self, method: str, params: Any = None, binary: bytes = b"") -> Response:
+    async def request(
+        self, method: str, params: Any = None, binary: bytes = b""
+    ) -> Response:
         future = await self.task(method, params, binary)
 
         return await future.wait()
 
-    async def get_result(self, method: str, params: Any = None, binary: bytes = b"") -> Any:
+    async def get_result(
+        self, method: str, params: Any = None, binary: bytes = b""
+    ) -> Any:
         result, binary = await self.request(method, params, binary)
 
         if binary:
@@ -187,15 +202,19 @@ class Connection:
 
 
 async def connect(
-    url: str,
-    ssl: SSLContext,
-    max_frame_size: int,
+    host: str,
+    port: int = 5000,
+    ssl: SSLContext | None = None,
+    max_frame_size: int = 2**31,
     max_attempts: int | None = 1,
-    sleep_between_attempts: float = 1,
+    sleep_between_attempts: float = 0.1,
     logger: Logger | None = None,
 ) -> Connection:
     if logger is None:
         logger = Logger("Brayns")
+
+    protocol = "ws" if ssl is None else "wss"
+    url = f"{protocol}://{host}:{port}"
 
     attempt = 0
 
@@ -205,9 +224,9 @@ async def connect(
             websocket = await connect_websocket(url, ssl, max_frame_size, logger)
             break
         except ServiceUnavailable as e:
-            logger.warn("Connection attempt failed: %s", e)
+            logger.warning("Connection attempt failed: %s", e)
             if max_attempts is not None and attempt >= max_attempts:
-                logger.warn("Max connection attempts reached, aborted")
+                logger.warning("Max connection attempts reached, aborted")
                 raise
 
         await asyncio.sleep(sleep_between_attempts)
