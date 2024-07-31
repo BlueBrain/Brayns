@@ -21,11 +21,10 @@
 
 #pragma once
 
-#include <brayns/core/api/Api.h>
 #include <brayns/core/api/ApiBuilder.h>
 #include <brayns/core/service/Service.h>
 
 namespace brayns
 {
-void addCoreEndpoints(ApiBuilder &builder, Api &api, StopToken &token);
+void addServiceEndpoints(ApiBuilder &builder, Api &api, StopToken &token);
 }

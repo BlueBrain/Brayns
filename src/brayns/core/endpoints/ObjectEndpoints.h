@@ -1,4 +1,4 @@
-/* Copyright (c) 2015-2024, EPFL/Blue Brain Project
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
  *
  * Responsible Author: adrien.fleury@epfl.ch
@@ -21,17 +21,26 @@
 
 #pragma once
 
-#include <string>
-
-#include "Errors.h"
-#include "Messages.h"
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/objects/ObjectManager.h>
 
 namespace brayns
 {
-JsonRpcRequest parseTextJsonRpcRequest(const std::string &text);
-JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary);
-std::string composeAsText(const JsonRpcSuccessResponse &response);
-std::string composeAsBinary(const JsonRpcSuccessResponse &response);
-std::string composeError(const JsonRpcErrorResponse &response);
-std::string composeError(const std::optional<JsonRpcId> &id, const JsonRpcException &e);
+struct IdList
+{
+    std::vector<ObjectId> ids;
+};
+
+template<>
+struct JsonObjectReflector<IdList>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<IdList>();
+        builder.field("ids", [](auto &object) { return &object.ids; }).description("List of objects ID");
+        return builder.build();
+    }
+};
+
+void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects);
 }

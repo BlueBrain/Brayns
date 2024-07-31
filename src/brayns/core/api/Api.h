@@ -45,7 +45,7 @@ public:
     const EndpointSchema &getSchema(const std::string &method) const;
     RawResult execute(const std::string &method, RawParams params);
     std::vector<TaskInfo> getTasks() const;
-    ProgressInfo getTaskProgress(TaskId id) const;
+    TaskInfo getTask(TaskId id) const;
     RawResult waitForTaskResult(TaskId id);
     void cancelTask(TaskId id);
 

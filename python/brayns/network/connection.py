@@ -21,14 +21,24 @@
 import asyncio
 from logging import Logger
 from ssl import SSLContext
-from typing import Any, NamedTuple
-from .json_rpc import JsonRpcErrorResponse, JsonRpcId, JsonRpcRequest, JsonRpcResponse, compose_request, parse_response
+from typing import Any, NamedTuple, Self
+
+from .json_rpc import (
+    JsonRpcError,
+    JsonRpcErrorResponse,
+    JsonRpcId,
+    JsonRpcRequest,
+    JsonRpcResponse,
+    JsonRpcSuccessResponse,
+    compose_request,
+    parse_response,
+)
 from .websocket import ServiceUnavailable, WebSocket, connect_websocket
 
 
-class JsonRpcBuffer:
+class ResponseBuffer:
     def __init__(self) -> None:
-        self._responses = dict[JsonRpcId, JsonRpcResponse | JsonRpcErrorResponse | None]()
+        self._responses = dict[JsonRpcId, JsonRpcResponse | None]()
 
     def is_running(self, request_id: JsonRpcId) -> bool:
         return request_id in self._responses
@@ -40,9 +50,22 @@ class JsonRpcBuffer:
         return self._responses[request_id] is not None
 
     def add_request(self, request_id: JsonRpcId) -> None:
+        if request_id in self._responses:
+            raise ValueError("A request with same ID is already running")
+
         self._responses[request_id] = None
 
-    def add_response(self, message: JsonRpcResponse | JsonRpcErrorResponse) -> None:
+    def add_global_error(self, error: JsonRpcError) -> None:
+        response = JsonRpcErrorResponse(None, error)
+
+        for request_id in self._responses:
+            self._responses[request_id] = response
+
+    def add_response(self, message: JsonRpcResponse) -> None:
+        if message.id is None:
+            self.add_global_error(message.error)
+            return
+
         if message.id not in self._responses:
             raise ValueError("No requests match given response ID")
 
@@ -51,38 +74,55 @@ class JsonRpcBuffer:
 
         self._responses[message.id] = message
 
-    def get_response(self, request_id: JsonRpcId) -> JsonRpcResponse | JsonRpcErrorResponse | None:
+    def get_response(self, request_id: JsonRpcId) -> JsonRpcResponse | None:
         if not self.is_done(request_id):
             return None
 
         return self._responses.pop(request_id)
 
 
-class Result(NamedTuple):
-    value: Any
+class Request(NamedTuple):
+    method: str
+    params: Any = None
+    binary: bytes = b""
+
+
+class Response(NamedTuple):
+    result: Any
     binary: bytes
 
 
-class JsonRpcFuture:
-    def __init__(self, request_id: JsonRpcId, websocket: WebSocket, buffer: JsonRpcBuffer) -> None:
+class FutureResponse:
+    def __init__(self, request_id: JsonRpcId | None, websocket: WebSocket, buffer: ResponseBuffer) -> None:
         self._request_id = request_id
         self._websocket = websocket
         self._buffer = buffer
 
     @property
-    def request_id(self) -> JsonRpcId:
+    def request_id(self) -> JsonRpcId | None:
         return self._request_id
 
     @property
     def done(self) -> bool:
+        if self._request_id is None:
+            return True
+
         return self._buffer.is_done(self._request_id)
 
     async def poll(self) -> None:
+        if self.done:
+            return
+
         data = await self._websocket.receive()
+
         message = parse_response(data)
+
         self._buffer.add_response(message)
 
-    async def wait_for_result(self) -> Result:
+    async def wait(self) -> Response:
+        if self._request_id is None:
+            raise ValueError("Cannot wait for result of requests without ID")
+
         while True:
             response = self._buffer.get_response(self._request_id)
 
@@ -90,8 +130,8 @@ class JsonRpcFuture:
                 await self.poll()
                 continue
 
-            if isinstance(response, JsonRpcResponse):
-                return Result(response.result, response.binary)
+            if isinstance(response, JsonRpcSuccessResponse):
+                return Response(response.result, response.binary)
 
             if isinstance(response, JsonRpcErrorResponse):
                 raise response.error
@@ -102,38 +142,71 @@ class JsonRpcFuture:
 class Connection:
     def __init__(self, websocket: WebSocket) -> None:
         self._websocket = websocket
-        self._buffer = JsonRpcBuffer()
+        self._buffer = ResponseBuffer()
 
-    async def send(self, request: JsonRpcRequest) -> JsonRpcFuture:
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(self, *args) -> None:
+        await self._websocket.close()
+
+    async def send_json_rpc(self, request: JsonRpcRequest) -> FutureResponse:
+        if request.id is not None and self._buffer.is_running(request.id):
+            raise ValueError(f"A request with ID {request.id} is already running")
+
         data = compose_request(request)
-        await self._websocket.send(data)
-        return JsonRpcFuture(request.id, self._websocket, self._buffer)
 
-    async def start(self, method: str, params: Any = None, binary: bytes = b"") -> JsonRpcFuture:
+        await self._websocket.send(data)
+
+        if request.id is not None:
+            self._buffer.add_request(request.id)
+
+        return FutureResponse(request.id, self._websocket, self._buffer)
+
+    async def send(self, request: Request) -> FutureResponse:
         request_id = 0
 
         while self._buffer.is_running(request_id):
             request_id += 1
 
-        request = JsonRpcRequest(request_id, method, params, binary)
+        method, params, binary = request
+        json_rpc_request = JsonRpcRequest(method, params, binary, request_id)
+
+        return await self.send_json_rpc(json_rpc_request)
+
+    async def task(self, method: str, params: Any = None, binary: bytes = b"") -> FutureResponse:
+        request = Request(method, params, binary)
 
         return await self.send(request)
 
-    async def request(self, method: str, params: Any = None, binary: bytes = b"") -> Result:
-        future = await self.start(method, params, binary)
-        return await future.wait_for_result()
+    async def request(self, method: str, params: Any = None, binary: bytes = b"") -> Response:
+        future = await self.task(method, params, binary)
+
+        return await future.wait()
+
+    async def get_result(self, method: str, params: Any = None, binary: bytes = b"") -> Any:
+        result, binary = await self.request(method, params, binary)
+
+        if binary:
+            raise ValueError(f"Unexpected binary data in response of method {method}")
+
+        return result
 
 
 async def connect(
-    url: str,
-    ssl: SSLContext,
-    max_frame_size: int,
+    host: str,
+    port: int = 5000,
+    ssl: SSLContext | None = None,
+    max_frame_size: int = 2**31,
     max_attempts: int | None = 1,
-    sleep_between_attempts: float = 1,
+    sleep_between_attempts: float = 0.1,
     logger: Logger | None = None,
 ) -> Connection:
     if logger is None:
         logger = Logger("Brayns")
+
+    protocol = "ws" if ssl is None else "wss"
+    url = f"{protocol}://{host}:{port}"
 
     attempt = 0
 
@@ -143,9 +216,9 @@ async def connect(
             websocket = await connect_websocket(url, ssl, max_frame_size, logger)
             break
         except ServiceUnavailable as e:
-            logger.warn("Connection attempt failed: %s", e)
+            logger.warning("Connection attempt failed: %s", e)
             if max_attempts is not None and attempt >= max_attempts:
-                logger.warn("Max connection attempts reached, aborted")
+                logger.warning("Max connection attempts reached, aborted")
                 raise
 
         await asyncio.sleep(sleep_between_attempts)

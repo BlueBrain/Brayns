@@ -20,9 +20,10 @@
 
 from logging import Logger
 from ssl import SSLContext
-from websockets.client import connect, WebSocketClientProtocol
-from websockets.exceptions import WebSocketException
 from typing import Protocol, Self
+
+from websockets.client import WebSocketClientProtocol, connect
+from websockets.exceptions import WebSocketException
 
 
 class WebSocketError(Exception): ...
@@ -80,7 +81,7 @@ class _WebSocket(WebSocket):
         try:
             await self._websocket.close()
         except WebSocketException as e:
-            self._logger.warn("Failed to close connection: %s", e)
+            self._logger.warning("Failed to close connection: %s", e)
             raise WebSocketError(str(e))
 
         self._logger.info("Websocket connection closed")
@@ -97,7 +98,7 @@ class _WebSocket(WebSocket):
         try:
             await self._websocket.send(sliced)
         except WebSocketException as e:
-            self._logger.warn("Failed to send frame: %s", e)
+            self._logger.warning("Failed to send frame: %s", e)
             raise WebSocketError(str(e))
 
         self._logger.info("Frame sent")
@@ -123,10 +124,10 @@ async def connect_websocket(url: str, ssl: SSLContext | None, max_frame_size: in
     try:
         websocket = await connect(url, ssl=ssl, max_size=max_frame_size)
     except WebSocketException as e:
-        logger.warn("Connection failed: %s", e)
+        logger.warning("Connection failed: %s", e)
         raise WebSocketError(str(e))
     except OSError as e:
-        logger.warn("Service not found (probably not ready): %s", e)
+        logger.warning("Service not found (probably not ready): %s", e)
         raise ServiceUnavailable(str(e))
 
     wrapper = _WebSocket(websocket, max_frame_size, logger)

@@ -50,7 +50,7 @@ struct Metadata
 template<>
 struct JsonObjectReflector<Metadata>
 {
-    static auto build()
+    static auto reflect()
     {
         auto builder = JsonBuilder<Metadata>();
         builder.field("id", [](auto &object) { return &object.id; })
@@ -75,7 +75,7 @@ struct UserObject
 template<ReflectedJson Properties>
 struct JsonObjectReflector<UserObject<Properties>>
 {
-    static auto build()
+    static auto reflect()
     {
         auto builder = JsonBuilder<UserObject<Properties>>();
         builder.field("metadata", [](auto &object) { return &object.metadata; })
@@ -119,7 +119,7 @@ class ObjectManager
 public:
     explicit ObjectManager();
 
-    std::vector<ObjectId> getIds() const;
+    std::vector<Metadata> getAllMetadata() const;
     const Metadata &getMetadata(ObjectId id) const;
     ObjectId getId(const std::string &tag) const;
     void remove(ObjectId id);
@@ -129,9 +129,7 @@ public:
     const std::shared_ptr<T> &getShared(ObjectId id) const
     {
         auto &entry = getEntry(id);
-
         checkType(entry, typeid(std::shared_ptr<T>));
-
         return std::any_cast<const std::shared_ptr<T> &>(entry.object);
     }
 
@@ -149,6 +147,7 @@ public:
         try
         {
             auto &[type, tag, userData] = settings;
+
             auto metadata = Metadata{id, std::move(type), std::move(tag), userData};
             auto object = T{std::move(metadata), std::move(properties)};
             auto ptr = std::make_shared<T>(std::move(object));

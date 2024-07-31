@@ -44,7 +44,8 @@ struct RawResult
 
 struct RawTask
 {
-    std::function<ProgressInfo()> getProgress;
+    std::size_t operationCount;
+    std::function<TaskOperation()> getCurrentOperation;
     std::function<RawResult()> wait;
     std::function<void()> cancel;
 };
@@ -71,7 +72,8 @@ struct JsonObjectReflector<TaskResult>
 struct TaskInfo
 {
     TaskId id;
-    ProgressInfo progress;
+    std::size_t operationCount;
+    TaskOperation currentOperation;
 };
 
 template<>
@@ -80,8 +82,11 @@ struct JsonObjectReflector<TaskInfo>
     static auto reflect()
     {
         auto builder = JsonBuilder<TaskInfo>();
-        builder.field("id", [](auto &object) { return &object.id; }).description("Task ID to monitor it");
-        builder.field("progress", [](auto &object) { return &object.progress; }).description("Current task progress");
+        builder.field("id", [](auto &object) { return &object.id; }).description("Task ID");
+        builder.field("operation_count", [](auto &object) { return &object.operationCount; })
+            .description("Number of operations the task will perform");
+        builder.field("current_operation", [](auto &object) { return &object.currentOperation; })
+            .description("Current task operation");
         return builder.build();
     }
 };

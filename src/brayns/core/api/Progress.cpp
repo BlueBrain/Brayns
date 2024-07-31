@@ -30,14 +30,25 @@ TaskCancelledException::TaskCancelledException():
 {
 }
 
-ProgressInfo ProgressState::get()
+TaskMonitor::TaskMonitor(std::size_t operationCount, std::string initialOperation):
+    _operationCount(operationCount),
+    _currentOperation{std::move(initialOperation)}
+{
+}
+
+std::size_t TaskMonitor::getOperationCount() const
+{
+    return _operationCount;
+}
+
+TaskOperation TaskMonitor::getCurrentOperation()
 {
     auto lock = std::lock_guard(_mutex);
 
-    return _info;
+    return _currentOperation;
 }
 
-void ProgressState::update(float currentOperationProgress)
+void TaskMonitor::update(float completion)
 {
     auto lock = std::lock_guard(_mutex);
 
@@ -46,11 +57,12 @@ void ProgressState::update(float currentOperationProgress)
         throw TaskCancelledException();
     }
 
-    assert(currentOperationProgress >= 0.0F && currentOperationProgress <= 1.0F);
-    _info.currentOperationProgress = currentOperationProgress;
+    assert(completion >= 0.0F && completion <= 1.0F);
+
+    _currentOperation.completion = completion;
 }
 
-void ProgressState::nextOperation(std::string value)
+void TaskMonitor::nextOperation(std::string description)
 {
     auto lock = std::lock_guard(_mutex);
 
@@ -59,30 +71,34 @@ void ProgressState::nextOperation(std::string value)
         throw TaskCancelledException();
     }
 
-    _info.currentOperation = std::move(value);
-    _info.currentOperationProgress = 0.0F;
+    _currentOperation.description = std::move(description);
+    _currentOperation.completion = 0.0F;
+    _currentOperation.index += 1;
+
+    assert(_currentOperation.index < _operationCount);
 }
 
-void ProgressState::cancel()
+void TaskMonitor::cancel()
 {
     auto lock = std::lock_guard(_mutex);
 
     assert(!_cancelled);
+
     _cancelled = true;
 }
 
-Progress::Progress(std::shared_ptr<ProgressState> state):
-    _state(std::move(state))
+Progress::Progress(std::shared_ptr<TaskMonitor> monitor):
+    _monitor(std::move(monitor))
 {
 }
 
-void Progress::update(float currentOperationProgress)
+void Progress::update(float completion)
 {
-    _state->update(currentOperationProgress);
+    _monitor->update(completion);
 }
 
-void Progress::nextOperation(std::string value)
+void Progress::nextOperation(std::string description)
 {
-    _state->nextOperation(std::move(value));
+    _monitor->nextOperation(std::move(description));
 }
 }

@@ -67,23 +67,22 @@ ObjectManager::ObjectManager()
     disableNullId(_ids);
 }
 
-std::vector<ObjectId> ObjectManager::getIds() const
+std::vector<Metadata> ObjectManager::getAllMetadata() const
 {
-    auto ids = std::vector<ObjectId>();
-    ids.reserve(_objects.size());
+    auto objects = std::vector<Metadata>();
+    objects.reserve(_objects.size());
 
     for (const auto &[id, object] : _objects)
     {
-        ids.push_back(id);
+        objects.push_back(*object.getMetadata());
     }
 
-    return ids;
+    return objects;
 }
 
 const Metadata &ObjectManager::getMetadata(ObjectId id) const
 {
     auto i = getObjectIterator(_objects, id);
-
     return *i->second.getMetadata();
 }
 
@@ -153,7 +152,6 @@ void ObjectManager::addEntry(ObjectId id, ObjectManagerEntry entry)
     if (!tag.empty())
     {
         checkTagIsNotAlreadyUsed(_idsByTag, tag);
-
         _idsByTag.emplace(tag, id);
     }
 

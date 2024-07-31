@@ -21,28 +21,64 @@
 """
 Brayns Python package.
 
-This package provides a high level API to interact with an instance of Brayns
-instance through websockets.
-
-The low level JSON-RPC API is also available using the instance directly.
+This package provides an API to interact with Brayns service.
 """
 
-from .version import VERSION
-from .network.connection import Connection, connect
-from .network.json_rpc import JsonRpcError, JsonRpcErrorResponse, JsonRpcId, JsonRpcRequest, JsonRpcResponse
+from .api.core.service import (
+    Endpoint,
+    Task,
+    TaskInfo,
+    TaskOperation,
+    Version,
+    cancel_task,
+    get_endpoint,
+    get_methods,
+    get_task,
+    get_task_result,
+    get_tasks,
+    get_version,
+    stop_service,
+)
+from .network.connection import Connection, FutureResponse, Request, Response, connect
+from .network.json_rpc import (
+    JsonRpcError,
+    JsonRpcErrorResponse,
+    JsonRpcId,
+    JsonRpcRequest,
+    JsonRpcResponse,
+    JsonRpcSuccessResponse,
+)
 from .network.websocket import ServiceUnavailable, WebSocketError
+from .version import VERSION
 
 __version__ = VERSION
 """Version tag of brayns Python package (major.minor.patch)."""
 
 __all__ = [
-    "Connection",
+    "cancel_task",
     "connect",
+    "Connection",
+    "Endpoint",
+    "FutureResponse",
+    "get_endpoint",
+    "get_methods",
+    "get_task_result",
+    "get_task",
+    "get_tasks",
+    "get_version",
     "JsonRpcError",
     "JsonRpcErrorResponse",
     "JsonRpcId",
     "JsonRpcRequest",
     "JsonRpcResponse",
+    "JsonRpcSuccessResponse",
+    "Request",
+    "Response",
     "ServiceUnavailable",
+    "stop_service",
+    "Task",
+    "TaskInfo",
+    "TaskOperation",
+    "Version",
     "WebSocketError",
 ]

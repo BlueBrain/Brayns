@@ -17,9 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-mypy==1.10.1
-pytest==8.2.2
-pytest-asyncio==0.23.8
-pytest-integration==0.2.3
-ruff==0.5.0

@@ -17,26 +17,3 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
-from brayns.network.json_rpc import JsonRpcRequest, compose_request
-
-
-def test_compose_request() -> None:
-    request = JsonRpcRequest(0, "test", 123)
-    data = compose_request(request)
-    text = """{"jsonrpc":"2.0","id":0,"method":"test","params":123}"""
-    assert data == text
-
-    request.binary = b"123"
-
-    data = compose_request(request)
-
-    assert len(data) == len(text) + 4 + 3
-
-    assert isinstance(data, bytes)
-
-    size = int.from_bytes(data[:4], byteorder="little", signed=False)
-
-    assert size == len(text)
-    assert data[4 : size + 4].decode() == text
-    assert data[size + 4 :] == request.binary

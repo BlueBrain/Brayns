@@ -42,7 +42,7 @@ JsonRpcRequest parseRequest(const RawRequest &request)
         return parseBinaryJsonRpcRequest(request.data);
     }
 
-    return parseJsonRpcRequest(request.data);
+    return parseTextJsonRpcRequest(request.data);
 }
 
 ResponseData composeResponse(const JsonRpcId &id, RawResult result)
@@ -57,7 +57,80 @@ ResponseData composeResponse(const JsonRpcId &id, RawResult result)
     return {.data = std::move(data), .binary = true};
 }
 
-std::optional<JsonRpcRequest> tryParseRequest(const RawRequest &request, Logger &logger)
+void sendExecutionError(
+    const std::optional<JsonRpcId> &id,
+    const JsonRpcException &e,
+    const ResponseHandler &respond,
+    Logger &logger)
+{
+    if (!id)
+    {
+        logger.info("No ID in request, skipping error response");
+        return;
+    }
+
+    logger.info("Composing execution error");
+    auto text = composeError(*id, e);
+    logger.info("Execution error composed");
+
+    logger.info("Sending execution error");
+    respond({std::move(text)});
+    logger.info("Execution error sent");
+}
+
+void sendParsingError(const JsonRpcException &e, const ResponseHandler &respond, Logger &logger)
+{
+    logger.info("Composing parsing error");
+    auto text = composeError(std::nullopt, e);
+    logger.info("Parsing error composed");
+
+    logger.info("Sending parsing error");
+    respond({std::move(text)});
+    logger.info("Parsing error sent");
+}
+
+void executeRequest(JsonRpcRequest request, const ResponseHandler &respond, Api &api, Logger &logger)
+{
+    try
+    {
+        auto params = RawParams{std::move(request.params), std::move(request.binary)};
+
+        logger.info("Calling endpoint for request {}", toString(request.id));
+        auto result = api.execute(request.method, std::move(params));
+        logger.info("Successfully called endpoint");
+
+        if (!request.id)
+        {
+            logger.info("No ID in request, skipping response");
+            return;
+        }
+
+        logger.info("Composing response");
+        auto response = composeResponse(*request.id, std::move(result));
+        logger.info("Successfully composed response");
+
+        logger.info("Sending response");
+        respond({response.data, response.binary});
+        logger.info("Response sent");
+    }
+    catch (const JsonRpcException &e)
+    {
+        logger.warn("Error during request execution: '{}'", e.what());
+        sendExecutionError(request.id, e, respond, logger);
+    }
+    catch (const std::exception &e)
+    {
+        logger.error("Unexpected error during request execution: '{}'", e.what());
+        sendExecutionError(request.id, InternalError(e.what()), respond, logger);
+    }
+    catch (...)
+    {
+        logger.error("Unknown error during request execution");
+        sendExecutionError(request.id, InternalError("Unknown execution error"), respond, logger);
+    }
+}
+
+void handleRequest(const RawRequest &request, Api &api, Logger &logger)
 {
     try
     {
@@ -65,86 +138,23 @@ std::optional<JsonRpcRequest> tryParseRequest(const RawRequest &request, Logger 
         auto jsonRpcRequest = parseRequest(request);
         logger.info("Successfully parsed request");
 
-        return jsonRpcRequest;
+        executeRequest(std::move(jsonRpcRequest), request.respond, api, logger);
     }
     catch (const JsonRpcException &e)
     {
         logger.warn("Error while parsing request: '{}'", e.what());
-        request.respond({composeError(NullJson(), e)});
+        sendParsingError(e, request.respond, logger);
     }
     catch (const std::exception &e)
     {
         logger.error("Unexpected error while parsing request: '{}'", e.what());
-        request.respond({composeError(NullJson(), InternalError(e.what()))});
+        sendParsingError(InternalError(e.what()), request.respond, logger);
     }
     catch (...)
     {
         logger.error("Unknown error while parsing request");
-        request.respond({composeError(NullJson(), InternalError("Unknown parsing error"))});
+        sendParsingError(InternalError("Unknown parsing error"), request.respond, logger);
     }
-
-    return std::nullopt;
-}
-
-ResponseData executeRequest(JsonRpcRequest request, Api &api, Logger &logger)
-{
-    auto params = RawParams{std::move(request.params), std::move(request.binary)};
-
-    logger.info("Calling endpoint for request {}", request.id);
-    auto result = api.execute(request.method, std::move(params));
-    logger.info("Successfully called endpoint");
-
-    if (std::holds_alternative<NullJson>(request.id))
-    {
-        logger.info("No ID in request, skipping response");
-        return {};
-    }
-
-    logger.info("Composing response");
-    auto response = composeResponse(request.id, std::move(result));
-    logger.info("Successfully composed response");
-
-    return response;
-}
-
-void tryExecuteRequest(JsonRpcRequest request, const ResponseHandler &respond, Api &api, Logger &logger)
-{
-    try
-    {
-        auto [data, binary] = executeRequest(std::move(request), api, logger);
-
-        if (!data.empty())
-        {
-            respond({data, binary});
-        }
-    }
-    catch (const JsonRpcException &e)
-    {
-        logger.warn("Error during request execution: '{}'", e.what());
-        respond({composeError(request.id, e)});
-    }
-    catch (const std::exception &e)
-    {
-        logger.error("Unexpected error during request execution: '{}'", e.what());
-        respond({composeError(request.id, InternalError(e.what()))});
-    }
-    catch (...)
-    {
-        logger.error("Unknown error during request execution");
-        respond({composeError(request.id, InternalError("Unknown handling error"))});
-    }
-}
-
-void handleRequest(const RawRequest &request, Api &api, Logger &logger)
-{
-    auto jsonRpcRequest = tryParseRequest(request, logger);
-
-    if (!jsonRpcRequest)
-    {
-        return;
-    }
-
-    tryExecuteRequest(std::move(*jsonRpcRequest), request.respond, api, logger);
 }
 }
 
