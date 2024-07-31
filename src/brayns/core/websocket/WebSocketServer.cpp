@@ -54,7 +54,7 @@ public:
 
         response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
 
-        response.send() << "OK";
+        response.send() << "OK\n";
 
         _logger->debug("Healthcheck ok");
     }
@@ -146,7 +146,7 @@ public:
 
         _logger->info("New HTTP request from {} to uri '{}'", host, uri);
 
-        if (uri == "/healthz")
+        if (uri == "/health")
         {
             return new HealthcheckRequestHandler(*_logger);
         }
@@ -189,17 +189,26 @@ Poco::Net::Context::Ptr createSslContext(const SslSettings &settings)
 Poco::Net::ServerSocket createServerSocket(const WebSocketServerSettings &settings)
 {
     auto address = Poco::Net::SocketAddress(settings.host, settings.port);
+    auto reuseAddress = true;
+    auto reusePort = false;
+    auto backlog = 64;
 
     if (!settings.ssl)
     {
-        return Poco::Net::ServerSocket(address);
-    }
+        auto socket = Poco::Net::ServerSocket();
+        socket.bind(address, reuseAddress, reusePort);
+        socket.listen(backlog);
 
-    auto backlog = 64;
+        return socket;
+    }
 
     auto context = createSslContext(*settings.ssl);
 
-    return Poco::Net::SecureServerSocket(address, backlog, context);
+    auto socket = Poco::Net::SecureServerSocket(context);
+    socket.bind(address, reuseAddress, reusePort);
+    socket.listen(backlog);
+
+    return socket;
 }
 
 Poco::Net::HTTPServerParams::Ptr extractServerParams(const WebSocketServerSettings &settings)

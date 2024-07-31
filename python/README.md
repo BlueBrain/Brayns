@@ -81,8 +81,6 @@ pip install -r requirements-dev.txt
 ```bash
 BRAYNS_HOST=localhost
 BRAYNS_PORT=5000
-BRAYNS_EXECUTABLE=path/to/braynsService
-LD_LIBRARY_PATH=path/to/additional/libs
 ```
 
 Note: integration testing can be disable using the pytest --without-integration flag.

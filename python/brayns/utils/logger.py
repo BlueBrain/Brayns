@@ -18,24 +18,19 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logging import DEBUG
-import os
-from collections.abc import AsyncIterator
-
-import pytest_asyncio
-
-from brayns import Connection, connect, create_logger
-
-HOST = os.getenv("BRAYNS_HOST", "localhost")
-PORT = int(os.getenv("BRAYNS_PORT", "5000"))
+from logging import INFO, Formatter, Logger, StreamHandler
+import sys
 
 
-async def connect_to_service() -> Connection:
-    logger = create_logger(DEBUG)
-    return await connect(HOST, PORT, max_attempts=10, logger=logger)
+def create_logger(level: int | str = INFO) -> Logger:
+    logger = Logger("Brayns", level)
 
+    format = "[%(asctime)s][%(name)s][%(levelname)s] %(message)s"
+    formatter = Formatter(format)
 
-@pytest_asyncio.fixture
-async def connection() -> AsyncIterator[Connection]:
-    async with await connect_to_service() as connection:
-        yield connection
+    handler = StreamHandler(sys.stdout)
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
+
+    return logger

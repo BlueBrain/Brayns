@@ -61,6 +61,7 @@ std::optional<JsonRpcResponse> execute(JsonRpcRequest request, Api &api, Logger 
         logger.info("Calling endpoint for request {}", toString(request.id));
         auto params = RawParams{std::move(request.params), std::move(request.binary)};
         auto result = api.execute(request.method, std::move(params));
+
         logger.info("Successfully called endpoint");
 
         if (!request.id)
@@ -69,7 +70,7 @@ std::optional<JsonRpcResponse> execute(JsonRpcRequest request, Api &api, Logger 
             return {};
         }
 
-        return JsonRpcSuccessResponse{*request.id, std::move(result)};
+        return JsonRpcSuccessResponse{*request.id, result.json, std::move(result.binary)};
     }
     catch (const JsonRpcException &e)
     {

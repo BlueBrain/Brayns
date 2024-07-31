@@ -127,7 +127,7 @@ async def connect_websocket(url: str, ssl: SSLContext | None, max_frame_size: in
         logger.warning("Connection failed: %s", e)
         raise WebSocketError(str(e))
     except OSError as e:
-        logger.warning("Service not found (probably not ready): %s", e)
+        logger.warning("Service not found (maybe not ready): %s", e)
         raise ServiceUnavailable(str(e))
 
     wrapper = _WebSocket(websocket, max_frame_size, logger)

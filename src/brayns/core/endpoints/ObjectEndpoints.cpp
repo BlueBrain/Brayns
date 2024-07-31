@@ -23,68 +23,38 @@
 
 namespace brayns
 {
-struct TagList
-{
-    std::vector<std::string> tags;
-};
-
-template<>
-struct JsonObjectReflector<TagList>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<TagList>();
-        builder.field("tags", [](auto &object) { return &object.tags; }).description("List of object tag");
-        return builder.build();
-    }
-};
-
-struct MetadataList
+struct ObjectList
 {
     std::vector<Metadata> objects;
 };
 
 template<>
-struct JsonObjectReflector<MetadataList>
+struct JsonObjectReflector<ObjectList>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<MetadataList>();
+        auto builder = JsonBuilder<ObjectList>();
         builder.field("objects", [](auto &object) { return &object.objects; })
             .description("List of object generic properties");
         return builder.build();
     }
 };
 
-std::vector<Metadata> getMetadata(ObjectManager &objects, const std::vector<ObjectId> &ids)
+std::vector<Metadata> getSelectedObjects(ObjectManager &objects, const std::vector<ObjectId> &ids)
 {
     auto metadatas = std::vector<Metadata>();
     metadatas.reserve(ids.size());
 
     for (auto id : ids)
     {
-        const auto &metadata = objects.getMetadata(id);
+        const auto &metadata = objects.getObject(id);
         metadatas.push_back(metadata);
     }
 
     return metadatas;
 }
 
-std::vector<ObjectId> getIdsFromTags(ObjectManager &objects, const std::vector<std::string> &tags)
-{
-    auto ids = std::vector<ObjectId>();
-    ids.reserve(tags.size());
-
-    for (const auto &tag : tags)
-    {
-        auto id = objects.getId(tag);
-        ids.push_back(id);
-    }
-
-    return ids;
-}
-
-void removeObjects(ObjectManager &objects, const std::vector<ObjectId> &ids)
+void removeSelectedObjects(ObjectManager &objects, const std::vector<ObjectId> &ids)
 {
     for (auto id : ids)
     {
@@ -94,16 +64,13 @@ void removeObjects(ObjectManager &objects, const std::vector<ObjectId> &ids)
 
 void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects)
 {
-    builder.endpoint("get-all-objects", [&] { return MetadataList{objects.getAllMetadata()}; })
+    builder.endpoint("get-all-objects", [&] { return ObjectList{objects.getAllObjects()}; })
         .description("Return the generic properties of all objects, use get-{type} to get specific properties");
 
-    builder.endpoint("get-objects", [&](IdList params) { return MetadataList{getMetadata(objects, params.ids)}; })
+    builder.endpoint("get-objects", [&](IdList params) { return ObjectList{getSelectedObjects(objects, params.ids)}; })
         .description("Get generic object properties from given object IDs");
 
-    builder.endpoint("get-object-ids", [&](TagList params) { return IdList{getIdsFromTags(objects, params.tags)}; })
-        .description("Map given list of tags to object IDs (result is an array in the same order as params)");
-
-    builder.endpoint("remove-objects", [&](IdList params) { removeObjects(objects, params.ids); })
+    builder.endpoint("remove-objects", [&](IdList params) { removeSelectedObjects(objects, params.ids); })
         .description(
             "Remove objects from the registry, the ID can be reused by future objects. Note that the object can stay "
             "in memory as long as it is used by other objects (using a ref-counted system)");

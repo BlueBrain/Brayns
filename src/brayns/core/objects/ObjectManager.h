@@ -43,7 +43,6 @@ struct Metadata
 {
     ObjectId id;
     std::string type;
-    std::string tag = {};
     JsonValue userData = {};
 };
 
@@ -57,8 +56,6 @@ struct JsonObjectReflector<Metadata>
             .description("Object ID, primary way to query this object");
         builder.field("type", [](auto &object) { return &object.type; })
             .description("Object type, use endpoint 'get-{type}' to query detailed information about the object");
-        builder.field("tag", [](auto &object) { return &object.tag; })
-            .description("Optional user defined tag, can also be used to query this object");
         builder.field("user_data", [](auto &object) { return &object.userData; })
             .description("Optional user data (only for user, not used by brayns)");
         return builder.build();
@@ -107,10 +104,11 @@ struct ObjectManagerEntry
     std::function<Metadata *()> getMetadata;
 };
 
+template<ReflectedJson Properties>
 struct UserObjectSettings
 {
     std::string type;
-    std::string tag = {};
+    Properties properties;
     JsonValue userData = {};
 };
 
@@ -119,9 +117,8 @@ class ObjectManager
 public:
     explicit ObjectManager();
 
-    std::vector<Metadata> getAllMetadata() const;
-    const Metadata &getMetadata(ObjectId id) const;
-    ObjectId getId(const std::string &tag) const;
+    std::vector<Metadata> getAllObjects() const;
+    const Metadata &getObject(ObjectId id) const;
     void remove(ObjectId id);
     void clear();
 
@@ -140,21 +137,19 @@ public:
     }
 
     template<ValidUserObject T>
-    T &create(UserObjectSettings settings, GetUserObjectProperties<T> properties)
+    T &create(UserObjectSettings<GetUserObjectProperties<T>> settings)
     {
         auto id = _ids.next();
 
         try
         {
-            auto &[type, tag, userData] = settings;
-
-            auto metadata = Metadata{id, std::move(type), std::move(tag), userData};
-            auto object = T{std::move(metadata), std::move(properties)};
+            auto metadata = Metadata{id, std::move(settings.type), settings.userData};
+            auto object = T{std::move(metadata), std::move(settings.properties)};
             auto ptr = std::make_shared<T>(std::move(object));
 
             auto entry = ObjectManagerEntry{ptr, [=] { return &ptr->metadata; }};
 
-            addEntry(id, std::move(entry));
+            _objects.emplace(id, std::move(entry));
 
             return *ptr;
         }
@@ -173,6 +168,5 @@ private:
     static void checkType(const ObjectManagerEntry &entry, const std::type_info &expected);
 
     const ObjectManagerEntry &getEntry(ObjectId id) const;
-    void addEntry(ObjectId id, ObjectManagerEntry entry);
 };
 }

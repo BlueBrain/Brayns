@@ -50,6 +50,7 @@ from .network.json_rpc import (
 )
 from .network.websocket import ServiceUnavailable, WebSocketError
 from .version import VERSION
+from .utils.logger import create_logger
 
 __version__ = VERSION
 """Version tag of brayns Python package (major.minor.patch)."""
@@ -58,6 +59,7 @@ __all__ = [
     "cancel_task",
     "connect",
     "Connection",
+    "create_logger",
     "Endpoint",
     "FutureResponse",
     "get_endpoint",

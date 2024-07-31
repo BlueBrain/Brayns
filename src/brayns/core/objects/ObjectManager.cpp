@@ -27,23 +27,9 @@ namespace
 {
 using namespace brayns;
 
-using IdByTag = std::unordered_map<std::string, ObjectId>;
-
 void disableNullId(IdGenerator<ObjectId> &ids)
 {
     ids.next();
-}
-
-void checkTagIsNotAlreadyUsed(const IdByTag &ids, const std::string &tag)
-{
-    auto i = ids.find(tag);
-
-    if (i == ids.end())
-    {
-        return;
-    }
-
-    throw InvalidParams(fmt::format("Tag '{}' already used by object with ID {}", tag, i->first));
 }
 
 auto getObjectIterator(auto &objects, ObjectId id)
@@ -67,7 +53,7 @@ ObjectManager::ObjectManager()
     disableNullId(_ids);
 }
 
-std::vector<Metadata> ObjectManager::getAllMetadata() const
+std::vector<Metadata> ObjectManager::getAllObjects() const
 {
     auto objects = std::vector<Metadata>();
     objects.reserve(_objects.size());
@@ -80,22 +66,10 @@ std::vector<Metadata> ObjectManager::getAllMetadata() const
     return objects;
 }
 
-const Metadata &ObjectManager::getMetadata(ObjectId id) const
+const Metadata &ObjectManager::getObject(ObjectId id) const
 {
     auto i = getObjectIterator(_objects, id);
     return *i->second.getMetadata();
-}
-
-ObjectId ObjectManager::getId(const std::string &tag) const
-{
-    auto i = _idsByTag.find(tag);
-
-    if (i == _idsByTag.end())
-    {
-        throw InvalidParams(fmt::format("No objects found with tag '{}'", tag));
-    }
-
-    return i->second;
 }
 
 void ObjectManager::remove(ObjectId id)
@@ -103,13 +77,6 @@ void ObjectManager::remove(ObjectId id)
     auto i = getObjectIterator(_objects, id);
 
     auto &metadata = *i->second.getMetadata();
-
-    const auto &tag = metadata.tag;
-
-    if (!tag.empty())
-    {
-        _idsByTag.erase(tag);
-    }
 
     metadata.id = nullId;
     _objects.erase(i);
@@ -140,29 +107,6 @@ void ObjectManager::checkType(const ObjectManagerEntry &entry, const std::type_i
 const ObjectManagerEntry &ObjectManager::getEntry(ObjectId id) const
 {
     auto i = getObjectIterator(_objects, id);
-
     return i->second;
-}
-
-void ObjectManager::addEntry(ObjectId id, ObjectManagerEntry entry)
-{
-    const auto &metadata = *entry.getMetadata();
-    const auto &tag = metadata.tag;
-
-    if (!tag.empty())
-    {
-        checkTagIsNotAlreadyUsed(_idsByTag, tag);
-        _idsByTag.emplace(tag, id);
-    }
-
-    try
-    {
-        _objects.emplace(id, std::move(entry));
-    }
-    catch (...)
-    {
-        _idsByTag.erase(tag);
-        throw;
-    }
 }
 }
