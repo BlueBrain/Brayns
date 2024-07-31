@@ -21,9 +21,7 @@
 
 #pragma once
 
-#include <functional>
-#include <string>
-#include <string_view>
+#include <mutex>
 
 #include <brayns/core/utils/IdGenerator.h>
 #include <brayns/core/utils/Logger.h>
@@ -43,6 +41,7 @@ public:
 private:
     RequestQueue *_requests;
     Logger *_logger;
-    IdGenerator<ClientId> _clientIds;
+    std::mutex _mutex;
+    IdGenerator<ClientId> _ids;
 };
 }

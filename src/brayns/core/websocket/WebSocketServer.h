@@ -63,7 +63,7 @@ public:
     WebSocketServer &operator=(const WebSocketServer &) = delete;
     WebSocketServer &operator=(WebSocketServer &&) = default;
 
-    std::vector<RawRequest> waitForRequests();
+    std::vector<Request> waitForRequests();
 
 private:
     std::unique_ptr<Poco::Net::HTTPServer> _server;

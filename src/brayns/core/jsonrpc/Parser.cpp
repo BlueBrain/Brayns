@@ -85,6 +85,11 @@ std::string composeAsText(const JsonRpcSuccessResponse &response)
     return stringifyToJson(response);
 }
 
+std::string composeAsText(const JsonRpcErrorResponse &response)
+{
+    return stringifyToJson(response);
+}
+
 std::string composeAsBinary(const JsonRpcSuccessResponse &response)
 {
     auto text = composeAsText(response);
@@ -101,21 +106,17 @@ std::string composeAsBinary(const JsonRpcSuccessResponse &response)
     return header + text + response.binary;
 }
 
-std::string composeError(const JsonRpcErrorResponse &response)
+JsonRpcError composeError(const JsonRpcException &e)
 {
-    return stringifyToJson(response);
+    return {
+        .code = e.getCode(),
+        .message = e.what(),
+        .data = e.getData(),
+    };
 }
 
-std::string composeError(const std::optional<JsonRpcId> &id, const JsonRpcException &e)
+JsonRpcErrorResponse composeErrorResponse(const JsonRpcException &e, std::optional<JsonRpcId> id)
 {
-    return composeError({
-        .id = id,
-        .error =
-            {
-                .code = e.getCode(),
-                .message = e.what(),
-                .data = e.getData(),
-            },
-    });
+    return {composeError(e), std::move(id)};
 }
 }

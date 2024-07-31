@@ -50,10 +50,10 @@ inline std::string toString(const std::optional<JsonRpcId> &id)
 
 struct JsonRpcRequest
 {
-    std::optional<JsonRpcId> id;
     std::string method;
     JsonValue params;
     std::string binary = {};
+    std::optional<JsonRpcId> id = {};
 };
 
 template<>
@@ -63,9 +63,9 @@ struct JsonObjectReflector<JsonRpcRequest>
     {
         auto builder = JsonBuilder<JsonRpcRequest>();
         builder.constant("jsonrpc", "2.0");
-        builder.field("id", [](auto &object) { return &object.id; });
         builder.field("method", [](auto &object) { return &object.method; });
         builder.field("params", [](auto &object) { return &object.params; }).required(false);
+        builder.field("id", [](auto &object) { return &object.id; });
         return builder.build();
     }
 };
@@ -112,8 +112,8 @@ struct JsonObjectReflector<JsonRpcError>
 
 struct JsonRpcErrorResponse
 {
-    std::optional<JsonRpcId> id;
     JsonRpcError error;
+    std::optional<JsonRpcId> id = {};
 };
 
 template<>
@@ -123,8 +123,8 @@ struct JsonObjectReflector<JsonRpcErrorResponse>
     {
         auto builder = JsonBuilder<JsonRpcErrorResponse>();
         builder.constant("jsonrpc", "2.0");
-        builder.field("id", [](auto &object) { return &object.id; });
         builder.field("error", [](auto &object) { return &object.error; });
+        builder.field("id", [](auto &object) { return &object.id; });
         return builder.build();
     }
 };

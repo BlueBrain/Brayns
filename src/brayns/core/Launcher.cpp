@@ -28,6 +28,7 @@
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/utils/String.h>
+#include <brayns/core/websocket/WebSocketServer.h>
 
 namespace
 {
@@ -95,7 +96,7 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
     logger.info("Websocket server started");
 
     logger.info("Service running");
-    runService(server, api, token, logger);
+    runService([&] { return server.waitForRequests(); }, api, token, logger);
 }
 }
 

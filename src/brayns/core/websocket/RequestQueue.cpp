@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-void RequestQueue::push(RawRequest request)
+void RequestQueue::push(Request request)
 {
     auto lock = std::lock_guard(_mutex);
 
@@ -33,7 +33,7 @@ void RequestQueue::push(RawRequest request)
     _condition.notify_all();
 }
 
-std::vector<RawRequest> RequestQueue::wait()
+std::vector<Request> RequestQueue::wait()
 {
     auto lock = std::unique_lock(_mutex);
 

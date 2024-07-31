@@ -30,31 +30,30 @@ namespace brayns
 {
 using ClientId = std::uint32_t;
 
-struct RawResponse
+struct Message
 {
-    std::string_view data;
+    std::string data;
     bool binary = false;
 };
 
-using ResponseHandler = std::function<void(const RawResponse &)>;
+using ResponseHandler = std::function<void(const Message &)>;
 
-struct RawRequest
+struct Request
 {
     ClientId clientId;
-    std::string data;
-    bool binary = false;
+    Message message;
     ResponseHandler respond;
 };
 
 class RequestQueue
 {
 public:
-    void push(RawRequest request);
-    std::vector<RawRequest> wait();
+    void push(Request request);
+    std::vector<Request> wait();
 
 private:
     std::mutex _mutex;
     std::condition_variable _condition;
-    std::vector<RawRequest> _requests;
+    std::vector<Request> _requests;
 };
 }
