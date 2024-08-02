@@ -40,20 +40,6 @@ struct JsonObjectReflector<ObjectList>
     }
 };
 
-std::vector<Metadata> getSelectedObjects(ObjectManager &objects, const std::vector<ObjectId> &ids)
-{
-    auto metadatas = std::vector<Metadata>();
-    metadatas.reserve(ids.size());
-
-    for (auto id : ids)
-    {
-        const auto &metadata = objects.getObject(id);
-        metadatas.push_back(metadata);
-    }
-
-    return metadatas;
-}
-
 void removeSelectedObjects(ObjectManager &objects, const std::vector<ObjectId> &ids)
 {
     for (auto id : ids)
@@ -62,19 +48,32 @@ void removeSelectedObjects(ObjectManager &objects, const std::vector<ObjectId> &
     }
 }
 
+using EmptyObject = UserObject<std::optional<EmptyJsonObject>>;
+using EmptyObjectParams = UserObjectParams<std::optional<EmptyJsonObject>>;
+
+EmptyObject &createEmptyObject(ObjectManager &objects, const EmptyObjectParams &params)
+{
+    return objects.create<EmptyObject>({"object", {}, params.userData});
+}
+
 void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects)
 {
-    builder.endpoint("get-all-objects", [&] { return ObjectList{objects.getAllObjects()}; })
+    builder.endpoint("get-all-objects", [&] { return ObjectList{objects.getAllMetadata()}; })
         .description("Return the generic properties of all objects, use get-{type} to get specific properties");
 
-    builder.endpoint("get-objects", [&](IdList params) { return ObjectList{getSelectedObjects(objects, params.ids)}; })
+    builder.endpoint("get-object", [&](ObjectIdParams params) { return objects.getMetadata(params.id); })
         .description("Get generic object properties from given object IDs");
 
-    builder.endpoint("remove-objects", [&](IdList params) { removeSelectedObjects(objects, params.ids); })
-        .description(
-            "Remove objects from the registry, the ID can be reused by future objects. Note that the object can stay "
-            "in memory as long as it is used by other objects (using a ref-counted system)");
+    builder.endpoint("remove-objects", [&](ObjectIds params) { removeSelectedObjects(objects, params.ids); })
+        .description("Remove selected objects from registry (but not from scene)");
 
     builder.endpoint("clear-objects", [&] { objects.clear(); }).description("Remove all objects currently in registry");
+
+    builder
+        .endpoint("create-empty-object", [&](EmptyObjectParams params) { return createEmptyObject(objects, params); })
+        .description("Create an empty object just to store user data");
+
+    builder.endpoint("get-empty-object", [&](ObjectIdParams params) { return objects.get<EmptyObject>(params.id); })
+        .description("Create an empty object just to store user data");
 }
 }

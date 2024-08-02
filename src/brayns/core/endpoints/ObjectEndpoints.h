@@ -26,18 +26,70 @@
 
 namespace brayns
 {
-struct IdList
+struct ObjectIds
 {
     std::vector<ObjectId> ids;
 };
 
 template<>
-struct JsonObjectReflector<IdList>
+struct JsonObjectReflector<ObjectIds>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<IdList>();
-        builder.field("ids", [](auto &object) { return &object.ids; }).description("List of objects ID");
+        auto builder = JsonBuilder<ObjectIds>();
+        builder.field("ids", [](auto &object) { return &object.ids; }).description("List of object IDs");
+        return builder.build();
+    }
+};
+
+struct ObjectIdParams
+{
+    ObjectId id;
+};
+
+template<>
+struct JsonObjectReflector<ObjectIdParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<ObjectIdParams>();
+        builder.field("id", [](auto &object) { return &object.id; }).description("Objects ID");
+        return builder.build();
+    }
+};
+
+struct EmptyJsonObject
+{
+};
+
+template<>
+struct JsonObjectReflector<EmptyJsonObject>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<EmptyJsonObject>();
+        builder.description("Placeholder empty object");
+        return builder.build();
+    }
+};
+
+template<ReflectedJson T>
+struct UserObjectParams
+{
+    T settings;
+    JsonValue userData;
+};
+
+template<ReflectedJson T>
+struct JsonObjectReflector<UserObjectParams<T>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<UserObjectParams<T>>();
+        builder.field("settings", [](auto &object) { return &object.settings; })
+            .description("Settings specific to object type");
+        builder.field("user_data", [](auto &object) { return &object.userData; })
+            .description("User data to attach to the object (not used by Brayns)");
         return builder.build();
     }
 };

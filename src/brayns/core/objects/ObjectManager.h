@@ -117,8 +117,8 @@ class ObjectManager
 public:
     explicit ObjectManager();
 
-    std::vector<Metadata> getAllObjects() const;
-    const Metadata &getObject(ObjectId id) const;
+    std::vector<Metadata> getAllMetadata() const;
+    const Metadata &getMetadata(ObjectId id) const;
     void remove(ObjectId id);
     void clear();
 
@@ -162,7 +162,6 @@ public:
 
 private:
     std::map<ObjectId, ObjectManagerEntry> _objects;
-    std::unordered_map<std::string, ObjectId> _idsByTag;
     IdGenerator<ObjectId> _ids;
 
     static void checkType(const ObjectManagerEntry &entry, const std::type_info &expected);

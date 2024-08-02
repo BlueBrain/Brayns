@@ -60,11 +60,11 @@ TEST_CASE("Create and remove objects")
     auto &another = objects.create<TestObject>({"type", {}});
     CHECK_EQ(another.metadata.id, 2);
 
-    CHECK_EQ(objects.getAllObjects().size(), 2);
+    CHECK_EQ(objects.getAllMetadata().size(), 2);
 
     CHECK_EQ(&objects.get<TestObject>(1), &object);
 
-    CHECK_EQ(&objects.getObject(1), &object.metadata);
+    CHECK_EQ(&objects.getMetadata(1), &object.metadata);
 
     auto shared = objects.getShared<TestObject>(1);
 
@@ -72,11 +72,11 @@ TEST_CASE("Create and remove objects")
 
     CHECK_EQ(shared->metadata.id, nullId);
 
-    CHECK_THROWS_AS(objects.getObject(1), InvalidParams);
+    CHECK_THROWS_AS(objects.getMetadata(1), InvalidParams);
 
     objects.clear();
 
-    CHECK(objects.getAllObjects().empty());
+    CHECK(objects.getAllMetadata().empty());
 }
 
 TEST_CASE("Errors")
@@ -85,8 +85,8 @@ TEST_CASE("Errors")
 
     objects.create<TestObject>({"type", {}});
 
-    CHECK_THROWS_AS(objects.getObject(0), InvalidParams);
-    CHECK_THROWS_AS(objects.getObject(2), InvalidParams);
+    CHECK_THROWS_AS(objects.getMetadata(0), InvalidParams);
+    CHECK_THROWS_AS(objects.getMetadata(2), InvalidParams);
     CHECK_THROWS_AS(objects.remove(2), InvalidParams);
     CHECK_THROWS_AS(objects.get<UserObject<int>>(1), InvalidParams);
 }

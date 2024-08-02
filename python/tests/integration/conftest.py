@@ -24,7 +24,7 @@ from collections.abc import AsyncIterator
 
 import pytest_asyncio
 
-from brayns import Connection, connect, create_logger
+from brayns import Connection, connect, create_logger, clear_objects
 
 HOST = os.getenv("BRAYNS_HOST", "localhost")
 PORT = int(os.getenv("BRAYNS_PORT", "5000"))
@@ -38,4 +38,5 @@ async def connect_to_service() -> Connection:
 @pytest_asyncio.fixture
 async def connection() -> AsyncIterator[Connection]:
     async with await connect_to_service() as connection:
+        await clear_objects(connection)
         yield connection

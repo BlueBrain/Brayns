@@ -51,19 +51,32 @@ from .network.json_rpc import (
 from .network.websocket import ServiceUnavailable, WebSocketError
 from .version import VERSION
 from .utils.logger import create_logger
+from .api.core.objects import (
+    Object,
+    Metadata,
+    get_object,
+    get_all_objects,
+    remove_objects,
+    clear_objects,
+    create_object,
+)
 
 __version__ = VERSION
 """Version tag of brayns Python package (major.minor.patch)."""
 
 __all__ = [
     "cancel_task",
+    "clear_objects",
     "connect",
     "Connection",
     "create_logger",
+    "create_object",
     "Endpoint",
     "FutureResponse",
+    "get_all_objects",
     "get_endpoint",
     "get_methods",
+    "get_object",
     "get_task_result",
     "get_task",
     "get_tasks",
@@ -74,6 +87,9 @@ __all__ = [
     "JsonRpcRequest",
     "JsonRpcResponse",
     "JsonRpcSuccessResponse",
+    "Metadata",
+    "Object",
+    "remove_objects",
     "Request",
     "Response",
     "ServiceUnavailable",

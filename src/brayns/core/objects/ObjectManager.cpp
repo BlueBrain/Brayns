@@ -53,7 +53,7 @@ ObjectManager::ObjectManager()
     disableNullId(_ids);
 }
 
-std::vector<Metadata> ObjectManager::getAllObjects() const
+std::vector<Metadata> ObjectManager::getAllMetadata() const
 {
     auto objects = std::vector<Metadata>();
     objects.reserve(_objects.size());
@@ -66,7 +66,7 @@ std::vector<Metadata> ObjectManager::getAllObjects() const
     return objects;
 }
 
-const Metadata &ObjectManager::getObject(ObjectId id) const
+const Metadata &ObjectManager::getMetadata(ObjectId id) const
 {
     auto i = getObjectIterator(_objects, id);
     return *i->second.getMetadata();
@@ -85,7 +85,6 @@ void ObjectManager::remove(ObjectId id)
 void ObjectManager::clear()
 {
     _objects.clear();
-    _idsByTag.clear();
     _ids = {};
     disableNullId(_ids);
 }
