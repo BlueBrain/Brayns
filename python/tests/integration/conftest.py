@@ -21,6 +21,8 @@
 from logging import DEBUG
 import os
 from collections.abc import AsyncIterator
+from pathlib import Path
+from ssl import SSLContext, create_default_context, Purpose
 
 import pytest_asyncio
 
@@ -28,11 +30,20 @@ from brayns import Connection, connect, create_logger, clear_objects
 
 HOST = os.getenv("BRAYNS_HOST", "localhost")
 PORT = int(os.getenv("BRAYNS_PORT", "5000"))
+SSL = bool(int(os.getenv("BRAYNS_SSL", "0")))
+
+DATA = Path(__file__).parent.parent / "data"
+CA = DATA / "certificate.pem"
+
+
+def create_ssl_context() -> SSLContext:
+    return create_default_context(Purpose.SERVER_AUTH, cafile=CA)
 
 
 async def connect_to_service() -> Connection:
     logger = create_logger(DEBUG)
-    return await connect(HOST, PORT, max_attempts=10, logger=logger)
+    ssl = create_ssl_context() if SSL else None
+    return await connect(HOST, PORT, ssl, max_attempts=10, logger=logger)
 
 
 @pytest_asyncio.fixture

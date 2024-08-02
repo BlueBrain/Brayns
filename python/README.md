@@ -81,6 +81,7 @@ pip install -r requirements-dev.txt
 ```bash
 BRAYNS_HOST=localhost
 BRAYNS_PORT=5000
+BRAYNS_SSL=0
 ```
 
 Note: integration testing can be disable using the pytest --without-integration flag.

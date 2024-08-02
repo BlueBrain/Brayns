@@ -103,7 +103,7 @@ ExternalProject_Add(
 ExternalProject_Add(
     poco
     GIT_REPOSITORY https://github.com/pocoproject/poco.git
-    GIT_TAG poco-1.13.3-release
+    GIT_TAG poco-1.12.5-release
     GIT_SHALLOW ON
     CMAKE_ARGS
     -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}

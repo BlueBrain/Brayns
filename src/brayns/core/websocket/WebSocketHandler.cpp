@@ -109,7 +109,7 @@ void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const Mess
 
         try
         {
-            logger.info("Sending websocket frame of {} bytes", data.size());
+            logger.info("Sending websocket frame of {} bytes", chunk.size());
             websocket.send({opcode, chunk, finalFrame});
         }
         catch (const WebSocketException &e)
