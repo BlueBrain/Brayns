@@ -32,7 +32,7 @@ void disableNullId(IdGenerator<ObjectId> &ids)
     ids.next();
 }
 
-auto getObjectIterator(auto &objects, ObjectId id)
+auto getStorageIterator(auto &objects, ObjectId id)
 {
     auto i = objects.find(id);
 
@@ -47,7 +47,6 @@ auto getObjectIterator(auto &objects, ObjectId id)
 
 namespace brayns
 {
-
 ObjectManager::ObjectManager()
 {
     disableNullId(_ids);
@@ -55,57 +54,61 @@ ObjectManager::ObjectManager()
 
 std::vector<Metadata> ObjectManager::getAllMetadata() const
 {
-    auto objects = std::vector<Metadata>();
-    objects.reserve(_objects.size());
+    auto metadatas = std::vector<Metadata>();
+    metadatas.reserve(_objects.size());
 
     for (const auto &[id, object] : _objects)
     {
-        objects.push_back(*object.getMetadata());
+        auto metadata = createMetadata(id, object);
+        metadatas.push_back(std::move(metadata));
     }
 
-    return objects;
+    return metadatas;
 }
 
-const Metadata &ObjectManager::getMetadata(ObjectId id) const
+Metadata ObjectManager::getMetadata(ObjectId id) const
 {
-    auto i = getObjectIterator(_objects, id);
-    return *i->second.getMetadata();
+    const auto &storage = getStorage(id);
+
+    return createMetadata(id, storage);
 }
 
 void ObjectManager::remove(ObjectId id)
 {
-    auto i = getObjectIterator(_objects, id);
+    auto i = getStorageIterator(_objects, id);
 
-    auto &metadata = *i->second.getMetadata();
+    i->second.remove();
 
-    metadata.id = nullId;
     _objects.erase(i);
 }
 
 void ObjectManager::clear()
 {
+    for (const auto &[id, object] : _objects)
+    {
+        object.remove();
+    }
+
     _objects.clear();
+
     _ids = {};
     disableNullId(_ids);
 }
 
-void ObjectManager::checkType(const ObjectManagerEntry &entry, const std::type_info &expected)
+Metadata ObjectManager::createMetadata(ObjectId id, const ObjectStorage &storage)
 {
-    if (entry.object.type() == expected)
-    {
-        return;
-    }
-
-    const auto &metadata = *entry.getMetadata();
-    auto id = metadata.id;
-    const auto &type = metadata.type;
-
-    throw InvalidParams(fmt::format("Invalid type '{}' for object with ID {}", id, type));
+    return {
+        .id = id,
+        .type = storage.type,
+        .size = storage.getSize(),
+        .userData = storage.userData,
+    };
 }
 
-const ObjectManagerEntry &ObjectManager::getEntry(ObjectId id) const
+const ObjectStorage &ObjectManager::getStorage(ObjectId id) const
 {
-    auto i = getObjectIterator(_objects, id);
+    auto i = getStorageIterator(_objects, id);
+
     return i->second;
 }
 }

@@ -25,10 +25,27 @@ using namespace brayns;
 
 namespace brayns
 {
-struct TestProperties
+struct TestSettings
 {
     int someInt = 0;
     std::string someString = {};
+};
+
+template<>
+struct JsonObjectReflector<TestSettings>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<TestSettings>();
+        builder.field("some_int", [](auto &object) { return &object.someInt; });
+        builder.field("some_string", [](auto &object) { return &object.someString; });
+        return builder.build();
+    }
+};
+
+struct TestProperties
+{
+    float someFloat = 0.0F;
 };
 
 template<>
@@ -37,44 +54,94 @@ struct JsonObjectReflector<TestProperties>
     static auto reflect()
     {
         auto builder = JsonBuilder<TestProperties>();
-        builder.field("some_int", [](auto &object) { return &object.someInt; });
-        builder.field("some_string", [](auto &object) { return &object.someString; });
+        builder.field("some_float", [](auto &object) { return &object.someFloat; });
         return builder.build();
     }
 };
 
-using TestObject = UserObject<TestProperties>;
+struct TestObject
+{
+    ObjectId id;
+    TestSettings settings;
+};
+
+template<>
+struct ObjectReflector<TestObject>
+{
+    using Settings = TestSettings;
+
+    static std::string getType()
+    {
+        return "test";
+    }
+
+    static TestProperties getProperties(const TestObject &object)
+    {
+        return {static_cast<float>(object.settings.someInt)};
+    }
+
+    static std::size_t getSize(const TestObject &object)
+    {
+        return object.settings.someString.size();
+    }
+
+    static void remove(TestObject &object)
+    {
+        object.id = nullId;
+    }
+};
+
+void registerTestObject(ObjectManager &objects)
+{
+    objects.addFactory<TestObject>([](auto params) { return TestObject{params.id, std::move(params.settings)}; });
+}
 }
 
 TEST_CASE("Create and remove objects")
 {
     auto objects = ObjectManager();
+    registerTestObject(objects);
 
-    auto &object = objects.create<TestObject>({"type", {123, "123"}, "someUserData"});
-    CHECK_EQ(object.metadata.id, 1);
-    CHECK_EQ(object.metadata.type, "type");
-    CHECK_EQ(object.metadata.userData.extract<std::string>(), "someUserData");
-    CHECK_EQ(object.properties.someInt, 123);
-    CHECK_EQ(object.properties.someString, "123");
+    auto id = objects.create<TestObject>({2, "data"}, "someUserData");
 
-    auto &another = objects.create<TestObject>({"type", {}});
-    CHECK_EQ(another.metadata.id, 2);
+    CHECK_EQ(id, 1);
+
+    auto metadata = objects.getMetadata(id);
+
+    CHECK_EQ(metadata.id, id);
+    CHECK_EQ(metadata.type, "test");
+    CHECK_EQ(metadata.size, 4);
+    CHECK_EQ(metadata.userData.extract<std::string>(), "someUserData");
+
+    auto properties = objects.getProperties<TestObject>(id);
+
+    CHECK_EQ(properties.someFloat, 2.0F);
+
+    auto &object = objects.get<TestObject>(id);
+
+    CHECK_EQ(object.id, id);
+    CHECK_EQ(object.settings.someInt, 2);
+    CHECK_EQ(object.settings.someString, "data");
+
+    auto shared = objects.getShared<TestObject>(id);
+
+    auto id2 = objects.create<TestObject>({3, "data2"}, "someUserData2");
 
     CHECK_EQ(objects.getAllMetadata().size(), 2);
 
-    CHECK_EQ(&objects.get<TestObject>(1), &object);
+    objects.remove(id);
 
-    CHECK_EQ(&objects.getMetadata(1), &object.metadata);
+    CHECK_EQ(shared->id, nullId);
 
-    auto shared = objects.getShared<TestObject>(1);
+    CHECK_THROWS_AS(objects.getMetadata(id), InvalidParams);
+    CHECK_THROWS_AS(objects.getProperties<TestObject>(id), InvalidParams);
+    CHECK_THROWS_AS(objects.getResult<TestObject>(id), InvalidParams);
 
-    objects.remove(1);
-
-    CHECK_EQ(shared->metadata.id, nullId);
-
-    CHECK_THROWS_AS(objects.getMetadata(1), InvalidParams);
+    auto shared2 = objects.getShared<TestObject>(id2);
 
     objects.clear();
+
+    CHECK_EQ(shared2->id, nullId);
 
     CHECK(objects.getAllMetadata().empty());
 }
@@ -82,11 +149,11 @@ TEST_CASE("Create and remove objects")
 TEST_CASE("Errors")
 {
     auto objects = ObjectManager();
+    registerTestObject(objects);
 
-    objects.create<TestObject>({"type", {}});
+    objects.create<TestObject>({});
 
     CHECK_THROWS_AS(objects.getMetadata(0), InvalidParams);
     CHECK_THROWS_AS(objects.getMetadata(2), InvalidParams);
     CHECK_THROWS_AS(objects.remove(2), InvalidParams);
-    CHECK_THROWS_AS(objects.get<UserObject<int>>(1), InvalidParams);
 }

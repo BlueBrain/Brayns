@@ -72,14 +72,17 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
     logger.info("Building JSON-RPC API");
 
     auto api = Api();
-
     auto builder = ApiBuilder();
 
     addServiceEndpoints(builder, api, token);
 
     auto objects = ObjectManager();
 
-    addObjectEndpoints(builder, objects);
+    addDefaultObjects(objects);
+
+    auto locked = LockedObjects(std::move(objects), logger);
+
+    addObjectEndpoints(builder, locked);
 
     api = builder.build();
 

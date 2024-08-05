@@ -21,25 +21,35 @@
 
 #pragma once
 
+#include <concepts>
+#include <mutex>
+#include <type_traits>
+#include <vector>
+
 #include <brayns/core/api/ApiBuilder.h>
 #include <brayns/core/objects/ObjectManager.h>
+#include <brayns/core/utils/Logger.h>
 
 namespace brayns
 {
-struct ObjectIds
+class LockedObjects
 {
-    std::vector<ObjectId> ids;
-};
+public:
+    explicit LockedObjects(ObjectManager objects, Logger &logger);
 
-template<>
-struct JsonObjectReflector<ObjectIds>
-{
-    static auto reflect()
+    auto visit(std::invocable<ObjectManager &> auto &&callable) -> decltype(callable(std::declval<ObjectManager &>()))
     {
-        auto builder = JsonBuilder<ObjectIds>();
-        builder.field("ids", [](auto &object) { return &object.ids; }).description("List of object IDs");
-        return builder.build();
+        _logger->info("Waiting for object manager lock");
+        auto lock = std::lock_guard(_mutex);
+        _logger->info("Object manager lock acquired");
+
+        return callable(_objects);
     }
+
+private:
+    std::mutex _mutex;
+    ObjectManager _objects;
+    Logger *_logger;
 };
 
 struct ObjectIdParams
@@ -58,41 +68,54 @@ struct JsonObjectReflector<ObjectIdParams>
     }
 };
 
-struct EmptyJsonObject
+struct ObjectIds
 {
+    std::vector<ObjectId> ids;
 };
 
 template<>
-struct JsonObjectReflector<EmptyJsonObject>
+struct JsonObjectReflector<ObjectIds>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<EmptyJsonObject>();
-        builder.description("Placeholder empty object");
+        auto builder = JsonBuilder<ObjectIds>();
+        builder.field("ids", [](auto &object) { return &object.ids; }).description("List of object IDs");
         return builder.build();
     }
 };
 
-template<ReflectedJson T>
-struct UserObjectParams
+template<ReflectedObject T>
+ObjectResult<GetProperties<T>> createObject(LockedObjects &locked, ObjectParams<GetSettings<T>> params)
 {
-    T settings;
-    JsonValue userData;
-};
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto id = objects.create<T>(std::move(params.settings), params.userData);
+            return objects.getResult<T>(id);
+        });
+}
 
-template<ReflectedJson T>
-struct JsonObjectReflector<UserObjectParams<T>>
+template<ReflectedObject T>
+ObjectResult<GetProperties<T>> getObject(LockedObjects &locked, ObjectId id)
 {
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<UserObjectParams<T>>();
-        builder.field("settings", [](auto &object) { return &object.settings; })
-            .description("Settings specific to object type");
-        builder.field("user_data", [](auto &object) { return &object.userData; })
-            .description("User data to attach to the object (not used by Brayns)");
-        return builder.build();
-    }
-};
+    return locked.visit([=](ObjectManager &objects) { return objects.getResult<T>(id); });
+}
 
-void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects);
+template<ReflectedObject T>
+void addCreateAndGet(ApiBuilder &builder, LockedObjects &locked)
+{
+    const auto &type = getObjectType<T>();
+
+    builder.endpoint("get-" + type, [&](ObjectIdParams params) { return getObject<T>(locked, params.id); })
+        .description("Get all properties properties of given " + type);
+
+    builder
+        .endpoint(
+            "create-" + type,
+            [&](ObjectParams<GetSettings<T>> params) { return createObject<T>(locked, std::move(params)); })
+        .description("Create a new " + type + " and returns it");
+}
+
+void addDefaultObjects(ObjectManager &objects);
+void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects);
 }

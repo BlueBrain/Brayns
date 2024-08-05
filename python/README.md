@@ -76,7 +76,7 @@ pip install -r requirements.txt
 pip install -r requirements-dev.txt
 ```
 
-3. For integration testing, create a `.env` file:
+3. Optional (for integration testing), create a `.env` file:
 
 ```bash
 BRAYNS_HOST=localhost
@@ -86,7 +86,7 @@ BRAYNS_SSL=0
 
 Note: integration testing can be disable using the pytest --without-integration flag.
 
-4. Create a .vscode folder and create a `launch.json` inside to use to debug tests:
+4. Create a .vscode folder and create a `launch.json` file inside to be able to debug tests:
 
 ```json
 {
@@ -107,7 +107,7 @@ Note: integration testing can be disable using the pytest --without-integration 
 }
 ```
 
-5. In the same folder, create a `settings.json` to configure pytest:
+5. In the same folder, create a `settings.json` file to configure pytest:
 
 ```json
 {

@@ -26,91 +26,31 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <unordered_map>
+#include <typeindex>
 #include <vector>
+
+#include <fmt/format.h>
 
 #include <brayns/core/json/Json.h>
 #include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/utils/IdGenerator.h>
 
+#include "Messages.h"
+#include "ObjectReflector.h"
+
 namespace brayns
 {
-using ObjectId = std::uint32_t;
-
-constexpr auto nullId = ObjectId(0);
-
-struct Metadata
-{
-    ObjectId id;
-    std::string type;
-    JsonValue userData = {};
-};
-
-template<>
-struct JsonObjectReflector<Metadata>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Metadata>();
-        builder.field("id", [](auto &object) { return &object.id; })
-            .description("Object ID, primary way to query this object");
-        builder.field("type", [](auto &object) { return &object.type; })
-            .description("Object type, use endpoint 'get-{type}' to query detailed information about the object");
-        builder.field("user_data", [](auto &object) { return &object.userData; })
-            .description("Optional user data (only for user, not used by brayns)");
-        return builder.build();
-    }
-};
-
-template<ReflectedJson Properties>
-struct UserObject
-{
-    Metadata metadata;
-    Properties properties;
-};
-
-template<ReflectedJson Properties>
-struct JsonObjectReflector<UserObject<Properties>>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<UserObject<Properties>>();
-        builder.field("metadata", [](auto &object) { return &object.metadata; })
-            .description("Generic object properties (not specific to object type)");
-        builder.field("properties", [](auto &object) { return &object.properties; })
-            .description("Object properties (specific to object type)");
-        return builder.build();
-    }
-};
-
-template<typename T>
-struct UserObjectReflector;
-
-template<ReflectedJson Properties>
-struct UserObjectReflector<UserObject<Properties>>
-{
-    using Type = Properties;
-};
-
-template<typename T>
-concept ValidUserObject = requires { typename UserObjectReflector<T>::Type; };
-
-template<ValidUserObject T>
-using GetUserObjectProperties = typename UserObjectReflector<T>::Type;
-
-struct ObjectManagerEntry
+struct ObjectStorage
 {
     std::any object;
-    std::function<Metadata *()> getMetadata;
+    std::string type;
+    JsonValue userData;
+    std::function<std::size_t()> getSize;
+    std::function<void()> remove;
 };
 
-template<ReflectedJson Properties>
-struct UserObjectSettings
-{
-    std::string type;
-    Properties properties;
-    JsonValue userData = {};
-};
+template<typename T>
+using ObjectFactory = std::function<T(ParamsOf<T>)>;
 
 class ObjectManager
 {
@@ -118,40 +58,75 @@ public:
     explicit ObjectManager();
 
     std::vector<Metadata> getAllMetadata() const;
-    const Metadata &getMetadata(ObjectId id) const;
+    Metadata getMetadata(ObjectId id) const;
     void remove(ObjectId id);
     void clear();
 
-    template<ValidUserObject T>
-    const std::shared_ptr<T> &getShared(ObjectId id) const
+    template<ReflectedObject T>
+    void addFactory(ObjectFactory<T> factory)
     {
-        auto &entry = getEntry(id);
-        checkType(entry, typeid(std::shared_ptr<T>));
-        return std::any_cast<const std::shared_ptr<T> &>(entry.object);
+        const auto &type = typeid(T);
+
+        if (_factories.contains(type))
+        {
+            throw std::invalid_argument("A factory is already registered for given type");
+        }
+
+        _factories[type] = factory;
     }
 
-    template<ValidUserObject T>
+    template<ReflectedObject T>
+    const std::shared_ptr<T> &getShared(ObjectId id) const
+    {
+        const auto &storage = getStorage(id);
+
+        return castObject<T>(id, storage);
+    }
+
+    template<ReflectedObject T>
     T &get(ObjectId id) const
     {
         return *getShared<T>(id);
     }
 
-    template<ValidUserObject T>
-    T &create(UserObjectSettings<GetUserObjectProperties<T>> settings)
+    template<ReflectedObject T>
+    GetProperties<T> getProperties(ObjectId id) const
+    {
+        auto &object = get<T>(id);
+
+        return getObjectProperties(object);
+    }
+
+    template<ReflectedObject T>
+    ObjectResult<GetProperties<T>> getResult(ObjectId id) const
+    {
+        const auto &storage = getStorage(id);
+        const auto &object = castObject<T>(id, storage);
+
+        return {createMetadata(id, storage), getObjectProperties(*object)};
+    }
+
+    template<ReflectedObject T>
+    ObjectId create(GetSettings<T> settings, const JsonValue &userData = {})
     {
         auto id = _ids.next();
 
         try
         {
-            auto metadata = Metadata{id, std::move(settings.type), settings.userData};
-            auto object = T{std::move(metadata), std::move(settings.properties)};
+            auto object = createObject<T>({id, std::move(settings)});
             auto ptr = std::make_shared<T>(std::move(object));
 
-            auto entry = ObjectManagerEntry{ptr, [=] { return &ptr->metadata; }};
+            auto storage = ObjectStorage{
+                .object = ptr,
+                .type = ObjectReflector<T>::getType(),
+                .userData = std::move(userData),
+                .getSize = [=] { return getObjectSize(*ptr); },
+                .remove = [=] { removeObject(*ptr); },
+            };
 
-            _objects.emplace(id, std::move(entry));
+            _objects.emplace(id, std::move(storage));
 
-            return *ptr;
+            return id;
         }
         catch (...)
         {
@@ -161,11 +136,43 @@ public:
     }
 
 private:
-    std::map<ObjectId, ObjectManagerEntry> _objects;
+    std::map<std::type_index, std::any> _factories;
+    std::map<ObjectId, ObjectStorage> _objects;
     IdGenerator<ObjectId> _ids;
 
-    static void checkType(const ObjectManagerEntry &entry, const std::type_info &expected);
+    static Metadata createMetadata(ObjectId id, const ObjectStorage &storage);
 
-    const ObjectManagerEntry &getEntry(ObjectId id) const;
+    template<ReflectedObject T>
+    static const std::shared_ptr<T> &castObject(ObjectId id, const ObjectStorage &storage)
+    {
+        auto ptr = std::any_cast<std::shared_ptr<T>>(&storage.object);
+
+        if (ptr != nullptr)
+        {
+            return *ptr;
+        }
+
+        const auto &expected = getObjectType<T>();
+        const auto &got = storage.type;
+
+        throw InvalidParams(fmt::format("Invalid type for object with ID {}: expected {}, got {}", id, expected, got));
+    }
+
+    const ObjectStorage &getStorage(ObjectId id) const;
+
+    template<ReflectedObject T>
+    T createObject(const ParamsOf<T> &params)
+    {
+        auto i = _factories.find(typeid(T));
+
+        if (i == _factories.end())
+        {
+            throw std::invalid_argument("Unsupported object type");
+        }
+
+        const auto &factory = std::any_cast<const ObjectFactory<T> &>(i->second);
+
+        return factory(std::move(params));
+    }
 };
 }
