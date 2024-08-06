@@ -42,7 +42,7 @@ struct JsonObjectReflector<Metadatas>
 
 struct UpdateObjectParams
 {
-    ObjectId objectId;
+    ObjectId id;
     JsonValue userData;
 };
 
@@ -52,8 +52,7 @@ struct JsonObjectReflector<UpdateObjectParams>
     static auto reflect()
     {
         auto builder = JsonBuilder<UpdateObjectParams>();
-        builder.field("object_id", [](auto &object) { return &object.objectId; })
-            .description("ID of the object to update");
+        builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to update");
         builder.field("user_data", [](auto &object) { return &object.userData; })
             .description("New user data to store in the object");
         return builder.build();
@@ -76,8 +75,8 @@ Metadata updateObject(LockedObjects &locked, const UpdateObjectParams &params)
     return locked.visit(
         [&](auto &objects)
         {
-            objects.setUserData(params.objectId, params.userData);
-            return objects.getMetadata(params.objectId);
+            objects.setUserData(params.id, params.userData);
+            return objects.getMetadata(params.id);
         });
 }
 

@@ -24,6 +24,15 @@ Brayns Python package.
 This package provides an API to interact with Brayns service.
 """
 
+from .api.core.objects import (
+    Metadata,
+    clear_objects,
+    create_empty_object,
+    get_all_objects,
+    get_object,
+    remove_objects,
+    update_object,
+)
 from .api.core.service import (
     Endpoint,
     Task,
@@ -49,17 +58,8 @@ from .network.json_rpc import (
     JsonRpcSuccessResponse,
 )
 from .network.websocket import ServiceUnavailable, WebSocketError
-from .version import VERSION
 from .utils.logger import create_logger
-from .api.core.objects import (
-    Object,
-    Metadata,
-    get_object,
-    get_all_objects,
-    remove_objects,
-    clear_objects,
-    create_object,
-)
+from .version import VERSION
 
 __version__ = VERSION
 """Version tag of brayns Python package (major.minor.patch)."""
@@ -70,7 +70,8 @@ __all__ = [
     "connect",
     "Connection",
     "create_logger",
-    "create_object",
+    "update_object",
+    "create_empty_object",
     "Endpoint",
     "FutureResponse",
     "get_all_objects",
@@ -88,7 +89,6 @@ __all__ = [
     "JsonRpcResponse",
     "JsonRpcSuccessResponse",
     "Metadata",
-    "Object",
     "remove_objects",
     "Request",
     "Response",
