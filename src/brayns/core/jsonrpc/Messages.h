@@ -48,11 +48,16 @@ inline std::string toString(const std::optional<JsonRpcId> &id)
     return id ? toString(*id) : "null";
 }
 
+struct Payload
+{
+    JsonValue json;
+    std::string binary = {};
+};
+
 struct JsonRpcRequest
 {
     std::string method;
-    JsonValue params;
-    std::string binary = {};
+    Payload params;
     std::optional<JsonRpcId> id = {};
 };
 
@@ -64,7 +69,7 @@ struct JsonObjectReflector<JsonRpcRequest>
         auto builder = JsonBuilder<JsonRpcRequest>();
         builder.constant("jsonrpc", "2.0");
         builder.field("method", [](auto &object) { return &object.method; });
-        builder.field("params", [](auto &object) { return &object.params; }).required(false);
+        builder.field("params", [](auto &object) { return &object.params.json; }).required(false);
         builder.field("id", [](auto &object) { return &object.id; });
         return builder.build();
     }
@@ -73,8 +78,7 @@ struct JsonObjectReflector<JsonRpcRequest>
 struct JsonRpcSuccessResponse
 {
     JsonRpcId id;
-    JsonValue result;
-    std::string binary = {};
+    Payload result;
 };
 
 template<>
@@ -85,7 +89,7 @@ struct JsonObjectReflector<JsonRpcSuccessResponse>
         auto builder = JsonBuilder<JsonRpcSuccessResponse>();
         builder.constant("jsonrpc", "2.0");
         builder.field("id", [](auto &object) { return &object.id; });
-        builder.field("result", [](auto &object) { return &object.result; });
+        builder.field("result", [](auto &object) { return &object.result.json; });
         return builder.build();
     }
 };

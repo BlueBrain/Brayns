@@ -23,7 +23,6 @@
 
 #include <memory>
 #include <mutex>
-#include <stdexcept>
 #include <string>
 
 #include <brayns/core/json/Json.h>
@@ -33,7 +32,7 @@ namespace brayns
 {
 struct TaskOperation
 {
-    std::string description;
+    std::string description = "Task startup";
     float completion = 0.0F;
     std::size_t index = 0;
 };
@@ -63,7 +62,7 @@ public:
 class TaskMonitor
 {
 public:
-    explicit TaskMonitor(std::size_t operationCount, std::string initialOperation);
+    explicit TaskMonitor(std::size_t operationCount);
 
     std::size_t getOperationCount() const;
     TaskOperation getCurrentOperation();

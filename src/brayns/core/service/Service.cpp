@@ -41,7 +41,7 @@ JsonRpcRequest parseRequest(const Message &message)
 
 Message composeResponse(const JsonRpcSuccessResponse &response)
 {
-    if (response.binary.empty())
+    if (response.result.binary.empty())
     {
         return {.data = composeAsText(response), .binary = false};
     }
@@ -59,9 +59,7 @@ std::optional<JsonRpcResponse> execute(JsonRpcRequest request, Api &api, Logger 
     try
     {
         logger.info("Calling endpoint for request {}", toString(request.id));
-        auto params = RawParams{std::move(request.params), std::move(request.binary)};
-        auto result = api.execute(request.method, std::move(params));
-
+        auto result = api.execute(request.method, std::move(request.params));
         logger.info("Successfully called endpoint");
 
         if (!request.id)
@@ -70,7 +68,7 @@ std::optional<JsonRpcResponse> execute(JsonRpcRequest request, Api &api, Logger 
             return {};
         }
 
-        return JsonRpcSuccessResponse{*request.id, result.json, std::move(result.binary)};
+        return JsonRpcSuccessResponse{*request.id, std::move(result)};
     }
     catch (const JsonRpcException &e)
     {

@@ -42,8 +42,8 @@ TEST_CASE("JsonRpcParser")
         CHECK(request.id);
         CHECK_EQ(std::get<int>(*request.id), 1);
         CHECK_EQ(request.method, "test");
-        CHECK_EQ(request.params, 123);
-        CHECK_EQ(request.binary, "");
+        CHECK_EQ(request.params.json, 123);
+        CHECK_EQ(request.params.binary, "");
     }
     SUBCASE("Binary")
     {
@@ -56,8 +56,8 @@ TEST_CASE("JsonRpcParser")
         CHECK(request.id);
         CHECK_EQ(std::get<int>(*request.id), 1);
         CHECK_EQ(request.method, "test");
-        CHECK_EQ(request.params, 123);
-        CHECK_EQ(request.binary, "binary");
+        CHECK_EQ(request.params.json, 123);
+        CHECK_EQ(request.params.binary, "binary");
     }
     SUBCASE("Invalid JSON")
     {

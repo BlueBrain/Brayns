@@ -110,7 +110,7 @@ struct JsonObjectReflector<EmptyJsonObject>
     static auto reflect()
     {
         auto builder = JsonBuilder<EmptyJsonObject>();
-        builder.description("Can also be an empty object");
+        builder.description("An empty object");
         return builder.build();
     }
 };

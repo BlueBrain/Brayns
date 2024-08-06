@@ -56,14 +56,14 @@ struct JsonObjectReflector<EndpointSchema>
             .description("JSON schema of the method result");
         builder.field("async", [](auto &object) { return &object.async; })
             .description(
-                "If true, the endpoint does not return its result directly but instead an object {\"task_id\": ID}. "
-                "This ID can be used to get the method result, cancel it or get its progress");
+                "If true, the endpoint does not return its result directly but instead an object {\"task_id\": <id>}. "
+                "This ID can be used to get the task result, cancel it or get its progress");
         return builder.build();
     }
 };
 
-using SyncEndpointHandler = std::function<RawResult(RawParams)>;
-using AsyncEndpointHandler = std::function<RawTask(RawParams)>;
+using SyncEndpointHandler = std::function<Payload(Payload)>;
+using AsyncEndpointHandler = std::function<TaskInterface(Payload)>;
 using EndpointHandler = std::variant<SyncEndpointHandler, AsyncEndpointHandler>;
 
 struct Endpoint

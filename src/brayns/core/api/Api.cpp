@@ -30,7 +30,7 @@ namespace
 {
 using namespace brayns;
 
-const RawTask &getRawTask(const std::map<TaskId, RawTask> &tasks, TaskId id)
+const TaskInterface &getRawTask(const std::map<TaskId, TaskInterface> &tasks, TaskId id)
 {
     auto i = tasks.find(id);
 
@@ -42,7 +42,7 @@ const RawTask &getRawTask(const std::map<TaskId, RawTask> &tasks, TaskId id)
     return i->second;
 }
 
-TaskId addTask(RawTask task, std::map<TaskId, RawTask> &tasks, IdGenerator<TaskId> ids)
+TaskId addTask(TaskInterface task, std::map<TaskId, TaskInterface> &tasks, IdGenerator<TaskId> ids)
 {
     auto id = ids.next();
     assert(!tasks.contains(id));
@@ -101,7 +101,7 @@ const EndpointSchema &Api::getSchema(const std::string &method) const
     return i->second.schema;
 }
 
-RawResult Api::execute(const std::string &method, RawParams params)
+Payload Api::execute(const std::string &method, Payload params)
 {
     auto i = _endpoints.find(method);
 
@@ -161,7 +161,7 @@ TaskInfo Api::getTask(TaskId id) const
     return {id, operationCount, std::move(currentOperation)};
 }
 
-RawResult Api::waitForTaskResult(TaskId id)
+Payload Api::waitForTaskResult(TaskId id)
 {
     const auto &task = getRawTask(_tasks, id);
 

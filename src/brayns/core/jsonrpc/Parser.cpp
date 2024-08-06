@@ -75,7 +75,7 @@ JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary)
 
     auto request = parseTextJsonRpcRequest(std::string(text));
 
-    request.binary = binary.substr(4 + textSize);
+    request.params.binary = binary.substr(4 + textSize);
 
     return request;
 }
@@ -103,7 +103,7 @@ std::string composeAsBinary(const JsonRpcSuccessResponse &response)
 
     auto header = composeBytes(static_cast<std::uint32_t>(textSize), std::endian::little);
 
-    return header + text + response.binary;
+    return header + text + response.result.binary;
 }
 
 JsonRpcError composeError(const JsonRpcException &e)

@@ -21,32 +21,24 @@
 
 #pragma once
 
+#include <concepts>
 #include <functional>
+#include <future>
 #include <string>
+#include <type_traits>
 
 #include <brayns/core/json/Json.h>
+#include <brayns/core/jsonrpc/PayloadReflector.h>
 
 #include "Progress.h"
 
 namespace brayns
 {
-struct RawParams
-{
-    JsonValue json;
-    std::string binary = {};
-};
-
-struct RawResult
-{
-    JsonValue json;
-    std::string binary = {};
-};
-
-struct RawTask
+struct TaskInterface
 {
     std::size_t operationCount;
     std::function<TaskOperation()> getCurrentOperation;
-    std::function<RawResult()> wait;
+    std::function<Payload()> wait;
     std::function<void()> cancel;
 };
 
@@ -90,4 +82,47 @@ struct JsonObjectReflector<TaskInfo>
         return builder.build();
     }
 };
+
+template<ReflectedPayload T>
+struct Task
+{
+    std::size_t operationCount;
+    std::function<TaskOperation()> getCurrentOperation;
+    std::function<T()> wait;
+    std::function<void()> cancel;
+};
+
+template<typename T>
+struct TaskReflector;
+
+template<ReflectedPayload T>
+struct TaskReflector<Task<T>>
+{
+    using Result = T;
+};
+
+template<typename T>
+concept ReflectedTask = requires { typename TaskReflector<T>::Result; };
+
+template<ReflectedTask T>
+using GetTaskResult = typename TaskReflector<T>::Result;
+
+template<ReflectedPayload ParamsType, std::invocable<Progress, ParamsType> Handler>
+Task<std::invoke_result_t<Handler, Progress, ParamsType>> startTask(
+    Handler handler,
+    ParamsType params,
+    std::size_t operationCount)
+{
+    auto monitor = std::make_shared<TaskMonitor>(operationCount);
+
+    auto future = std::async(std::launch::async, std::move(handler), Progress(monitor), std::move(params));
+    auto shared = std::make_shared<decltype(future)>(std::move(future));
+
+    return {
+        .operationCount = operationCount,
+        .getCurrentOperation = [=] { return monitor->getCurrentOperation(); },
+        .wait = [=] { return shared->get(); },
+        .cancel = [=] { monitor->cancel(); },
+    };
+}
 }

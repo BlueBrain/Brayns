@@ -43,15 +43,15 @@ public:
 
     std::vector<std::string> getMethods() const;
     const EndpointSchema &getSchema(const std::string &method) const;
-    RawResult execute(const std::string &method, RawParams params);
+    Payload execute(const std::string &method, Payload params);
     std::vector<TaskInfo> getTasks() const;
     TaskInfo getTask(TaskId id) const;
-    RawResult waitForTaskResult(TaskId id);
+    Payload waitForTaskResult(TaskId id);
     void cancelTask(TaskId id);
 
 private:
     std::map<std::string, Endpoint> _endpoints;
-    std::map<TaskId, RawTask> _tasks;
+    std::map<TaskId, TaskInterface> _tasks;
     IdGenerator<TaskId> _ids;
 };
 }
