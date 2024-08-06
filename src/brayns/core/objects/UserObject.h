@@ -22,7 +22,7 @@
 #pragma once
 
 #include <concepts>
-#include <string>
+#include <functional>
 #include <type_traits>
 
 #include <brayns/core/json/Json.h>
@@ -31,6 +31,33 @@
 
 namespace brayns
 {
+using ObjectId = std::uint32_t;
+
+constexpr auto nullId = ObjectId(0);
+
+template<typename T>
+struct UserObject
+{
+    ObjectId id;
+    T value;
+    JsonValue userData = {};
+};
+
+template<typename T>
+struct UserObjectReflector;
+
+template<typename T>
+struct UserObjectReflector<UserObject<T>>
+{
+    using Value = T;
+};
+
+template<typename T>
+concept ValidUserObject = requires { typename UserObjectReflector<T>::Value; };
+
+template<typename T>
+using GetUserObjectValue = typename UserObjectReflector<T>::Value;
+
 template<typename T>
 struct ObjectReflector;
 
@@ -50,20 +77,10 @@ template<typename T>
 concept WithProperties = ReflectedJson<GetProperties<T>>;
 
 template<typename T>
-concept ReflectedObject = WithSettings<T> && WithType<T> && WithProperties<T>;
-
-template<ReflectedObject T>
-struct ParamsOf
-{
-    ObjectId id;
-    GetSettings<T> settings;
-};
+concept ReflectedObject = ValidUserObject<T> && WithSettings<T> && WithType<T> && WithProperties<T>;
 
 template<typename T>
 concept WithSize = std::convertible_to<decltype(ObjectReflector<T>::getSize(std::declval<const T &>())), std::size_t>;
-
-template<typename T>
-concept WithRemove = std::same_as<decltype(ObjectReflector<T>::remove(std::declval<T &>())), void>;
 
 template<ReflectedObject T>
 const std::string &getObjectType()
@@ -90,14 +107,23 @@ std::size_t getObjectSize(const T &object)
     return ObjectReflector<T>::getSize(object);
 }
 
-void removeObject(auto &object)
+template<ReflectedObject T>
+using ObjectFactory = std::function<GetUserObjectValue<T>(ObjectId, GetSettings<T>)>;
+
+template<ReflectedObject T>
+Metadata createMetadata(const T &object)
 {
-    (void)object;
+    return {
+        .id = object.id,
+        .type = getObjectType<T>(),
+        .size = getObjectSize(object),
+        .userData = object.userData,
+    };
 }
 
-template<WithRemove T>
-void removeObject(T &object)
+template<ReflectedObject T>
+ObjectResult<GetProperties<T>> createResult(const T &object)
 {
-    ObjectReflector<T>::remove(object);
+    return {createMetadata(object), getObjectProperties(object)};
 }
 }

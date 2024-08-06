@@ -90,8 +90,8 @@ ObjectResult<GetProperties<T>> createObject(LockedObjects &locked, ObjectParams<
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto id = objects.create<T>(std::move(params.settings), params.userData);
-            return objects.getResult<T>(id);
+            auto &object = objects.create<T>(std::move(params.settings), params.userData);
+            return objects.getResult<T>(object.id);
         });
 }
 
@@ -107,7 +107,7 @@ void addCreateAndGet(ApiBuilder &builder, LockedObjects &locked)
     const auto &type = getObjectType<T>();
 
     builder.endpoint("get-" + type, [&](ObjectIdParams params) { return getObject<T>(locked, params.id); })
-        .description("Get all properties properties of given " + type);
+        .description("Get all properties of " + type + " with given ID");
 
     builder
         .endpoint(

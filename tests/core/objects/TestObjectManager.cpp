@@ -59,11 +59,13 @@ struct JsonObjectReflector<TestProperties>
     }
 };
 
-struct TestObject
+struct TestValue
 {
     ObjectId id;
     TestSettings settings;
 };
+
+using TestObject = UserObject<TestValue>;
 
 template<>
 struct ObjectReflector<TestObject>
@@ -77,23 +79,18 @@ struct ObjectReflector<TestObject>
 
     static TestProperties getProperties(const TestObject &object)
     {
-        return {static_cast<float>(object.settings.someInt)};
+        return {static_cast<float>(object.value.settings.someInt)};
     }
 
     static std::size_t getSize(const TestObject &object)
     {
-        return object.settings.someString.size();
-    }
-
-    static void remove(TestObject &object)
-    {
-        object.id = nullId;
+        return object.value.settings.someString.size();
     }
 };
 
 void registerTestObject(ObjectManager &objects)
 {
-    objects.addFactory<TestObject>([](auto params) { return TestObject{params.id, std::move(params.settings)}; });
+    objects.addFactory<TestObject>([](auto id, auto settings) { return TestValue{id, std::move(settings)}; });
 }
 }
 
@@ -102,42 +99,43 @@ TEST_CASE("Create and remove objects")
     auto objects = ObjectManager();
     registerTestObject(objects);
 
-    auto id = objects.create<TestObject>({2, "data"}, "someUserData");
+    auto &object = objects.create<TestObject>({2, "data"}, "someUserData");
 
-    CHECK_EQ(id, 1);
+    CHECK_EQ(object.id, 1);
 
-    auto metadata = objects.getMetadata(id);
+    auto metadata = objects.getMetadata(object.id);
 
-    CHECK_EQ(metadata.id, id);
+    CHECK_EQ(metadata.id, object.id);
     CHECK_EQ(metadata.type, "test");
     CHECK_EQ(metadata.size, 4);
     CHECK_EQ(metadata.userData.extract<std::string>(), "someUserData");
 
-    auto properties = objects.getProperties<TestObject>(id);
+    auto properties = objects.getProperties<TestObject>(object.id);
 
     CHECK_EQ(properties.someFloat, 2.0F);
 
-    auto &object = objects.get<TestObject>(id);
+    auto &retreived = objects.get<TestObject>(object.id);
 
-    CHECK_EQ(object.id, id);
-    CHECK_EQ(object.settings.someInt, 2);
-    CHECK_EQ(object.settings.someString, "data");
+    CHECK_EQ(retreived.id, object.id);
+    CHECK_EQ(retreived.userData, object.userData);
+    CHECK_EQ(object.value.settings.someInt, 2);
+    CHECK_EQ(object.value.settings.someString, "data");
 
-    auto shared = objects.getShared<TestObject>(id);
+    auto shared = objects.getShared<TestObject>(object.id);
 
-    auto id2 = objects.create<TestObject>({3, "data2"}, "someUserData2");
+    auto &object2 = objects.create<TestObject>({3, "data2"}, "someUserData2");
 
     CHECK_EQ(objects.getAllMetadata().size(), 2);
 
-    objects.remove(id);
+    objects.remove(object.id);
 
     CHECK_EQ(shared->id, nullId);
 
-    CHECK_THROWS_AS(objects.getMetadata(id), InvalidParams);
-    CHECK_THROWS_AS(objects.getProperties<TestObject>(id), InvalidParams);
-    CHECK_THROWS_AS(objects.getResult<TestObject>(id), InvalidParams);
+    CHECK_THROWS_AS(objects.getMetadata(object.id), InvalidParams);
+    CHECK_THROWS_AS(objects.getProperties<TestObject>(object.id), InvalidParams);
+    CHECK_THROWS_AS(objects.getResult<TestObject>(object.id), InvalidParams);
 
-    auto shared2 = objects.getShared<TestObject>(id2);
+    auto shared2 = objects.getShared<TestObject>(object2.id);
 
     objects.clear();
 

@@ -28,13 +28,9 @@
 
 namespace brayns
 {
-using ObjectId = std::uint32_t;
-
-constexpr auto nullId = ObjectId(0);
-
 struct Metadata
 {
-    ObjectId id;
+    std::uint32_t id;
     std::string type;
     std::size_t size = 0;
     JsonValue userData = {};

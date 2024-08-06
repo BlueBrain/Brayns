@@ -40,7 +40,28 @@ struct JsonObjectReflector<Metadatas>
     }
 };
 
+struct UpdateObjectParams
+{
+    ObjectId objectId;
+    JsonValue userData;
+};
+
+template<>
+struct JsonObjectReflector<UpdateObjectParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<UpdateObjectParams>();
+        builder.field("object_id", [](auto &object) { return &object.objectId; })
+            .description("ID of the object to update");
+        builder.field("user_data", [](auto &object) { return &object.userData; })
+            .description("New user data to store in the object");
+        return builder.build();
+    }
+};
+
 Metadatas getAllObjects(LockedObjects &locked)
+
 {
     return {locked.visit([](auto &objects) { return objects.getAllMetadata(); })};
 }
@@ -48,6 +69,16 @@ Metadatas getAllObjects(LockedObjects &locked)
 Metadata getObject(LockedObjects &locked, ObjectId id)
 {
     return locked.visit([&](auto &objects) { return objects.getMetadata(id); });
+}
+
+Metadata updateObject(LockedObjects &locked, const UpdateObjectParams &params)
+{
+    return locked.visit(
+        [&](auto &objects)
+        {
+            objects.setUserData(params.objectId, params.userData);
+            return objects.getMetadata(params.objectId);
+        });
 }
 
 void removeSelectedObjects(LockedObjects &locked, const std::vector<ObjectId> &ids)
@@ -67,9 +98,7 @@ void clearObjects(LockedObjects &locked)
     locked.visit([](auto &objects) { objects.clear(); });
 }
 
-struct EmptyObject
-{
-};
+using EmptyObject = UserObject<EmptyJson>;
 
 template<>
 struct ObjectReflector<EmptyObject>
@@ -95,7 +124,7 @@ LockedObjects::LockedObjects(ObjectManager objects, Logger &logger):
 
 void addDefaultObjects(ObjectManager &objects)
 {
-    objects.addFactory<EmptyObject>([](auto) { return EmptyObject(); });
+    objects.addFactory<EmptyObject>([](auto, auto) { return EmptyJson(); });
 }
 
 void addObjectEndpoints(ApiBuilder &builder, LockedObjects &locked)
@@ -105,6 +134,8 @@ void addObjectEndpoints(ApiBuilder &builder, LockedObjects &locked)
 
     builder.endpoint("get-object", [&](ObjectIdParams params) { return getObject(locked, params.id); })
         .description("Get generic object properties from given object IDs");
+
+    builder.endpoint("update-object", [&](UpdateObjectParams params) { return updateObject(locked, params); });
 
     builder.endpoint("remove-objects", [&](ObjectIds params) { removeSelectedObjects(locked, params.ids); })
         .description("Remove selected objects from registry (but not from scene)");

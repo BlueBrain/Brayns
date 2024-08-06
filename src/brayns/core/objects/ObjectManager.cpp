@@ -47,6 +47,16 @@ auto getStorageIterator(auto &objects, ObjectId id)
 
 namespace brayns
 {
+Metadata createMetadata(const ObjectInterface &object)
+{
+    return {
+        .id = object.getId(),
+        .type = object.getType(),
+        .size = object.getSize(),
+        .userData = object.getUserData(),
+    };
+}
+
 ObjectManager::ObjectManager()
 {
     disableNullId(_ids);
@@ -59,7 +69,7 @@ std::vector<Metadata> ObjectManager::getAllMetadata() const
 
     for (const auto &[id, object] : _objects)
     {
-        auto metadata = createMetadata(id, object);
+        auto metadata = createMetadata(object);
         metadatas.push_back(std::move(metadata));
     }
 
@@ -68,16 +78,30 @@ std::vector<Metadata> ObjectManager::getAllMetadata() const
 
 Metadata ObjectManager::getMetadata(ObjectId id) const
 {
-    const auto &storage = getStorage(id);
+    const auto &interface = getInterface(id);
 
-    return createMetadata(id, storage);
+    return createMetadata(interface);
+}
+
+const ObjectInterface &ObjectManager::getInterface(ObjectId id) const
+{
+    auto i = getStorageIterator(_objects, id);
+
+    return i->second;
+}
+
+void ObjectManager::setUserData(ObjectId id, const JsonValue &userData)
+{
+    auto i = getStorageIterator(_objects, id);
+
+    i->second.setUserData(userData);
 }
 
 void ObjectManager::remove(ObjectId id)
 {
     auto i = getStorageIterator(_objects, id);
 
-    i->second.remove();
+    i->second.removeId();
 
     _objects.erase(i);
 }
@@ -86,29 +110,12 @@ void ObjectManager::clear()
 {
     for (const auto &[id, object] : _objects)
     {
-        object.remove();
+        object.removeId();
     }
 
     _objects.clear();
 
     _ids = {};
     disableNullId(_ids);
-}
-
-Metadata ObjectManager::createMetadata(ObjectId id, const ObjectStorage &storage)
-{
-    return {
-        .id = id,
-        .type = storage.type,
-        .size = storage.getSize(),
-        .userData = storage.userData,
-    };
-}
-
-const ObjectStorage &ObjectManager::getStorage(ObjectId id) const
-{
-    auto i = getStorageIterator(_objects, id);
-
-    return i->second;
 }
 }
