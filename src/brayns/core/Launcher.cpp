@@ -23,8 +23,10 @@
 
 #include <iostream>
 
+#include <brayns/core/endpoints/CameraEndpoints.h>
 #include <brayns/core/endpoints/ObjectEndpoints.h>
 #include <brayns/core/endpoints/ServiceEndpoints.h>
+#include <brayns/core/engine/Device.h>
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/utils/String.h>
@@ -77,12 +79,13 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
     addServiceEndpoints(builder, api, token);
 
     auto objects = ObjectManager();
-
-    addDefaultObjects(objects);
-
     auto locked = LockedObjects(std::move(objects), logger);
 
     addObjectEndpoints(builder, locked);
+
+    auto device = createDevice(logger);
+
+    addCameraEndpoints(builder, locked, device);
 
     api = builder.build();
 

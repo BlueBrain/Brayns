@@ -48,23 +48,6 @@ public:
         return callable(_objects);
     }
 
-    template<ReflectedObject T>
-    ResultOf<T> create(ParamsOf<T> params)
-    {
-        return visit(
-            [&](ObjectManager &objects)
-            {
-                auto object = objects.create<T>(std::move(params.settings), params.userData);
-                return object.getResult();
-            });
-    }
-
-    template<ReflectedObject T>
-    ResultOf<T> get(GetObjectParams params)
-    {
-        return visit([&](ObjectManager &objects) { return objects.getResult<T>(params.id); });
-    }
-
 private:
     std::mutex _mutex;
     ObjectManager _objects;

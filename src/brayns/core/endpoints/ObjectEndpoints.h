@@ -26,6 +26,5 @@
 
 namespace brayns
 {
-void addDefaultObjects(ObjectManager &objects);
 void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects);
 }

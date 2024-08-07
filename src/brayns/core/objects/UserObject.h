@@ -26,20 +26,12 @@
 #include <string>
 #include <type_traits>
 
-#include <brayns/core/json/Json.h>
-
 #include "Messages.h"
 
 namespace brayns
 {
 template<typename T>
 struct ObjectReflector;
-
-template<typename T>
-using GetSettings = typename ObjectReflector<T>::Settings;
-
-template<typename T>
-concept WithSettings = ReflectedJson<GetSettings<T>>;
 
 template<typename T>
 concept WithType = std::same_as<std::string, decltype(ObjectReflector<T>::getType(std::declval<const T &>()))>;
@@ -51,30 +43,12 @@ template<typename T>
 concept WithRemove = std::is_void_v<decltype(ObjectReflector<T>::remove(std::declval<T &>()))>;
 
 template<typename T>
-using GetProperties = decltype(ObjectReflector<T>::getProperties(std::declval<const T &>()));
-
-template<typename T>
-concept WithProperties = ReflectedJson<GetProperties<T>>;
-
-template<typename T>
-concept ReflectedObject = WithSettings<T> && WithType<T> && WithProperties<T>;
-
-template<ReflectedObject T>
-using ParamsOf = ObjectParams<GetSettings<T>>;
-
-template<ReflectedObject T>
-using ResultOf = ObjectResult<GetProperties<T>>;
+concept ReflectedObject = WithType<T> && std::default_initializable<T>;
 
 template<ReflectedObject T>
 std::string getObjectType(const T &object)
 {
     return ObjectReflector<T>::getType(object);
-}
-
-template<ReflectedObject T>
-GetProperties<T> getObjectProperties(const T &object)
-{
-    return ObjectReflector<T>::getProperties(object);
 }
 
 template<typename T>
@@ -129,12 +103,6 @@ Metadata createObjectMetadata(const UserObject<T> &object)
 }
 
 template<ReflectedObject T>
-ResultOf<T> createObjectResult(const UserObject<T> &object)
-{
-    return {createObjectMetadata(object), getObjectProperties(object.value)};
-}
-
-template<ReflectedObject T>
 class Stored
 {
 public:
@@ -178,16 +146,6 @@ public:
         return createObjectMetadata(*_object);
     }
 
-    GetProperties<T> getProperties() const
-    {
-        return getObjectProperties(*_object);
-    }
-
-    ResultOf<T> getResult() const
-    {
-        return createObjectResult(*_object);
-    }
-
     T &get() const
     {
         return _object->value;
@@ -196,9 +154,6 @@ public:
 private:
     std::shared_ptr<UserObject<T>> _object;
 };
-
-template<ReflectedObject T>
-using ObjectFactory = std::function<T(ObjectId, GetSettings<T>)>;
 
 struct ObjectInterface
 {

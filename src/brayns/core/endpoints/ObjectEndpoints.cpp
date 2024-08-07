@@ -112,6 +112,9 @@ void clearObjects(LockedObjects &locked)
     locked.visit([](auto &objects) { objects.clear(); });
 }
 
+using EmptyParams = ObjectParams<EmptyJson>;
+using EmptyResult = ObjectResult<EmptyJson>;
+
 struct EmptyObject
 {
 };
@@ -119,22 +122,30 @@ struct EmptyObject
 template<>
 struct ObjectReflector<EmptyObject>
 {
-    using Settings = EmptyJson;
-
     static std::string getType(const EmptyObject &)
     {
         return "empty-object";
     }
-
-    static EmptyJson getProperties(const EmptyObject &)
-    {
-        return {};
-    }
 };
 
-void addDefaultObjects(ObjectManager &objects)
+ObjectResult<EmptyJson> createEmptyObject(LockedObjects &locked, const JsonValue &userData)
 {
-    objects.addFactory<EmptyObject>([](auto, auto) { return EmptyObject(); });
+    return locked.visit(
+        [&](auto &objects)
+        {
+            auto object = objects.add(EmptyObject(), userData);
+            return ObjectResult<EmptyJson>{object.getMetadata(), {}};
+        });
+}
+
+ObjectResult<EmptyJson> getEmptyObject(LockedObjects &locked, ObjectId id)
+{
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto object = objects.getStored<EmptyObject>(id);
+            return ObjectResult<EmptyJson>(object.getMetadata(), {});
+        });
 }
 
 void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects)
@@ -154,12 +165,10 @@ void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects)
         .description("Remove all objects currently in registry");
 
     builder
-        .endpoint(
-            "create-empty-object",
-            [&](ParamsOf<EmptyObject> params) { return objects.create<EmptyObject>(params); })
+        .endpoint("create-empty-object", [&](EmptyParams params) { return createEmptyObject(objects, params.userData); })
         .description("Create an empty object with only metadata");
 
-    builder.endpoint("get-empty-object", [&](GetObjectParams params) { return objects.get<EmptyObject>(params); })
+    builder.endpoint("get-empty-object", [&](GetObjectParams params) { return getEmptyObject(objects, params.id); })
         .description("Get empty object with given ID");
 }
 }

@@ -135,12 +135,6 @@ struct ObjectReflector<OrthographicUserCamera>
     }
 };*/
 
-void addCameraObjects(ObjectManager &objects, Device &device)
-{
-    (void)objects;
-    (void)device;
-}
-
 void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
     (void)builder;
