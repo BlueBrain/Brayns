@@ -23,19 +23,19 @@
 
 namespace brayns
 {
-struct Metadatas
+struct AllObjectsResult
 {
     std::vector<Metadata> objects;
 };
 
 template<>
-struct JsonObjectReflector<Metadatas>
+struct JsonObjectReflector<AllObjectsResult>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<Metadatas>();
+        auto builder = JsonBuilder<AllObjectsResult>();
         builder.field("objects", [](auto &object) { return &object.objects; })
-            .description("List of object generic properties");
+            .description("Metadata of all objects in registry");
         return builder.build();
     }
 };
@@ -59,8 +59,23 @@ struct JsonObjectReflector<UpdateObjectParams>
     }
 };
 
-Metadatas getAllObjects(LockedObjects &locked)
+struct RemoveParams
+{
+    std::vector<ObjectId> ids;
+};
 
+template<>
+struct JsonObjectReflector<RemoveParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<RemoveParams>();
+        builder.field("ids", [](auto &object) { return &object.ids; }).description("IDs of the objects to remove");
+        return builder.build();
+    }
+};
+
+AllObjectsResult getAllObjects(LockedObjects &locked)
 {
     return {locked.visit([](auto &objects) { return objects.getAllMetadata(); })};
 }
@@ -97,14 +112,16 @@ void clearObjects(LockedObjects &locked)
     locked.visit([](auto &objects) { objects.clear(); });
 }
 
-using EmptyObject = UserObject<EmptyJson>;
+struct EmptyObject
+{
+};
 
 template<>
 struct ObjectReflector<EmptyObject>
 {
     using Settings = EmptyJson;
 
-    static std::string getType()
+    static std::string getType(const EmptyObject &)
     {
         return "empty-object";
     }
@@ -115,33 +132,34 @@ struct ObjectReflector<EmptyObject>
     }
 };
 
-LockedObjects::LockedObjects(ObjectManager objects, Logger &logger):
-    _objects(std::move(objects)),
-    _logger(&logger)
-{
-}
-
 void addDefaultObjects(ObjectManager &objects)
 {
-    objects.addFactory<EmptyObject>([](auto, auto) { return EmptyJson(); });
+    objects.addFactory<EmptyObject>([](auto, auto) { return EmptyObject(); });
 }
 
-void addObjectEndpoints(ApiBuilder &builder, LockedObjects &locked)
+void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects)
 {
-    builder.endpoint("get-all-objects", [&] { return getAllObjects(locked); })
+    builder.endpoint("get-all-objects", [&] { return getAllObjects(objects); })
         .description("Get generic properties of all objects, use get-{type} to get details of an object");
 
-    builder.endpoint("get-object", [&](ObjectIdParams params) { return getObject(locked, params.id); })
+    builder.endpoint("get-object", [&](GetObjectParams params) { return getObject(objects, params.id); })
         .description("Get generic object properties from given object IDs");
 
-    builder.endpoint("update-object", [&](UpdateObjectParams params) { return updateObject(locked, params); });
+    builder.endpoint("update-object", [&](UpdateObjectParams params) { return updateObject(objects, params); });
 
-    builder.endpoint("remove-objects", [&](ObjectIds params) { removeSelectedObjects(locked, params.ids); })
+    builder.endpoint("remove-objects", [&](RemoveParams params) { removeSelectedObjects(objects, params.ids); })
         .description("Remove selected objects from registry (but not from scene)");
 
-    builder.endpoint("clear-objects", [&] { clearObjects(locked); })
+    builder.endpoint("clear-objects", [&] { clearObjects(objects); })
         .description("Remove all objects currently in registry");
 
-    addCreateAndGet<EmptyObject>(builder, locked);
+    builder
+        .endpoint(
+            "create-empty-object",
+            [&](ParamsOf<EmptyObject> params) { return objects.create<EmptyObject>(params); })
+        .description("Create an empty object with only metadata");
+
+    builder.endpoint("get-empty-object", [&](GetObjectParams params) { return objects.get<EmptyObject>(params); })
+        .description("Get empty object with given ID");
 }
 }

@@ -22,9 +22,7 @@
 #pragma once
 
 #include <any>
-#include <functional>
 #include <map>
-#include <memory>
 #include <string>
 #include <typeindex>
 #include <vector>
@@ -40,19 +38,6 @@
 
 namespace brayns
 {
-struct ObjectInterface
-{
-    std::any object;
-    std::function<ObjectId()> getId;
-    std::function<void()> removeId;
-    std::function<std::string()> getType;
-    std::function<std::size_t()> getSize;
-    std::function<JsonValue()> getUserData;
-    std::function<void(const JsonValue &)> setUserData;
-};
-
-Metadata createMetadata(const ObjectInterface &object);
-
 class ObjectManager
 {
 public:
@@ -60,7 +45,6 @@ public:
 
     std::vector<Metadata> getAllMetadata() const;
     Metadata getMetadata(ObjectId id) const;
-    const ObjectInterface &getInterface(ObjectId id) const;
     void setUserData(ObjectId id, const JsonValue &userData);
     void remove(ObjectId id);
     void clear();
@@ -79,58 +63,37 @@ public:
     }
 
     template<ReflectedObject T>
-    const std::shared_ptr<T> &getShared(ObjectId id) const
-    {
-        const auto &interface = getInterface(id);
-
-        return castObject<T>(id, interface);
-    }
-
-    template<ReflectedObject T>
     T &get(ObjectId id) const
     {
-        return *getShared<T>(id);
+        return getShared<T>(id)->value;
     }
 
     template<ReflectedObject T>
-    GetProperties<T> getProperties(ObjectId id) const
+    Stored<T> getStored(ObjectId id) const
     {
-        auto &object = get<T>(id);
-
-        return getObjectProperties(object);
+        return Stored<T>(getShared<T>(id));
     }
 
     template<ReflectedObject T>
-    ObjectResult<GetProperties<T>> getResult(ObjectId id) const
+    ResultOf<T> getResult(ObjectId id) const
     {
-        auto &object = get<T>(id);
-
-        return createResult(object);
+        return createObjectResult(*getShared<T>(id));
     }
 
     template<ReflectedObject T>
-    T &create(GetSettings<T> settings, const JsonValue &userData = {})
+    Stored<T> create(GetSettings<T> settings, const JsonValue &userData = {})
     {
         auto id = _ids.next();
 
         try
         {
-            auto object = createObject<T>(id, userData, std::move(settings));
-            auto ptr = std::make_shared<T>(std::move(object));
-
-            auto interface = ObjectInterface{
-                .object = ptr,
-                .getId = [=] { return ptr->id; },
-                .removeId = [=] { ptr->id = nullId; },
-                .getType = [] { return getObjectType<T>(); },
-                .getSize = [=] { return getObjectSize(*ptr); },
-                .getUserData = [=] { return ptr->userData; },
-                .setUserData = [=](const auto &value) { ptr->userData = value; },
-            };
+            auto object = createUserObject<T>(id, std::move(settings), userData);
+            auto ptr = std::make_shared<UserObject<T>>(std::move(object));
+            auto interface = createObjectInterface(ptr);
 
             _objects.emplace(id, std::move(interface));
 
-            return *ptr;
+            return Stored<T>(std::move(ptr));
         }
         catch (...)
         {
@@ -144,24 +107,34 @@ private:
     std::map<ObjectId, ObjectInterface> _objects;
     IdGenerator<ObjectId> _ids;
 
+    const ObjectInterface &getInterface(ObjectId id) const;
+
     template<ReflectedObject T>
-    static const std::shared_ptr<T> &castObject(ObjectId id, const ObjectInterface &interface)
+    static const std::shared_ptr<UserObject<T>> &castObject(const ObjectInterface &interface)
     {
-        auto ptr = std::any_cast<std::shared_ptr<T>>(&interface.object);
+        auto ptr = std::any_cast<std::shared_ptr<UserObject<T>>>(&interface.value);
 
         if (ptr != nullptr)
         {
             return *ptr;
         }
 
-        const auto &expected = getObjectType<T>();
-        auto got = interface.getType();
+        auto id = interface.getId();
+        auto type = interface.getType();
 
-        throw InvalidParams(fmt::format("Invalid type for object with ID {}: expected {}, got {}", id, expected, got));
+        throw InvalidParams(fmt::format("Invalid type for object with ID {}: {}", id, type));
     }
 
     template<ReflectedObject T>
-    T createObject(ObjectId id, const JsonValue &userData, GetSettings<T> settings)
+    const std::shared_ptr<UserObject<T>> &getShared(ObjectId id) const
+    {
+        const auto &interface = getInterface(id);
+
+        return castObject<T>(interface);
+    }
+
+    template<ReflectedObject T>
+    UserObject<T> createUserObject(ObjectId id, GetSettings<T> settings, const JsonValue &userData)
     {
         auto i = _factories.find(typeid(T));
 
@@ -172,9 +145,9 @@ private:
 
         const auto &factory = std::any_cast<const ObjectFactory<T> &>(i->second);
 
-        auto value = factory(id, std::move(settings));
+        auto object = factory(id, std::move(settings));
 
-        return {id, std::move(value), userData};
+        return {id, std::move(object), userData};
     }
 };
 }

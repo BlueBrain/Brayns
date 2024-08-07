@@ -28,9 +28,13 @@
 
 namespace brayns
 {
+using ObjectId = std::uint32_t;
+
+constexpr auto nullId = ObjectId(0);
+
 struct Metadata
 {
-    std::uint32_t id;
+    ObjectId id;
     std::string type;
     std::size_t size = 0;
     JsonValue userData = {};
@@ -112,4 +116,20 @@ struct JsonObjectReflector<EmptyJsonObject>
 };
 
 using EmptyJson = std::optional<EmptyJsonObject>;
+
+struct GetObjectParams
+{
+    ObjectId id;
+};
+
+template<>
+struct JsonObjectReflector<GetObjectParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<GetObjectParams>();
+        builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to retreive");
+        return builder.build();
+    }
+};
 }

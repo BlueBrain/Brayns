@@ -47,16 +47,6 @@ auto getStorageIterator(auto &objects, ObjectId id)
 
 namespace brayns
 {
-Metadata createMetadata(const ObjectInterface &object)
-{
-    return {
-        .id = object.getId(),
-        .type = object.getType(),
-        .size = object.getSize(),
-        .userData = object.getUserData(),
-    };
-}
-
 ObjectManager::ObjectManager()
 {
     disableNullId(_ids);
@@ -69,7 +59,7 @@ std::vector<Metadata> ObjectManager::getAllMetadata() const
 
     for (const auto &[id, object] : _objects)
     {
-        auto metadata = createMetadata(object);
+        auto metadata = createObjectMetadata(object);
         metadatas.push_back(std::move(metadata));
     }
 
@@ -80,14 +70,7 @@ Metadata ObjectManager::getMetadata(ObjectId id) const
 {
     const auto &interface = getInterface(id);
 
-    return createMetadata(interface);
-}
-
-const ObjectInterface &ObjectManager::getInterface(ObjectId id) const
-{
-    auto i = getStorageIterator(_objects, id);
-
-    return i->second;
+    return createObjectMetadata(interface);
 }
 
 void ObjectManager::setUserData(ObjectId id, const JsonValue &userData)
@@ -101,21 +84,30 @@ void ObjectManager::remove(ObjectId id)
 {
     auto i = getStorageIterator(_objects, id);
 
-    i->second.removeId();
+    i->second.remove();
 
     _objects.erase(i);
+
+    _ids.recycle(id);
 }
 
 void ObjectManager::clear()
 {
     for (const auto &[id, object] : _objects)
     {
-        object.removeId();
+        object.remove();
     }
 
     _objects.clear();
 
     _ids = {};
     disableNullId(_ids);
+}
+
+const ObjectInterface &ObjectManager::getInterface(ObjectId id) const
+{
+    auto i = getStorageIterator(_objects, id);
+
+    return i->second;
 }
 }
