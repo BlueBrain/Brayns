@@ -25,73 +25,91 @@ using namespace brayns;
 
 namespace brayns
 {
-struct TestProperties
+struct TestObject
 {
-    int someInt = 0;
-    std::string someString = {};
+    std::string type;
+    ObjectId id = nullId;
 };
 
 template<>
-struct JsonObjectReflector<TestProperties>
+struct ObjectReflector<TestObject>
 {
-    static auto reflect()
+    static std::string getType(const TestObject &object)
     {
-        auto builder = JsonBuilder<TestProperties>();
-        builder.field("some_int", [](auto &object) { return &object.someInt; });
-        builder.field("some_string", [](auto &object) { return &object.someString; });
-        return builder.build();
+        return object.type;
+    }
+
+    static void add(TestObject &object, ObjectId id)
+    {
+        object.id = id;
+    }
+
+    static void remove(TestObject &object)
+    {
+        object.id = nullId;
     }
 };
-
-using TestObject = UserObject<TestProperties>;
 }
 
 TEST_CASE("Create and remove objects")
 {
     auto objects = ObjectManager();
 
-    auto &object = objects.create<TestObject>({"type", "tag", "someUserData"}, {123, "123"});
-    CHECK_EQ(object.metadata.id, 1);
-    CHECK_EQ(object.metadata.type, "type");
-    CHECK_EQ(object.metadata.tag, "tag");
-    CHECK_EQ(object.metadata.userData.extract<std::string>(), "someUserData");
-    CHECK_EQ(object.properties.someInt, 123);
-    CHECK_EQ(object.properties.someString, "123");
+    auto object = objects.add(TestObject{"type"});
 
-    auto &another = objects.create<TestObject>({"type"}, {});
-    CHECK_EQ(another.metadata.id, 2);
+    auto id = object.getId();
 
-    CHECK_EQ(objects.getAllMetadata().size(), 2);
+    CHECK_EQ(id, 1);
 
-    CHECK_EQ(&objects.get<TestObject>(1), &object);
+    auto info = objects.getObject(id);
 
-    CHECK_EQ(&objects.getMetadata(1), &object.metadata);
-    CHECK_EQ(objects.getId("tag"), 1);
+    CHECK_EQ(info.id, id);
+    CHECK_EQ(info.type, "type");
+    CHECK(info.userData.isEmpty());
 
-    auto shared = objects.getShared<TestObject>(1);
+    auto &retreived = objects.get<TestObject>(id);
 
-    objects.remove(1);
+    CHECK_EQ(retreived.type, "type");
+    CHECK_EQ(retreived.id, id);
 
-    CHECK_EQ(shared->metadata.id, nullId);
+    auto stored = objects.getStored<TestObject>(id);
 
-    CHECK_THROWS_AS(objects.getMetadata(1), InvalidParams);
+    CHECK_EQ(stored.getId(), id);
+
+    auto object2 = objects.add(TestObject());
+    auto id2 = object2.getId();
+
+    CHECK_EQ(objects.getAllObjects().size(), 2);
+
+    objects.remove(id);
+
+    CHECK(stored.isRemoved());
+    CHECK_EQ(stored.get().id, nullId);
+
+    CHECK_THROWS_AS(objects.getObject(id), InvalidParams);
+    CHECK_THROWS_AS(objects.get<TestObject>(id), InvalidParams);
+    CHECK_THROWS_AS(objects.getStored<TestObject>(id), InvalidParams);
+
+    auto object3 = objects.add(TestObject());
+    CHECK_EQ(object3.getId(), 1);
+
+    auto stored2 = objects.getStored<TestObject>(id2);
 
     objects.clear();
 
-    CHECK(objects.getAllMetadata().empty());
+    CHECK(stored2.isRemoved());
+    CHECK(object3.isRemoved());
+
+    CHECK(objects.getAllObjects().empty());
 }
 
 TEST_CASE("Errors")
 {
     auto objects = ObjectManager();
 
-    objects.create<TestObject>({"type", "tag"}, {});
+    objects.add<TestObject>({});
 
-    CHECK_THROWS_AS(objects.create<TestObject>({"type", "tag"}, {}), InvalidParams);
-
-    CHECK_THROWS_AS(objects.getId("invalid tag"), InvalidParams);
-    CHECK_THROWS_AS(objects.getMetadata(0), InvalidParams);
-    CHECK_THROWS_AS(objects.getMetadata(2), InvalidParams);
+    CHECK_THROWS_AS(objects.getObject(0), InvalidParams);
+    CHECK_THROWS_AS(objects.getObject(2), InvalidParams);
     CHECK_THROWS_AS(objects.remove(2), InvalidParams);
-    CHECK_THROWS_AS(objects.get<UserObject<int>>(1), InvalidParams);
 }

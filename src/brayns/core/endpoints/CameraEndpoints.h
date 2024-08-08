@@ -22,9 +22,10 @@
 #pragma once
 
 #include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/engine/Camera.h>
 #include <brayns/core/objects/LockedObjects.h>
 
 namespace brayns
 {
-void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects);
+void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
 }

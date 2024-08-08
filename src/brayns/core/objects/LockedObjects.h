@@ -21,10 +21,36 @@
 
 #pragma once
 
-#include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/objects/LockedObjects.h>
+#include <concepts>
+#include <mutex>
+
+#include <brayns/core/utils/Logger.h>
+
+#include "ObjectManager.h"
 
 namespace brayns
 {
-void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects);
+class LockedObjects
+{
+public:
+    explicit LockedObjects(ObjectManager objects, Logger &logger):
+        _objects(std::move(objects)),
+        _logger(&logger)
+    {
+    }
+
+    auto visit(std::invocable<ObjectManager &> auto &&callable) -> decltype(callable(std::declval<ObjectManager &>()))
+    {
+        _logger->info("Waiting for object manager lock");
+        auto lock = std::lock_guard(_mutex);
+        _logger->info("Object manager lock acquired");
+
+        return callable(_objects);
+    }
+
+private:
+    std::mutex _mutex;
+    ObjectManager _objects;
+    Logger *_logger;
+};
 }

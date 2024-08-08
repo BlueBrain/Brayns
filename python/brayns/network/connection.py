@@ -19,9 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import asyncio
-from logging import Logger
+from logging import WARNING, Logger
 from ssl import SSLContext
 from typing import Any, NamedTuple, Self
+
+from brayns.utils.logger import create_logger
 
 from .json_rpc import (
     JsonRpcError,
@@ -110,6 +112,9 @@ class FutureResponse:
         return self._buffer.is_done(self._request_id)
 
     async def poll(self) -> None:
+        if self._request_id is None:
+            raise ValueError("Cannot poll requests without ID")
+
         if self.done:
             return
 
@@ -203,7 +208,7 @@ async def connect(
     logger: Logger | None = None,
 ) -> Connection:
     if logger is None:
-        logger = Logger("Brayns")
+        logger = create_logger(WARNING)
 
     protocol = "ws" if ssl is None else "wss"
     url = f"{protocol}://{host}:{port}"
@@ -214,15 +219,16 @@ async def connect(
         try:
             logger.info("Connection attempt %d", attempt)
             websocket = await connect_websocket(url, ssl, max_frame_size, logger)
-            break
+            logger.info("Connection suceeded")
+
+            return Connection(websocket)
         except ServiceUnavailable as e:
-            logger.warning("Connection attempt failed: %s", e)
+            logger.warning("Connection attempt %d failed: %s", attempt, e)
+
+            attempt += 1
+
             if max_attempts is not None and attempt >= max_attempts:
                 logger.warning("Max connection attempts reached, aborted")
                 raise
 
         await asyncio.sleep(sleep_between_attempts)
-
-    logger.info("Connection suceeded")
-
-    return Connection(websocket)

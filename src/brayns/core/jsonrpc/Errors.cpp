@@ -91,4 +91,9 @@ InternalError::InternalError(const std::string &message):
     JsonRpcException(-32603, message)
 {
 }
+
+InternalError::InternalError(const std::exception &e):
+    JsonRpcException(-32603, e.what())
+{
+}
 }

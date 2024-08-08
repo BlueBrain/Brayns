@@ -70,5 +70,6 @@ class InternalError : public JsonRpcException
 {
 public:
     explicit InternalError(const std::string &message);
+    explicit InternalError(const std::exception &e);
 };
 }

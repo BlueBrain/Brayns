@@ -29,132 +29,109 @@ namespace
 {
 using namespace brayns;
 
-struct ResponseData
+JsonRpcRequest parseRequest(const Message &message)
 {
-    std::string data;
-    bool binary = false;
-};
-
-JsonRpcRequest parseRequest(const RawRequest &request)
-{
-    if (request.binary)
+    if (message.binary)
     {
-        return parseBinaryJsonRpcRequest(request.data);
+        return parseBinaryJsonRpcRequest(message.data);
     }
 
-    return parseTextJsonRpcRequest(request.data);
+    return parseTextJsonRpcRequest(message.data);
 }
 
-ResponseData composeResponse(const JsonRpcId &id, RawResult result)
+Message composeResponse(const JsonRpcSuccessResponse &response)
 {
-    if (result.binary.empty())
+    if (response.result.binary.empty())
     {
-        auto data = composeAsText({id, result.json});
-        return {.data = std::move(data), .binary = false};
+        return {.data = composeAsText(response), .binary = false};
     }
 
-    auto data = composeAsBinary({id, result.json, std::move(result.binary)});
-    return {.data = std::move(data), .binary = true};
+    return {.data = composeAsBinary(response), .binary = true};
 }
 
-void sendExecutionError(
-    const std::optional<JsonRpcId> &id,
-    const JsonRpcException &e,
-    const ResponseHandler &respond,
-    Logger &logger)
+Message composeResponse(const JsonRpcErrorResponse &response)
 {
-    if (!id)
-    {
-        logger.info("No ID in request, skipping error response");
-        return;
-    }
-
-    logger.info("Composing execution error");
-    auto text = composeError(*id, e);
-    logger.info("Execution error composed");
-
-    logger.info("Sending execution error");
-    respond({std::move(text)});
-    logger.info("Execution error sent");
+    return {.data = composeAsText(response), .binary = false};
 }
 
-void sendParsingError(const JsonRpcException &e, const ResponseHandler &respond, Logger &logger)
-{
-    logger.info("Composing parsing error");
-    auto text = composeError(std::nullopt, e);
-    logger.info("Parsing error composed");
-
-    logger.info("Sending parsing error");
-    respond({std::move(text)});
-    logger.info("Parsing error sent");
-}
-
-void executeRequest(JsonRpcRequest request, const ResponseHandler &respond, Api &api, Logger &logger)
+std::optional<JsonRpcResponse> execute(JsonRpcRequest request, Api &api, Logger &logger)
 {
     try
     {
-        auto params = RawParams{std::move(request.params), std::move(request.binary)};
-
         logger.info("Calling endpoint for request {}", toString(request.id));
-        auto result = api.execute(request.method, std::move(params));
+        auto result = api.execute(request.method, std::move(request.params));
         logger.info("Successfully called endpoint");
 
         if (!request.id)
         {
             logger.info("No ID in request, skipping response");
-            return;
+            return {};
         }
 
-        logger.info("Composing response");
-        auto response = composeResponse(*request.id, std::move(result));
-        logger.info("Successfully composed response");
-
-        logger.info("Sending response");
-        respond({response.data, response.binary});
-        logger.info("Response sent");
+        return JsonRpcSuccessResponse{*request.id, std::move(result)};
     }
     catch (const JsonRpcException &e)
     {
         logger.warn("Error during request execution: '{}'", e.what());
-        sendExecutionError(request.id, e, respond, logger);
+        return composeErrorResponse(e, *request.id);
     }
     catch (const std::exception &e)
     {
         logger.error("Unexpected error during request execution: '{}'", e.what());
-        sendExecutionError(request.id, InternalError(e.what()), respond, logger);
+        return composeErrorResponse(InternalError(e), *request.id);
     }
     catch (...)
     {
         logger.error("Unknown error during request execution");
-        sendExecutionError(request.id, InternalError("Unknown execution error"), respond, logger);
+        return composeErrorResponse(InternalError("Unknown execution error"), *request.id);
     }
 }
 
-void handleRequest(const RawRequest &request, Api &api, Logger &logger)
+std::optional<JsonRpcResponse> parseAndExecute(const Message &message, Api &api, Logger &logger)
 {
     try
     {
-        logger.info("Parsing JSON-RPC request from client {}", request.clientId);
-        auto jsonRpcRequest = parseRequest(request);
+        logger.info("Parsing request");
+        auto request = parseRequest(message);
         logger.info("Successfully parsed request");
 
-        executeRequest(std::move(jsonRpcRequest), request.respond, api, logger);
+        return execute(std::move(request), api, logger);
     }
     catch (const JsonRpcException &e)
     {
         logger.warn("Error while parsing request: '{}'", e.what());
-        sendParsingError(e, request.respond, logger);
+        return composeErrorResponse(e);
     }
     catch (const std::exception &e)
     {
         logger.error("Unexpected error while parsing request: '{}'", e.what());
-        sendParsingError(InternalError(e.what()), request.respond, logger);
+        return composeErrorResponse(InternalError(e));
     }
     catch (...)
     {
         logger.error("Unknown error while parsing request");
-        sendParsingError(InternalError("Unknown parsing error"), request.respond, logger);
+        return composeErrorResponse(InternalError("Unknown parsing error"));
     }
+}
+
+void handleRequest(const Request &request, Api &api, Logger &logger)
+{
+    logger.info("Handling JSON-RPC request from client {}", request.clientId);
+
+    auto response = parseAndExecute(request.message, api, logger);
+
+    if (!response)
+    {
+        return;
+    }
+
+    logger.info("Composing response");
+    auto message = std::visit([](const auto &value) { return composeResponse(value); }, *response);
+    logger.info("Successfully composed response");
+
+    logger.info("Sending response");
+    request.respond(message);
+    logger.info("Response sent");
 }
 }
 
@@ -170,17 +147,24 @@ void StopToken::stop()
     _stopped = true;
 }
 
-void runService(WebSocketServer &server, Api &api, StopToken &token, Logger &logger)
+void runService(RequestProvider waitForRequests, Api &api, StopToken &token, Logger &logger)
 {
     while (true)
     {
         logger.info("Waiting for incoming requests");
-        auto requests = server.waitForRequests();
-
+        auto requests = waitForRequests();
         logger.info("Received {} requests", requests.size());
+
         for (const auto &request : requests)
         {
-            handleRequest(request, api, logger);
+            try
+            {
+                handleRequest(request, api, logger);
+            }
+            catch (...)
+            {
+                logger.error("Unknown error while handling request");
+            }
 
             if (token.isStopped())
             {

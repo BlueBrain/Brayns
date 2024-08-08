@@ -10,37 +10,11 @@ Brayns comes with a main application:
 
 ## Building
 
-Brayns is developed, maintained and run on Linux-based operating systems, being tested mainly on RHEL and Ubuntu. The following platforms and build environments have been tested:
-
-* Linux: Ubuntu 16.04, Ubuntu 18.04, Ubuntu 20.04, Debian 9, RHEL 7 (Makefile, x64)
+TODO
 
 ### System dependencies
 
-The following components must be installed on the system where Brayns will be built:
-
-* GCC 12.1 or higher (Requires C++ 20 support)
-* CMake 3.15 or higher
-* Make or Ninja build systems
-* Git
-* Package config
-* SSL Development files
-* Python 3.9 or higher
-* Custom OSPRay 2.10.5 (https://github.com/BlueBrain/ospray/tree/v2.10.5)
-* zlib
-
-Optionally, to build the core plugins of Brayns, the following components are required.
-
-* HDF5 development files
-* Bzip2
-
-Brayns uses further dependencies, but if they are not present on the system, it will download them by itself during build.
-
-* Poco libraries 1.12.4 (https://github.com/pocoproject/poco/tree/poco-1.12.4-release)
-* spdlog 1.9.2 (https://github.com/gabime/spdlog/tree/v1.9.2)
-* stb (https://github.com/nothings/stb)
-* tinyexr (https://github.com/syoyo/tinyexr/tree/v1.0.1)
-* libsonata 0.1.22 (https://github.com/BlueBrain/libsonata/tree/v0.1.22)
-* MorphIO 3.3.5 (https://github.com/BlueBrain/MorphIO/tree/v3.3.5)
+TODO
 
 ### Build command
 
@@ -70,7 +44,7 @@ The following cmake options (shown with their default value) can be used during 
 
 To run the braynsService app, execute the following command (The command assumes braynsService executable is available on the system **PATH**):
 
-    $ braynsService --uri 0.0.0.0:5000
+    $ braynsService --host 0.0.0.0 --port 5000
 
 The ***--uri*** parameter allows to specify an address and a port to bind to. In the example, the service is binding to all available addresses and the port 5000.
 
@@ -82,7 +56,7 @@ Use the following command to get more details about command line arguments.
 
 Brayns is available as a docker image at https://hub.docker.com/r/bluebrain/brayns. The image allows to launch the braynsService application.
 
-It is built with every commit merged into the main repository branch (develop), and deployed into docker hub as brayns:latest. Furthermore, when a new release is made, and a new tag created, an additional image is built and deployed with the same tag.
+It is built with every commit merged into the main repository branch (master), and deployed into docker hub as brayns:latest. Furthermore, when a new release is made, and a new tag created, an additional image is built and deployed with the same tag.
 
 To get Brayns docker image, you will need to have docker installed. Then execute the following command to download it:
 
@@ -90,7 +64,7 @@ To get Brayns docker image, you will need to have docker installed. Then execute
 
 To run it, simply execute the following command:
 
-    $ docker run -ti --rm -p 5000:5000 bluebrain/brayns --uri 0.0.0.0:5000
+    $ docker run -ti --rm -p 5000:5000 bluebrain/brayns --host 0.0.0.0 --port 5000
 
 Additional parameters, can be specified in a similar fashion as in the **braynsService** application.
 

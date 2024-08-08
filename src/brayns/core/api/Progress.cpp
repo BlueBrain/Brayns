@@ -30,9 +30,8 @@ TaskCancelledException::TaskCancelledException():
 {
 }
 
-TaskMonitor::TaskMonitor(std::size_t operationCount, std::string initialOperation):
-    _operationCount(operationCount),
-    _currentOperation{std::move(initialOperation)}
+TaskMonitor::TaskMonitor(std::size_t operationCount):
+    _operationCount(operationCount)
 {
 }
 

@@ -23,11 +23,14 @@
 
 #include <iostream>
 
+#include <brayns/core/endpoints/CameraEndpoints.h>
 #include <brayns/core/endpoints/ObjectEndpoints.h>
 #include <brayns/core/endpoints/ServiceEndpoints.h>
+#include <brayns/core/engine/Device.h>
 #include <brayns/core/service/Service.h>
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/utils/String.h>
+#include <brayns/core/websocket/WebSocketServer.h>
 
 namespace
 {
@@ -71,14 +74,18 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
     logger.info("Building JSON-RPC API");
 
     auto api = Api();
-
     auto builder = ApiBuilder();
 
     addServiceEndpoints(builder, api, token);
 
     auto objects = ObjectManager();
+    auto locked = LockedObjects(std::move(objects), logger);
 
-    addObjectEndpoints(builder, objects);
+    addObjectEndpoints(builder, locked);
+
+    auto device = createDevice(logger);
+
+    addCameraEndpoints(builder, locked, device);
 
     api = builder.build();
 
@@ -95,7 +102,7 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
     logger.info("Websocket server started");
 
     logger.info("Service running");
-    runService(server, api, token, logger);
+    runService([&] { return server.waitForRequests(); }, api, token, logger);
 }
 }
 

@@ -21,9 +21,11 @@
 
 #pragma once
 
+#include <functional>
+
 #include <brayns/core/api/Api.h>
 #include <brayns/core/utils/Logger.h>
-#include <brayns/core/websocket/WebSocketServer.h>
+#include <brayns/core/websocket/RequestQueue.h>
 
 namespace brayns
 {
@@ -37,5 +39,7 @@ private:
     bool _stopped = false;
 };
 
-void runService(WebSocketServer &server, Api &api, StopToken &token, Logger &logger);
+using RequestProvider = std::function<std::vector<Request>()>;
+
+void runService(RequestProvider waitForRequests, Api &api, StopToken &token, Logger &logger);
 }

@@ -22,141 +22,60 @@
 #pragma once
 
 #include <any>
-#include <functional>
 #include <map>
-#include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
-#include <brayns/core/json/Json.h>
+#include <fmt/format.h>
+
 #include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/utils/IdGenerator.h>
 
+#include "Messages.h"
+#include "UserObject.h"
+
 namespace brayns
 {
-using ObjectId = std::uint32_t;
-
-constexpr auto nullId = ObjectId(0);
-
-struct Metadata
-{
-    ObjectId id;
-    std::string type;
-    std::string tag = {};
-    JsonValue userData = {};
-};
-
-template<>
-struct JsonObjectReflector<Metadata>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Metadata>();
-        builder.field("id", [](auto &object) { return &object.id; })
-            .description("Object ID, primary way to query this object");
-        builder.field("type", [](auto &object) { return &object.type; })
-            .description("Object type, use endpoint 'get-{type}' to query detailed information about the object");
-        builder.field("tag", [](auto &object) { return &object.tag; })
-            .description("Optional user defined tag, can also be used to query this object");
-        builder.field("user_data", [](auto &object) { return &object.userData; })
-            .description("Optional user data (only for user, not used by brayns)");
-        return builder.build();
-    }
-};
-
-template<ReflectedJson Properties>
-struct UserObject
-{
-    Metadata metadata;
-    Properties properties;
-};
-
-template<ReflectedJson Properties>
-struct JsonObjectReflector<UserObject<Properties>>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<UserObject<Properties>>();
-        builder.field("metadata", [](auto &object) { return &object.metadata; })
-            .description("Generic object properties (not specific to object type)");
-        builder.field("properties", [](auto &object) { return &object.properties; })
-            .description("Object properties (specific to object type)");
-        return builder.build();
-    }
-};
-
-template<typename T>
-struct UserObjectReflector;
-
-template<ReflectedJson Properties>
-struct UserObjectReflector<UserObject<Properties>>
-{
-    using Type = Properties;
-};
-
-template<typename T>
-concept ValidUserObject = requires { typename UserObjectReflector<T>::Type; };
-
-template<ValidUserObject T>
-using GetUserObjectProperties = typename UserObjectReflector<T>::Type;
-
-struct ObjectManagerEntry
-{
-    std::any object;
-    std::function<Metadata *()> getMetadata;
-};
-
-struct UserObjectSettings
-{
-    std::string type;
-    std::string tag = {};
-    JsonValue userData = {};
-};
-
 class ObjectManager
 {
 public:
     explicit ObjectManager();
 
-    std::vector<Metadata> getAllMetadata() const;
-    const Metadata &getMetadata(ObjectId id) const;
-    ObjectId getId(const std::string &tag) const;
+    std::vector<ObjectInfo> getAllObjects() const;
+    ObjectInfo getObject(ObjectId id) const;
+    void setUserData(ObjectId id, const JsonValue &userData);
     void remove(ObjectId id);
     void clear();
 
-    template<ValidUserObject T>
-    const std::shared_ptr<T> &getShared(ObjectId id) const
-    {
-        auto &entry = getEntry(id);
-        checkType(entry, typeid(std::shared_ptr<T>));
-        return std::any_cast<const std::shared_ptr<T> &>(entry.object);
-    }
-
-    template<ValidUserObject T>
+    template<ReflectedObject T>
     T &get(ObjectId id) const
     {
-        return *getShared<T>(id);
+        return getShared<T>(id)->value;
     }
 
-    template<ValidUserObject T>
-    T &create(UserObjectSettings settings, GetUserObjectProperties<T> properties)
+    template<ReflectedObject T>
+    Stored<T> getStored(ObjectId id) const
+    {
+        return Stored<T>(getShared<T>(id));
+    }
+
+    template<ReflectedObject T>
+    Stored<T> add(T object)
     {
         auto id = _ids.next();
 
         try
         {
-            auto &[type, tag, userData] = settings;
+            auto user = UserObject<T>{id, std::move(object)};
+            auto ptr = std::make_shared<decltype(user)>(std::move(user));
 
-            auto metadata = Metadata{id, std::move(type), std::move(tag), userData};
-            auto object = T{std::move(metadata), std::move(properties)};
-            auto ptr = std::make_shared<T>(std::move(object));
+            addObject(ptr->value, id);
 
-            auto entry = ObjectManagerEntry{ptr, [=] { return &ptr->metadata; }};
+            auto interface = createObjectInterface(ptr);
 
-            addEntry(id, std::move(entry));
+            _objects.emplace(id, std::move(interface));
 
-            return *ptr;
+            return Stored<T>(std::move(ptr));
         }
         catch (...)
         {
@@ -166,13 +85,26 @@ public:
     }
 
 private:
-    std::map<ObjectId, ObjectManagerEntry> _objects;
-    std::unordered_map<std::string, ObjectId> _idsByTag;
+    std::map<ObjectId, ObjectInterface> _objects;
     IdGenerator<ObjectId> _ids;
 
-    static void checkType(const ObjectManagerEntry &entry, const std::type_info &expected);
+    const ObjectInterface &getInterface(ObjectId id) const;
 
-    const ObjectManagerEntry &getEntry(ObjectId id) const;
-    void addEntry(ObjectId id, ObjectManagerEntry entry);
+    template<ReflectedObject T>
+    const std::shared_ptr<UserObject<T>> &getShared(ObjectId id) const
+    {
+        const auto &interface = getInterface(id);
+
+        auto ptr = std::any_cast<std::shared_ptr<UserObject<T>>>(&interface.value);
+
+        if (ptr != nullptr)
+        {
+            return *ptr;
+        }
+
+        auto type = interface.getType();
+
+        throw InvalidParams(fmt::format("Invalid type for object with ID {}: {}", id, type));
+    }
 };
 }

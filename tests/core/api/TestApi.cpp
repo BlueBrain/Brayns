@@ -48,7 +48,7 @@ TEST_CASE("Basic")
     CHECK_EQ(schema.result, getJsonSchema<float>());
     CHECK_FALSE(schema.async);
 
-    auto params = RawParams{2};
+    auto params = Payload{2};
 
     auto result = api.execute("test", params);
 
@@ -75,7 +75,7 @@ TEST_CASE("With binary")
 
     auto api = builder.build();
 
-    auto params = RawParams{1, "123"};
+    auto params = Payload{1, "123"};
 
     CHECK_THROWS_AS(api.execute("test1", params), InvalidParams);
 
@@ -105,9 +105,9 @@ TEST_CASE("No params or result")
     CHECK_EQ(api.getSchema("test3").params, getJsonSchema<NullJson>());
     CHECK_EQ(api.getSchema("test3").result, getJsonSchema<NullJson>());
 
-    CHECK_EQ(api.execute("test1", RawParams()).json, serializeToJson(0));
-    CHECK_EQ(api.execute("test2", RawParams(0)).json, serializeToJson(NullJson()));
-    CHECK_EQ(api.execute("test3", RawParams()).json, serializeToJson(NullJson()));
+    CHECK_EQ(api.execute("test1", Payload()).json, serializeToJson(0));
+    CHECK_EQ(api.execute("test2", Payload(0)).json, serializeToJson(NullJson()));
+    CHECK_EQ(api.execute("test3", Payload()).json, serializeToJson(NullJson()));
 }
 
 struct NonCopyable
@@ -143,7 +143,7 @@ TEST_CASE("Copy")
 
     auto api = builder.build();
 
-    auto params = RawParams{createJsonObject()};
+    auto params = Payload{createJsonObject()};
 
     auto result = api.execute("test", params);
 
@@ -174,11 +174,11 @@ TEST_CASE("Task")
         return value + offset;
     };
 
-    builder.task("test", [=](int value) { return startTask(worker, value, {2, "Test"}); });
+    builder.task("test", [=](int value) { return startTask(worker, value, 2); });
 
     auto api = builder.build();
 
-    auto params = RawParams{2};
+    auto params = Payload{2};
 
     auto [json, binary] = api.execute("test", params);
 

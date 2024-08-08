@@ -27,26 +27,12 @@ namespace
 {
 using namespace brayns;
 
-using IdByTag = std::unordered_map<std::string, ObjectId>;
-
 void disableNullId(IdGenerator<ObjectId> &ids)
 {
     ids.next();
 }
 
-void checkTagIsNotAlreadyUsed(const IdByTag &ids, const std::string &tag)
-{
-    auto i = ids.find(tag);
-
-    if (i == ids.end())
-    {
-        return;
-    }
-
-    throw InvalidParams(fmt::format("Tag '{}' already used by object with ID {}", tag, i->first));
-}
-
-auto getObjectIterator(auto &objects, ObjectId id)
+auto getStorageIterator(auto &objects, ObjectId id)
 {
     auto i = objects.find(id);
 
@@ -61,108 +47,67 @@ auto getObjectIterator(auto &objects, ObjectId id)
 
 namespace brayns
 {
-
 ObjectManager::ObjectManager()
 {
     disableNullId(_ids);
 }
 
-std::vector<Metadata> ObjectManager::getAllMetadata() const
+std::vector<ObjectInfo> ObjectManager::getAllObjects() const
 {
-    auto objects = std::vector<Metadata>();
+    auto objects = std::vector<ObjectInfo>();
     objects.reserve(_objects.size());
 
     for (const auto &[id, object] : _objects)
     {
-        objects.push_back(*object.getMetadata());
+        auto result = getObjectInfo(object);
+        objects.push_back(std::move(result));
     }
 
     return objects;
 }
 
-const Metadata &ObjectManager::getMetadata(ObjectId id) const
+ObjectInfo ObjectManager::getObject(ObjectId id) const
 {
-    auto i = getObjectIterator(_objects, id);
-    return *i->second.getMetadata();
+    const auto &interface = getInterface(id);
+
+    return getObjectInfo(interface);
 }
 
-ObjectId ObjectManager::getId(const std::string &tag) const
+void ObjectManager::setUserData(ObjectId id, const JsonValue &userData)
 {
-    auto i = _idsByTag.find(tag);
+    auto i = getStorageIterator(_objects, id);
 
-    if (i == _idsByTag.end())
-    {
-        throw InvalidParams(fmt::format("No objects found with tag '{}'", tag));
-    }
-
-    return i->second;
+    i->second.setUserData(userData);
 }
 
 void ObjectManager::remove(ObjectId id)
 {
-    auto i = getObjectIterator(_objects, id);
+    auto i = getStorageIterator(_objects, id);
 
-    auto &metadata = *i->second.getMetadata();
+    i->second.remove();
 
-    const auto &tag = metadata.tag;
-
-    if (!tag.empty())
-    {
-        _idsByTag.erase(tag);
-    }
-
-    metadata.id = nullId;
     _objects.erase(i);
+
+    _ids.recycle(id);
 }
 
 void ObjectManager::clear()
 {
+    for (const auto &[id, object] : _objects)
+    {
+        object.remove();
+    }
+
     _objects.clear();
-    _idsByTag.clear();
+
     _ids = {};
     disableNullId(_ids);
 }
 
-void ObjectManager::checkType(const ObjectManagerEntry &entry, const std::type_info &expected)
+const ObjectInterface &ObjectManager::getInterface(ObjectId id) const
 {
-    if (entry.object.type() == expected)
-    {
-        return;
-    }
-
-    const auto &metadata = *entry.getMetadata();
-    auto id = metadata.id;
-    const auto &type = metadata.type;
-
-    throw InvalidParams(fmt::format("Invalid type '{}' for object with ID {}", id, type));
-}
-
-const ObjectManagerEntry &ObjectManager::getEntry(ObjectId id) const
-{
-    auto i = getObjectIterator(_objects, id);
+    auto i = getStorageIterator(_objects, id);
 
     return i->second;
-}
-
-void ObjectManager::addEntry(ObjectId id, ObjectManagerEntry entry)
-{
-    const auto &metadata = *entry.getMetadata();
-    const auto &tag = metadata.tag;
-
-    if (!tag.empty())
-    {
-        checkTagIsNotAlreadyUsed(_idsByTag, tag);
-        _idsByTag.emplace(tag, id);
-    }
-
-    try
-    {
-        _objects.emplace(id, std::move(entry));
-    }
-    catch (...)
-    {
-        _idsByTag.erase(tag);
-        throw;
-    }
 }
 }

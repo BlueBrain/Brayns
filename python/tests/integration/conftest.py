@@ -18,52 +18,36 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from logging import DEBUG
 import os
-from collections.abc import AsyncIterator, Iterator
-from subprocess import PIPE, STDOUT, Popen
+from collections.abc import AsyncIterator
+from pathlib import Path
+from ssl import SSLContext, create_default_context, Purpose
 
-import pytest
 import pytest_asyncio
 
-from brayns import Connection, connect
+from brayns import Connection, connect, create_logger, clear_objects
 
 HOST = os.getenv("BRAYNS_HOST", "localhost")
 PORT = int(os.getenv("BRAYNS_PORT", "5000"))
-EXECUTABLE = os.getenv("BRAYNS_EXECUTABLE", "")
+SSL = bool(int(os.getenv("BRAYNS_SSL", "0")))
+
+DATA = Path(__file__).parent.parent / "data"
+CA = DATA / "certificate.pem"
 
 
-def start_service() -> Popen[str]:
-    return Popen(
-        args=[
-            EXECUTABLE,
-            "--host",
-            HOST,
-            "--port",
-            str(PORT),
-        ],
-        stdin=PIPE,
-        stdout=PIPE,
-        stderr=STDOUT,
-        text=True,
-    )
+def create_ssl_context() -> SSLContext:
+    return create_default_context(Purpose.SERVER_AUTH, cafile=CA)
 
 
 async def connect_to_service() -> Connection:
-    return await connect(HOST, PORT, max_attempts=100)
-
-
-@pytest.fixture(scope="session")
-def service() -> Iterator[None]:
-    if not EXECUTABLE:
-        yield
-        return
-
-    with start_service() as process:
-        yield
-        process.terminate()
+    logger = create_logger(DEBUG)
+    ssl = create_ssl_context() if SSL else None
+    return await connect(HOST, PORT, ssl, max_attempts=10, logger=logger)
 
 
 @pytest_asyncio.fixture
-async def connection(service) -> AsyncIterator[Connection]:
+async def connection() -> AsyncIterator[Connection]:
     async with await connect_to_service() as connection:
+        await clear_objects(connection)
         yield connection

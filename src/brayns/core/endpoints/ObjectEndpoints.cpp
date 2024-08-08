@@ -23,91 +23,129 @@
 
 namespace brayns
 {
-struct TagList
+struct AllObjectsResult
 {
-    std::vector<std::string> tags;
+    std::vector<ObjectInfo> objects;
 };
 
 template<>
-struct JsonObjectReflector<TagList>
+struct JsonObjectReflector<AllObjectsResult>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<TagList>();
-        builder.field("tags", [](auto &object) { return &object.tags; }).description("List of object tag");
-        return builder.build();
-    }
-};
-
-struct MetadataList
-{
-    std::vector<Metadata> objects;
-};
-
-template<>
-struct JsonObjectReflector<MetadataList>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<MetadataList>();
+        auto builder = JsonBuilder<AllObjectsResult>();
         builder.field("objects", [](auto &object) { return &object.objects; })
-            .description("List of object generic properties");
+            .description("Generic properties of all objects in registry");
         return builder.build();
     }
 };
 
-std::vector<Metadata> getMetadata(ObjectManager &objects, const std::vector<ObjectId> &ids)
+AllObjectsResult getAllObjects(LockedObjects &locked)
 {
-    auto metadatas = std::vector<Metadata>();
-    metadatas.reserve(ids.size());
-
-    for (auto id : ids)
-    {
-        const auto &metadata = objects.getMetadata(id);
-        metadatas.push_back(metadata);
-    }
-
-    return metadatas;
+    return {locked.visit([](auto &objects) { return objects.getAllObjects(); })};
 }
 
-std::vector<ObjectId> getIdsFromTags(ObjectManager &objects, const std::vector<std::string> &tags)
+ObjectInfo getObject(LockedObjects &locked, const ObjectParams &params)
 {
-    auto ids = std::vector<ObjectId>();
-    ids.reserve(tags.size());
-
-    for (const auto &tag : tags)
-    {
-        auto id = objects.getId(tag);
-        ids.push_back(id);
-    }
-
-    return ids;
+    return locked.visit([&](auto &objects) { return objects.getObject(params.id); });
 }
 
-void removeObjects(ObjectManager &objects, const std::vector<ObjectId> &ids)
+struct UserProperties
 {
-    for (auto id : ids)
+    JsonValue userData;
+};
+
+template<>
+struct JsonObjectReflector<UserProperties>
+{
+    static auto reflect()
     {
-        objects.remove(id);
+        auto builder = JsonBuilder<UserProperties>();
+        builder.field("user_data", [](auto &object) { return &object.userData; }).description("User data");
+        return builder.build();
     }
+};
+
+using ObjectUpdate = UpdateParams<UserProperties>;
+
+void updateObject(LockedObjects &locked, const ObjectUpdate &params)
+{
+    locked.visit([&](auto &objects) { objects.setUserData(params.id, params.properties.userData); });
 }
 
-void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects)
+struct RemoveParams
 {
-    builder.endpoint("get-all-objects", [&] { return MetadataList{objects.getAllMetadata()}; })
-        .description("Return the generic properties of all objects, use get-{type} to get specific properties");
+    std::vector<ObjectId> ids;
+};
 
-    builder.endpoint("get-objects", [&](IdList params) { return MetadataList{getMetadata(objects, params.ids)}; })
+template<>
+struct JsonObjectReflector<RemoveParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<RemoveParams>();
+        builder.field("ids", [](auto &object) { return &object.ids; }).description("IDs of the objects to remove");
+        return builder.build();
+    }
+};
+
+void removeObjects(LockedObjects &locked, const RemoveParams &params)
+{
+    locked.visit(
+        [&](auto &objects)
+        {
+            for (auto id : params.ids)
+            {
+                objects.remove(id);
+            }
+        });
+}
+
+void clearObjects(LockedObjects &locked)
+{
+    locked.visit([](auto &objects) { objects.clear(); });
+}
+
+struct EmptyObject
+{
+};
+
+template<>
+struct ObjectReflector<EmptyObject>
+{
+    static std::string getType(const EmptyObject &)
+    {
+        return "empty-object";
+    }
+};
+
+ObjectResult createEmptyObject(LockedObjects &locked)
+{
+    return locked.visit(
+        [&](auto &objects)
+        {
+            auto object = objects.add(EmptyObject());
+            return object.getResult();
+        });
+}
+
+void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects)
+{
+    builder.endpoint("get-all-objects", [&] { return getAllObjects(objects); })
+        .description("Get generic properties of all objects, use get-{type} to get details of an object");
+
+    builder.endpoint("get-object", [&](ObjectParams params) { return getObject(objects, params); })
         .description("Get generic object properties from given object IDs");
 
-    builder.endpoint("get-object-ids", [&](TagList params) { return IdList{getIdsFromTags(objects, params.tags)}; })
-        .description("Map given list of tags to object IDs (result is an array in the same order as params)");
+    builder.endpoint("update-object", [&](ObjectUpdate params) { return updateObject(objects, params); });
 
-    builder.endpoint("remove-objects", [&](IdList params) { removeObjects(objects, params.ids); })
-        .description(
-            "Remove objects from the registry, the ID can be reused by future objects. Note that the object can stay "
-            "in memory as long as it is used by other objects (using a ref-counted system)");
+    builder.endpoint("remove-objects", [&](RemoveParams params) { removeObjects(objects, params); })
+        .description("Remove selected objects from registry (but not from scene)");
 
-    builder.endpoint("clear-objects", [&] { objects.clear(); }).description("Remove all objects currently in registry");
+    builder.endpoint("clear-objects", [&] { clearObjects(objects); })
+        .description("Remove all objects currently in registry");
+
+    builder.endpoint("create-empty-object", [&] { return createEmptyObject(objects); })
+        .description("Create an empty object (for testing or to store user data)");
 }
 }

@@ -75,12 +75,17 @@ JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary)
 
     auto request = parseTextJsonRpcRequest(std::string(text));
 
-    request.binary = binary.substr(4 + textSize);
+    request.params.binary = binary.substr(4 + textSize);
 
     return request;
 }
 
 std::string composeAsText(const JsonRpcSuccessResponse &response)
+{
+    return stringifyToJson(response);
+}
+
+std::string composeAsText(const JsonRpcErrorResponse &response)
 {
     return stringifyToJson(response);
 }
@@ -98,24 +103,20 @@ std::string composeAsBinary(const JsonRpcSuccessResponse &response)
 
     auto header = composeBytes(static_cast<std::uint32_t>(textSize), std::endian::little);
 
-    return header + text + response.binary;
+    return header + text + response.result.binary;
 }
 
-std::string composeError(const JsonRpcErrorResponse &response)
+JsonRpcError composeError(const JsonRpcException &e)
 {
-    return stringifyToJson(response);
+    return {
+        .code = e.getCode(),
+        .message = e.what(),
+        .data = e.getData(),
+    };
 }
 
-std::string composeError(const std::optional<JsonRpcId> &id, const JsonRpcException &e)
+JsonRpcErrorResponse composeErrorResponse(const JsonRpcException &e, std::optional<JsonRpcId> id)
 {
-    return composeError({
-        .id = id,
-        .error =
-            {
-                .code = e.getCode(),
-                .message = e.what(),
-                .data = e.getData(),
-            },
-    });
+    return {composeError(e), std::move(id)};
 }
 }

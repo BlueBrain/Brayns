@@ -22,53 +22,28 @@
 #pragma once
 
 #include <concepts>
-#include <future>
 #include <string>
 #include <type_traits>
 #include <utility>
 
 #include <brayns/core/json/Json.h>
+#include <brayns/core/jsonrpc/PayloadReflector.h>
 #include <brayns/core/utils/FunctorReflector.h>
 
 #include "Api.h"
-#include "ApiReflector.h"
 #include "Endpoint.h"
 #include "Task.h"
 
 namespace brayns
 {
 template<typename T>
-using GetParamsType = std::decay_t<GetArgType<T, 0>>;
+using GetParams = std::decay_t<GetArgType<T, 0>>;
 
 template<typename T>
-using GetResultType = std::decay_t<GetReturnType<T>>;
-
-template<ApiReflected T>
-struct Task
-{
-    std::size_t operationCount;
-    std::function<TaskOperation()> getCurrentOperation;
-    std::function<T()> wait;
-    std::function<void()> cancel;
-};
+using GetResult = std::decay_t<GetReturnType<T>>;
 
 template<typename T>
-struct TaskReflector;
-
-template<ApiReflected T>
-struct TaskReflector<Task<T>>
-{
-    using Result = T;
-};
-
-template<typename T>
-concept ReflectedTask = requires { typename TaskReflector<T>::Result; };
-
-template<ReflectedTask T>
-using GetTaskResult = typename TaskReflector<T>::Result;
-
-template<typename T>
-concept WithReflectedParams = getArgCount<T> == 1 && ApiReflected<GetParamsType<T>>;
+concept WithReflectedParams = getArgCount<T> == 1 && ReflectedPayload<GetParams<T>>;
 
 template<typename T>
 concept WithoutParams = getArgCount<T> == 0;
@@ -77,19 +52,19 @@ template<typename T>
 concept WithParams = WithReflectedParams<T> || WithoutParams<T>;
 
 template<typename T>
-concept WithReflectedResult = ApiReflected<GetResultType<T>>;
+concept WithReflectedResult = ReflectedPayload<GetResult<T>>;
 
 template<typename T>
-concept WithoutResult = std::is_void_v<GetResultType<T>>;
+concept WithoutResult = std::is_void_v<GetResult<T>>;
 
 template<typename T>
 concept WithResult = WithReflectedResult<T> || WithoutResult<T>;
 
 template<typename T>
-concept WithReflectedTaskResult = ApiReflected<GetTaskResult<GetResultType<T>>>;
+concept WithReflectedTaskResult = ReflectedPayload<GetTaskResult<GetResult<T>>>;
 
 template<typename T>
-concept WithoutTaskResult = std::is_void_v<GetTaskResult<GetResultType<T>>>;
+concept WithoutTaskResult = std::is_void_v<GetTaskResult<GetResult<T>>>;
 
 template<typename T>
 concept WithTaskResult = WithReflectedTaskResult<T> || WithoutTaskResult<T>;
@@ -123,7 +98,7 @@ auto ensureHasResult(WithReflectedResult auto handler)
 
 auto ensureHasResult(WithoutResult auto handler)
 {
-    using Params = GetParamsType<decltype(handler)>;
+    using Params = GetParams<decltype(handler)>;
 
     return [handler = std::move(handler)](Params params)
     {
@@ -139,7 +114,7 @@ auto ensureHasTaskResult(WithReflectedTaskResult auto handler)
 
 auto ensureHasTaskResult(WithoutTaskResult auto handler)
 {
-    using Params = GetParamsType<decltype(handler)>;
+    using Params = GetParams<decltype(handler)>;
 
     return [handler = std::move(handler)](Params params)
     {
@@ -160,10 +135,10 @@ auto ensureHasTaskResult(WithoutTaskResult auto handler)
     };
 }
 
-template<ApiReflected T>
-RawTask addParsingToTask(Task<T> task)
+template<ReflectedPayload T>
+TaskInterface addParsingToTask(Task<T> task)
 {
-    using ResultReflector = ApiReflector<T>;
+    using ResultReflector = PayloadReflector<T>;
 
     return {
         .operationCount = task.operationCount,
@@ -176,7 +151,7 @@ RawTask addParsingToTask(Task<T> task)
 template<ReflectedAsyncHandler T>
 AsyncEndpointHandler addParsingToAsyncHandler(T handler)
 {
-    using ParamsReflector = ApiReflector<GetParamsType<T>>;
+    using ParamsReflector = PayloadReflector<GetParams<T>>;
 
     return [handler = std::move(handler)](auto rawParams)
     {
@@ -189,8 +164,8 @@ AsyncEndpointHandler addParsingToAsyncHandler(T handler)
 template<ReflectedAsyncHandler T>
 EndpointSchema reflectAsyncEndpointSchema(std::string method)
 {
-    using ParamsReflector = ApiReflector<GetParamsType<T>>;
-    using ResultReflector = ApiReflector<GetTaskResult<GetResultType<T>>>;
+    using ParamsReflector = PayloadReflector<GetParams<T>>;
+    using ResultReflector = PayloadReflector<GetTaskResult<GetResult<T>>>;
 
     return {
         .method = std::move(method),
@@ -203,8 +178,8 @@ EndpointSchema reflectAsyncEndpointSchema(std::string method)
 template<ReflectedSyncHandler T>
 SyncEndpointHandler addParsingToSyncHandler(T handler)
 {
-    using ParamsReflector = ApiReflector<GetParamsType<T>>;
-    using ResultReflector = ApiReflector<GetResultType<T>>;
+    using ParamsReflector = PayloadReflector<GetParams<T>>;
+    using ResultReflector = PayloadReflector<GetResult<T>>;
 
     return [handler = std::move(handler)](auto rawParams)
     {
@@ -217,38 +192,13 @@ SyncEndpointHandler addParsingToSyncHandler(T handler)
 template<ReflectedSyncHandler T>
 EndpointSchema reflectSyncEndpointSchema(std::string method)
 {
-    using ParamsReflector = ApiReflector<GetParamsType<T>>;
-    using ResultReflector = ApiReflector<GetResultType<T>>;
+    using ParamsReflector = PayloadReflector<GetParams<T>>;
+    using ResultReflector = PayloadReflector<GetResult<T>>;
 
     return {
         .method = std::move(method),
         .params = ParamsReflector::getSchema(),
         .result = ResultReflector::getSchema(),
-    };
-}
-
-struct TaskSettings
-{
-    std::size_t operationCount;
-    std::string initialOperation;
-};
-
-template<ApiReflected ParamsType, std::invocable<Progress, ParamsType> Handler>
-Task<std::invoke_result_t<Handler, Progress, ParamsType>> startTask(
-    Handler handler,
-    ParamsType params,
-    TaskSettings settings)
-{
-    auto monitor = std::make_shared<TaskMonitor>(settings.operationCount, std::move(settings.initialOperation));
-
-    auto future = std::async(std::launch::async, std::move(handler), Progress(monitor), std::move(params));
-    auto shared = std::make_shared<decltype(future)>(std::move(future));
-
-    return {
-        .operationCount = settings.operationCount,
-        .getCurrentOperation = [=] { return monitor->getCurrentOperation(); },
-        .wait = [=] { return shared->get(); },
-        .cancel = [=] { monitor->cancel(); },
     };
 }
 

@@ -54,7 +54,7 @@ public:
 
         response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_OK);
 
-        response.send() << "OK";
+        response.send() << "OK\n";
 
         _logger->debug("Healthcheck ok");
     }
@@ -66,8 +66,8 @@ private:
 class WebSocketRequestHandler : public Poco::Net::HTTPRequestHandler
 {
 public:
-    explicit WebSocketRequestHandler(WebSocketHandler handler, std::size_t maxFrameSize, Logger &logger):
-        _handler(std::move(handler)),
+    explicit WebSocketRequestHandler(WebSocketHandler &handler, std::size_t maxFrameSize, Logger &logger):
+        _handler(&handler),
         _maxFrameSize(maxFrameSize),
         _logger(&logger)
     {
@@ -77,42 +77,13 @@ public:
     {
         _logger->info("Upgrading to websocket");
 
-        auto websocket = _tryUpgrade(request, response);
-
-        if (!websocket)
-        {
-            return;
-        }
-
-        _logger->info("Upgrade complete, host {} is now connected", request.getHost());
-
         try
         {
-            _handler.handle(*websocket);
-        }
-        catch (...)
-        {
-            _logger->error("Unexpected error in websocket request handler");
-            websocket->close(WebSocketStatus::UnexpectedCondition, "Internal error");
-        }
-    }
+            auto websocket = upgrade(request, response);
 
-private:
-    WebSocketHandler _handler;
-    std::size_t _maxFrameSize;
-    Logger *_logger;
+            _logger->info("Upgrade complete, host {} is now connected", request.getHost());
 
-    std::optional<WebSocket> _tryUpgrade(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
-    {
-        try
-        {
-            auto websocket = Poco::Net::WebSocket(request, response);
-
-            auto maxFrameSize = static_cast<int>(_maxFrameSize);
-
-            websocket.setMaxPayloadSize(maxFrameSize);
-
-            return WebSocket(websocket);
+            handle(websocket);
         }
         catch (const Poco::Net::WebSocketException &e)
         {
@@ -130,15 +101,38 @@ private:
             response.setStatusAndReason(Poco::Net::HTTPResponse::HTTP_INTERNAL_SERVER_ERROR);
             response.send() << "Internal error during websocket handshake";
         }
+    }
 
-        return std::nullopt;
+private:
+    WebSocketHandler *_handler;
+    std::size_t _maxFrameSize;
+    Logger *_logger;
+
+    WebSocket upgrade(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
+    {
+        auto webocket = Poco::Net::WebSocket(request, response);
+        webocket.setMaxPayloadSize(static_cast<int>(_maxFrameSize));
+        return WebSocket(webocket);
+    }
+
+    void handle(WebSocket &websocket)
+    {
+        try
+        {
+            _handler->handle(websocket);
+        }
+        catch (...)
+        {
+            _logger->error("Unexpected error in websocket request handler");
+            websocket.close(WebSocketStatus::UnexpectedCondition, "Internal error");
+        }
     }
 };
 
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-    explicit RequestHandlerFactory(WebSocketHandler handler, std::size_t maxFrameSize, Logger &logger):
+    explicit RequestHandlerFactory(std::unique_ptr<WebSocketHandler> handler, std::size_t maxFrameSize, Logger &logger):
         _handler(std::move(handler)),
         _maxFrameSize(maxFrameSize),
         _logger(&logger)
@@ -152,14 +146,14 @@ public:
 
         _logger->info("New HTTP request from {} to uri '{}'", host, uri);
 
-        if (uri == "/healthz")
+        if (uri == "/health")
         {
             return new HealthcheckRequestHandler(*_logger);
         }
 
         if (uri == "/")
         {
-            return new WebSocketRequestHandler(_handler, _maxFrameSize, *_logger);
+            return new WebSocketRequestHandler(*_handler, _maxFrameSize, *_logger);
         }
 
         _logger->error("No request handlers for uri '{}'", uri);
@@ -168,7 +162,7 @@ public:
     }
 
 private:
-    WebSocketHandler _handler;
+    std::unique_ptr<WebSocketHandler> _handler;
     std::size_t _maxFrameSize;
     Logger *_logger;
 };
@@ -195,17 +189,26 @@ Poco::Net::Context::Ptr createSslContext(const SslSettings &settings)
 Poco::Net::ServerSocket createServerSocket(const WebSocketServerSettings &settings)
 {
     auto address = Poco::Net::SocketAddress(settings.host, settings.port);
+    auto reuseAddress = true;
+    auto reusePort = false;
+    auto backlog = 64;
 
     if (!settings.ssl)
     {
-        return Poco::Net::ServerSocket(address);
-    }
+        auto socket = Poco::Net::ServerSocket();
+        socket.bind(address, reuseAddress, reusePort);
+        socket.listen(backlog);
 
-    auto backlog = 64;
+        return socket;
+    }
 
     auto context = createSslContext(*settings.ssl);
 
-    return Poco::Net::SecureServerSocket(address, backlog, context);
+    auto socket = Poco::Net::SecureServerSocket(context);
+    socket.bind(address, reuseAddress, reusePort);
+    socket.listen(backlog);
+
+    return socket;
 }
 
 Poco::Net::HTTPServerParams::Ptr extractServerParams(const WebSocketServerSettings &settings)
@@ -235,7 +238,7 @@ WebSocketServer::~WebSocketServer()
     }
 }
 
-std::vector<RawRequest> WebSocketServer::waitForRequests()
+std::vector<Request> WebSocketServer::waitForRequests()
 {
     return _requests->wait();
 }
@@ -250,7 +253,7 @@ WebSocketServer startServer(const WebSocketServerSettings &settings, Logger &log
     try
     {
         auto requests = std::make_unique<RequestQueue>();
-        auto handler = WebSocketHandler(*requests, logger);
+        auto handler = std::make_unique<WebSocketHandler>(*requests, logger);
         auto factory = Poco::makeShared<RequestHandlerFactory>(std::move(handler), settings.maxFrameSize, logger);
         auto socket = createServerSocket(settings);
         auto params = extractServerParams(settings);

@@ -30,13 +30,7 @@ namespace
 {
 using namespace brayns;
 
-struct WebSocketBuffer
-{
-    std::string data;
-    bool binary = false;
-};
-
-void onContinuation(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger &logger)
+void onContinuation(const WebSocketFrame &frame, Message &buffer, Logger &logger)
 {
     logger.info("Continuation frame received (binary = {})", buffer.binary);
 
@@ -48,7 +42,7 @@ void onContinuation(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger
     buffer.data.append(frame.data);
 }
 
-void onText(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger &logger)
+void onText(const WebSocketFrame &frame, Message &buffer, Logger &logger)
 {
     logger.info("Text frame received");
 
@@ -61,7 +55,7 @@ void onText(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger &logger
     buffer.binary = false;
 }
 
-void onBinary(const WebSocketFrame &frame, WebSocketBuffer &buffer, Logger &logger)
+void onBinary(const WebSocketFrame &frame, Message &buffer, Logger &logger)
 {
     logger.info("Binary frame received");
 
@@ -93,9 +87,9 @@ void onPong(Logger &logger)
     logger.info("Pong frame received, ignoring");
 }
 
-void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const RawResponse &response)
+void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const Message &response)
 {
-    auto data = response.data;
+    auto data = std::string_view(response.data);
 
     logger.info("Sending response of {} bytes to client {}", data.size(), clientId);
 
@@ -115,7 +109,7 @@ void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const RawR
 
         try
         {
-            logger.info("Sending websocket frame of {} bytes", data.size());
+            logger.info("Sending websocket frame of {} bytes", chunk.size());
             websocket.send({opcode, chunk, finalFrame});
         }
         catch (const WebSocketException &e)
@@ -141,7 +135,7 @@ void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const RawR
 
 void runClientLoop(ClientId clientId, WebSocket &websocket, RequestQueue &requests, Logger &logger)
 {
-    auto buffer = WebSocketBuffer();
+    auto buffer = Message();
 
     while (true)
     {
@@ -177,22 +171,33 @@ void runClientLoop(ClientId clientId, WebSocket &websocket, RequestQueue &reques
             continue;
         }
 
-        auto request = RawRequest{
+        logger.info("Received request of {} bytes from client {}", buffer.data.size(), clientId);
+
+        if (!buffer.binary)
+        {
+            logger.debug("Text request data: {}", buffer.data);
+        }
+
+        auto request = Request{
             .clientId = clientId,
-            .data = std::exchange(buffer.data, {}),
-            .binary = buffer.binary,
+            .message = std::exchange(buffer, {}),
             .respond = [=, &logger](const auto &response) mutable { respond(clientId, websocket, logger, response); },
         };
 
-        logger.info("Received request of {} bytes from client {}", request.data.size(), clientId);
-
-        if (!request.binary)
-        {
-            logger.debug("Text request data: {}", request.data);
-        }
-
         requests.push(std::move(request));
     }
+}
+
+ClientId generateClientId(std::mutex &mutex, IdGenerator<ClientId> &ids)
+{
+    auto lock = std::lock_guard(mutex);
+    return ids.next();
+}
+
+void recycleClientId(std::mutex &mutex, IdGenerator<ClientId> &ids, ClientId id)
+{
+    auto lock = std::lock_guard(mutex);
+    return ids.recycle(id);
 }
 }
 
@@ -206,7 +211,7 @@ WebSocketHandler::WebSocketHandler(RequestQueue &requests, Logger &logger):
 
 void WebSocketHandler::handle(WebSocket &websocket)
 {
-    auto clientId = _clientIds.next();
+    auto clientId = generateClientId(_mutex, _ids);
 
     try
     {
@@ -228,7 +233,7 @@ void WebSocketHandler::handle(WebSocket &websocket)
         websocket.close(WebSocketStatus::UnexpectedCondition, "Internal error");
     }
 
-    _clientIds.recycle(clientId);
+    recycleClientId(_mutex, _ids, clientId);
 
     _logger->info("Client {} disconnected", clientId);
 }
