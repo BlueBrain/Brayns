@@ -45,31 +45,6 @@ struct JsonObjectReflector<CameraView>
     }
 };
 
-template<>
-struct JsonObjectReflector<Perspective>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Perspective>();
-        builder.field("fovy", [](auto &object) { return &object.fovy; })
-            .description("Camera vertical field of view (horizontal is deduced from framebuffer resolution)")
-            .defaultValue(45.0F);
-        return builder.build();
-    }
-};
-
-template<>
-struct JsonObjectReflector<Viewport>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Viewport>();
-        builder.field("height", [](auto &object) { return &object.height; })
-            .description("Camera viewport height (horizontal is deduced from framebuffer resolution)");
-        return builder.build();
-    }
-};
-
 template<ReflectedJson T>
 struct CameraParams
 {
@@ -91,54 +66,259 @@ struct JsonObjectReflector<CameraParams<T>>
     }
 };
 
-/*struct UserCamera
-{
-    std::any params;
-    std::function<void(float)> setAspectRatio;
-};
+template<typename T>
+struct CameraReflector;
 
-using PerspectiveParams = CameraParams<Perspective>;
-using PerspectiveUserCamera = UserCamera<Perspective>;
+template<std::derived_from<Camera> T>
+using GetProjection = typename CameraReflector<T>::Projection;
+
+template<std::derived_from<Camera> T>
+using CameraParamsOf = CameraParams<GetProjection<T>>;
+
+template<std::derived_from<Camera> T>
+using ProjectionUpdate = UpdateParams<GetProjection<T>>;
+
+using ViewUpdate = UpdateParams<CameraView>;
 
 template<typename T>
-struct ObjectReflector<UserCamera<T>>
+concept ReflectedCamera =
+    ReflectedJson<GetProjection<T>> && std::same_as<std::string, decltype(CameraReflector<T>::getType())>
+    && std::same_as<T, decltype(CameraReflector<T>::create(std::declval<Device &>(), CameraParamsOf<T>()))>
+    && std::is_void_v<decltype(CameraReflector<T>::setAspect(std::declval<T &>(), 0.0F))>;
+
+template<ReflectedCamera T>
+std::string getCameraType()
 {
-    using Settings = PerspectiveParams;
+    return CameraReflector<T>::getType();
+}
+
+template<ReflectedCamera T>
+T createCamera(Device &device, const CameraParamsOf<T> &params)
+{
+    return CameraReflector<T>::create(device, params);
+}
+
+template<ReflectedCamera T>
+void setCameraAspect(T &camera, float aspect)
+{
+    CameraReflector<T>::setAspect(camera, aspect);
+}
+
+template<ReflectedCamera T>
+struct UserCamera
+{
+    T deviceObject;
+    CameraParamsOf<T> params;
+};
+
+struct CameraInterface
+{
+    std::any value;
+    std::function<std::string()> getType;
+    std::function<Camera()> getDeviceObject;
+    std::function<CameraView()> getView;
+    std::function<void(const CameraView &)> setView;
+    std::function<void(float)> setAspect;
+};
+
+template<>
+struct ObjectReflector<CameraInterface>
+{
+    static std::string getType(const CameraInterface &camera)
+    {
+        return camera.getType();
+    }
+};
+
+template<ReflectedCamera T>
+CameraInterface createCameraInterface(const std::shared_ptr<UserCamera<T>> &camera)
+{
+    return {
+        .value = camera,
+        .getType = [] { return getCameraType<T>(); },
+        .getDeviceObject = [=] { return camera->deviceObject; },
+        .getView = [=] { return camera->params.view; },
+        .setView = [=](const auto &view) { camera->params.view = view; },
+        .setAspect = [=](auto aspect) { setCameraAspect(camera->deviceObject, aspect); },
+    };
+}
+
+template<ReflectedCamera T>
+UserCamera<T> &castCamera(CameraInterface &camera)
+{
+    auto ptr = std::any_cast<std::shared_ptr<UserCamera<T>>>(&camera.value);
+
+    if (ptr != nullptr)
+    {
+        return **ptr;
+    }
+
+    auto expected = getCameraType<T>();
+    auto got = camera.getType();
+
+    throw InvalidParams(fmt::format("Invalid camera type: expected {}, got {}", expected, got));
+}
+
+template<ReflectedCamera T>
+ObjectResult createUserCamera(LockedObjects &locked, Device &device, const CameraParamsOf<T> &params)
+{
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto camera = createCamera<T>(device, params);
+            auto object = UserCamera<T>{camera, params};
+            auto ptr = std::make_shared<decltype(object)>(std::move(object));
+
+            auto interface = createCameraInterface(ptr);
+
+            auto stored = objects.add(std::move(interface));
+
+            return stored.getResult();
+        });
+}
+
+CameraView getCameraView(LockedObjects &locked, const ObjectParams &params)
+{
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto &camera = objects.get<CameraInterface>(params.id);
+
+            return camera.getView();
+        });
+}
+
+template<ReflectedCamera T>
+GetProjection<T> getCameraProjection(LockedObjects &locked, const ObjectParams &params)
+{
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto &interface = objects.get<CameraInterface>(params.id);
+            auto &camera = castCamera<T>(interface);
+
+            return camera.params.projection;
+        });
+}
+
+void updateCameraView(LockedObjects &locked, const ViewUpdate &params)
+{
+    locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto &camera = objects.get<CameraInterface>(params.id);
+
+            camera.setView(params.properties);
+        });
+}
+
+template<ReflectedCamera T>
+void updateCameraProjection(LockedObjects &locked, const ProjectionUpdate<T> &params)
+{
+    locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto &interface = objects.get<CameraInterface>(params.id);
+            auto &camera = castCamera<T>(interface);
+
+            camera.params.projection = params.properties;
+        });
+}
+
+template<ReflectedCamera T>
+void addCameraType(ApiBuilder &builder, LockedObjects &objects, Device &device)
+{
+    auto type = getCameraType<T>();
+
+    builder
+        .endpoint(
+            "create-" + type,
+            [&](CameraParamsOf<T> params) { return createUserCamera<T>(objects, device, params); })
+        .description("Create a camera of type " + type);
+
+    builder.endpoint("get-" + type, [&](ObjectParams params) { return getCameraProjection<T>(objects, params); })
+        .description("Get projection part of a camera of type " + type);
+
+    builder.endpoint("update-" + type, [&](ProjectionUpdate<T> params) { updateCameraProjection<T>(objects, params); })
+        .description("Update projection part of a camera of type " + type);
+}
+
+template<>
+struct JsonObjectReflector<Perspective>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Perspective>();
+        builder.field("fovy", [](auto &object) { return &object.fovy; })
+            .description("Camera vertical field of view (horizontal is deduced from framebuffer aspect)")
+            .defaultValue(45.0F);
+        return builder.build();
+    }
+};
+
+template<>
+struct CameraReflector<PerspectiveCamera>
+{
+    using Projection = Perspective;
 
     static std::string getType()
     {
         return "perspective-camera";
     }
 
-    static PerspectiveParams getProperties(const PerspectiveUserCamera &camera)
+    static PerspectiveCamera create(Device &device, const CameraParamsOf<PerspectiveCamera> &params)
     {
-        return camera.value.params;
+        return createPerspectiveCamera(device, params.view, params.projection);
+    }
+
+    static void setAspect(PerspectiveCamera &camera, float aspect)
+    {
+        camera.setAspect(aspect);
     }
 };
 
-using OrthographicParams = CameraParams<Viewport>;
-using OrthographicUserCamera = UserCamera<Viewport>;
+template<>
+struct JsonObjectReflector<Orthographic>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Orthographic>();
+        builder.field("height", [](auto &object) { return &object.height; })
+            .description("Camera viewport height in world coordinates (horizontal is deduced from framebuffer aspect)");
+        return builder.build();
+    }
+};
 
 template<>
-struct ObjectReflector<OrthographicUserCamera>
+struct CameraReflector<OrthographicCamera>
 {
-    using Settings = OrthographicParams;
+    using Projection = Orthographic;
 
     static std::string getType()
     {
         return "orthographic-camera";
     }
 
-    static OrthographicParams getProperties(const OrthographicUserCamera &camera)
+    static OrthographicCamera create(Device &device, const CameraParamsOf<OrthographicCamera> &params)
     {
-        return camera.value.params;
+        return createOrthographicCamera(device, params.view, params.projection);
     }
-};*/
+
+    static void setAspect(OrthographicCamera &camera, float aspect)
+    {
+        camera.setAspect(aspect);
+    }
+};
 
 void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
-    (void)builder;
-    (void)objects;
-    (void)device;
+    addCameraType<PerspectiveCamera>(builder, objects, device);
+    addCameraType<OrthographicCamera>(builder, objects, device);
+
+    builder.endpoint("get-camera", [&](ObjectParams params) { return getCameraView(objects, params); })
+        .description("Get the view of a camera of any type");
+
+    builder.endpoint("update-camera", [&](ViewUpdate params) { return updateCameraView(objects, params); })
+        .description("Update the view of a camera of any type");
 }
 }

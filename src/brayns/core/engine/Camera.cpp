@@ -50,22 +50,22 @@ void PerspectiveCamera::setFovy(float fovy)
     commitObject(handle);
 }
 
-void PerspectiveCamera::setAspectRatio(float aspectRatio)
+void PerspectiveCamera::setAspect(float aspect)
 {
     auto handle = getHandle();
-    setObjectParam(handle, "aspect", aspectRatio);
+    setObjectParam(handle, "aspect", aspect);
     commitObject(handle);
 }
 
-PerspectiveCamera createPerspectiveCamera(Device &device, const CameraView &view, const Perspective &perspective)
+PerspectiveCamera createPerspectiveCamera(Device &device, const CameraView &view, const Perspective &projection)
 {
     auto handle = ospNewCamera("perspective");
     auto camera = wrapObjectHandleAs<PerspectiveCamera>(device, handle);
 
     setCameraViewParams(handle, view);
 
-    setObjectParam(handle, "fovy", perspective.fovy);
-    setObjectParam(handle, "aspect", perspective.aspectRatio);
+    setObjectParam(handle, "fovy", projection.fovy);
+    setObjectParam(handle, "aspect", projection.aspect);
 
     commitObject(handle);
 
@@ -79,22 +79,22 @@ void OrthographicCamera::setHeight(float height)
     commitObject(handle);
 }
 
-void OrthographicCamera::setAspectRatio(float aspectRatio)
+void OrthographicCamera::setAspect(float aspect)
 {
     auto handle = getHandle();
-    setObjectParam(handle, "aspect", aspectRatio);
+    setObjectParam(handle, "aspect", aspect);
     commitObject(handle);
 }
 
-OrthographicCamera createOrthographicCamera(Device &device, const CameraView &view, const Viewport &viewport)
+OrthographicCamera createOrthographicCamera(Device &device, const CameraView &view, const Orthographic &projection)
 {
     auto handle = ospNewCamera("orthographic");
     auto camera = wrapObjectHandleAs<OrthographicCamera>(device, handle);
 
     setCameraViewParams(handle, view);
 
-    setObjectParam(handle, "height", viewport.height);
-    setObjectParam(handle, "aspect", viewport.aspectRatio);
+    setObjectParam(handle, "height", projection.height);
+    setObjectParam(handle, "aspect", projection.aspect);
 
     commitObject(handle);
 

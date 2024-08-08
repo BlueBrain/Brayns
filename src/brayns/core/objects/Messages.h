@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <optional>
 #include <string>
 
 #include <brayns/core/json/Json.h>
@@ -32,103 +31,64 @@ using ObjectId = std::uint32_t;
 
 constexpr auto nullId = ObjectId(0);
 
-struct Metadata
+struct ObjectInfo
 {
     ObjectId id;
     std::string type;
-    std::size_t size = 0;
     JsonValue userData = {};
 };
 
 template<>
-struct JsonObjectReflector<Metadata>
+struct JsonObjectReflector<ObjectInfo>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<Metadata>();
+        auto builder = JsonBuilder<ObjectInfo>();
         builder.field("id", [](auto &object) { return &object.id; })
-            .description("Object ID, primary way to query this object (starts at 1)");
+            .description("Object ID (starts at 1, uses 0 for objects that are not in registry)");
         builder.field("type", [](auto &object) { return &object.type; })
-            .description("Object type key, use 'get-{type}' to query detailed information about the object");
-        builder.field("size", [](auto &object) { return &object.size; })
-            .description("Object size in memory (in bytes), 0 if negligible");
-        builder.field("user_data", [](auto &object) { return &object.userData; }).description("Data set by user");
-        return builder.build();
-    }
-};
-
-template<ReflectedJson T>
-struct ObjectParams
-{
-    T settings;
-    JsonValue userData = {};
-};
-
-template<ReflectedJson T>
-struct JsonObjectReflector<ObjectParams<T>>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<ObjectParams<T>>();
-        builder.field("settings", [](auto &object) { return &object.settings; })
-            .description("Settings to create the object");
+            .description("Object type, use 'get-{type}' to query detailed information about the object");
         builder.field("user_data", [](auto &object) { return &object.userData; })
-            .description("Optional user data (only for user, not used by Brayns)")
-            .defaultValue(NullJson());
+            .description("Data set by user (not used by Brayns)")
+            .required(false);
         return builder.build();
     }
 };
 
-template<ReflectedJson T>
-struct ObjectResult
-{
-    Metadata metadata;
-    T properties;
-};
-
-template<ReflectedJson T>
-struct JsonObjectReflector<ObjectResult<T>>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<ObjectResult<T>>();
-        builder.field("metadata", [](auto &object) { return &object.metadata; })
-            .description("Generic object properties");
-        builder.field("properties", [](auto &object) { return &object.properties; })
-            .description("Properties that are specific to the object type");
-        return builder.build();
-    }
-};
-
-struct EmptyJsonObject
-{
-};
-
-template<>
-struct JsonObjectReflector<EmptyJsonObject>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<EmptyJsonObject>();
-        builder.description("An empty object");
-        return builder.build();
-    }
-};
-
-using EmptyJson = std::optional<EmptyJsonObject>;
-
-struct GetObjectParams
+struct ObjectParams
 {
     ObjectId id;
 };
 
+using ObjectResult = ObjectParams;
+
 template<>
-struct JsonObjectReflector<GetObjectParams>
+struct JsonObjectReflector<ObjectParams>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<GetObjectParams>();
-        builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to retreive");
+        auto builder = JsonBuilder<ObjectParams>();
+        builder.field("id", [](auto &object) { return &object.id; }).description("Object ID");
+        return builder.build();
+    }
+};
+
+template<ReflectedJson T>
+struct UpdateParams
+{
+    ObjectId id;
+    T properties;
+};
+
+template<typename T>
+struct JsonObjectReflector<UpdateParams<T>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<UpdateParams<T>>();
+        builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to update");
+        builder.field("properties", [](auto &object) { return &object.properties; })
+            .description("New object properties to replace the old ones");
         return builder.build();
     }
 };

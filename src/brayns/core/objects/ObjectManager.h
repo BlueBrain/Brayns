@@ -41,8 +41,8 @@ class ObjectManager
 public:
     explicit ObjectManager();
 
-    std::vector<Metadata> getAllMetadata() const;
-    Metadata getMetadata(ObjectId id) const;
+    std::vector<ObjectInfo> getAllObjects() const;
+    ObjectInfo getObject(ObjectId id) const;
     void setUserData(ObjectId id, const JsonValue &userData);
     void remove(ObjectId id);
     void clear();
@@ -60,14 +60,17 @@ public:
     }
 
     template<ReflectedObject T>
-    Stored<T> add(T value, const JsonValue &userData = {})
+    Stored<T> add(T object)
     {
         auto id = _ids.next();
 
         try
         {
-            auto object = UserObject<T>{id, std::move(value), userData};
-            auto ptr = std::make_shared<decltype(object)>(std::move(object));
+            auto user = UserObject<T>{id, std::move(object)};
+            auto ptr = std::make_shared<decltype(user)>(std::move(user));
+
+            addObject(ptr->value, id);
+
             auto interface = createObjectInterface(ptr);
 
             _objects.emplace(id, std::move(interface));
@@ -88,8 +91,10 @@ private:
     const ObjectInterface &getInterface(ObjectId id) const;
 
     template<ReflectedObject T>
-    static const std::shared_ptr<UserObject<T>> &castObject(const ObjectInterface &interface)
+    const std::shared_ptr<UserObject<T>> &getShared(ObjectId id) const
     {
+        const auto &interface = getInterface(id);
+
         auto ptr = std::any_cast<std::shared_ptr<UserObject<T>>>(&interface.value);
 
         if (ptr != nullptr)
@@ -97,18 +102,9 @@ private:
             return *ptr;
         }
 
-        auto id = interface.getId();
         auto type = interface.getType();
 
         throw InvalidParams(fmt::format("Invalid type for object with ID {}: {}", id, type));
-    }
-
-    template<ReflectedObject T>
-    const std::shared_ptr<UserObject<T>> &getShared(ObjectId id) const
-    {
-        const auto &interface = getInterface(id);
-
-        return castObject<T>(interface);
     }
 };
 }

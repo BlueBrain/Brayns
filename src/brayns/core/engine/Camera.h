@@ -45,7 +45,7 @@ public:
 struct Perspective
 {
     float fovy = 60.0F;
-    float aspectRatio = 1.0F;
+    float aspect = 1.0F;
 };
 
 class PerspectiveCamera : public Camera
@@ -54,18 +54,18 @@ public:
     using Camera::Camera;
 
     void setFovy(float fovy);
-    void setAspectRatio(float aspectRatio);
+    void setAspect(float aspect);
 };
 
 PerspectiveCamera createPerspectiveCamera(
     Device &device,
     const CameraView &view = {},
-    const Perspective &perspective = {});
+    const Perspective &projection = {});
 
-struct Viewport
+struct Orthographic
 {
     float height = 1.0F;
-    float aspectRatio = 1.0F;
+    float aspect = 1.0F;
 };
 
 class OrthographicCamera : public Camera
@@ -74,8 +74,11 @@ public:
     using Camera::Camera;
 
     void setHeight(float height);
-    void setAspectRatio(float aspectRatio);
+    void setAspect(float aspect);
 };
 
-OrthographicCamera createOrthographicCamera(Device &device, const CameraView &view = {}, const Viewport &viewport = {});
+OrthographicCamera createOrthographicCamera(
+    Device &device,
+    const CameraView &view = {},
+    const Orthographic &projection = {});
 }

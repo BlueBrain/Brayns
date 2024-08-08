@@ -25,27 +25,10 @@ using namespace brayns;
 
 namespace brayns
 {
-struct TestProperties
-{
-    float someFloat = 0.0F;
-};
-
-template<>
-struct JsonObjectReflector<TestProperties>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<TestProperties>();
-        builder.field("some_float", [](auto &object) { return &object.someFloat; });
-        return builder.build();
-    }
-};
-
 struct TestObject
 {
     std::string type;
-    std::size_t size;
-    bool removed = false;
+    ObjectId id = nullId;
 };
 
 template<>
@@ -56,14 +39,14 @@ struct ObjectReflector<TestObject>
         return object.type;
     }
 
-    static std::size_t getSize(const TestObject &object)
+    static void add(TestObject &object, ObjectId id)
     {
-        return object.size;
+        object.id = id;
     }
 
     static void remove(TestObject &object)
     {
-        object.removed = true;
+        object.id = nullId;
     }
 };
 }
@@ -72,44 +55,42 @@ TEST_CASE("Create and remove objects")
 {
     auto objects = ObjectManager();
 
-    auto object = objects.add<TestObject>({"type", 4}, "someUserData");
+    auto object = objects.add(TestObject{"type"});
 
     auto id = object.getId();
 
     CHECK_EQ(id, 1);
 
-    auto metadata = objects.getMetadata(id);
+    auto info = objects.getObject(id);
 
-    CHECK_EQ(metadata.id, id);
-    CHECK_EQ(metadata.type, "type");
-    CHECK_EQ(metadata.size, 4);
-    CHECK_EQ(metadata.userData.extract<std::string>(), "someUserData");
+    CHECK_EQ(info.id, id);
+    CHECK_EQ(info.type, "type");
+    CHECK(info.userData.isEmpty());
 
     auto &retreived = objects.get<TestObject>(id);
 
-    CHECK_EQ(retreived.size, 4);
     CHECK_EQ(retreived.type, "type");
-    CHECK_FALSE(retreived.removed);
+    CHECK_EQ(retreived.id, id);
 
     auto stored = objects.getStored<TestObject>(id);
 
     CHECK_EQ(stored.getId(), id);
 
-    auto object2 = objects.add<TestObject>({});
+    auto object2 = objects.add(TestObject());
     auto id2 = object2.getId();
 
-    CHECK_EQ(objects.getAllMetadata().size(), 2);
+    CHECK_EQ(objects.getAllObjects().size(), 2);
 
     objects.remove(id);
 
     CHECK(stored.isRemoved());
-    CHECK(stored.get().removed);
+    CHECK_EQ(stored.get().id, nullId);
 
-    CHECK_THROWS_AS(objects.getMetadata(id), InvalidParams);
+    CHECK_THROWS_AS(objects.getObject(id), InvalidParams);
     CHECK_THROWS_AS(objects.get<TestObject>(id), InvalidParams);
     CHECK_THROWS_AS(objects.getStored<TestObject>(id), InvalidParams);
 
-    auto object3 = objects.add<TestObject>({});
+    auto object3 = objects.add(TestObject());
     CHECK_EQ(object3.getId(), 1);
 
     auto stored2 = objects.getStored<TestObject>(id2);
@@ -119,7 +100,7 @@ TEST_CASE("Create and remove objects")
     CHECK(stored2.isRemoved());
     CHECK(object3.isRemoved());
 
-    CHECK(objects.getAllMetadata().empty());
+    CHECK(objects.getAllObjects().empty());
 }
 
 TEST_CASE("Errors")
@@ -128,7 +109,7 @@ TEST_CASE("Errors")
 
     objects.add<TestObject>({});
 
-    CHECK_THROWS_AS(objects.getMetadata(0), InvalidParams);
-    CHECK_THROWS_AS(objects.getMetadata(2), InvalidParams);
+    CHECK_THROWS_AS(objects.getObject(0), InvalidParams);
+    CHECK_THROWS_AS(objects.getObject(2), InvalidParams);
     CHECK_THROWS_AS(objects.remove(2), InvalidParams);
 }

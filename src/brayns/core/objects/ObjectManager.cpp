@@ -52,25 +52,25 @@ ObjectManager::ObjectManager()
     disableNullId(_ids);
 }
 
-std::vector<Metadata> ObjectManager::getAllMetadata() const
+std::vector<ObjectInfo> ObjectManager::getAllObjects() const
 {
-    auto metadatas = std::vector<Metadata>();
-    metadatas.reserve(_objects.size());
+    auto objects = std::vector<ObjectInfo>();
+    objects.reserve(_objects.size());
 
     for (const auto &[id, object] : _objects)
     {
-        auto metadata = createObjectMetadata(object);
-        metadatas.push_back(std::move(metadata));
+        auto result = getObjectInfo(object);
+        objects.push_back(std::move(result));
     }
 
-    return metadatas;
+    return objects;
 }
 
-Metadata ObjectManager::getMetadata(ObjectId id) const
+ObjectInfo ObjectManager::getObject(ObjectId id) const
 {
     const auto &interface = getInterface(id);
 
-    return createObjectMetadata(interface);
+    return getObjectInfo(interface);
 }
 
 void ObjectManager::setUserData(ObjectId id, const JsonValue &userData)

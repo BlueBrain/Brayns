@@ -37,7 +37,7 @@ template<typename T>
 concept WithType = std::same_as<std::string, decltype(ObjectReflector<T>::getType(std::declval<const T &>()))>;
 
 template<typename T>
-concept WithSize = std::same_as<std::size_t, decltype(ObjectReflector<T>::getSize(std::declval<const T &>()))>;
+concept WithAdd = std::is_void_v<decltype(ObjectReflector<T>::add(std::declval<T &>(), ObjectId()))>;
 
 template<typename T>
 concept WithRemove = std::is_void_v<decltype(ObjectReflector<T>::remove(std::declval<T &>()))>;
@@ -52,16 +52,16 @@ std::string getObjectType(const T &object)
 }
 
 template<typename T>
-std::size_t getObjectSize(const T &object)
+void addObject(T &object, ObjectId id)
 {
     (void)object;
-    return 0;
+    (void)id;
 }
 
-template<WithSize T>
-std::size_t getObjectSize(const T &object)
+template<WithAdd T>
+void addObject(T &object, ObjectId id)
 {
-    return ObjectReflector<T>::getSize(object);
+    return ObjectReflector<T>::add(object, id);
 }
 
 template<typename T>
@@ -85,21 +85,10 @@ struct UserObject
 };
 
 template<ReflectedObject T>
-void removeStoredObject(UserObject<T> &object)
+void removeUserObject(UserObject<T> &object)
 {
     object.id = nullId;
     removeObject(object.value);
-}
-
-template<ReflectedObject T>
-Metadata createObjectMetadata(const UserObject<T> &object)
-{
-    return {
-        .id = object.id,
-        .type = getObjectType(object.value),
-        .size = getObjectSize(object.value),
-        .userData = object.userData,
-    };
 }
 
 template<ReflectedObject T>
@@ -126,11 +115,6 @@ public:
         return getObjectType(_object->value);
     }
 
-    std::size_t getSize() const
-    {
-        return getObjectSize(_object->value);
-    }
-
     JsonValue getUserData() const
     {
         return _object->userData;
@@ -141,9 +125,9 @@ public:
         _object->userData = userData;
     }
 
-    Metadata getMetadata() const
+    ObjectResult getResult() const
     {
-        return createObjectMetadata(*_object);
+        return {getId()};
     }
 
     T &get() const
@@ -161,7 +145,6 @@ struct ObjectInterface
     std::function<ObjectId()> getId;
     std::function<void()> remove;
     std::function<std::string()> getType;
-    std::function<std::size_t()> getSize;
     std::function<JsonValue()> getUserData;
     std::function<void(const JsonValue &)> setUserData;
 };
@@ -172,20 +155,18 @@ ObjectInterface createObjectInterface(const std::shared_ptr<UserObject<T>> &obje
     return {
         .value = object,
         .getId = [=] { return object->id; },
-        .remove = [=] { removeStoredObject(*object); },
+        .remove = [=] { removeUserObject(*object); },
         .getType = [=] { return getObjectType(object->value); },
-        .getSize = [=] { return getObjectSize(object->value); },
         .getUserData = [=] { return object->userData; },
         .setUserData = [=](const auto &userData) { object->userData = userData; },
     };
 }
 
-inline Metadata createObjectMetadata(const ObjectInterface &object)
+inline ObjectInfo getObjectInfo(const ObjectInterface &object)
 {
     return {
         .id = object.getId(),
         .type = object.getType(),
-        .size = object.getSize(),
         .userData = object.getUserData(),
     };
 }
