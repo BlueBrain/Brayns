@@ -25,7 +25,7 @@ This package provides an API to interact with Brayns service.
 """
 
 from .api.core.objects import (
-    Metadata,
+    Object,
     clear_objects,
     create_empty_object,
     get_all_objects,
@@ -69,9 +69,8 @@ __all__ = [
     "clear_objects",
     "connect",
     "Connection",
-    "create_logger",
-    "update_object",
     "create_empty_object",
+    "create_logger",
     "Endpoint",
     "FutureResponse",
     "get_all_objects",
@@ -88,7 +87,7 @@ __all__ = [
     "JsonRpcRequest",
     "JsonRpcResponse",
     "JsonRpcSuccessResponse",
-    "Metadata",
+    "Object",
     "remove_objects",
     "Request",
     "Response",
@@ -97,6 +96,7 @@ __all__ = [
     "Task",
     "TaskInfo",
     "TaskOperation",
+    "update_object",
     "Version",
     "WebSocketError",
 ]

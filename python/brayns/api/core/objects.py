@@ -22,48 +22,40 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network.connection import Connection
-from brayns.utils.parsing import check_type, get
+from brayns.utils.parsing import check_type, get, try_get
 
 
 @dataclass
-class Metadata:
+class Object:
     id: int
     type: str
-    size: int
     user_data: Any
 
 
-def parse_metadata(message: dict[str, Any]) -> Metadata:
-    return Metadata(
+def parse_object(message: dict[str, Any]) -> Object:
+    return Object(
         id=get(message, "id", int),
         type=get(message, "type", str),
-        size=get(message, "size", int),
-        user_data=get(message, "user_data", Any),
+        user_data=try_get(message, "user_data", Any, None),
     )
 
 
-def extract_metadata(result: dict[str, Any]) -> Metadata:
-    metadata = get(result, "metadata", dict[str, Any])
-    return parse_metadata(metadata)
-
-
-async def get_all_objects(connection: Connection) -> list[Metadata]:
+async def get_all_objects(connection: Connection) -> list[Object]:
     result = await connection.get_result("get-all-objects")
     check_type(result, dict[str, Any])
     objects = get(result, "objects", list[dict[str, Any]])
-    return [parse_metadata(item) for item in objects]
+    return [parse_object(item) for item in objects]
 
 
-async def get_object(connection: Connection, id: int) -> Metadata:
+async def get_object(connection: Connection, id: int) -> Object:
     result = await connection.get_result("get-object", {"id": id})
     check_type(result, dict[str, Any])
-    return parse_metadata(result)
+    return parse_object(result)
 
 
-async def update_object(connection: Connection, id: int, user_data: Any) -> Metadata:
-    result = await connection.get_result("update-object", {"id": id, "user_data": user_data})
-    check_type(result, dict[str, Any])
-    return parse_metadata(result)
+async def update_object(connection: Connection, id: int, user_data: Any) -> None:
+    properties = {"user_data": user_data}
+    await connection.get_result("update-object", {"id": id, "properties": properties})
 
 
 async def remove_objects(connection: Connection, ids: list[int]) -> None:
@@ -74,7 +66,7 @@ async def clear_objects(connection: Connection) -> None:
     await connection.get_result("clear-objects")
 
 
-async def create_empty_object(connection: Connection, user_data: Any = None) -> Metadata:
-    result = await connection.get_result("create-empty-object", {"user_data": user_data})
+async def create_empty_object(connection: Connection) -> int:
+    result = await connection.get_result("create-empty-object")
     check_type(result, dict[str, Any])
-    return extract_metadata(result)
+    return get(result, "id", int)
