@@ -61,12 +61,14 @@ from .network.websocket import ServiceUnavailable, WebSocketError
 from .utils.logger import create_logger
 from .utils.vector import Vector2, Vector3, Vector4
 from .utils.quaternion import Quaternion
+from .utils.rotation import Rotation, euler, rotation_between, axis_angle
 from .version import VERSION
 
 __version__ = VERSION
 """Version tag of brayns Python package (major.minor.patch)."""
 
 __all__ = [
+    "axis_angle",
     "cancel_task",
     "clear_objects",
     "connect",
@@ -74,6 +76,7 @@ __all__ = [
     "create_empty_object",
     "create_logger",
     "Endpoint",
+    "euler",
     "FutureResponse",
     "get_all_objects",
     "get_endpoint",
@@ -94,6 +97,8 @@ __all__ = [
     "remove_objects",
     "Request",
     "Response",
+    "rotation_between",
+    "Rotation",
     "ServiceUnavailable",
     "stop_service",
     "Task",
