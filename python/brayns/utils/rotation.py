@@ -18,6 +18,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from dataclasses import dataclass
 import math
 from typing import Self
 
@@ -25,25 +26,13 @@ from .quaternion import Quaternion
 from .vector import Vector3
 
 
+@dataclass(frozen=True)
 class Rotation:
-    def __init__(self, quaternion: Quaternion = Quaternion()) -> None:
-        self._quaternion = quaternion.normalized
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Rotation):
-            return False
-        return self._quaternion == other.quaternion
-
-    def __hash__(self) -> int:
-        return hash(self._quaternion)
-
-    @property
-    def quaternion(self) -> Quaternion:
-        return self._quaternion
+    quaternion: Quaternion = Quaternion()
 
     @property
     def euler_radians(self) -> Vector3:
-        return _quaternion_to_euler(self._quaternion)
+        return _quaternion_to_euler(self.quaternion)
 
     @property
     def euler_degrees(self) -> Vector3:
@@ -51,27 +40,27 @@ class Rotation:
 
     @property
     def axis(self) -> Vector3:
-        return self._quaternion.axis
+        return self.quaternion.axis
 
     @property
     def angle_radians(self) -> float:
-        return self._quaternion.angle_radians
+        return self.quaternion.angle_radians
 
     @property
     def angle_degrees(self) -> float:
-        return self._quaternion.angle_degrees
+        return self.quaternion.angle_degrees
 
     @property
     def inverse(self) -> Self:
-        return type(self)(self._quaternion.conjugate)
+        return type(self)(self.quaternion.conjugate)
 
     def then(self, other: Self) -> Self:
-        return type(self)(other._quaternion * self._quaternion)
+        return type(self)(other.quaternion * self.quaternion)
 
     def apply(self, value: Vector3, center: Vector3 = Vector3()) -> Vector3:
         value -= center
 
-        quaternion = self._quaternion
+        quaternion = self.quaternion
         vector = Quaternion(*value, 0)
 
         vector = quaternion * vector * quaternion.conjugate
@@ -101,7 +90,7 @@ def axis_angle(x: float, y: float, z: float, angle: float, degrees: bool = False
     return Rotation(quaternion)
 
 
-def rotation_between(source: Vector3, destination: Vector3) -> Rotation:
+def get_rotation_between(source: Vector3, destination: Vector3) -> Rotation:
     quaternion = _get_quaternion_between(source, destination)
 
     return Rotation(quaternion)

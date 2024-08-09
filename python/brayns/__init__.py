@@ -61,7 +61,19 @@ from .network.websocket import ServiceUnavailable, WebSocketError
 from .utils.logger import create_logger
 from .utils.vector import Vector2, Vector3, Vector4
 from .utils.quaternion import Quaternion
-from .utils.rotation import Rotation, euler, rotation_between, axis_angle
+from .utils.rotation import Rotation, euler, get_rotation_between, axis_angle
+from .utils.view import (
+    View,
+    X,
+    Y,
+    Z,
+    FRONT_VIEW,
+    BACK_VIEW,
+    TOP_VIEW,
+    BOTTOM_VIEW,
+    RIGHT_VIEW,
+    LEFT_VIEW,
+)
 from .version import VERSION
 
 __version__ = VERSION
@@ -69,6 +81,8 @@ __version__ = VERSION
 
 __all__ = [
     "axis_angle",
+    "BACK_VIEW",
+    "BOTTOM_VIEW",
     "cancel_task",
     "clear_objects",
     "connect",
@@ -77,11 +91,13 @@ __all__ = [
     "create_logger",
     "Endpoint",
     "euler",
+    "FRONT_VIEW",
     "FutureResponse",
     "get_all_objects",
     "get_endpoint",
     "get_methods",
     "get_object",
+    "get_rotation_between",
     "get_task_result",
     "get_task",
     "get_tasks",
@@ -92,22 +108,28 @@ __all__ = [
     "JsonRpcRequest",
     "JsonRpcResponse",
     "JsonRpcSuccessResponse",
+    "LEFT_VIEW",
     "Object",
     "Quaternion",
     "remove_objects",
     "Request",
     "Response",
-    "rotation_between",
+    "RIGHT_VIEW",
     "Rotation",
     "ServiceUnavailable",
     "stop_service",
     "Task",
     "TaskInfo",
     "TaskOperation",
+    "TOP_VIEW",
     "update_object",
     "Vector2",
     "Vector3",
     "Vector4",
     "Version",
+    "View",
     "WebSocketError",
+    "X",
+    "Y",
+    "Z",
 ]

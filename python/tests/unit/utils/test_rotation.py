@@ -20,7 +20,7 @@
 
 import math
 import pytest
-from brayns import Rotation, euler, axis_angle, rotation_between, Quaternion, Vector3
+from brayns import Rotation, euler, axis_angle, get_rotation_between, Quaternion, Vector3
 
 
 def test_quaternion() -> None:
@@ -85,7 +85,7 @@ def test_rotation_between() -> None:
     u = Vector3(1, 0, 0)
     v = Vector3(1, 1, 0)
 
-    rotation = rotation_between(u, v)
+    rotation = get_rotation_between(u, v)
     test = rotation.euler_degrees
 
     assert test.x == pytest.approx(0)
@@ -95,14 +95,14 @@ def test_rotation_between() -> None:
     u = Vector3(1, 0, 0)
     v = Vector3(1, 0, 0)
 
-    identity = rotation_between(u, v)
+    identity = get_rotation_between(u, v)
 
     assert identity == Rotation()
 
     u = Vector3(1, 0, 0)
     v = Vector3(-1, 0, 0)
 
-    opposite = rotation_between(u, v)
+    opposite = get_rotation_between(u, v)
     back = opposite.apply(u)
 
     assert back.x == pytest.approx(v.x)
