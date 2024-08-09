@@ -62,6 +62,19 @@ def test_conversion() -> None:
     assert vector3.xy == vector2
     assert vector4.xyz == vector3
 
+    assert vector2.x == 1
+    assert vector3.x == 1
+    assert vector4.x == 1
+
+    assert vector2.y == 2
+    assert vector3.y == 2
+    assert vector4.y == 2
+
+    assert vector3.z == 3
+    assert vector4.z == 3
+
+    assert vector4.w == 4
+
 
 def test_iter() -> None:
     values = [1, 2, 3]

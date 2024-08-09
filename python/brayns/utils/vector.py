@@ -18,8 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from __future__ import annotations
-
 import math
 from typing import Callable, Iterable, Self, TypeVarTuple, Generic
 
@@ -130,8 +128,10 @@ class Vector(tuple[*Ts], Generic[*Ts]):
 
     def reduce(self, operation: Callable[[float, float], float]) -> float:
         value = self[0]
+
         for i in range(1, self.component_count()):
             value = operation(value, self[i])  # type: ignore
+
         return value  # type: ignore
 
     def reduce_multiply(self) -> float:
@@ -140,6 +140,7 @@ class Vector(tuple[*Ts], Generic[*Ts]):
     def _filter(self, value, operation) -> Self:
         if isinstance(value, (int, float)):
             return self.unpack(operation(i, value) for i in self)
+
         return self.unpack(operation(i, j) for i, j in zip(self, value))
 
 
@@ -184,8 +185,8 @@ class Vector3(Vector[float, float, float]):
     def xy(self) -> Vector2:
         return Vector2(self.x, self.y)
 
-    def cross(self, other: Vector3) -> Vector3:
-        return Vector3(
+    def cross(self, other: Self) -> Self:
+        return type(self)(
             self.y * other.z - self.z * other.y,
             self.z * other.x - self.x * other.z,
             self.x * other.y - self.y * other.x,
@@ -197,7 +198,7 @@ class Vector4(Vector[float, float, float, float]):
     def component_count(cls) -> int:
         return 4
 
-    def __new__(cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, w: float = 0.0) -> Vector4:
+    def __new__(cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, w: float = 0.0) -> Self:
         return super().__new__(cls, x, y, z, w)
 
     @property

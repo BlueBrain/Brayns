@@ -60,6 +60,7 @@ from .network.json_rpc import (
 from .network.websocket import ServiceUnavailable, WebSocketError
 from .utils.logger import create_logger
 from .utils.vector import Vector2, Vector3, Vector4
+from .utils.quaternion import Quaternion
 from .version import VERSION
 
 __version__ = VERSION
@@ -89,6 +90,7 @@ __all__ = [
     "JsonRpcResponse",
     "JsonRpcSuccessResponse",
     "Object",
+    "Quaternion",
     "remove_objects",
     "Request",
     "Response",
