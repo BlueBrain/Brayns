@@ -20,8 +20,9 @@
 
 from dataclasses import dataclass
 from typing import Self
-from .vector import Vector3
+
 from .rotation import Rotation, get_rotation_between
+from .vector import Vector3
 
 X = Vector3(1, 0, 0)
 Y = Vector3(0, 1, 0)
@@ -65,7 +66,7 @@ class View:
             up=rotation.apply(self.up),
         )
 
-    def rotation_to(self, destination: Self) -> Rotation:
+    def get_rotation_to(self, destination: Self) -> Rotation:
         first = get_rotation_between(self.direction, destination.direction)
 
         up = first.apply(self.real_up)
@@ -80,4 +81,5 @@ BACK_VIEW = View(direction=-Z)
 RIGHT_VIEW = View(direction=-X)
 LEFT_VIEW = View(direction=-X)
 TOP_VIEW = View(direction=-Y, up=-Z)
+BOTTOM_VIEW = View(direction=Y, up=Z)
 BOTTOM_VIEW = View(direction=Y, up=Z)

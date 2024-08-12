@@ -31,6 +31,7 @@ version = { attr = "brayns.version.VERSION" }
 [tool.ruff]
 lint.ignore = ["E501"]
 line-length = 119
+lint.extend-select = ["I"]
 
 [tool.mypy]
 ignore_missing_imports = true

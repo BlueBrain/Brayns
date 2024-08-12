@@ -58,22 +58,12 @@ from .network.json_rpc import (
     JsonRpcSuccessResponse,
 )
 from .network.websocket import ServiceUnavailable, WebSocketError
+from .utils.box import Box2, Box3
 from .utils.logger import create_logger
-from .utils.vector import Vector2, Vector3, Vector4
 from .utils.quaternion import Quaternion
-from .utils.rotation import Rotation, euler, get_rotation_between, axis_angle
-from .utils.view import (
-    View,
-    X,
-    Y,
-    Z,
-    FRONT_VIEW,
-    BACK_VIEW,
-    TOP_VIEW,
-    BOTTOM_VIEW,
-    RIGHT_VIEW,
-    LEFT_VIEW,
-)
+from .utils.rotation import Rotation, axis_angle, euler, get_rotation_between
+from .utils.vector import Vector2, Vector3, Vector4
+from .utils.view import BACK_VIEW, BOTTOM_VIEW, FRONT_VIEW, LEFT_VIEW, RIGHT_VIEW, TOP_VIEW, View, X, Y, Z
 from .version import VERSION
 
 __version__ = VERSION
@@ -83,6 +73,8 @@ __all__ = [
     "axis_angle",
     "BACK_VIEW",
     "BOTTOM_VIEW",
+    "Box2",
+    "Box3",
     "cancel_task",
     "clear_objects",
     "connect",

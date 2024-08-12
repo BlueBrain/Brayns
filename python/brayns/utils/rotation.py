@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass
 import math
+from dataclasses import dataclass
 from typing import Self
 
 from .quaternion import Quaternion
@@ -31,24 +31,16 @@ class Rotation:
     quaternion: Quaternion = Quaternion()
 
     @property
-    def euler_radians(self) -> Vector3:
+    def euler(self) -> Vector3:
         return _quaternion_to_euler(self.quaternion)
-
-    @property
-    def euler_degrees(self) -> Vector3:
-        return Vector3.unpack(math.degrees(i) for i in self.euler_radians)
 
     @property
     def axis(self) -> Vector3:
         return self.quaternion.axis
 
     @property
-    def angle_radians(self) -> float:
-        return self.quaternion.angle_radians
-
-    @property
-    def angle_degrees(self) -> float:
-        return self.quaternion.angle_degrees
+    def angle(self) -> float:
+        return self.quaternion.angle
 
     @property
     def inverse(self) -> Self:
@@ -68,23 +60,15 @@ class Rotation:
         return center + vector.xyz
 
 
-def euler(x: float, y: float, z: float, degrees: bool = False) -> Rotation:
+def euler(x: float, y: float, z: float) -> Rotation:
     angles = Vector3(x, y, z)
-
-    if degrees:
-        angles = Vector3.unpack(math.radians(i) for i in angles)
-
     quaternion = _euler_to_quaternion(angles)
 
     return Rotation(quaternion)
 
 
-def axis_angle(x: float, y: float, z: float, angle: float, degrees: bool = False) -> Rotation:
+def axis_angle(x: float, y: float, z: float, angle: float) -> Rotation:
     axis = Vector3(x, y, z)
-
-    if degrees:
-        angle = math.radians(angle)
-
     quaternion = _axis_angle_to_quaternion(axis, angle)
 
     return Rotation(quaternion)

@@ -25,6 +25,10 @@ from .vector import Vector, Vector3
 
 
 class Quaternion(Vector[float, float, float, float]):
+    @classmethod
+    def component_count(cls) -> int:
+        return 4
+
     def __new__(cls, x: float = 0.0, y: float = 0.0, z: float = 0.0, w: float = 1.0) -> Self:
         return super().__new__(cls, x, y, z, w)
 
@@ -85,13 +89,9 @@ class Quaternion(Vector[float, float, float, float]):
         return self.xyz.normalized
 
     @property
-    def angle_radians(self) -> float:
+    def angle(self) -> float:
         q = self.normalized
         return 2 * math.acos(q.w)
-
-    @property
-    def angle_degrees(self) -> float:
-        return math.degrees(self.angle_radians)
 
     @property
     def conjugate(self) -> Self:

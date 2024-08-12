@@ -18,8 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import math
+
 import pytest
-from brayns import X, Y, Z, Vector3, axis_angle, FRONT_VIEW, TOP_VIEW
+
+from brayns import FRONT_VIEW, TOP_VIEW, Vector3, X, Y, Z, axis_angle
 
 
 def test_directions() -> None:
@@ -41,8 +44,8 @@ def test_rotate() -> None:
     front = FRONT_VIEW
 
     axis = -X
-    angle = 90
-    rotation = axis_angle(*axis, angle, degrees=True)
+    angle = math.radians(90)
+    rotation = axis_angle(*axis, angle)
 
     top = front.rotate(rotation)
 
@@ -63,7 +66,7 @@ def test_rotation_to() -> None:
     source = FRONT_VIEW
     destination = TOP_VIEW
 
-    rotation = source.rotation_to(destination)
+    rotation = source.get_rotation_to(destination)
 
     test = source.rotate(rotation)
 
@@ -77,4 +80,6 @@ def test_rotation_to() -> None:
 
     assert test.up.x == pytest.approx(destination.up.x)
     assert test.up.y == pytest.approx(destination.up.y)
+    assert test.up.z == pytest.approx(destination.up.z)
+    assert test.up.z == pytest.approx(destination.up.z)
     assert test.up.z == pytest.approx(destination.up.z)

@@ -21,6 +21,7 @@
 import math
 
 import pytest
+
 from brayns import Vector2, Vector3, Vector4
 
 
@@ -182,4 +183,5 @@ def test_cross() -> None:
 def test_reduce() -> None:
     assert Vector3(1, 2, 3).reduce_multiply() == 6
     assert Vector3(1, -2, 3).reduce_multiply() == -6
+    assert Vector3(0, -2, 3).reduce_multiply() == 0
     assert Vector3(0, -2, 3).reduce_multiply() == 0

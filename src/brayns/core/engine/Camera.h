@@ -26,7 +26,7 @@
 
 namespace brayns
 {
-struct CameraView
+struct CameraSettings
 {
     Vector3 position = {0.0F, 0.0F, 0.0F};
     Vector3 direction = {0.0F, 0.0F, 1.0F};
@@ -39,10 +39,10 @@ class Camera : public Managed<OSPCamera>
 public:
     using Managed::Managed;
 
-    void setView(const CameraView &view);
+    void update(const CameraSettings &settings);
 };
 
-struct Perspective
+struct PerspectiveSettings
 {
     float fovy = 60.0F;
     float aspect = 1.0F;
@@ -59,10 +59,10 @@ public:
 
 PerspectiveCamera createPerspectiveCamera(
     Device &device,
-    const CameraView &view = {},
-    const Perspective &projection = {});
+    const CameraSettings &settings = {},
+    const PerspectiveSettings &perspective = {});
 
-struct Orthographic
+struct OrthographicSettings
 {
     float height = 1.0F;
     float aspect = 1.0F;
@@ -79,6 +79,6 @@ public:
 
 OrthographicCamera createOrthographicCamera(
     Device &device,
-    const CameraView &view = {},
-    const Orthographic &projection = {});
+    const CameraSettings &settings = {},
+    const OrthographicSettings &orthographic = {});
 }

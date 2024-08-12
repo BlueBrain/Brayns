@@ -19,8 +19,14 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import math
+
 import pytest
+
 from brayns import Quaternion, Vector3
+
+
+def test_component_count() -> None:
+    assert Quaternion.component_count() == 4
 
 
 def test_identity() -> None:
@@ -60,8 +66,7 @@ def test_angle_axis() -> None:
 
     flip = Quaternion(1, 0, 0, 0)
 
-    assert flip.angle_degrees == pytest.approx(180)
-    assert flip.angle_radians == pytest.approx(math.radians(180))
+    assert flip.angle == pytest.approx(math.radians(180))
 
 
 def test_conjugate() -> None:

@@ -19,25 +19,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import math
+
 import pytest
-from brayns import Rotation, euler, axis_angle, get_rotation_between, Quaternion, Vector3
 
-
-def test_quaternion() -> None:
-    quaternion = Quaternion(1, 2, 3, 4)
-    test = Rotation(quaternion)
-
-    assert test.quaternion == quaternion.normalized
-
-    identity = Rotation()
-
-    assert identity.quaternion == Quaternion(0, 0, 0, 1)
+from brayns import Quaternion, Rotation, Vector3, axis_angle, euler, get_rotation_between
 
 
 def test_euler() -> None:
-    angles = Vector3(34, -22, -80)
+    angles = Vector3(math.radians(34), math.radians(-22), math.radians(-80))
 
-    test = euler(*angles, degrees=True)
+    test = euler(*angles)
     quaternion = test.quaternion
 
     assert quaternion.norm == pytest.approx(1)
@@ -46,24 +37,18 @@ def test_euler() -> None:
     assert quaternion.z == pytest.approx(-0.56067163)
     assert quaternion.w == pytest.approx(0.75497182)
 
-    degrees = test.euler_degrees
+    back_to_euler = test.euler
 
-    assert degrees.x == pytest.approx(angles.x)
-    assert degrees.y == pytest.approx(angles.y)
-    assert degrees.z == pytest.approx(angles.z)
-
-    radians = test.euler_radians
-
-    assert radians.x == pytest.approx(math.radians(angles.x))
-    assert radians.y == pytest.approx(math.radians(angles.y))
-    assert radians.z == pytest.approx(math.radians(angles.z))
+    assert back_to_euler.x == pytest.approx(angles.x)
+    assert back_to_euler.y == pytest.approx(angles.y)
+    assert back_to_euler.z == pytest.approx(angles.z)
 
 
 def test_axis_angle() -> None:
     axis = Vector3(1, 2, 3)
-    angle = 30
+    angle = math.radians(30)
 
-    test = axis_angle(*axis, angle, degrees=True)
+    test = axis_angle(*axis, angle)
     quaternion = test.quaternion
 
     assert quaternion.norm == pytest.approx(1)
@@ -77,8 +62,7 @@ def test_axis_angle() -> None:
     assert test.axis.y == pytest.approx(axis.normalized.y)
     assert test.axis.z == pytest.approx(axis.normalized.z)
 
-    assert test.angle_degrees == pytest.approx(angle)
-    assert test.angle_radians == pytest.approx(math.radians(angle))
+    assert test.angle == pytest.approx(angle)
 
 
 def test_rotation_between() -> None:
@@ -86,11 +70,11 @@ def test_rotation_between() -> None:
     v = Vector3(1, 1, 0)
 
     rotation = get_rotation_between(u, v)
-    test = rotation.euler_degrees
+    test = rotation.euler
 
     assert test.x == pytest.approx(0)
     assert test.y == pytest.approx(0)
-    assert test.z == pytest.approx(45)
+    assert test.z == pytest.approx(math.radians(45))
 
     u = Vector3(1, 0, 0)
     v = Vector3(1, 0, 0)
@@ -114,26 +98,31 @@ def test_inverse() -> None:
     quaternion = Quaternion(1, 2, 3, 4).normalized
     rotation = Rotation(quaternion)
 
-    assert rotation.inverse.quaternion == quaternion.inverse
+    identity = rotation.then(rotation.inverse).quaternion
+
+    assert identity.x == pytest.approx(0)
+    assert identity.y == pytest.approx(0)
+    assert identity.z == pytest.approx(0)
+    assert identity.w == pytest.approx(1)
 
 
 def test_then() -> None:
     axis = Vector3(0, 1, 0)
-    angle = 30
+    angle = math.radians(30)
 
-    r1 = axis_angle(*axis, angle, degrees=True)
-    r2 = axis_angle(*axis, angle, degrees=True)
+    r1 = axis_angle(*axis, angle)
+    r2 = axis_angle(*axis, angle)
 
     combined = r1.then(r2)
 
-    assert combined.angle_degrees == pytest.approx(2 * angle)
+    assert combined.angle == pytest.approx(2 * angle)
     assert combined.axis.x == pytest.approx(axis.x)
     assert combined.axis.y == pytest.approx(axis.y)
     assert combined.axis.z == pytest.approx(axis.z)
 
 
 def test_apply() -> None:
-    rotation = euler(22, 35, 68, degrees=True)
+    rotation = euler(math.radians(22), math.radians(35), math.radians(68))
     value = Vector3(1, 2, 3)
 
     test = rotation.apply(value)

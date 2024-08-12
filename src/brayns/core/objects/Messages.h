@@ -80,7 +80,7 @@ struct UpdateParams
     T properties;
 };
 
-template<typename T>
+template<ReflectedJson T>
 struct JsonObjectReflector<UpdateParams<T>>
 {
     static auto reflect()

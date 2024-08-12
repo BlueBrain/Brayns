@@ -19,7 +19,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import math
-from typing import Callable, Iterable, Self, TypeVarTuple, Generic
+from collections.abc import Sequence
+from typing import Callable, Generic, Iterable, Self, TypeVarTuple
 
 Ts = TypeVarTuple("Ts")
 
@@ -27,7 +28,7 @@ Ts = TypeVarTuple("Ts")
 class Vector(tuple[*Ts], Generic[*Ts]):
     @classmethod
     def component_count(cls) -> int:
-        return 0
+        raise NotImplementedError()
 
     @classmethod
     def unpack(cls, components: Iterable[float]) -> Self:
@@ -46,15 +47,15 @@ class Vector(tuple[*Ts], Generic[*Ts]):
         return cls.full(1)
 
     @classmethod
-    def componentwise(cls, values: Iterable[Self], operation: Callable[[Iterable[float]], float]) -> Self:
+    def componentwise(cls, values: Sequence[Self], operation: Callable[[Iterable[float]], float]) -> Self:
         return cls.unpack(operation(value[i] for value in values) for i in range(cls.component_count()))  # type: ignore
 
     @classmethod
-    def componentwise_min(cls, values: Iterable[Self]) -> Self:
+    def componentwise_min(cls, values: Sequence[Self]) -> Self:
         return cls.componentwise(values, min)
 
     @classmethod
-    def componentwise_max(cls, values: Iterable[Self]) -> Self:
+    def componentwise_max(cls, values: Sequence[Self]) -> Self:
         return cls.componentwise(values, max)
 
     def __new__(cls, *args: *Ts) -> Self:
@@ -69,47 +70,47 @@ class Vector(tuple[*Ts], Generic[*Ts]):
     def __abs__(self) -> Self:
         return self.unpack(abs(i) for i in self)  # type: ignore
 
-    def __add__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: x + y)
+    def __add__(self, value: int | float | Self) -> Self:  # type: ignore
+        return self._apply(value, lambda x, y: x + y)
 
-    def __radd__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: y + x)
+    def __radd__(self, value: int | float | Self) -> Self:  # type: ignore
+        return self._apply(value, lambda x, y: y + x)
 
     def __sub__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: x - y)
+        return self._apply(value, lambda x, y: x - y)
 
     def __rsub__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: y - x)
+        return self._apply(value, lambda x, y: y - x)
 
-    def __mul__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: x * y)
+    def __mul__(self, value: int | float | Self) -> Self:  # type: ignore
+        return self._apply(value, lambda x, y: x * y)
 
-    def __rmul__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: y * x)
+    def __rmul__(self, value: int | float | Self) -> Self:  # type: ignore
+        return self._apply(value, lambda x, y: y * x)
 
     def __truediv__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: x / y)
+        return self._apply(value, lambda x, y: x / y)
 
     def __rtruediv__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: y / x)
+        return self._apply(value, lambda x, y: y / x)
 
     def __floordiv__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: x // y)
+        return self._apply(value, lambda x, y: x // y)
 
     def __rfloordiv__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: y // x)
+        return self._apply(value, lambda x, y: y // x)
 
     def __mod__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: x % y)
+        return self._apply(value, lambda x, y: x % y)
 
     def __rmod__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: y % x)
+        return self._apply(value, lambda x, y: y % x)
 
     def __pow__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: x**y)
+        return self._apply(value, lambda x, y: x**y)
 
     def __rpow__(self, value: int | float | Self) -> Self:
-        return self._filter(value, lambda x, y: y**x)
+        return self._apply(value, lambda x, y: y**x)
 
     @property
     def square_norm(self) -> float:
@@ -127,7 +128,7 @@ class Vector(tuple[*Ts], Generic[*Ts]):
         return sum(i * j for i, j in zip(self, other))  # type: ignore
 
     def reduce(self, operation: Callable[[float, float], float]) -> float:
-        value = self[0]
+        value = self[0]  # type: ignore
 
         for i in range(1, self.component_count()):
             value = operation(value, self[i])  # type: ignore
@@ -137,11 +138,11 @@ class Vector(tuple[*Ts], Generic[*Ts]):
     def reduce_multiply(self) -> float:
         return self.reduce(lambda x, y: x * y)
 
-    def _filter(self, value, operation) -> Self:
+    def _apply(self, value, operation) -> Self:
         if isinstance(value, (int, float)):
             return self.unpack(operation(i, value) for i in self)
 
-        return self.unpack(operation(i, j) for i, j in zip(self, value))
+        return self.unpack(operation(i, j) for i, j in zip(self, value))  # type: ignore
 
 
 class Vector2(Vector[float, float]):

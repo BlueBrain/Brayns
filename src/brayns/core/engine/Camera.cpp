@@ -25,21 +25,21 @@ namespace
 {
 using namespace brayns;
 
-void setCameraViewParams(OSPCamera handle, const CameraView &view)
+void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 {
-    setObjectParam(handle, "position", view.position);
-    setObjectParam(handle, "direction", view.direction);
-    setObjectParam(handle, "up", view.up);
-    setObjectParam(handle, "nearClip", view.nearClippingDistance);
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "up", settings.up);
+    setObjectParam(handle, "nearClip", settings.nearClippingDistance);
 }
 }
 
 namespace brayns
 {
-void Camera::setView(const CameraView &view)
+void Camera::update(const CameraSettings &settings)
 {
     auto handle = getHandle();
-    setCameraViewParams(handle, view);
+    setCameraParams(handle, settings);
     commitObject(handle);
 }
 
@@ -57,15 +57,18 @@ void PerspectiveCamera::setAspect(float aspect)
     commitObject(handle);
 }
 
-PerspectiveCamera createPerspectiveCamera(Device &device, const CameraView &view, const Perspective &projection)
+PerspectiveCamera createPerspectiveCamera(
+    Device &device,
+    const CameraSettings &settings,
+    const PerspectiveSettings &perspective)
 {
     auto handle = ospNewCamera("perspective");
     auto camera = wrapObjectHandleAs<PerspectiveCamera>(device, handle);
 
-    setCameraViewParams(handle, view);
+    setCameraParams(handle, settings);
 
-    setObjectParam(handle, "fovy", projection.fovy);
-    setObjectParam(handle, "aspect", projection.aspect);
+    setObjectParam(handle, "fovy", perspective.fovy);
+    setObjectParam(handle, "aspect", perspective.aspect);
 
     commitObject(handle);
 
@@ -86,15 +89,18 @@ void OrthographicCamera::setAspect(float aspect)
     commitObject(handle);
 }
 
-OrthographicCamera createOrthographicCamera(Device &device, const CameraView &view, const Orthographic &projection)
+OrthographicCamera createOrthographicCamera(
+    Device &device,
+    const CameraSettings &settings,
+    const OrthographicSettings &orthographic)
 {
     auto handle = ospNewCamera("orthographic");
     auto camera = wrapObjectHandleAs<OrthographicCamera>(device, handle);
 
-    setCameraViewParams(handle, view);
+    setCameraParams(handle, settings);
 
-    setObjectParam(handle, "height", projection.height);
-    setObjectParam(handle, "aspect", projection.aspect);
+    setObjectParam(handle, "height", orthographic.height);
+    setObjectParam(handle, "aspect", orthographic.aspect);
 
     commitObject(handle);
 
