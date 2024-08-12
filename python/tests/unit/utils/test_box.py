@@ -60,6 +60,14 @@ def test_merge() -> None:
     assert Box3.merge(boxes) == Box3(lower, upper)
 
 
+def test_iter() -> None:
+    test = Box2.ones()
+    lower, upper = test
+
+    assert lower == Vector2(-1, -1)
+    assert upper == Vector2(1, 1)
+
+
 def test_contains() -> None:
     test2 = Box2(-Vector2(1, 2), Vector2(1, 2))
 

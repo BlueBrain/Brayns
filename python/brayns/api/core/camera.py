@@ -19,23 +19,22 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import math
-from abc import ABC, abstractmethod
 from dataclasses import dataclass, replace
-from typing import Any, NewType
+from typing import Any, NewType, Protocol
 
 from brayns.network.connection import Connection
 from brayns.utils.box import Box3
 from brayns.utils.parsing import check_type, get
 from brayns.utils.vector import Vector3
-from brayns.utils.view import View
+from brayns.utils.view import FRONT_VIEW, View, Z
 
 CameraId = NewType("CameraId", int)
 
 
 @dataclass
 class CameraSettings:
-    view: View
-    near_clipping_distance: float
+    view: View = FRONT_VIEW
+    near_clipping_distance: float = 0.0
 
 
 def serialize_camera_settings(value: CameraSettings) -> dict[str, Any]:
@@ -58,6 +57,21 @@ def deserialize_camera_settings(message: dict[str, Any]) -> CameraSettings:
     )
 
 
+async def create_camera(
+    connection: Connection, typename: str, base: CameraSettings, derived: dict[str, Any]
+) -> CameraId:
+    method = "create-" + typename
+    params = {
+        "base": serialize_camera_settings(base),
+        "derived": derived,
+    }
+    result = await connection.get_result(method, params)
+
+    check_type(result, dict[str, Any])
+
+    return CameraId(get(result, "id", int))
+
+
 async def get_camera_settings(connection: Connection, id: CameraId) -> CameraSettings:
     result = await connection.get_result("get-camera", {"id": id})
     check_type(result, dict[str, Any])
@@ -75,16 +89,31 @@ class PerspectiveSettings:
 
 
 def serialize_perspective_settings(value: PerspectiveSettings) -> dict[str, Any]:
-    return {"fovy": value.fovy}
+    return {"fovy": math.degrees(value.fovy)}
 
 
 def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSettings:
     return PerspectiveSettings(fovy=math.radians(get(message, "fovy", float)))
 
 
+async def get_perspective_settings(connection: Connection, id: CameraId) -> PerspectiveSettings:
+    result = await connection.get_result("get-perspective-camera", {"id": id})
+    check_type(result, dict[str, Any])
+    return deserialize_perspective_settings(result)
+
+
+async def update_perspective_settings(connection: Connection, id: CameraId, settings: PerspectiveSettings) -> None:
+    params = serialize_perspective_settings(settings)
+    await connection.get_result("update-perspective-camera", {"id": id, "properties": params})
+
+
+def get_perspective_distance(fovy: float, target_height: float) -> float:
+    return target_height / 2 / math.tan(fovy / 2)
+
+
 @dataclass
 class OrthographicSettings:
-    height: float = 1
+    height: float = 1.0
 
 
 def serialize_orthographic_settings(value: OrthographicSettings) -> dict[str, Any]:
@@ -95,81 +124,191 @@ def deserialize_orthographic_settings(message: dict[str, Any]) -> OrthographicSe
     return OrthographicSettings(height=get(message, "height", float))
 
 
-class Camera(ABC):
-    def __init__(self, settings: CameraSettings) -> None:
-        self.__settings = settings
+async def get_orthographic_settings(connection: Connection, id: CameraId) -> OrthographicSettings:
+    result = await connection.get_result("get-orthographic-camera", {"id": id})
+    check_type(result, dict[str, Any])
+    return deserialize_orthographic_settings(result)
+
+
+async def update_orthographic_settings(connection: Connection, id: CameraId, settings: OrthographicSettings) -> None:
+    params = serialize_orthographic_settings(settings)
+    await connection.get_result("update-orthographic-camera", {"id": id, "properties": params})
+
+
+class CameraProtocol(Protocol):
+    async def get(self, connection: Connection, id: CameraId) -> None: ...
+    async def update(self, connection: Connection, id: CameraId) -> None: ...
+    def look_at(self, target: Box3) -> float: ...
+
+
+class Camera:
+    def __init__(
+        self,
+        id: CameraId,
+        settings: CameraSettings,
+        protocol: CameraProtocol,
+    ) -> None:
+        self._id = id
+        self._settings = settings
+        self._protocol = protocol
 
     @property
-    @abstractmethod
-    def name(self) -> str: ...
+    def id(self) -> CameraId:
+        return self._id
 
     @property
     def settings(self) -> CameraSettings:
-        return self.__settings
+        return self._settings
 
     @settings.setter
     def settings(self, value: CameraSettings) -> None:
-        self.__settings = value
+        self._settings = value
 
     @property
     def view(self) -> View:
-        return self.__settings.view
+        return self._settings.view
 
     @view.setter
     def view(self, value: View) -> None:
-        self.__settings.view = value
+        self._settings.view = value
 
     @property
     def position(self) -> Vector3:
-        return self.__settings.view.position
+        return self._settings.view.position
 
     @position.setter
     def position(self, value: Vector3) -> None:
-        self.__settings.view = replace(self.view, position=value)
+        self._settings.view = replace(self.view, position=value)
 
     @property
     def direction(self) -> Vector3:
-        return self.__settings.view.direction
+        return self._settings.view.direction
 
     @direction.setter
     def direction(self, value: Vector3) -> None:
-        self.__settings.view = replace(self.view, direction=value)
+        self._settings.view = replace(self.view, direction=value)
 
     @property
     def up(self) -> Vector3:
-        return self.__settings.view.up
+        return self._settings.view.up
 
     @up.setter
     def up(self, value: Vector3) -> None:
-        self.__settings.view = replace(self.view, up=value)
+        self._settings.view = replace(self.view, up=value)
 
     @property
     def near_clipping_distance(self) -> float:
-        return self.__settings.near_clipping_distance
+        return self._settings.near_clipping_distance
 
     @near_clipping_distance.setter
     def near_clipping_distance(self, value: float) -> None:
-        self.__settings.near_clipping_distance = value
+        self._settings.near_clipping_distance = value
 
-    @abstractmethod
-    def look_at(self, target: Box3) -> None: ...
+    async def get(self, connection: Connection) -> None:
+        self._settings = await get_camera_settings(connection, self._id)
+        await self._protocol.get(connection, self._id)
+
+    async def update(self, connection: Connection) -> None:
+        await update_camera_settings(connection, self._id, self._settings)
+        await self._protocol.update(connection, self._id)
+
+    def look_at(self, target: Box3) -> None:
+        distance = self._protocol.look_at(target)
+        distance = max(distance, self.near_clipping_distance)
+        distance += target.depth / 2
+        self.view = replace(FRONT_VIEW, position=distance * Z)
 
 
-"""class PerspectiveCamera(Camera[PerspectiveSettings]):
-    def __init__(self, base: CameraSettings, derived: PerspectiveSettings) -> None:
-        super().__init__(
-            "perspective-camera",
-            base,
-            derived,
-            lambda x: serialize_perspective_settings(x),
-            lambda x: deserialize_perspective_settings(x),
-        )
+@dataclass
+class PerspectiveProtocol(CameraProtocol):
+    settings: PerspectiveSettings
+
+    async def get(self, connection: Connection, id: CameraId) -> None:
+        self.settings = await get_perspective_settings(connection, id)
+
+    async def update(self, connection: Connection, id: CameraId) -> None:
+        await update_perspective_settings(connection, id, self.settings)
+
+    def look_at(self, target: Box3) -> float:
+        return get_perspective_distance(self.settings.fovy, target.height)
+
+
+class PerspectiveCamera(Camera):
+    def __init__(self, id: CameraId, settings: CameraSettings, perspective: PerspectiveSettings) -> None:
+        self._perspective = PerspectiveProtocol(perspective)
+        super().__init__(id, settings, self._perspective)
+
+    @property
+    def perspective(self) -> PerspectiveSettings:
+        return self._perspective.settings
+
+    @perspective.setter
+    def perspective(self, value: PerspectiveSettings) -> None:
+        self._perspective.settings = value
 
     @property
     def fovy(self) -> float:
-        return self.derived_settings.fovy
+        return self._perspective.settings.fovy
 
     @fovy.setter
     def fovy(self, value: float) -> None:
-        self.derived_settings.fovy = value
-"""
+        self._perspective.settings.fovy = value
+
+
+async def create_perspective_camera(
+    connection: Connection,
+    settings: CameraSettings = CameraSettings(),
+    perspective: PerspectiveSettings = PerspectiveSettings(),
+) -> PerspectiveCamera:
+    typename = "perspective-camera"
+    derived = serialize_perspective_settings(perspective)
+    id = await create_camera(connection, typename, settings, derived)
+    return PerspectiveCamera(id, replace(settings), replace(perspective))
+
+
+@dataclass
+class OrthographicProtocol(CameraProtocol):
+    settings: OrthographicSettings
+
+    async def get(self, connection: Connection, id: CameraId) -> None:
+        self.settings = await get_orthographic_settings(connection, id)
+
+    async def update(self, connection: Connection, id: CameraId) -> None:
+        await update_orthographic_settings(connection, id, self.settings)
+
+    def look_at(self, target: Box3) -> float:
+        self.settings.height = target.height
+        return 0
+
+
+class OrthographicCamera(Camera):
+    def __init__(self, id: CameraId, settings: CameraSettings, orthographic: OrthographicSettings) -> None:
+        self._orthographic = OrthographicProtocol(orthographic)
+        super().__init__(id, settings, self._orthographic)
+
+    @property
+    def orthographic(self) -> OrthographicSettings:
+        return self._orthographic.settings
+
+    @orthographic.setter
+    def orthographic(self, value: OrthographicSettings) -> None:
+        self._orthographic.settings = value
+
+    @property
+    def height(self) -> float:
+        return self._orthographic.settings.height
+
+    @height.setter
+    def height(self, value: float) -> None:
+        self._orthographic.settings.height = value
+
+
+async def create_orthographic_camera(
+    connection: Connection,
+    settings: CameraSettings = CameraSettings(),
+    orthographic: OrthographicSettings = OrthographicSettings(),
+) -> OrthographicCamera:
+    typename = "orthographic-camera"
+    derived = serialize_orthographic_settings(orthographic)
+    id = await create_camera(connection, typename, settings, derived)
+    return OrthographicCamera(id, replace(settings), replace(orthographic))

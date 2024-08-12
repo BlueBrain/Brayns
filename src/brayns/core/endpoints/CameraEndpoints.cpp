@@ -35,7 +35,7 @@ struct JsonObjectReflector<CameraSettings>
         builder.field("position", [](auto &object) { return &object.position; }).description("Camera position XYZ");
         builder.field("direction", [](auto &object) { return &object.direction; })
             .description("Camera forward direction XYZ");
-        builder.field("up", [](auto &object) { return &object.direction; })
+        builder.field("up", [](auto &object) { return &object.up; })
             .description("Camera up direction XYZ")
             .defaultValue(Vector3(0.0F, 1.0F, 0.0F));
         builder.field("near_clipping_distance", [](auto &object) { return &object.nearClippingDistance; })
