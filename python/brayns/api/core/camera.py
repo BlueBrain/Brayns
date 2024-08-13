@@ -83,61 +83,9 @@ async def update_camera_settings(connection: Connection, id: CameraId, settings:
     await connection.get_result("update-camera", params)
 
 
-@dataclass
-class PerspectiveSettings:
-    fovy: float = math.radians(45)
-
-
-def serialize_perspective_settings(value: PerspectiveSettings) -> dict[str, Any]:
-    return {"fovy": math.degrees(value.fovy)}
-
-
-def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSettings:
-    return PerspectiveSettings(fovy=math.radians(get(message, "fovy", float)))
-
-
-async def get_perspective_settings(connection: Connection, id: CameraId) -> PerspectiveSettings:
-    result = await connection.get_result("get-perspective-camera", {"id": id})
-    check_type(result, dict[str, Any])
-    return deserialize_perspective_settings(result)
-
-
-async def update_perspective_settings(connection: Connection, id: CameraId, settings: PerspectiveSettings) -> None:
-    params = serialize_perspective_settings(settings)
-    await connection.get_result("update-perspective-camera", {"id": id, "properties": params})
-
-
-def get_perspective_distance(fovy: float, target_height: float) -> float:
-    return target_height / 2 / math.tan(fovy / 2)
-
-
-@dataclass
-class OrthographicSettings:
-    height: float = 1.0
-
-
-def serialize_orthographic_settings(value: OrthographicSettings) -> dict[str, Any]:
-    return {"height": value.height}
-
-
-def deserialize_orthographic_settings(message: dict[str, Any]) -> OrthographicSettings:
-    return OrthographicSettings(height=get(message, "height", float))
-
-
-async def get_orthographic_settings(connection: Connection, id: CameraId) -> OrthographicSettings:
-    result = await connection.get_result("get-orthographic-camera", {"id": id})
-    check_type(result, dict[str, Any])
-    return deserialize_orthographic_settings(result)
-
-
-async def update_orthographic_settings(connection: Connection, id: CameraId, settings: OrthographicSettings) -> None:
-    params = serialize_orthographic_settings(settings)
-    await connection.get_result("update-orthographic-camera", {"id": id, "properties": params})
-
-
 class CameraProtocol(Protocol):
-    async def get(self, connection: Connection, id: CameraId) -> None: ...
-    async def update(self, connection: Connection, id: CameraId) -> None: ...
+    async def push(self, connection: Connection, id: CameraId) -> None: ...
+    async def pull(self, connection: Connection, id: CameraId) -> None: ...
     def look_at(self, target: Box3) -> float: ...
 
 
@@ -204,13 +152,13 @@ class Camera:
     def near_clipping_distance(self, value: float) -> None:
         self._settings.near_clipping_distance = value
 
-    async def get(self, connection: Connection) -> None:
-        self._settings = await get_camera_settings(connection, self._id)
-        await self._protocol.get(connection, self._id)
-
-    async def update(self, connection: Connection) -> None:
+    async def push(self, connection: Connection) -> None:
         await update_camera_settings(connection, self._id, self._settings)
-        await self._protocol.update(connection, self._id)
+        await self._protocol.push(connection, self._id)
+
+    async def pull(self, connection: Connection) -> None:
+        self._settings = await get_camera_settings(connection, self._id)
+        await self._protocol.pull(connection, self._id)
 
     def look_at(self, target: Box3) -> None:
         distance = self._protocol.look_at(target)
@@ -220,14 +168,42 @@ class Camera:
 
 
 @dataclass
+class PerspectiveSettings:
+    fovy: float = math.radians(45)
+
+
+def serialize_perspective_settings(value: PerspectiveSettings) -> dict[str, Any]:
+    return {"fovy": math.degrees(value.fovy)}
+
+
+def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSettings:
+    return PerspectiveSettings(fovy=math.radians(get(message, "fovy", float)))
+
+
+async def get_perspective_settings(connection: Connection, id: CameraId) -> PerspectiveSettings:
+    result = await connection.get_result("get-perspective-camera", {"id": id})
+    check_type(result, dict[str, Any])
+    return deserialize_perspective_settings(result)
+
+
+async def update_perspective_settings(connection: Connection, id: CameraId, settings: PerspectiveSettings) -> None:
+    params = serialize_perspective_settings(settings)
+    await connection.get_result("update-perspective-camera", {"id": id, "properties": params})
+
+
+def get_perspective_distance(fovy: float, target_height: float) -> float:
+    return target_height / 2 / math.tan(fovy / 2)
+
+
+@dataclass
 class PerspectiveProtocol(CameraProtocol):
     settings: PerspectiveSettings
 
-    async def get(self, connection: Connection, id: CameraId) -> None:
-        self.settings = await get_perspective_settings(connection, id)
-
-    async def update(self, connection: Connection, id: CameraId) -> None:
+    async def push(self, connection: Connection, id: CameraId) -> None:
         await update_perspective_settings(connection, id, self.settings)
+
+    async def pull(self, connection: Connection, id: CameraId) -> None:
+        self.settings = await get_perspective_settings(connection, id)
 
     def look_at(self, target: Box3) -> float:
         return get_perspective_distance(self.settings.fovy, target.height)
@@ -267,14 +243,38 @@ async def create_perspective_camera(
 
 
 @dataclass
+class OrthographicSettings:
+    height: float = 1.0
+
+
+def serialize_orthographic_settings(value: OrthographicSettings) -> dict[str, Any]:
+    return {"height": value.height}
+
+
+def deserialize_orthographic_settings(message: dict[str, Any]) -> OrthographicSettings:
+    return OrthographicSettings(height=get(message, "height", float))
+
+
+async def get_orthographic_settings(connection: Connection, id: CameraId) -> OrthographicSettings:
+    result = await connection.get_result("get-orthographic-camera", {"id": id})
+    check_type(result, dict[str, Any])
+    return deserialize_orthographic_settings(result)
+
+
+async def update_orthographic_settings(connection: Connection, id: CameraId, settings: OrthographicSettings) -> None:
+    params = serialize_orthographic_settings(settings)
+    await connection.get_result("update-orthographic-camera", {"id": id, "properties": params})
+
+
+@dataclass
 class OrthographicProtocol(CameraProtocol):
     settings: OrthographicSettings
 
-    async def get(self, connection: Connection, id: CameraId) -> None:
-        self.settings = await get_orthographic_settings(connection, id)
-
-    async def update(self, connection: Connection, id: CameraId) -> None:
+    async def push(self, connection: Connection, id: CameraId) -> None:
         await update_orthographic_settings(connection, id, self.settings)
+
+    async def pull(self, connection: Connection, id: CameraId) -> None:
+        self.settings = await get_orthographic_settings(connection, id)
 
     def look_at(self, target: Box3) -> float:
         self.settings.height = target.height

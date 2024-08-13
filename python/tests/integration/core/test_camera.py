@@ -92,13 +92,13 @@ async def test_perspective_camera(connection: Connection) -> None:
     check_camera_defaults(camera)
     assert camera.fovy == pytest.approx(math.radians(45))
 
-    await camera.get(connection)
+    await camera.pull(connection)
     check_camera_defaults(camera)
     assert camera.fovy == pytest.approx(math.radians(45))
 
     camera.position = Vector3(1, 2, 3)
     camera.fovy = math.radians(60)
-    await camera.update(connection)
+    await camera.push(connection)
 
     settings = await get_camera_settings(connection, camera.id)
     assert camera.settings == settings
@@ -112,7 +112,7 @@ async def test_perspective_camera(connection: Connection) -> None:
     perspective.fovy = math.radians(30)
     await update_perspective_settings(connection, camera.id, perspective)
 
-    await camera.get(connection)
+    await camera.pull(connection)
     assert camera.settings == settings
     assert camera.fovy == pytest.approx(perspective.fovy)
 
@@ -125,14 +125,14 @@ async def test_orthographic_camera(connection: Connection) -> None:
     check_camera_defaults(camera)
     assert camera.height == 1
 
-    await camera.get(connection)
+    await camera.pull(connection)
 
     check_camera_defaults(camera)
     assert camera.height == 1
 
     camera.position = Vector3(1, 2, 3)
     camera.height = 2
-    await camera.update(connection)
+    await camera.push(connection)
 
     settings = await get_camera_settings(connection, camera.id)
     assert camera.settings == settings
@@ -146,7 +146,7 @@ async def test_orthographic_camera(connection: Connection) -> None:
     orthographic.height = 3
     await update_orthographic_settings(connection, camera.id, orthographic)
 
-    await camera.get(connection)
+    await camera.pull(connection)
     assert camera.settings == settings
     assert camera.orthographic == orthographic
 
