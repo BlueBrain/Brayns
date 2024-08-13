@@ -56,7 +56,7 @@ def check_camera_defaults(camera: Camera) -> None:
     assert camera.position == Vector3()
     assert camera.direction == -Z
     assert camera.up == Y
-    assert camera.near_clipping_distance == 0
+    assert camera.near_clip == 0
 
 
 def test_look_at() -> None:
@@ -78,10 +78,45 @@ def test_look_at() -> None:
     assert camera.position.z == pytest.approx(2)
     assert camera.height == target.height
 
-    camera.near_clipping_distance = 10
+    camera.near_clip = 10
     camera.look_at(target)
 
     assert camera.position.z == 12
+
+
+def test_properties() -> None:
+    settings = CameraSettings()
+    perspective = PerspectiveSettings()
+    camera = PerspectiveCamera(CameraId(1), settings, perspective)
+
+    assert camera.id == 1
+
+    camera.settings = settings
+    assert camera.settings is settings
+
+    camera.view = settings.view
+    assert camera.view is settings.view
+
+    camera.position = settings.view.position
+    assert camera.position is settings.view.position
+
+    camera.direction = settings.view.direction
+    assert camera.direction is settings.view.direction
+
+    camera.up = settings.view.up
+    assert camera.up is settings.view.up
+
+    camera.near_clip = settings.near_clip
+    assert camera.near_clip is settings.near_clip
+
+    camera.fovy = perspective.fovy
+    assert camera.fovy is perspective.fovy
+
+    orthographic = OrthographicSettings()
+    camera = OrthographicCamera(CameraId(1), settings, orthographic)
+
+    camera.height = orthographic.height
+    assert camera.height is orthographic.height
 
 
 @pytest.mark.integration_test
@@ -106,7 +141,7 @@ async def test_perspective_camera(connection: Connection) -> None:
     perspective = await get_perspective_settings(connection, camera.id)
     assert camera.fovy == pytest.approx(perspective.fovy)
 
-    settings.near_clipping_distance = 10
+    settings.near_clip = 10
     await update_camera_settings(connection, camera.id, settings)
 
     perspective.fovy = math.radians(30)
@@ -140,7 +175,7 @@ async def test_orthographic_camera(connection: Connection) -> None:
     orthographic = await get_orthographic_settings(connection, camera.id)
     assert camera.orthographic == orthographic
 
-    settings.near_clipping_distance = 10
+    settings.near_clip = 10
     await update_camera_settings(connection, camera.id, settings)
 
     orthographic.height = 3

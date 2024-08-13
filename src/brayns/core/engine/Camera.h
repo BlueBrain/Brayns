@@ -31,7 +31,7 @@ struct CameraSettings
     Vector3 position = {0.0F, 0.0F, 0.0F};
     Vector3 direction = {0.0F, 0.0F, 1.0F};
     Vector3 up = {0.0F, 1.0F, 0.0F};
-    float nearClippingDistance = 1.0e-6F;
+    float nearClip = 1.0e-6F;
 };
 
 class Camera : public Managed<OSPCamera>

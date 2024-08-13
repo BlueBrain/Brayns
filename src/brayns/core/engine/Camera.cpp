@@ -30,7 +30,7 @@ void setCameraParams(OSPCamera handle, const CameraSettings &settings)
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "direction", settings.direction);
     setObjectParam(handle, "up", settings.up);
-    setObjectParam(handle, "nearClip", settings.nearClippingDistance);
+    setObjectParam(handle, "nearClip", settings.nearClip);
 }
 }
 

@@ -34,7 +34,7 @@ CameraId = NewType("CameraId", int)
 @dataclass
 class CameraSettings:
     view: View = FRONT_VIEW
-    near_clipping_distance: float = 0.0
+    near_clip: float = 0.0
 
 
 def serialize_camera_settings(value: CameraSettings) -> dict[str, Any]:
@@ -42,7 +42,7 @@ def serialize_camera_settings(value: CameraSettings) -> dict[str, Any]:
         "position": value.view.position,
         "direction": value.view.direction,
         "up": value.view.up,
-        "near_clipping_distance": value.near_clipping_distance,
+        "near_clip": value.near_clip,
     }
 
 
@@ -53,7 +53,7 @@ def deserialize_camera_settings(message: dict[str, Any]) -> CameraSettings:
             direction=Vector3(*get(message, "direction", list[float])),
             up=Vector3(*get(message, "up", list[float])),
         ),
-        near_clipping_distance=get(message, "near_clipping_distance", float),
+        near_clip=get(message, "near_clip", float),
     )
 
 
@@ -145,12 +145,12 @@ class Camera:
         self._settings.view = replace(self.view, up=value)
 
     @property
-    def near_clipping_distance(self) -> float:
-        return self._settings.near_clipping_distance
+    def near_clip(self) -> float:
+        return self._settings.near_clip
 
-    @near_clipping_distance.setter
-    def near_clipping_distance(self, value: float) -> None:
-        self._settings.near_clipping_distance = value
+    @near_clip.setter
+    def near_clip(self, value: float) -> None:
+        self._settings.near_clip = value
 
     async def push(self, connection: Connection) -> None:
         await update_camera_settings(connection, self._id, self._settings)
@@ -162,7 +162,7 @@ class Camera:
 
     def look_at(self, target: Box3) -> None:
         distance = self._protocol.look_at(target)
-        distance = max(distance, self.near_clipping_distance)
+        distance = max(distance, self.near_clip)
         distance += target.depth / 2
         self.view = replace(FRONT_VIEW, position=distance * Z)
 
