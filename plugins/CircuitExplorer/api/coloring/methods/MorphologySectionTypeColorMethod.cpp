@@ -117,10 +117,15 @@ private:
         {
             for (auto &entry : sectionIndices)
             {
-                auto &mapping = _getMappingForSection(entry.section, sections[i]);
+                const auto *mapping = _getMappingForSection(entry.section, sections[i]);
 
-                auto start = indices.begin() + elementIndexBegin + mapping.begin;
-                auto end = indices.begin() + elementIndexBegin + mapping.end;
+                if (mapping == nullptr)
+                {
+                    continue;
+                }
+
+                auto start = indices.begin() + elementIndexBegin + mapping->begin;
+                auto end = indices.begin() + elementIndexBegin + mapping->end;
                 std::fill(start, end, entry.index);
             }
 
@@ -142,7 +147,7 @@ private:
         return totalPrimitives;
     }
 
-    static const SectionTypeMapping &_getMappingForSection(
+    static const SectionTypeMapping *_getMappingForSection(
         NeuronSection section,
         const std::vector<SectionTypeMapping> &mapping)
     {
@@ -153,11 +158,10 @@ private:
 
         if (it == mapping.end())
         {
-            auto name = brayns::EnumInfo::getName(section);
-            throw std::invalid_argument(fmt::format("Neuron section '{}' not present in geometry", name));
+            return nullptr;
         }
 
-        return *it;
+        return &*it;
     }
 };
 }
