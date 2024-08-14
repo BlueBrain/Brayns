@@ -60,7 +60,7 @@ struct FramebufferSettings
     FramebufferFormat format = FramebufferFormat::Srgba8;
     std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
     std::optional<Accumulation> accumulation = std::nullopt;
-    std::optional<Data<ImageOperation>> operations = std::nullopt;
+    std::optional<Data<ImageOperation>> imageOperations = std::nullopt;
 };
 
 class Framebuffer : public Managed<OSPFrameBuffer>

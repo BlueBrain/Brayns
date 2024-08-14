@@ -23,16 +23,9 @@ import math
 import pytest
 
 from brayns import (
-    Box3,
     Camera,
-    CameraId,
-    CameraSettings,
     Connection,
     JsonRpcError,
-    OrthographicCamera,
-    OrthographicSettings,
-    PerspectiveCamera,
-    PerspectiveSettings,
     Vector3,
     Y,
     Z,
@@ -41,7 +34,9 @@ from brayns import (
     create_perspective_camera,
     get_camera_settings,
     get_object,
+    get_orthographic_camera,
     get_orthographic_settings,
+    get_perspective_camera,
     get_perspective_settings,
     remove_objects,
     update_camera_settings,
@@ -53,70 +48,10 @@ from brayns import (
 
 def check_camera_defaults(camera: Camera) -> None:
     assert camera.id == 1
-    assert camera.position == Vector3()
-    assert camera.direction == -Z
-    assert camera.up == Y
+    assert camera.view.position == Vector3()
+    assert camera.view.direction == -Z
+    assert camera.view.up == Y
     assert camera.near_clip == 0
-
-
-def test_look_at() -> None:
-    target = Box3.full(2)
-
-    camera = PerspectiveCamera(CameraId(1), CameraSettings(), PerspectiveSettings())
-    camera.fovy = math.radians(90)
-    camera.look_at(target)
-
-    assert camera.position.x == pytest.approx(0)
-    assert camera.position.y == pytest.approx(0)
-    assert camera.position.z == pytest.approx(4)
-
-    camera = OrthographicCamera(CameraId(1), CameraSettings(), OrthographicSettings())
-    camera.look_at(target)
-
-    assert camera.position.x == pytest.approx(0)
-    assert camera.position.y == pytest.approx(0)
-    assert camera.position.z == pytest.approx(2)
-    assert camera.height == target.height
-
-    camera.near_clip = 10
-    camera.look_at(target)
-
-    assert camera.position.z == 12
-
-
-def test_properties() -> None:
-    settings = CameraSettings()
-    perspective = PerspectiveSettings()
-    camera = PerspectiveCamera(CameraId(1), settings, perspective)
-
-    assert camera.id == 1
-
-    camera.settings = settings
-    assert camera.settings is settings
-
-    camera.view = settings.view
-    assert camera.view is settings.view
-
-    camera.position = settings.view.position
-    assert camera.position is settings.view.position
-
-    camera.direction = settings.view.direction
-    assert camera.direction is settings.view.direction
-
-    camera.up = settings.view.up
-    assert camera.up is settings.view.up
-
-    camera.near_clip = settings.near_clip
-    assert camera.near_clip is settings.near_clip
-
-    camera.fovy = perspective.fovy
-    assert camera.fovy is perspective.fovy
-
-    orthographic = OrthographicSettings()
-    camera = OrthographicCamera(CameraId(1), settings, orthographic)
-
-    camera.height = orthographic.height
-    assert camera.height is orthographic.height
 
 
 @pytest.mark.integration_test
@@ -125,21 +60,21 @@ async def test_perspective_camera(connection: Connection) -> None:
     camera = await create_perspective_camera(connection)
 
     check_camera_defaults(camera)
-    assert camera.fovy == pytest.approx(math.radians(45))
+    assert camera.perspective.fovy == pytest.approx(math.radians(45))
 
     await camera.pull(connection)
     check_camera_defaults(camera)
-    assert camera.fovy == pytest.approx(math.radians(45))
+    assert camera.perspective.fovy == pytest.approx(math.radians(45))
 
-    camera.position = Vector3(1, 2, 3)
-    camera.fovy = math.radians(60)
+    camera.view.position = Vector3(1, 2, 3)
+    camera.perspective.fovy = math.radians(60)
     await camera.push(connection)
 
     settings = await get_camera_settings(connection, camera.id)
     assert camera.settings == settings
 
     perspective = await get_perspective_settings(connection, camera.id)
-    assert camera.fovy == pytest.approx(perspective.fovy)
+    assert camera.perspective.fovy == pytest.approx(perspective.fovy)
 
     settings.near_clip = 10
     await update_camera_settings(connection, camera.id, settings)
@@ -149,7 +84,12 @@ async def test_perspective_camera(connection: Connection) -> None:
 
     await camera.pull(connection)
     assert camera.settings == settings
-    assert camera.fovy == pytest.approx(perspective.fovy)
+    assert camera.perspective.fovy == pytest.approx(perspective.fovy)
+
+    retreived = await get_perspective_camera(connection, camera.id)
+    assert retreived.id == camera.id
+    assert retreived.settings == camera.settings
+    assert retreived.perspective == camera.perspective
 
 
 @pytest.mark.integration_test
@@ -158,15 +98,15 @@ async def test_orthographic_camera(connection: Connection) -> None:
     camera = await create_orthographic_camera(connection)
 
     check_camera_defaults(camera)
-    assert camera.height == 1
+    assert camera.orthographic.height == 1
 
     await camera.pull(connection)
 
     check_camera_defaults(camera)
-    assert camera.height == 1
+    assert camera.orthographic.height == 1
 
-    camera.position = Vector3(1, 2, 3)
-    camera.height = 2
+    camera.view.position = Vector3(1, 2, 3)
+    camera.orthographic.height = 2
     await camera.push(connection)
 
     settings = await get_camera_settings(connection, camera.id)
@@ -184,6 +124,11 @@ async def test_orthographic_camera(connection: Connection) -> None:
     await camera.pull(connection)
     assert camera.settings == settings
     assert camera.orthographic == orthographic
+
+    retreived = await get_orthographic_camera(connection, camera.id)
+    assert retreived.id == camera.id
+    assert retreived.settings == camera.settings
+    assert retreived.orthographic == camera.orthographic
 
 
 @pytest.mark.integration_test

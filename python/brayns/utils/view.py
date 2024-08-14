@@ -29,7 +29,7 @@ Y = Vector3(0, 1, 0)
 Z = Vector3(0, 0, 1)
 
 
-@dataclass(frozen=True)
+@dataclass
 class View:
     position: Vector3 = Vector3()
     direction: Vector3 = -Z
@@ -74,12 +74,3 @@ class View:
         second = get_rotation_between(up, destination.real_up)
 
         return first.then(second)
-
-
-FRONT_VIEW = View()
-BACK_VIEW = View(direction=-Z)
-RIGHT_VIEW = View(direction=-X)
-LEFT_VIEW = View(direction=-X)
-TOP_VIEW = View(direction=-Y, up=-Z)
-BOTTOM_VIEW = View(direction=Y, up=Z)
-BOTTOM_VIEW = View(direction=Y, up=Z)

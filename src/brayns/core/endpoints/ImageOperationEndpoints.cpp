@@ -26,8 +26,11 @@ namespace brayns
 template<typename T>
 struct OperationReflector;
 
-template<typename T>
+template<std::derived_from<ImageOperation> T>
 using GetOperationSettings = typename OperationReflector<T>::Settings;
+
+template<std::derived_from<ImageOperation> T>
+using OperationParams = ComposedParams<NullJson, GetOperationSettings<T>>;
 
 template<std::derived_from<ImageOperation> T>
 using OperationUpdate = UpdateParams<GetOperationSettings<T>>;
@@ -56,13 +59,6 @@ void updateOperation(T &operation, const GetOperationSettings<T> &settings)
     return OperationReflector<T>::update(operation, settings);
 }
 
-template<ReflectedOperation T>
-struct UserOperation
-{
-    T deviceObject;
-    GetOperationSettings<T> settings;
-};
-
 template<>
 struct ObjectReflector<ImageOperationInterface>
 {
@@ -70,6 +66,13 @@ struct ObjectReflector<ImageOperationInterface>
     {
         return operation.getType();
     }
+};
+
+template<ReflectedOperation T>
+struct UserOperation
+{
+    T deviceObject;
+    GetOperationSettings<T> settings;
 };
 
 template<ReflectedOperation T>
@@ -148,7 +151,7 @@ void addOperationType(ApiBuilder &builder, LockedObjects &objects, Device &devic
     builder
         .endpoint(
             "create-" + type,
-            [&](GetOperationSettings<T> params) { return addOperation<T>(objects, device, params); })
+            [&](OperationParams<T> params) { return addOperation<T>(objects, device, params.derived); })
         .description("Create an image operation of type " + type);
 
     builder.endpoint("get-" + type, [&](ObjectParams params) { return getOperationAs<T>(objects, params); })
@@ -169,10 +172,10 @@ struct JsonObjectReflector<ToneMapperSettings>
             .defaultValue(1.0F);
         builder.field("contrast", [](auto &object) { return &object.contrast; })
             .description("Constrast (toe of the curve)")
-            .defaultValue(1.1759F);
+            .defaultValue(1.6773F);
         builder.field("shoulder", [](auto &object) { return &object.shoulder; })
             .description("Highlight compression (shoulder of the curve)")
-            .defaultValue(0.9746F);
+            .defaultValue(0.9714F);
         builder.field("mid_in", [](auto &object) { return &object.midIn; })
             .description("Mid-level anchor input")
             .defaultValue(0.18F);
@@ -181,10 +184,10 @@ struct JsonObjectReflector<ToneMapperSettings>
             .defaultValue(0.18F);
         builder.field("hdr_max", [](auto &object) { return &object.hdrMax; })
             .description("Maximum HDR input that is not clipped")
-            .defaultValue(6.3704F);
+            .defaultValue(11.0785F);
         builder.field("aces_color", [](auto &object) { return &object.acesColor; })
             .description("Apply the ACES color transforms")
-            .defaultValue(false);
+            .defaultValue(true);
         return builder.build();
     }
 };

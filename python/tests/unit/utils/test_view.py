@@ -22,11 +22,11 @@ import math
 
 import pytest
 
-from brayns import FRONT_VIEW, TOP_VIEW, Vector3, X, Y, Z, axis_angle
+from brayns import Vector3, View, X, Y, Z, axis_angle
 
 
 def test_directions() -> None:
-    front = FRONT_VIEW
+    front = View()
 
     assert front.position == Vector3()
     assert front.direction == -Z
@@ -41,7 +41,7 @@ def test_directions() -> None:
 
 
 def test_rotate() -> None:
-    front = FRONT_VIEW
+    front = View()
 
     axis = -X
     angle = math.radians(90)
@@ -63,8 +63,8 @@ def test_rotate() -> None:
 
 
 def test_rotation_to() -> None:
-    source = FRONT_VIEW
-    destination = TOP_VIEW
+    source = View()
+    destination = View(direction=-Y, up=-Z)
 
     rotation = source.get_rotation_to(destination)
 

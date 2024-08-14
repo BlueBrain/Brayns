@@ -74,7 +74,7 @@ Framebuffer createFramebuffer(Device &device, const FramebufferSettings &setting
     auto handle = ospNewFrameBuffer(width, height, format, channels);
     auto framebuffer = wrapObjectHandleAs<Framebuffer>(device, handle);
 
-    setObjectParam(handle, "imageOperation", settings.operations);
+    setObjectParam(handle, "imageOperation", settings.imageOperations);
 
     commitObject(handle);
 

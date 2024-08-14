@@ -142,7 +142,7 @@ TEST_CASE("Render")
             .resolution = {std::size_t(width), std::size_t(height)},
             .format = FramebufferFormat::Srgba8,
             .channels = {FramebufferChannel::Color},
-            .operations = createData<ImageOperation>(device, {toneMapper}),
+            .imageOperations = createData<ImageOperation>(device, {toneMapper}),
         });
 
     auto material = createScivisMaterial(device, {});

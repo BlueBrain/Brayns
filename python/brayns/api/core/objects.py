@@ -32,7 +32,7 @@ class Object:
     user_data: Any
 
 
-def parse_object(message: dict[str, Any]) -> Object:
+def deserialize_object(message: dict[str, Any]) -> Object:
     return Object(
         id=get(message, "id", int),
         type=get(message, "type", str),
@@ -44,13 +44,13 @@ async def get_all_objects(connection: Connection) -> list[Object]:
     result = await connection.get_result("get-all-objects")
     check_type(result, dict[str, Any])
     objects = get(result, "objects", list[dict[str, Any]])
-    return [parse_object(item) for item in objects]
+    return [deserialize_object(item) for item in objects]
 
 
 async def get_object(connection: Connection, id: int) -> Object:
     result = await connection.get_result("get-object", {"id": id})
     check_type(result, dict[str, Any])
-    return parse_object(result)
+    return deserialize_object(result)
 
 
 async def update_object(connection: Connection, id: int, user_data: Any) -> None:
@@ -70,3 +70,31 @@ async def create_empty_object(connection: Connection) -> int:
     result = await connection.get_result("create-empty-object")
     check_type(result, dict[str, Any])
     return get(result, "id", int)
+
+
+async def create_specific_object(connection: Connection, typename: str, params: dict[str, Any]) -> int:
+    method = "create-" + typename
+    result = await connection.get_result(method, params)
+    check_type(result, dict[str, Any])
+    return get(result, "id", int)
+
+
+async def create_composed_object(
+    connection: Connection, typename: str, base: dict[str, Any] | None, derived: dict[str, Any] | None
+) -> int:
+    params = {"base": base, "derived": derived}
+    return await create_specific_object(connection, typename, params)
+
+
+async def get_specific_object(connection: Connection, typename: str, id: int) -> dict[str, Any]:
+    method = "get-" + typename
+    params = {"id": id}
+    result = await connection.get_result(method, params)
+    check_type(result, dict[str, Any])
+    return result
+
+
+async def update_specific_object(connection: Connection, typename: str, id: int, properties: dict[str, Any]) -> None:
+    method = "update-" + typename
+    params = {"id": id, "properties": properties}
+    await connection.get_result(method, params)

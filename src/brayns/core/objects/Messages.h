@@ -49,8 +49,7 @@ struct JsonObjectReflector<ObjectInfo>
         builder.field("type", [](auto &object) { return &object.type; })
             .description("Object type, use 'get-{type}' to query detailed information about the object");
         builder.field("user_data", [](auto &object) { return &object.userData; })
-            .description("Data set by user (not used by Brayns)")
-            .required(false);
+            .description("Data set by user (not used by Brayns)");
         return builder.build();
     }
 };
@@ -88,7 +87,30 @@ struct JsonObjectReflector<UpdateParams<T>>
         auto builder = JsonBuilder<UpdateParams<T>>();
         builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to update");
         builder.field("properties", [](auto &object) { return &object.properties; })
-            .description("New object properties to replace the old ones");
+            .description("New object properties");
+        return builder.build();
+    }
+};
+
+template<ReflectedJson Base, ReflectedJson Derived>
+struct ComposedParams
+{
+    Base base;
+    Derived derived;
+};
+
+template<ReflectedJson Base, ReflectedJson Derived>
+struct JsonObjectReflector<ComposedParams<Base, Derived>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<ComposedParams<Base, Derived>>();
+        builder.field("base", [](auto &object) { return &object.base; })
+            .description("Base properties that are common between objects with the same base type (camera, renderer)")
+            .required(!std::is_same_v<Base, NullJson>);
+        builder.field("derived", [](auto &object) { return &object.derived; })
+            .description("Derived properties that are specific to the object type (perspective, scivis)")
+            .required(!std::is_same_v<Derived, NullJson>);
         return builder.build();
     }
 };

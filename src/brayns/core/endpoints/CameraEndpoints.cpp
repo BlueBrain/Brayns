@@ -45,27 +45,6 @@ struct JsonObjectReflector<CameraSettings>
     }
 };
 
-template<ReflectedJson T>
-struct CameraParams
-{
-    CameraSettings base;
-    T derived;
-};
-
-template<ReflectedJson T>
-struct JsonObjectReflector<CameraParams<T>>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<CameraParams<T>>();
-        builder.field("base", [](auto &object) { return &object.base; })
-            .description("Camera settings common to all camera types");
-        builder.field("derived", [](auto &object) { return &object.derived; })
-            .description("Camera settings specific to the given camera type");
-        return builder.build();
-    }
-};
-
 template<typename T>
 struct CameraReflector;
 
@@ -73,7 +52,7 @@ template<std::derived_from<Camera> T>
 using GetCameraSettings = typename CameraReflector<T>::Settings;
 
 template<std::derived_from<Camera> T>
-using CameraParamsOf = CameraParams<GetCameraSettings<T>>;
+using CameraParams = ComposedParams<CameraSettings, GetCameraSettings<T>>;
 
 template<std::derived_from<Camera> T>
 using CameraUpdateOf = UpdateParams<GetCameraSettings<T>>;
@@ -83,7 +62,7 @@ using CameraUpdate = UpdateParams<CameraSettings>;
 template<typename T>
 concept ReflectedCamera =
     ReflectedJson<GetCameraSettings<T>> && std::same_as<std::string, decltype(CameraReflector<T>::getType())>
-    && std::same_as<T, decltype(CameraReflector<T>::create(std::declval<Device &>(), CameraParamsOf<T>()))>
+    && std::same_as<T, decltype(CameraReflector<T>::create(std::declval<Device &>(), CameraParams<T>()))>
     && std::is_void_v<decltype(CameraReflector<T>::update(std::declval<T &>(), GetCameraSettings<T>()))>
     && std::is_void_v<decltype(CameraReflector<T>::setAspect(std::declval<T &>(), 0.0F))>;
 
@@ -94,7 +73,7 @@ std::string getCameraType()
 }
 
 template<ReflectedCamera T>
-T createCamera(Device &device, const CameraParamsOf<T> &params)
+T createCamera(Device &device, const CameraParams<T> &params)
 {
     return CameraReflector<T>::create(device, params);
 }
@@ -111,13 +90,6 @@ void setCameraAspect(T &camera, float aspect)
     CameraReflector<T>::setAspect(camera, aspect);
 }
 
-template<ReflectedCamera T>
-struct UserCamera
-{
-    T deviceObject;
-    CameraParamsOf<T> params;
-};
-
 template<>
 struct ObjectReflector<CameraInterface>
 {
@@ -125,6 +97,13 @@ struct ObjectReflector<CameraInterface>
     {
         return camera.getType();
     }
+};
+
+template<ReflectedCamera T>
+struct UserCamera
+{
+    T deviceObject;
+    CameraParams<T> params;
 };
 
 template<ReflectedCamera T>
@@ -156,7 +135,7 @@ UserCamera<T> &getCamera(ObjectManager &objects, ObjectId id)
 }
 
 template<ReflectedCamera T>
-ObjectResult addCamera(LockedObjects &locked, Device &device, const CameraParamsOf<T> &params)
+ObjectResult addCamera(LockedObjects &locked, Device &device, const CameraParams<T> &params)
 {
     return locked.visit(
         [&](ObjectManager &objects)
@@ -227,7 +206,7 @@ void addCameraType(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
     auto type = getCameraType<T>();
 
-    builder.endpoint("create-" + type, [&](CameraParamsOf<T> params) { return addCamera<T>(objects, device, params); })
+    builder.endpoint("create-" + type, [&](CameraParams<T> params) { return addCamera<T>(objects, device, params); })
         .description("Create a camera of type " + type);
 
     builder.endpoint("get-" + type, [&](ObjectParams params) { return getCameraAs<T>(objects, params); })
@@ -260,7 +239,7 @@ struct CameraReflector<PerspectiveCamera>
         return "perspective-camera";
     }
 
-    static PerspectiveCamera create(Device &device, const CameraParamsOf<PerspectiveCamera> &params)
+    static PerspectiveCamera create(Device &device, const CameraParams<PerspectiveCamera> &params)
     {
         return createPerspectiveCamera(device, params.base, params.derived);
     }
@@ -299,7 +278,7 @@ struct CameraReflector<OrthographicCamera>
         return "orthographic-camera";
     }
 
-    static OrthographicCamera create(Device &device, const CameraParamsOf<OrthographicCamera> &params)
+    static OrthographicCamera create(Device &device, const CameraParams<OrthographicCamera> &params)
     {
         return createOrthographicCamera(device, params.base, params.derived);
     }
