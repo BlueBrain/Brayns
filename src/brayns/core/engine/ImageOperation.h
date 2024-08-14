@@ -37,17 +37,19 @@ struct ToneMapperSettings
 {
     float exposure = 1.0F;
     float contrast = 1.6773F;
-    float hightlightCompression = 0.9714F;
-    float midLevelAnchorInput = 0.18F;
-    float midLevelAnchorOutput = 0.18F;
-    float maxHdr = 11.0785F;
-    bool aces = true;
+    float shoulder = 0.9714F;
+    float midIn = 0.18F;
+    float midOut = 0.18F;
+    float hdrMax = 11.0785F;
+    bool acesColor = true;
 };
 
 class ToneMapper : public ImageOperation
 {
 public:
     using ImageOperation::ImageOperation;
+
+    void update(const ToneMapperSettings &settings);
 };
 
 ToneMapper createToneMapper(Device &device, const ToneMapperSettings &settings);
