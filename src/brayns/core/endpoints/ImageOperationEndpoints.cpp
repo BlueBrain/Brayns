@@ -59,15 +59,6 @@ void updateOperation(T &operation, const GetOperationSettings<T> &settings)
     return OperationReflector<T>::update(operation, settings);
 }
 
-template<>
-struct ObjectReflector<ImageOperationInterface>
-{
-    static std::string getType(const ImageOperationInterface &operation)
-    {
-        return operation.getType();
-    }
-};
-
 template<ReflectedOperation T>
 struct UserOperation
 {

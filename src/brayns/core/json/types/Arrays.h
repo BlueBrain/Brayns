@@ -108,12 +108,7 @@ struct JsonSetReflector : BaseJsonArrayReflector<T>
         for (const auto &jsonItem : array)
         {
             auto item = deserializeAs<ValueType>(jsonItem);
-            auto [i, inserted] = value.insert(item);
-
-            if (!inserted)
-            {
-                throw JsonException("Duplicated item in set");
-            }
+            value.insert(item);
         }
 
         return value;

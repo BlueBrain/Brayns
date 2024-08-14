@@ -37,5 +37,14 @@ struct CameraInterface
     std::function<void(float)> setAspect;
 };
 
+template<>
+struct ObjectReflector<CameraInterface>
+{
+    static std::string getType(const CameraInterface &camera)
+    {
+        return camera.getType();
+    }
+};
+
 void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
 }

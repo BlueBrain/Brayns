@@ -192,7 +192,7 @@ public:
         return *this;
     }
 
-    template<typename T>
+    template<ReflectedJson T>
     JsonFieldBuilder defaultValue(const T &value)
     {
         _field->schema.defaultValue = serializeToJson(value);

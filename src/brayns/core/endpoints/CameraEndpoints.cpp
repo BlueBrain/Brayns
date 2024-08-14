@@ -90,15 +90,6 @@ void setCameraAspect(T &camera, float aspect)
     CameraReflector<T>::setAspect(camera, aspect);
 }
 
-template<>
-struct ObjectReflector<CameraInterface>
-{
-    static std::string getType(const CameraInterface &camera)
-    {
-        return camera.getType();
-    }
-};
-
 template<ReflectedCamera T>
 struct UserCamera
 {

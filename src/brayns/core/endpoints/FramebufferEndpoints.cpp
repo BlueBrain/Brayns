@@ -23,6 +23,8 @@
 
 #include <brayns/core/utils/EnumReflector.h>
 
+#include "ImageOperationEndpoints.h"
+
 namespace brayns
 {
 template<>
@@ -67,7 +69,7 @@ struct JsonObjectReflector<Accumulation>
     {
         auto builder = JsonBuilder<Accumulation>();
         builder.field("variance", [](auto &object) { return &object.variance; })
-            .description("Wether to use a framebuffer channel to store pixel variance");
+            .description("Wether to store per-pixel variance in a channel");
         return builder.build();
     }
 };
@@ -78,13 +80,64 @@ struct FramebufferParams
     FramebufferFormat format;
     std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
     std::optional<Accumulation> accumulation = std::nullopt;
-    std::set<ObjectId> imageOperations = {};
+    std::vector<ObjectId> imageOperations = {};
 };
+
+template<>
+struct JsonObjectReflector<FramebufferParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<FramebufferParams>();
+        builder.field("resolution", [](auto &object) { return &object.resolution; })
+            .description("Framebuffer resolution in pixel");
+        builder.field("format", [](auto &object) { return &object.format; })
+            .description("Format of the framebuffer color channel")
+            .defaultValue(FramebufferFormat::Srgba8);
+        builder.field("channels", [](auto &object) { return &object.channels; })
+            .description("Framebuffer channels that can be accessed by user")
+            .defaultValue(std::set<FramebufferChannel>{FramebufferChannel::Color});
+        builder.field("accumulation", [](auto &object) { return &object.accumulation; })
+            .description("If not null, the framebuffer will use accumulation with given settings");
+        builder.field("image_operations", [](auto &object) { return &object.imageOperations; })
+            .description("List of image operation IDs that will be applied on the framebuffer");
+        return builder.build();
+    }
+};
+
+Data<ImageOperation> getImageOperations(ObjectManager &objects, Device &device, const std::vector<ObjectId> &ids)
+{
+    auto itemCount = ids.size();
+
+    auto data = allocateData<ImageOperation>(device, itemCount);
+    auto items = data.getItems();
+
+    for (auto i = std::size_t(0); i < itemCount; ++i)
+    {
+        auto id = ids[i];
+        auto &interface = objects.get<ImageOperationInterface>(id);
+
+        items[i] = interface.getDeviceObject();
+    }
+
+    return data;
+}
+
+FramebufferSettings getSettings(ObjectManager &objects, Device &device, const FramebufferParams &params)
+{
+    return {
+        .resolution = params.resolution,
+        .format = params.format,
+        .channels = params.channels,
+        .accumulation = params.accumulation,
+        .imageOperations = getImageOperations(objects, device, params.imageOperations),
+    };
+}
 
 struct UserFramebuffer
 {
     Framebuffer deviceObject;
-    FramebufferSettings settings;
+    FramebufferParams params;
 };
 
 void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)

@@ -37,5 +37,14 @@ struct ImageOperationInterface
     std::function<ImageOperation()> getDeviceObject;
 };
 
+template<>
+struct ObjectReflector<ImageOperationInterface>
+{
+    static std::string getType(const ImageOperationInterface &operation)
+    {
+        return operation.getType();
+    }
+};
+
 void addImageOperationEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
 }

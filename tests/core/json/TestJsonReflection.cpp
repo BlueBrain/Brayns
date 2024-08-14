@@ -186,8 +186,6 @@ TEST_CASE("Set")
     CHECK_EQ(getJsonSchema<std::set<std::string>>(), getJsonSchema<std::vector<std::string>>());
     CHECK_EQ(parseJsonAs<std::set<int>>("[1,2,3]"), std::set<int>{1, 2, 3});
     CHECK_EQ(stringifyToJson(std::set<int>{1, 2, 3}), "[1,2,3]");
-
-    CHECK_THROWS_AS(parseJsonAs<std::set<int>>("[1,1,2]"), JsonException);
 }
 
 TEST_CASE("Math")
