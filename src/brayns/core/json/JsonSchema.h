@@ -49,7 +49,19 @@ enum class JsonType
 template<>
 struct EnumReflector<JsonType>
 {
-    static EnumInfo<JsonType> reflect();
+    static auto reflect()
+    {
+        auto builder = EnumBuilder<JsonType>();
+        builder.field("undefined", JsonType::Undefined);
+        builder.field("null", JsonType::Null);
+        builder.field("boolean", JsonType::Boolean);
+        builder.field("integer", JsonType::Integer);
+        builder.field("number", JsonType::Number);
+        builder.field("string", JsonType::String);
+        builder.field("array", JsonType::Array);
+        builder.field("object", JsonType::Object);
+        return builder.build();
+    }
 };
 
 constexpr bool isNumeric(JsonType type)

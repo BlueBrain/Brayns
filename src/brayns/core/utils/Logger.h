@@ -45,7 +45,7 @@ enum class LogLevel
 template<>
 struct EnumReflector<LogLevel>
 {
-    static EnumInfo<LogLevel> reflect()
+    static auto reflect()
     {
         auto builder = EnumBuilder<LogLevel>();
         builder.field("trace", LogLevel::Trace);

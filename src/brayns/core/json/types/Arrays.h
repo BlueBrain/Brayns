@@ -23,6 +23,8 @@
 
 #include <deque>
 #include <list>
+#include <set>
+#include <unordered_set>
 #include <vector>
 
 #include "Primitives.h"
@@ -30,7 +32,7 @@
 namespace brayns
 {
 template<typename T>
-struct JsonArrayReflector
+struct BaseJsonArrayReflector
 {
     using ValueType = typename T::value_type;
 
@@ -45,23 +47,34 @@ struct JsonArrayReflector
     static JsonValue serialize(const T &value)
     {
         auto array = createJsonArray();
+
         for (const auto &item : value)
         {
             auto jsonItem = serializeToJson(item);
             array->add(jsonItem);
         }
+
         return array;
     }
+};
+
+template<typename T>
+struct JsonArrayReflector : BaseJsonArrayReflector<T>
+{
+    using typename BaseJsonArrayReflector<T>::ValueType;
 
     static T deserialize(const JsonValue &json)
     {
         const auto &array = getArray(json);
+
         auto value = T();
+
         for (const auto &jsonItem : array)
         {
             auto item = deserializeAs<ValueType>(jsonItem);
             value.push_back(std::move(item));
         }
+
         return value;
     }
 };
@@ -78,6 +91,42 @@ struct JsonReflector<std::deque<T>> : JsonArrayReflector<std::deque<T>>
 
 template<typename T>
 struct JsonReflector<std::list<T>> : JsonArrayReflector<std::list<T>>
+{
+};
+
+template<typename T>
+struct JsonSetReflector : BaseJsonArrayReflector<T>
+{
+    using typename BaseJsonArrayReflector<T>::ValueType;
+
+    static T deserialize(const JsonValue &json)
+    {
+        const auto &array = getArray(json);
+
+        auto value = T();
+
+        for (const auto &jsonItem : array)
+        {
+            auto item = deserializeAs<ValueType>(jsonItem);
+            auto [i, inserted] = value.insert(item);
+
+            if (!inserted)
+            {
+                throw JsonException("Duplicated item in set");
+            }
+        }
+
+        return value;
+    }
+};
+
+template<typename T>
+struct JsonReflector<std::set<T>> : JsonSetReflector<std::set<T>>
+{
+};
+
+template<typename T>
+struct JsonReflector<std::unordered_set<T>> : JsonSetReflector<std::unordered_set<T>>
 {
 };
 }
