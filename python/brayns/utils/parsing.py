@@ -72,9 +72,18 @@ def try_get(message: dict[str, Any], key: str, t: Any, default: Any = None) -> A
 
 def get(message: dict[str, Any], key: str, t: Any) -> Any:
     if key not in message:
-        raise KeyError(f"Missing mandatory key in JSON-RPC message {key}")
+        raise KeyError(f"Missing mandatory key in JSON-RPC message: '{key}'")
 
     value = message[key]
     check_type(value, t)
+
+    return value
+
+
+def get_tuple(message: dict[str, Any], key: str, t: Any, item_count: int) -> Any:
+    value = get(message, key, list[t])
+
+    if len(value) != item_count:
+        raise ValueError(f"Expected {item_count} items for '{key}'")
 
     return value

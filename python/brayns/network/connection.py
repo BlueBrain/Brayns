@@ -115,7 +115,7 @@ class FutureResponse:
         if self._request_id is None:
             raise ValueError("Cannot poll requests without ID")
 
-        if self.done:
+        if self._buffer.is_done(self._request_id):
             return
 
         data = await self._websocket.receive()

@@ -23,99 +23,47 @@
 
 #include <brayns/core/utils/EnumReflector.h>
 
-#include "ImageOperationEndpoints.h"
-
 namespace brayns
 {
-template<>
-struct EnumReflector<FramebufferFormat>
+std::vector<Stored<ImageOperationInterface>> getImageOperations(ObjectManager &objects, const std::vector<ObjectId> &ids)
 {
-    static auto reflect()
+    auto interfaces = std::vector<Stored<ImageOperationInterface>>();
+    interfaces.reserve(ids.size());
+
+    for (auto id : ids)
     {
-        auto builder = EnumBuilder<FramebufferFormat>();
-        builder.field("rgba", FramebufferFormat::Rgba8).description("8 bit linear RGBA");
-        builder.field("srgba8", FramebufferFormat::Srgba8).description("8 bit gamma-encoded RGB and linear A");
-        builder.field("rgba32F", FramebufferFormat::Rgba32F).description("32 bit float RGBA");
-        return builder.build();
+        auto interface = objects.getStored<ImageOperationInterface>(id);
+        interfaces.push_back(std::move(interface));
     }
-};
 
-template<>
-struct EnumReflector<FramebufferChannel>
+    return interfaces;
+}
+
+std::vector<ObjectId> getImageOperationIds(const std::vector<Stored<ImageOperationInterface>> &operations)
 {
-    static auto reflect()
+    auto ids = std::vector<ObjectId>();
+    ids.reserve(operations.size());
+
+    for (const auto &operation : operations)
     {
-        auto builder = EnumBuilder<FramebufferChannel>();
-        builder.field("color", FramebufferChannel::Color).description("RGBA color as framebuffer format");
-        builder.field("depth", FramebufferChannel::Depth)
-            .description("Euclidean distance from camera of the closest hit as 32 bit float");
-        builder.field("normal", FramebufferChannel::Normal).description("Accumulated normal XYZ as 32 bit float");
-        builder.field("albedo", FramebufferChannel::Albedo)
-            .description("Accumulated color without illumination RGB as 32 bit float");
-        builder.field("primitive_id", FramebufferChannel::PrimitiveId)
-            .description("Index of first primitive hit as 32 bit int");
-        builder.field("model_id", FramebufferChannel::ModelId)
-            .description("ID set by user of the first geometric/volumetric model hit as 32 bit int");
-        builder.field("instance_id", FramebufferChannel::InstanceId)
-            .description("ID set by user of the first instance hit as 32 bit int");
-        return builder.build();
+        ids.push_back(operation.getId());
     }
-};
 
-template<>
-struct JsonObjectReflector<Accumulation>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Accumulation>();
-        builder.field("variance", [](auto &object) { return &object.variance; })
-            .description("Wether to store per-pixel variance in a channel");
-        return builder.build();
-    }
-};
+    return ids;
+}
 
-struct FramebufferParams
+Data<ImageOperation> createImageOperationData(
+    Device &device,
+    const std::vector<Stored<ImageOperationInterface>> &operations)
 {
-    Size2 resolution;
-    FramebufferFormat format;
-    std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
-    std::optional<Accumulation> accumulation = std::nullopt;
-    std::vector<ObjectId> imageOperations = {};
-};
-
-template<>
-struct JsonObjectReflector<FramebufferParams>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<FramebufferParams>();
-        builder.field("resolution", [](auto &object) { return &object.resolution; })
-            .description("Framebuffer resolution in pixel");
-        builder.field("format", [](auto &object) { return &object.format; })
-            .description("Format of the framebuffer color channel")
-            .defaultValue(FramebufferFormat::Srgba8);
-        builder.field("channels", [](auto &object) { return &object.channels; })
-            .description("Framebuffer channels that can be accessed by user")
-            .defaultValue(std::set<FramebufferChannel>{FramebufferChannel::Color});
-        builder.field("accumulation", [](auto &object) { return &object.accumulation; })
-            .description("If not null, the framebuffer will use accumulation with given settings");
-        builder.field("image_operations", [](auto &object) { return &object.imageOperations; })
-            .description("List of image operation IDs that will be applied on the framebuffer");
-        return builder.build();
-    }
-};
-
-Data<ImageOperation> getImageOperations(ObjectManager &objects, Device &device, const std::vector<ObjectId> &ids)
-{
-    auto itemCount = ids.size();
+    auto itemCount = operations.size();
 
     auto data = allocateData<ImageOperation>(device, itemCount);
     auto items = data.getItems();
 
     for (auto i = std::size_t(0); i < itemCount; ++i)
     {
-        auto id = ids[i];
-        auto &interface = objects.get<ImageOperationInterface>(id);
+        const auto &interface = operations[i].get();
 
         items[i] = interface.getDeviceObject();
     }
@@ -123,27 +71,54 @@ Data<ImageOperation> getImageOperations(ObjectManager &objects, Device &device, 
     return data;
 }
 
-FramebufferSettings getSettings(ObjectManager &objects, Device &device, const FramebufferParams &params)
+UserFramebuffer createUserFramebuffer(ObjectManager &objects, Device &device, FramebufferParams params)
 {
-    return {
-        .resolution = params.resolution,
-        .format = params.format,
-        .channels = params.channels,
-        .accumulation = params.accumulation,
-        .imageOperations = getImageOperations(objects, device, params.imageOperations),
-    };
+    auto operations = getImageOperations(objects, params.imageOperationIds);
+
+    if (!operations.empty())
+    {
+        params.settings.imageOperations = createImageOperationData(device, operations);
+    }
+
+    auto framebuffer = createFramebuffer(device, params.settings);
+
+    return {std::move(framebuffer), std::move(params.settings), std::move(operations)};
 }
 
-struct UserFramebuffer
+ObjectResult addFramebuffer(LockedObjects &locked, Device &device, FramebufferParams params)
 {
-    Framebuffer deviceObject;
-    FramebufferParams params;
-};
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto framebuffer = createUserFramebuffer(objects, device, std::move(params));
+            auto stored = objects.add(std::move(framebuffer));
+
+            return stored.getResult();
+        });
+}
+
+FramebufferParams getFramebuffer(LockedObjects &locked, const ObjectParams &params)
+{
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto &framebuffer = objects.get<UserFramebuffer>(params.id);
+
+            auto ids = getImageOperationIds(framebuffer.imageOperations);
+
+            return FramebufferParams{framebuffer.settings, std::move(ids)};
+        });
+}
 
 void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
-    (void)builder;
-    (void)objects;
-    (void)device;
+    builder
+        .endpoint(
+            "create-framebuffer",
+            [&](FramebufferParams params) { return addFramebuffer(objects, device, params); })
+        .description("Create a new framebuffer");
+
+    builder.endpoint("get-framebuffer", [&](ObjectParams params) { return getFramebuffer(objects, params); })
+        .description("Get properties of a given framebuffer");
 }
 }

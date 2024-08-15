@@ -19,6 +19,8 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
+
+from brayns.network.connection import Connection
 from brayns.network.json_rpc import (
     JsonRpcErrorResponse,
     JsonRpcResponse,
@@ -27,7 +29,6 @@ from brayns.network.json_rpc import (
     compose_text,
 )
 from brayns.network.websocket import WebSocket
-from brayns.network.connection import Connection
 
 
 @dataclass
