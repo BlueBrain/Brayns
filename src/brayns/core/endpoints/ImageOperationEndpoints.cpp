@@ -143,15 +143,14 @@ void addOperationType(ApiBuilder &builder, LockedObjects &objects, Device &devic
 
     builder
         .endpoint(
-            "create-" + type,
+            "create" + type,
             [&](OperationParams<T> params) { return addOperation<T>(objects, device, params.derived); })
         .description("Create an image operation of type " + type);
 
-    builder.endpoint("get-" + type, [&](ObjectParams params) { return getOperationAs<T>(objects, params); })
+    builder.endpoint("get" + type, [&](ObjectParams params) { return getOperationAs<T>(objects, params); })
         .description("Get derived properties of an image operation of type " + type);
 
-    builder
-        .endpoint("update-" + type, [&](OperationUpdate<T> params) { updateOperationAs<T>(objects, device, params); })
+    builder.endpoint("update" + type, [&](OperationUpdate<T> params) { updateOperationAs<T>(objects, device, params); })
         .description("Update derived properties of an image operation of type " + type);
 }
 
@@ -170,16 +169,16 @@ struct JsonObjectReflector<ToneMapperSettings>
         builder.field("shoulder", [](auto &object) { return &object.shoulder; })
             .description("Highlight compression (shoulder of the curve)")
             .defaultValue(0.9714F);
-        builder.field("mid_in", [](auto &object) { return &object.midIn; })
+        builder.field("midIn", [](auto &object) { return &object.midIn; })
             .description("Mid-level anchor input")
             .defaultValue(0.18F);
-        builder.field("mid_out", [](auto &object) { return &object.midOut; })
+        builder.field("midOut", [](auto &object) { return &object.midOut; })
             .description("Mid-level anchor output")
             .defaultValue(0.18F);
-        builder.field("hdr_max", [](auto &object) { return &object.hdrMax; })
+        builder.field("hdrMax", [](auto &object) { return &object.hdrMax; })
             .description("Maximum HDR input that is not clipped")
             .defaultValue(11.0785F);
-        builder.field("aces_color", [](auto &object) { return &object.acesColor; })
+        builder.field("acesColor", [](auto &object) { return &object.acesColor; })
             .description("Apply the ACES color transforms")
             .defaultValue(true);
         return builder.build();
@@ -193,7 +192,7 @@ struct OperationReflector<ToneMapper>
 
     static std::string getType()
     {
-        return "tone-mapper";
+        return "ToneMapper";
     }
 
     static ToneMapper create(Device &device, const ToneMapperSettings &settings)

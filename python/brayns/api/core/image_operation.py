@@ -72,10 +72,10 @@ def serialize_tone_mapper_settings(settings: ToneMapperSettings) -> dict[str, An
         "exposure": settings.exposure,
         "contrast": settings.contrast,
         "shoulder": settings.shoulder,
-        "mid_in": settings.mid_in,
-        "mid_out": settings.mid_out,
-        "hdr_max": settings.hdr_max,
-        "aces_color": settings.aces_color,
+        "midIn": settings.mid_in,
+        "midOut": settings.mid_out,
+        "hdrMax": settings.hdr_max,
+        "acesColor": settings.aces_color,
     }
 
 
@@ -84,15 +84,15 @@ def deserialize_tone_mapper_settings(message: dict[str, Any]) -> ToneMapperSetti
         exposure=get(message, "exposure", float),
         contrast=get(message, "contrast", float),
         shoulder=get(message, "shoulder", float),
-        mid_in=get(message, "mid_in", float),
-        mid_out=get(message, "mid_out", float),
-        hdr_max=get(message, "hdr_max", float),
-        aces_color=get(message, "aces_color", float),
+        mid_in=get(message, "midIn", float),
+        mid_out=get(message, "midOut", float),
+        hdr_max=get(message, "hdrMax", float),
+        aces_color=get(message, "acesColor", float),
     )
 
 
 async def get_tone_mapper_settings(connection: Connection, id: ImageOperationId) -> ToneMapperSettings:
-    result = await get_specific_object(connection, "tone-mapper", id)
+    result = await get_specific_object(connection, "ToneMapper", id)
     return deserialize_tone_mapper_settings(result)
 
 
@@ -100,7 +100,7 @@ async def update_tone_mapper_settings(
     connection: Connection, id: ImageOperationId, settings: ToneMapperSettings
 ) -> None:
     properties = serialize_tone_mapper_settings(settings)
-    await update_specific_object(connection, "tone-mapper", id, properties)
+    await update_specific_object(connection, "ToneMapper", id, properties)
 
 
 @dataclass
@@ -128,7 +128,7 @@ async def create_tone_mapper(
     connection: Connection, settings: ToneMapperSettings = ToneMapperSettings()
 ) -> ToneMapper:
     derived = serialize_tone_mapper_settings(settings)
-    id = await create_image_operation(connection, "tone-mapper", derived)
+    id = await create_image_operation(connection, "ToneMapper", derived)
     return ToneMapper(id, replace(settings))
 
 

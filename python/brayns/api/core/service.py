@@ -36,19 +36,19 @@ class Version:
 
 
 async def get_version(connection: Connection) -> Version:
-    result = await connection.get_result("get-version")
+    result = await connection.get_result("getVersion")
 
     return Version(
         major=get(result, "major", int),
         minor=get(result, "minor", int),
         patch=get(result, "patch", int),
-        pre_release=get(result, "pre_release", int),
+        pre_release=get(result, "preRelease", int),
         tag=get(result, "tag", str),
     )
 
 
 async def get_methods(connection: Connection) -> list[str]:
-    result = await connection.get_result("get-methods")
+    result = await connection.get_result("getMethods")
 
     return get(result, "methods", list[str])
 
@@ -63,7 +63,7 @@ class Endpoint:
 
 
 async def get_endpoint(connection: Connection, method: str) -> Endpoint:
-    result = await connection.get_result("get-schema", {"method": method})
+    result = await connection.get_result("getSchema", {"method": method})
 
     return Endpoint(
         method=get(result, "method", str),
@@ -98,11 +98,11 @@ T = TypeVar("T")
 
 
 def deserialize_task(message: dict[str, Any]) -> TaskInfo:
-    operation = get(message, "current_operation", dict[str, Any])
+    operation = get(message, "currentOperation", dict[str, Any])
 
     return TaskInfo(
         id=get(message, "id", int),
-        operation_count=get(message, "operation_count", int),
+        operation_count=get(message, "operationCount", int),
         current_operation=TaskOperation(
             description=get(operation, "description", str),
             index=get(operation, "index", int),
@@ -112,7 +112,7 @@ def deserialize_task(message: dict[str, Any]) -> TaskInfo:
 
 
 async def get_tasks(connection: Connection) -> list[TaskInfo]:
-    result = await connection.get_result("get-tasks")
+    result = await connection.get_result("getTasks")
 
     tasks: list[dict[str, Any]] = get(result, "tasks", list[dict[str, Any]])
 
@@ -120,17 +120,17 @@ async def get_tasks(connection: Connection) -> list[TaskInfo]:
 
 
 async def get_task(connection: Connection, task_id: int) -> TaskInfo:
-    result = await connection.get_result("get-task", {"task_id": task_id})
+    result = await connection.get_result("getTask", {"taskId": task_id})
 
     return deserialize_task(result)
 
 
 async def cancel_task(connection: Connection, task_id: int) -> None:
-    await connection.get_result("cancel-task", {"task_id": task_id})
+    await connection.get_result("cancelTask", {"taskId": task_id})
 
 
 async def get_task_result(connection: Connection, task_id: int) -> Response:
-    return await connection.request("get-task-result", {"task_id": task_id})
+    return await connection.request("getTaskResult", {"taskId": task_id})
 
 
 class Task(Generic[T]):

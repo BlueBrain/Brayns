@@ -55,7 +55,7 @@ TEST_CASE("Create and remove objects")
 {
     auto objects = ObjectManager();
 
-    auto object = objects.add(TestObject{"type"});
+    auto object = objects.add(TestObject{"Type"});
 
     auto id = object.getId();
 
@@ -64,12 +64,12 @@ TEST_CASE("Create and remove objects")
     auto info = objects.getObject(id);
 
     CHECK_EQ(info.id, id);
-    CHECK_EQ(info.type, "type");
+    CHECK_EQ(info.type, "Type");
     CHECK(info.userData.isEmpty());
 
     auto &retreived = objects.get<TestObject>(id);
 
-    CHECK_EQ(retreived.type, "type");
+    CHECK_EQ(retreived.type, "Type");
     CHECK_EQ(retreived.id, id);
 
     auto stored = objects.getStored<TestObject>(id);

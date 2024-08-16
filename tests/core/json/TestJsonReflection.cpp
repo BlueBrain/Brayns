@@ -38,8 +38,8 @@ struct EnumReflector<SomeEnum>
     static auto reflect()
     {
         auto builder = EnumBuilder<SomeEnum>();
-        builder.field("value1", SomeEnum::Value1).description("Value 1");
-        builder.field("value2", SomeEnum::Value2).description("Value 2");
+        builder.field("Value1", SomeEnum::Value1).description("Value 1");
+        builder.field("Value2", SomeEnum::Value2).description("Value 2");
         return builder.build();
     }
 };
@@ -158,18 +158,18 @@ TEST_CASE("Enum")
                 JsonSchema{
                     .description = "Value 1",
                     .type = JsonType::String,
-                    .constant = "value1",
+                    .constant = "Value1",
                 },
                 JsonSchema{
                     .description = "Value 2",
                     .type = JsonType::String,
-                    .constant = "value2",
+                    .constant = "Value2",
                 },
             }});
-    CHECK_EQ(deserializeAs<SomeEnum>("value1"), SomeEnum::Value1);
-    CHECK_EQ(serializeToJson(SomeEnum::Value2), JsonValue("value2"));
+    CHECK_EQ(deserializeAs<SomeEnum>("Value1"), SomeEnum::Value1);
+    CHECK_EQ(serializeToJson(SomeEnum::Value2), JsonValue("Value2"));
     CHECK_THROWS_AS(deserializeAs<SomeEnum>(1), JsonException);
-    CHECK_THROWS_AS(deserializeAs<SomeEnum>("value3"), JsonException);
+    CHECK_THROWS_AS(deserializeAs<SomeEnum>("Value3"), JsonException);
 }
 
 TEST_CASE("Array")

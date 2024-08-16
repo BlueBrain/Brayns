@@ -48,7 +48,7 @@ struct JsonObjectReflector<ObjectInfo>
             .description("Object ID (starts at 1, uses 0 for objects that are not in registry)");
         builder.field("type", [](auto &object) { return &object.type; })
             .description("Object type, use 'get-{type}' to query detailed information about the object");
-        builder.field("user_data", [](auto &object) { return &object.userData; })
+        builder.field("userData", [](auto &object) { return &object.userData; })
             .description("Data set by user (not used by Brayns)");
         return builder.build();
     }

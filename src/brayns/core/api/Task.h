@@ -55,7 +55,7 @@ struct JsonObjectReflector<TaskResult>
     static auto reflect()
     {
         auto builder = JsonBuilder<TaskResult>();
-        builder.field("task_id", [](auto &object) { return &object.taskId; })
+        builder.field("taskId", [](auto &object) { return &object.taskId; })
             .description("ID of the task started by the method");
         return builder.build();
     }
@@ -75,9 +75,9 @@ struct JsonObjectReflector<TaskInfo>
     {
         auto builder = JsonBuilder<TaskInfo>();
         builder.field("id", [](auto &object) { return &object.id; }).description("Task ID");
-        builder.field("operation_count", [](auto &object) { return &object.operationCount; })
+        builder.field("operationCount", [](auto &object) { return &object.operationCount; })
             .description("Number of operations the task will perform");
-        builder.field("current_operation", [](auto &object) { return &object.currentOperation; })
+        builder.field("currentOperation", [](auto &object) { return &object.currentOperation; })
             .description("Current task operation");
         return builder.build();
     }

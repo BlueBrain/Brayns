@@ -61,7 +61,8 @@ struct JsonObjectReflector<UserProperties>
     static auto reflect()
     {
         auto builder = JsonBuilder<UserProperties>();
-        builder.field("user_data", [](auto &object) { return &object.userData; }).description("User data");
+        builder.field("userData", [](auto &object) { return &object.userData; })
+            .description("User data to store in the object (not used by Brayns)");
         return builder.build();
     }
 };
@@ -115,7 +116,7 @@ struct ObjectReflector<EmptyObject>
 {
     static std::string getType(const EmptyObject &)
     {
-        return "empty-object";
+        return "EmptyObject";
     }
 };
 
@@ -131,21 +132,21 @@ ObjectResult createEmptyObject(LockedObjects &locked)
 
 void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects)
 {
-    builder.endpoint("get-all-objects", [&] { return getAllObjects(objects); })
+    builder.endpoint("getAllObjects", [&] { return getAllObjects(objects); })
         .description("Get generic properties of all objects, use get-{type} to get details of an object");
 
-    builder.endpoint("get-object", [&](ObjectParams params) { return getObject(objects, params); })
+    builder.endpoint("getObject", [&](ObjectParams params) { return getObject(objects, params); })
         .description("Get generic object properties from given object IDs");
 
-    builder.endpoint("update-object", [&](ObjectUpdate params) { return updateObject(objects, params); });
+    builder.endpoint("updateObject", [&](ObjectUpdate params) { return updateObject(objects, params); });
 
-    builder.endpoint("remove-objects", [&](RemoveParams params) { removeObjects(objects, params); })
+    builder.endpoint("removeObjects", [&](RemoveParams params) { removeObjects(objects, params); })
         .description("Remove selected objects from registry (but not from scene)");
 
-    builder.endpoint("clear-objects", [&] { clearObjects(objects); })
+    builder.endpoint("clearObjects", [&] { clearObjects(objects); })
         .description("Remove all objects currently in registry");
 
-    builder.endpoint("create-empty-object", [&] { return createEmptyObject(objects); })
+    builder.endpoint("createEmptyObject", [&] { return createEmptyObject(objects); })
         .description("Create an empty object (for testing or to store user data)");
 }
 }

@@ -47,8 +47,8 @@ def serialize_camera_settings(settings: CameraSettings) -> dict[str, Any]:
         "position": settings.view.position,
         "direction": settings.view.direction,
         "up": settings.view.up,
-        "near_clip": settings.near_clip,
-        "image_region": serialize_box(settings.image_region),
+        "nearClip": settings.near_clip,
+        "imageRegion": serialize_box(settings.image_region),
     }
 
 
@@ -59,8 +59,8 @@ def deserialize_camera_settings(message: dict[str, Any]) -> CameraSettings:
             direction=deserialize_vector(message, "direction", Vector3),
             up=deserialize_vector(message, "up", Vector3),
         ),
-        near_clip=get(message, "near_clip", float),
-        image_region=deserialize_box(get(message, "image_region", dict[str, Any]), Box2),
+        near_clip=get(message, "nearClip", float),
+        image_region=deserialize_box(get(message, "imageRegion", dict[str, Any]), Box2),
     )
 
 
@@ -73,13 +73,13 @@ async def create_camera(
 
 
 async def get_camera_settings(connection: Connection, id: CameraId) -> CameraSettings:
-    result = await get_specific_object(connection, "camera", id)
+    result = await get_specific_object(connection, "Camera", id)
     return deserialize_camera_settings(result)
 
 
 async def update_camera_settings(connection: Connection, id: CameraId, settings: CameraSettings) -> None:
     properties = serialize_camera_settings(settings)
-    await update_specific_object(connection, "camera", id, properties)
+    await update_specific_object(connection, "Camera", id, properties)
 
 
 class CameraProtocol(Protocol):
@@ -136,11 +136,11 @@ class DepthOfField:
 
 
 class StereoMode(Enum):
-    NONE = "none"
-    LEFT = "left"
-    RIGHT = "right"
-    SIDE_BY_SIDE = "side_by_side"
-    TOP_BOTTOM = "top_bottom"
+    NONE = "None"
+    LEFT = "Left"
+    RIGHT = "Right"
+    SIDE_BY_SIDE = "SideBySide"
+    TOP_BOTTOM = "TopBottom"
 
 
 @dataclass
@@ -162,8 +162,8 @@ def serialize_perspective_settings(settings: PerspectiveSettings) -> dict[str, A
 
     if settings.depth_of_field is not None:
         depth_of_field = {
-            "aperture_radius": settings.depth_of_field.aperture_radius,
-            "focus_distance": settings.depth_of_field.focus_distance,
+            "apertureRadius": settings.depth_of_field.aperture_radius,
+            "focusDistance": settings.depth_of_field.focus_distance,
         }
 
     stereo = None
@@ -171,24 +171,24 @@ def serialize_perspective_settings(settings: PerspectiveSettings) -> dict[str, A
     if settings.stereo is not None:
         stereo = {
             "mode": settings.stereo.mode.value,
-            "interpupillary_distance": settings.stereo.interpupillary_distance,
+            "interpupillaryDistance": settings.stereo.interpupillary_distance,
         }
 
     return {
         "fovy": math.degrees(settings.fovy),
-        "depth_of_field": depth_of_field,
+        "depthOfField": depth_of_field,
         "architectural": settings.architectural,
         "stereo": stereo,
     }
 
 
 def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSettings:
-    depth_of_field = try_get(message, "depth_of_field", dict[str, Any])
+    depth_of_field = try_get(message, "depthOfField", dict[str, Any])
 
     if depth_of_field is not None:
         depth_of_field = DepthOfField(
-            aperture_radius=get(depth_of_field, "aperture_radius", float),
-            focus_distance=get(depth_of_field, "focus_distance", float),
+            aperture_radius=get(depth_of_field, "apertureRadius", float),
+            focus_distance=get(depth_of_field, "focusDistance", float),
         )
 
     stereo = try_get(message, "stereo", dict[str, Any])
@@ -196,7 +196,7 @@ def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSett
     if stereo is not None:
         stereo = Stereo(
             mode=StereoMode(get(stereo, "mode", str)),
-            interpupillary_distance=get(stereo, "interpupillary_distance", float),
+            interpupillary_distance=get(stereo, "interpupillaryDistance", float),
         )
 
     return PerspectiveSettings(
@@ -208,13 +208,13 @@ def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSett
 
 
 async def get_perspective_settings(connection: Connection, id: CameraId) -> PerspectiveSettings:
-    result = await get_specific_object(connection, "perspective-camera", id)
+    result = await get_specific_object(connection, "PerspectiveCamera", id)
     return deserialize_perspective_settings(result)
 
 
 async def update_perspective_settings(connection: Connection, id: CameraId, settings: PerspectiveSettings) -> None:
     properties = serialize_perspective_settings(settings)
-    await update_specific_object(connection, "perspective-camera", id, properties)
+    await update_specific_object(connection, "PerspectiveCamera", id, properties)
 
 
 def get_perspective_distance(fovy: float, target_height: float) -> float:
@@ -255,7 +255,7 @@ async def create_perspective_camera(
     perspective: PerspectiveSettings = PerspectiveSettings(),
 ) -> PerspectiveCamera:
     derived = serialize_perspective_settings(perspective)
-    id = await create_camera(connection, "perspective-camera", settings, derived)
+    id = await create_camera(connection, "PerspectiveCamera", settings, derived)
     return PerspectiveCamera(id, replace(settings), replace(perspective))
 
 
@@ -281,13 +281,13 @@ def deserialize_orthographic_settings(message: dict[str, Any]) -> OrthographicSe
 
 
 async def get_orthographic_settings(connection: Connection, id: CameraId) -> OrthographicSettings:
-    result = await get_specific_object(connection, "orthographic-camera", id)
+    result = await get_specific_object(connection, "OrthographicCamera", id)
     return deserialize_orthographic_settings(result)
 
 
 async def update_orthographic_settings(connection: Connection, id: CameraId, settings: OrthographicSettings) -> None:
     properties = serialize_orthographic_settings(settings)
-    await update_specific_object(connection, "orthographic-camera", id, properties)
+    await update_specific_object(connection, "OrthographicCamera", id, properties)
 
 
 @dataclass
@@ -325,7 +325,7 @@ async def create_orthographic_camera(
     orthographic: OrthographicSettings = OrthographicSettings(),
 ) -> OrthographicCamera:
     derived = serialize_orthographic_settings(orthographic)
-    id = await create_camera(connection, "orthographic-camera", settings, derived)
+    id = await create_camera(connection, "OrthographicCamera", settings, derived)
     return OrthographicCamera(id, replace(settings), replace(orthographic))
 
 

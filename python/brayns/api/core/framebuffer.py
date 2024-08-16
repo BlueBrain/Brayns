@@ -32,19 +32,19 @@ FramebufferId = NewType("FramebufferId", int)
 
 
 class FramebufferFormat(Enum):
-    RGBA8 = "rgba8"
-    SRGBA8 = "srgba8"
-    RGBA32F = "rgba32F"
+    RGBA8 = "Rgba8"
+    SRGBA8 = "Srgba8"
+    RGBA32F = "Rgba32F"
 
 
 class FramebufferChannel(Enum):
-    COLOR = "color"
-    DEPTH = "depth"
-    NORMAL = "normal"
-    ALBEDO = "albedo"
-    PRIMITIVE_ID = "primitive_id"
-    MODEL_ID = "model_id"
-    INSTANCE_ID = "instance_id"
+    COLOR = "Color"
+    DEPTH = "Depth"
+    NORMAL = "Normal"
+    ALBEDO = "Albedo"
+    PRIMITIVE_ID = "PrimtiveId"
+    MODEL_ID = "ModelId"
+    INSTANCE_ID = "InstanceId"
 
 
 @dataclass
@@ -70,7 +70,7 @@ def serialize_framebuffer_settings(settings: FramebufferSettings) -> dict[str, A
         "format": settings.format.value,
         "channels": [channel.value for channel in settings.channels],
         "accumulation": child,
-        "image_operations": list(settings.image_operations),
+        "imageOperations": list(settings.image_operations),
     }
 
 
@@ -83,20 +83,20 @@ def deserialize_framebuffer_settings(message: dict[str, Any]) -> FramebufferSett
         format=FramebufferFormat(get(message, "format", str)),
         channels={FramebufferChannel(value) for value in get(message, "channels", list[str])},
         accumulation=accumulation,
-        image_operations=set(get(message, "image_operations", list[int])),
+        image_operations=set(get(message, "imageOperations", list[int])),
     )
 
 
 async def get_framebuffer_settings(connection: Connection, id: FramebufferId) -> FramebufferSettings:
-    result = await get_specific_object(connection, "framebuffer", id)
+    result = await get_specific_object(connection, "Framebuffer", id)
     return deserialize_framebuffer_settings(result)
 
 
 async def update_framebuffer(
     connection: Connection, id: FramebufferId, image_operations: set[ImageOperationId]
 ) -> None:
-    properties = {"image_operations": list(image_operations)}
-    await update_specific_object(connection, "framebuffer", id, properties)
+    properties = {"imageOperations": list(image_operations)}
+    await update_specific_object(connection, "Framebuffer", id, properties)
 
 
 class Framebuffer:
@@ -131,7 +131,7 @@ async def create_framebuffer(
     connection: Connection, settings: FramebufferSettings = FramebufferSettings()
 ) -> Framebuffer:
     params = serialize_framebuffer_settings(settings)
-    id = await create_specific_object(connection, "framebuffer", params)
+    id = await create_specific_object(connection, "Framebuffer", params)
     return Framebuffer(FramebufferId(id), replace(settings))
 
 

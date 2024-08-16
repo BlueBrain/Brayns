@@ -51,8 +51,8 @@ async def test_methods(connection: Connection) -> None:
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_schema(connection: Connection) -> None:
-    endpoint = await get_endpoint(connection, "get-version")
-    assert endpoint.method == "get-version"
+    endpoint = await get_endpoint(connection, "getVersion")
+    assert endpoint.method == "getVersion"
     assert isinstance(endpoint.description, str)
     assert isinstance(endpoint.params_schema, dict)
     assert isinstance(endpoint.result_schema, dict)

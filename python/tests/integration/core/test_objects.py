@@ -70,7 +70,7 @@ async def test_update_object(connection: Connection) -> None:
     test = await get_object(connection, ids[0])
 
     assert test.id == 1
-    assert test.type == "empty-object"
+    assert test.type == "EmptyObject"
     assert test.user_data == "test"
 
 

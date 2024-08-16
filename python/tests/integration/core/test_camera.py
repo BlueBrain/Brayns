@@ -150,13 +150,13 @@ async def test_object_management(connection: Connection) -> None:
     object1 = await get_object(connection, camera1.id)
 
     assert object1.id == camera1.id
-    assert object1.type == "perspective-camera"
+    assert object1.type == "PerspectiveCamera"
     assert object1.user_data == "test"
 
     object2 = await get_object(connection, camera2.id)
 
     assert object2.id == camera2.id
-    assert object2.type == "orthographic-camera"
+    assert object2.type == "OrthographicCamera"
     assert object2.user_data is None
 
     await remove_objects(connection, [camera1.id, camera2.id])

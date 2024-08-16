@@ -21,8 +21,6 @@
 
 #include "FramebufferEndpoints.h"
 
-#include <brayns/core/utils/EnumReflector.h>
-
 namespace brayns
 {
 std::vector<Stored<ImageOperationInterface>> getImageOperations(ObjectManager &objects, const std::vector<ObjectId> &ids)
@@ -121,7 +119,7 @@ struct JsonObjectReflector<FramebufferOperations>
     static auto reflect()
     {
         auto builder = JsonBuilder<FramebufferOperations>();
-        builder.field("image_operations", [](auto &object) { return &object.imageOperations; })
+        builder.field("imageOperations", [](auto &object) { return &object.imageOperations; })
             .description("IDs of the image operations to attach to the framebuffer");
         return builder.build();
     }
@@ -150,16 +148,13 @@ void updateFramebuffer(LockedObjects &locked, Device &device, const FramebufferU
 void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
     builder
-        .endpoint(
-            "create-framebuffer",
-            [&](FramebufferParams params) { return addFramebuffer(objects, device, params); })
+        .endpoint("createFramebuffer", [&](FramebufferParams params) { return addFramebuffer(objects, device, params); })
         .description("Create a new framebuffer");
 
-    builder.endpoint("get-framebuffer", [&](ObjectParams params) { return getFramebuffer(objects, params); })
+    builder.endpoint("getFramebuffer", [&](ObjectParams params) { return getFramebuffer(objects, params); })
         .description("Get properties of a given framebuffer");
 
-    builder
-        .endpoint("update-framebuffer", [&](FramebufferUpdate params) { updateFramebuffer(objects, device, params); })
+    builder.endpoint("updateFramebuffer", [&](FramebufferUpdate params) { updateFramebuffer(objects, device, params); })
         .description("Get properties of a given framebuffer");
 }
 }

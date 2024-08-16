@@ -36,44 +36,44 @@ def deserialize_object(message: dict[str, Any]) -> Object:
     return Object(
         id=get(message, "id", int),
         type=get(message, "type", str),
-        user_data=try_get(message, "user_data", Any, None),
+        user_data=try_get(message, "userData", Any, None),
     )
 
 
 async def get_all_objects(connection: Connection) -> list[Object]:
-    result = await connection.get_result("get-all-objects")
+    result = await connection.get_result("getAllObjects")
     check_type(result, dict[str, Any])
     objects = get(result, "objects", list[dict[str, Any]])
     return [deserialize_object(item) for item in objects]
 
 
 async def get_object(connection: Connection, id: int) -> Object:
-    result = await connection.get_result("get-object", {"id": id})
+    result = await connection.get_result("getObject", {"id": id})
     check_type(result, dict[str, Any])
     return deserialize_object(result)
 
 
 async def update_object(connection: Connection, id: int, user_data: Any) -> None:
-    properties = {"user_data": user_data}
-    await connection.get_result("update-object", {"id": id, "properties": properties})
+    properties = {"userData": user_data}
+    await connection.get_result("updateObject", {"id": id, "properties": properties})
 
 
 async def remove_objects(connection: Connection, ids: list[int]) -> None:
-    await connection.get_result("remove-objects", {"ids": ids})
+    await connection.get_result("removeObjects", {"ids": ids})
 
 
 async def clear_objects(connection: Connection) -> None:
-    await connection.get_result("clear-objects")
+    await connection.get_result("clearObjects")
 
 
 async def create_empty_object(connection: Connection) -> int:
-    result = await connection.get_result("create-empty-object")
+    result = await connection.get_result("createEmptyObject")
     check_type(result, dict[str, Any])
     return get(result, "id", int)
 
 
 async def create_specific_object(connection: Connection, typename: str, params: dict[str, Any]) -> int:
-    method = "create-" + typename
+    method = "create" + typename
     result = await connection.get_result(method, params)
     check_type(result, dict[str, Any])
     return get(result, "id", int)
@@ -87,7 +87,7 @@ async def create_composed_object(
 
 
 async def get_specific_object(connection: Connection, typename: str, id: int) -> dict[str, Any]:
-    method = "get-" + typename
+    method = "get" + typename
     params = {"id": id}
     result = await connection.get_result(method, params)
     check_type(result, dict[str, Any])
@@ -95,6 +95,6 @@ async def get_specific_object(connection: Connection, typename: str, id: int) ->
 
 
 async def update_specific_object(connection: Connection, typename: str, id: int, properties: dict[str, Any]) -> None:
-    method = "update-" + typename
+    method = "update" + typename
     params = {"id": id, "properties": properties}
     await connection.get_result(method, params)

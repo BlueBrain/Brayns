@@ -38,10 +38,10 @@ struct JsonObjectReflector<CameraSettings>
         builder.field("up", [](auto &object) { return &object.up; })
             .description("Camera up direction XYZ")
             .defaultValue(Vector3(0.0F, 1.0F, 0.0F));
-        builder.field("near_clip", [](auto &object) { return &object.nearClip; })
+        builder.field("nearClip", [](auto &object) { return &object.nearClip; })
             .description("Distance to clip objects that are too close to the camera")
             .defaultValue(0.0F);
-        builder.field("image_region", [](auto &object) { return &object.imageRegion; })
+        builder.field("imageRegion", [](auto &object) { return &object.imageRegion; })
             .description("Normalized region of the camera to be rendered (does not affect framebuffer resolution)")
             .defaultValue(Box2{{0.0F, 0.0F}, {1.0F, 1.0F}});
         return builder.build();
@@ -223,13 +223,13 @@ void addCameraType(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
     auto type = getCameraType<T>();
 
-    builder.endpoint("create-" + type, [&](CameraParams<T> params) { return addCamera<T>(objects, device, params); })
+    builder.endpoint("create" + type, [&](CameraParams<T> params) { return addCamera<T>(objects, device, params); })
         .description("Create a camera of type " + type);
 
-    builder.endpoint("get-" + type, [&](ObjectParams params) { return getCameraAs<T>(objects, params); })
+    builder.endpoint("get" + type, [&](ObjectParams params) { return getCameraAs<T>(objects, params); })
         .description("Get derived properties of a camera of type " + type);
 
-    builder.endpoint("update-" + type, [&](CameraUpdateOf<T> params) { updateCameraAs<T>(objects, device, params); })
+    builder.endpoint("update" + type, [&](CameraUpdateOf<T> params) { updateCameraAs<T>(objects, device, params); })
         .description("Update derived properties of a camera of type " + type);
 }
 
@@ -239,10 +239,10 @@ struct JsonObjectReflector<DepthOfField>
     static auto reflect()
     {
         auto builder = JsonBuilder<DepthOfField>();
-        builder.field("aperture_radius", [](auto &object) { return &object.apertureRadius; })
+        builder.field("apertureRadius", [](auto &object) { return &object.apertureRadius; })
             .description("Size of the aperture radius (0 is no depth of field)")
             .defaultValue(0.0F);
-        builder.field("focus_distance", [](auto &object) { return &object.focusDistance; })
+        builder.field("focusDistance", [](auto &object) { return &object.focusDistance; })
             .description("Distance at which the image is the sharpest")
             .defaultValue(1.0F);
         return builder.build();
@@ -255,11 +255,11 @@ struct EnumReflector<StereoMode>
     static auto reflect()
     {
         auto builder = EnumBuilder<StereoMode>();
-        builder.field("none", StereoMode::None).description("Disable stereo");
-        builder.field("left", StereoMode::Left).description("Render left eye");
-        builder.field("right", StereoMode::Right).description("Render right eye");
-        builder.field("side_by_side", StereoMode::SideBySide).description("Render both eyes side by side");
-        builder.field("top_bottom", StereoMode::TopBottom).description("Render left eye above right eye");
+        builder.field("None", StereoMode::None).description("Disable stereo");
+        builder.field("Left", StereoMode::Left).description("Render left eye");
+        builder.field("Right", StereoMode::Right).description("Render right eye");
+        builder.field("SideBySide", StereoMode::SideBySide).description("Render both eyes side by side");
+        builder.field("TopBottom", StereoMode::TopBottom).description("Render left eye above right eye");
         return builder.build();
     }
 };
@@ -273,7 +273,7 @@ struct JsonObjectReflector<Stereo>
         builder.field("mode", [](auto &object) { return &object.mode; })
             .description("Size of the aperture radius (0 is no depth of field)")
             .defaultValue(StereoMode::None);
-        builder.field("interpupillary_distance", [](auto &object) { return &object.interpupillaryDistance; })
+        builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
             .description("Distance between observer eyes")
             .defaultValue(0.0635F);
         return builder.build();
@@ -289,7 +289,7 @@ struct JsonObjectReflector<PerspectiveSettings>
         builder.field("fovy", [](auto &object) { return &object.fovy; })
             .description("Camera vertical field of view in degrees (horizontal is deduced from framebuffer aspect)")
             .defaultValue(45.0F);
-        builder.field("depth_of_field", [](auto &object) { return &object.depthOfField; })
+        builder.field("depthOfField", [](auto &object) { return &object.depthOfField; })
             .description("Depth of field settings, set to null to disable it");
         builder.field("architectural", [](auto &object) { return &object.architectural; })
             .description("Vertical edges are projected to be parallel")
@@ -307,7 +307,7 @@ struct CameraReflector<PerspectiveCamera>
 
     static std::string getType()
     {
-        return "perspective-camera";
+        return "PerspectiveCamera";
     }
 
     static PerspectiveCamera create(Device &device, const CameraParams<PerspectiveCamera> &params)
@@ -346,7 +346,7 @@ struct CameraReflector<OrthographicCamera>
 
     static std::string getType()
     {
-        return "orthographic-camera";
+        return "OrthographicCamera";
     }
 
     static OrthographicCamera create(Device &device, const CameraParams<OrthographicCamera> &params)
@@ -370,11 +370,10 @@ void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &dev
     addCameraType<PerspectiveCamera>(builder, objects, device);
     addCameraType<OrthographicCamera>(builder, objects, device);
 
-    builder.endpoint("get-camera", [&](ObjectParams params) { return getCameraSettings(objects, params); })
+    builder.endpoint("getCamera", [&](ObjectParams params) { return getCameraSettings(objects, params); })
         .description("Get the base properties of a camera of any type");
 
-    builder
-        .endpoint("update-camera", [&](CameraUpdate params) { return updateCameraSettings(objects, device, params); })
+    builder.endpoint("updateCamera", [&](CameraUpdate params) { return updateCameraSettings(objects, device, params); })
         .description("Update the base properties of a camera of any type");
 }
 }
