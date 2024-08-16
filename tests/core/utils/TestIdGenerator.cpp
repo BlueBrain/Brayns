@@ -29,25 +29,25 @@ TEST_CASE("ID generation")
 
     CHECK_EQ(ids.next(), 0);
     CHECK_EQ(ids.next(), 1);
-
-    ids.recycle(0);
-    CHECK_EQ(ids.next(), 0);
+    CHECK_EQ(ids.next(), 2);
 
     ids.recycle(1);
     CHECK_EQ(ids.next(), 1);
+
+    ids.reset();
+
+    CHECK_EQ(ids.next(), 0);
 }
 
 TEST_CASE("Limits")
 {
-    auto ids = IdGenerator<std::uint8_t>();
+    auto ids = IdGenerator<std::uint32_t>(2, 4);
 
-    for (auto i = 0; i < 255; ++i)
-    {
-        ids.next();
-    }
+    CHECK_EQ(ids.next(), 2);
+    CHECK_EQ(ids.next(), 3);
 
     CHECK_THROWS_AS(ids.next(), std::out_of_range);
 
-    ids.recycle(0);
-    CHECK_EQ(ids.next(), 0);
+    ids.recycle(2);
+    CHECK_EQ(ids.next(), 2);
 }

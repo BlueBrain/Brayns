@@ -27,11 +27,6 @@ namespace
 {
 using namespace brayns;
 
-void disableNullId(IdGenerator<ObjectId> &ids)
-{
-    ids.next();
-}
-
 auto getStorageIterator(auto &objects, ObjectId id)
 {
     auto i = objects.find(id);
@@ -47,11 +42,6 @@ auto getStorageIterator(auto &objects, ObjectId id)
 
 namespace brayns
 {
-ObjectManager::ObjectManager()
-{
-    disableNullId(_ids);
-}
-
 std::vector<ObjectInfo> ObjectManager::getAllObjects() const
 {
     auto objects = std::vector<ObjectInfo>();
@@ -87,7 +77,6 @@ void ObjectManager::remove(ObjectId id)
     i->second.remove();
 
     _objects.erase(i);
-
     _ids.recycle(id);
 }
 
@@ -99,9 +88,7 @@ void ObjectManager::clear()
     }
 
     _objects.clear();
-
-    _ids = {};
-    disableNullId(_ids);
+    _ids.reset();
 }
 
 const ObjectInterface &ObjectManager::getInterface(ObjectId id) const

@@ -21,59 +21,6 @@
 
 #pragma once
 
-#include <cassert>
-#include <limits>
-#include <stdexcept>
-#include <vector>
-
 namespace brayns
 {
-template<typename T>
-class IdGenerator
-{
-public:
-    explicit IdGenerator(T min = T(0), T max = std::numeric_limits<T>::max()):
-        _min(min),
-        _max(max),
-        _current(min)
-    {
-    }
-
-    void reset()
-    {
-        _current = _min;
-        _recycled.clear();
-    }
-
-    T next()
-    {
-        if (!_recycled.empty())
-        {
-            auto id = _recycled.back();
-
-            _recycled.pop_back();
-
-            return id;
-        }
-
-        if (_current == _max)
-        {
-            throw std::out_of_range("No more available IDs");
-        }
-
-        return _current++;
-    }
-
-    void recycle(T id)
-    {
-        assert(id < _current && id >= _min);
-        _recycled.push_back(id);
-    }
-
-private:
-    T _min;
-    T _max;
-    T _current;
-    std::vector<T> _recycled;
-};
 }

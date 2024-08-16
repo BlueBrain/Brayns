@@ -39,8 +39,6 @@ namespace brayns
 class ObjectManager
 {
 public:
-    explicit ObjectManager();
-
     std::vector<ObjectInfo> getAllObjects() const;
     ObjectInfo getObject(ObjectId id) const;
     void setUserData(ObjectId id, const JsonValue &userData);
@@ -86,7 +84,7 @@ public:
 
 private:
     std::map<ObjectId, ObjectInterface> _objects;
-    IdGenerator<ObjectId> _ids;
+    IdGenerator<ObjectId> _ids{1};
 
     const ObjectInterface &getInterface(ObjectId id) const;
 

@@ -42,7 +42,7 @@ const TaskInterface &getRawTask(const std::map<TaskId, TaskInterface> &tasks, Ta
     return i->second;
 }
 
-TaskId addTask(TaskInterface task, std::map<TaskId, TaskInterface> &tasks, IdGenerator<TaskId> ids)
+TaskId addTask(TaskInterface task, std::map<TaskId, TaskInterface> &tasks, IdGenerator<TaskId> &ids)
 {
     auto id = ids.next();
     assert(!tasks.contains(id));
