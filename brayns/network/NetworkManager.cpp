@@ -36,6 +36,7 @@
 #include <brayns/network/entrypoints/ApplicationParametersEntrypoint.h>
 #include <brayns/network/entrypoints/CameraEntrypoint.h>
 #include <brayns/network/entrypoints/CameraNearClipEntrypoint.h>
+#include <brayns/network/entrypoints/CameraRegionEntrypoint.h>
 #include <brayns/network/entrypoints/CameraViewEntrypoint.h>
 #include <brayns/network/entrypoints/CancelEntrypoint.h>
 #include <brayns/network/entrypoints/ClearClippingGeometriesEntrypoint.h>
@@ -118,6 +119,7 @@ public:
         builder.add<brayns::GetCameraNearClipEntrypoint>(engine);
         builder.add<brayns::GetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::GetCameraPerspectiveEntrypoint>(engine);
+        builder.add<brayns::GetCameraRegionEntrypoint>(engine);
         builder.add<brayns::GetCameraTypeEntrypoint>(engine);
         builder.add<brayns::GetCameraViewEntrypoint>(engine);
         builder.add<brayns::GetColorMethodsEntrypoint>(models);
@@ -151,6 +153,7 @@ public:
         builder.add<brayns::SetCameraNearClipEntrypoint>(engine);
         builder.add<brayns::SetCameraOrthographicEntrypoint>(engine);
         builder.add<brayns::SetCameraPerspectiveEntrypoint>(engine);
+        builder.add<brayns::SetCameraRegionEntrypoint>(engine);
         builder.add<brayns::SetCameraViewEntrypoint>(engine);
         builder.add<brayns::SetColorRampEntrypoint>(models);
         builder.add<brayns::SetMaterialCarPaint>(models);

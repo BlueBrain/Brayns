@@ -117,6 +117,7 @@ from .projection import (
     get_camera_projection,
     set_camera_projection,
 )
+from .region import get_camera_region, set_camera_region
 from .renderer import (
     InteractiveRenderer,
     ProductionRenderer,
@@ -179,6 +180,7 @@ __all__ = [
     "get_camera_name",
     "get_camera_near_clip",
     "get_camera_projection",
+    "get_camera_region",
     "get_camera_view",
     "get_camera",
     "get_color_methods",
@@ -233,6 +235,7 @@ __all__ = [
     "serialize_view",
     "set_camera_near_clip",
     "set_camera_projection",
+    "set_camera_region",
     "set_camera_view",
     "set_camera",
     "set_color_ramp",

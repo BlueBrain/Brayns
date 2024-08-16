@@ -118,6 +118,20 @@ public:
     void setNearClippingDistance(float distance);
 
     /**
+     * @brief Get the Image Region object
+     *
+     * @return const Box2&
+     */
+    const Box2 &getImageRegion() const;
+
+    /**
+     * @brief Set the Image Region object
+     *
+     * @param imageRegion
+     */
+    void setImageRegion(const Box2 &imageRegion);
+
+    /**
      * @brief Sets the render plane aspect ratio.
      * @param aspectRatio (width/height).
      */
@@ -149,6 +163,7 @@ private:
     std::unique_ptr<IDataWrapper<ospray::cpp::Camera>> _data;
     View _view;
     float _nearClippingDistance = 1e-6f;
+    Box2 _imageRegion = {{0, 1}, {1, 0}};
     float _aspectRatio = 1.f;
     ModifiedFlag _flag;
 };
