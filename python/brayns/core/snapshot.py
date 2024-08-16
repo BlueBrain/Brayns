@@ -184,6 +184,8 @@ def _serialize_snapshot(
         message["camera_view"] = serialize_view(camera.view)
         message["camera"] = camera.projection.get_properties_with_name()
         message["camera_near_clip"] = camera.near_clipping_distance
+        message["image_start"] = list(camera.image_start)
+        message["image_end"] = list(camera.image_end)
     if snapshot.renderer is not None:
         message["renderer"] = snapshot.renderer.get_properties_with_name()
     if snapshot.frame is not None:
