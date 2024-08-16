@@ -150,6 +150,7 @@ TEST_CASE("Render")
     auto renderer = createScivisRenderer(device, {{.materials = createData<Material>(device, {material})}});
 
     auto camera = createPerspectiveCamera(device, {}, {.fovy = 45.0F, .aspect = float(width) / float(height)});
+    // auto camera = createOrthographicCamera(device, {}, {.height = 3, .aspect = float(width) / float(height)});
 
     auto sphereData = std::vector<Vector4>{{0, 0, 3, 0.25F}, {1, 0, 3, 0.25F}, {1, 1, 3, 0.25F}};
     auto colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}};

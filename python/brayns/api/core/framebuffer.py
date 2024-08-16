@@ -26,7 +26,7 @@ from brayns.network.connection import Connection
 from brayns.utils.parsing import get, get_tuple
 
 from .image_operation import ImageOperationId
-from .objects import create_specific_object, get_specific_object
+from .objects import create_specific_object, get_specific_object, update_specific_object
 
 FramebufferId = NewType("FramebufferId", int)
 
@@ -92,6 +92,13 @@ async def get_framebuffer_settings(connection: Connection, id: FramebufferId) ->
     return deserialize_framebuffer_settings(result)
 
 
+async def update_framebuffer(
+    connection: Connection, id: FramebufferId, image_operations: set[ImageOperationId]
+) -> None:
+    properties = {"image_operations": list(image_operations)}
+    await update_specific_object(connection, "framebuffer", id, properties)
+
+
 class Framebuffer:
     def __init__(self, id: FramebufferId, settings: FramebufferSettings) -> None:
         self._id = id
@@ -104,6 +111,20 @@ class Framebuffer:
     @property
     def settings(self) -> FramebufferSettings:
         return self._settings
+
+    @property
+    def image_operations(self) -> set[ImageOperationId]:
+        return self._settings.image_operations
+
+    @image_operations.setter
+    def image_operations(self, value: set[ImageOperationId]) -> None:
+        self._settings.image_operations = value
+
+    async def push(self, connection: Connection) -> None:
+        await update_framebuffer(connection, self.id, self._settings.image_operations)
+
+    async def pull(self, connection: Connection) -> None:
+        self._settings = await get_framebuffer_settings(connection, self._id)
 
 
 async def create_framebuffer(

@@ -48,6 +48,9 @@ class JsonRpcError(Exception):
     message: str
     data: Any = None
 
+    def __str__(self) -> str:
+        return f"{self.message} (code = {self.code})"
+
 
 @dataclass
 class JsonRpcErrorResponse:

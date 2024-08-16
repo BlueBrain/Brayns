@@ -80,7 +80,7 @@ struct JsonObjectReflector<Accumulation>
 struct FramebufferParams
 {
     FramebufferSettings settings;
-    std::vector<ObjectId> imageOperationIds;
+    std::vector<ObjectId> imageOperations;
 };
 
 template<>
@@ -99,7 +99,7 @@ struct JsonObjectReflector<FramebufferParams>
             .defaultValue(std::set<FramebufferChannel>{FramebufferChannel::Color});
         builder.field("accumulation", [](auto &object) { return &object.settings.accumulation; })
             .description("If not null, the framebuffer will use accumulation with given settings");
-        builder.field("image_operations", [](auto &object) { return &object.imageOperationIds; })
+        builder.field("image_operations", [](auto &object) { return &object.imageOperations; })
             .description("List of image operation IDs that will be applied on the framebuffer")
             .defaultValue(std::set<ObjectId>());
         return builder.build();

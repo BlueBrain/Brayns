@@ -73,7 +73,7 @@ Data<ImageOperation> createImageOperationData(
 
 UserFramebuffer createUserFramebuffer(ObjectManager &objects, Device &device, FramebufferParams params)
 {
-    auto operations = getImageOperations(objects, params.imageOperationIds);
+    auto operations = getImageOperations(objects, params.imageOperations);
 
     if (!operations.empty())
     {
@@ -110,6 +110,43 @@ FramebufferParams getFramebuffer(LockedObjects &locked, const ObjectParams &para
         });
 }
 
+struct FramebufferOperations
+{
+    std::vector<ObjectId> imageOperations;
+};
+
+template<>
+struct JsonObjectReflector<FramebufferOperations>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<FramebufferOperations>();
+        builder.field("image_operations", [](auto &object) { return &object.imageOperations; })
+            .description("IDs of the image operations to attach to the framebuffer");
+        return builder.build();
+    }
+};
+
+using FramebufferUpdate = UpdateParams<FramebufferOperations>;
+
+void updateFramebuffer(LockedObjects &locked, Device &device, const FramebufferUpdate &params)
+{
+    locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto &framebuffer = objects.get<UserFramebuffer>(params.id);
+
+            auto operations = getImageOperations(objects, params.properties.imageOperations);
+            auto data = createImageOperationData(device, operations);
+
+            framebuffer.deviceObject.setImageOperations(data);
+            device.throwIfError();
+
+            framebuffer.imageOperations = std::move(operations);
+            framebuffer.settings.imageOperations = std::move(data);
+        });
+}
+
 void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
     builder
@@ -119,6 +156,10 @@ void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device
         .description("Create a new framebuffer");
 
     builder.endpoint("get-framebuffer", [&](ObjectParams params) { return getFramebuffer(objects, params); })
+        .description("Get properties of a given framebuffer");
+
+    builder
+        .endpoint("update-framebuffer", [&](FramebufferUpdate params) { updateFramebuffer(objects, device, params); })
         .description("Get properties of a given framebuffer");
 }
 }

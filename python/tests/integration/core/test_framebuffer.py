@@ -48,6 +48,19 @@ async def test_framebuffer(connection: Connection) -> None:
     settings2 = await get_framebuffer_settings(connection, framebuffer.id)
     assert settings2 == settings
 
+    tone_mapper = await create_tone_mapper(connection)
+    framebuffer.image_operations = {tone_mapper.id}
+
+    await framebuffer.push(connection)
+
+    settings2 = await get_framebuffer_settings(connection, framebuffer.id)
+    assert settings2 == framebuffer.settings
+
+    framebuffer.image_operations = set()
+    await framebuffer.pull(connection)
+
+    assert framebuffer.image_operations == {tone_mapper.id}
+
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio

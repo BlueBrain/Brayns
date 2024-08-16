@@ -122,7 +122,7 @@ GetOperationSettings<T> getOperationAs(LockedObjects &locked, const ObjectParams
 }
 
 template<ReflectedOperation T>
-void updateOperationAs(LockedObjects &locked, const OperationUpdate<T> &params)
+void updateOperationAs(LockedObjects &locked, Device &device, const OperationUpdate<T> &params)
 {
     locked.visit(
         [&](ObjectManager &objects)
@@ -130,6 +130,8 @@ void updateOperationAs(LockedObjects &locked, const OperationUpdate<T> &params)
             auto &operation = getOperation<T>(objects, params.id);
 
             updateOperation(operation.deviceObject, params.properties);
+            device.throwIfError();
+
             operation.settings = params.properties;
         });
 }
@@ -148,7 +150,8 @@ void addOperationType(ApiBuilder &builder, LockedObjects &objects, Device &devic
     builder.endpoint("get-" + type, [&](ObjectParams params) { return getOperationAs<T>(objects, params); })
         .description("Get derived properties of an image operation of type " + type);
 
-    builder.endpoint("update-" + type, [&](OperationUpdate<T> params) { updateOperationAs<T>(objects, params); })
+    builder
+        .endpoint("update-" + type, [&](OperationUpdate<T> params) { updateOperationAs<T>(objects, device, params); })
         .description("Update derived properties of an image operation of type " + type);
 }
 

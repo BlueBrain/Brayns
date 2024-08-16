@@ -48,6 +48,21 @@ struct JsonObjectReflector<CameraSettings>
     }
 };
 
+void validateCameraSettings(const CameraSettings &settings)
+{
+    auto right = cross(settings.direction, settings.up);
+
+    if (right.x == 0.0F && right.y == 0.0F && right.z == 0.0F)
+    {
+        throw InvalidParams("Camera up and direction are colinear");
+    }
+
+    if (settings.nearClip < 0.0F)
+    {
+        throw InvalidParams("Camera near clip must be positive");
+    }
+}
+
 template<typename T>
 struct CameraReflector;
 
@@ -131,6 +146,8 @@ UserCamera<T> &getCamera(ObjectManager &objects, ObjectId id)
 template<ReflectedCamera T>
 ObjectResult addCamera(LockedObjects &locked, Device &device, const CameraParams<T> &params)
 {
+    validateCameraSettings(params.base);
+
     return locked.visit(
         [&](ObjectManager &objects)
         {
@@ -169,8 +186,10 @@ GetCameraSettings<T> getCameraAs(LockedObjects &locked, const ObjectParams &para
         });
 }
 
-void updateCameraSettings(LockedObjects &locked, const CameraUpdate &params)
+void updateCameraSettings(LockedObjects &locked, Device &device, const CameraUpdate &params)
 {
+    validateCameraSettings(params.properties);
+
     locked.visit(
         [&](ObjectManager &objects)
         {
@@ -178,12 +197,14 @@ void updateCameraSettings(LockedObjects &locked, const CameraUpdate &params)
             auto deviceObject = camera.getDeviceObject();
 
             deviceObject.update(params.properties);
+            device.throwIfError();
+
             camera.update(params.properties);
         });
 }
 
 template<ReflectedCamera T>
-void updateCameraAs(LockedObjects &locked, const CameraUpdateOf<T> &params)
+void updateCameraAs(LockedObjects &locked, Device &device, const CameraUpdateOf<T> &params)
 {
     locked.visit(
         [&](ObjectManager &objects)
@@ -191,6 +212,8 @@ void updateCameraAs(LockedObjects &locked, const CameraUpdateOf<T> &params)
             auto &camera = getCamera<T>(objects, params.id);
 
             updateCamera(camera.deviceObject, params.properties);
+            device.throwIfError();
+
             camera.params.derived = params.properties;
         });
 }
@@ -206,7 +229,7 @@ void addCameraType(ApiBuilder &builder, LockedObjects &objects, Device &device)
     builder.endpoint("get-" + type, [&](ObjectParams params) { return getCameraAs<T>(objects, params); })
         .description("Get derived properties of a camera of type " + type);
 
-    builder.endpoint("update-" + type, [&](CameraUpdateOf<T> params) { updateCameraAs<T>(objects, params); })
+    builder.endpoint("update-" + type, [&](CameraUpdateOf<T> params) { updateCameraAs<T>(objects, device, params); })
         .description("Update derived properties of a camera of type " + type);
 }
 
@@ -236,7 +259,7 @@ struct EnumReflector<StereoMode>
         builder.field("left", StereoMode::Left).description("Render left eye");
         builder.field("right", StereoMode::Right).description("Render right eye");
         builder.field("side_by_side", StereoMode::SideBySide).description("Render both eyes side by side");
-        builder.field("top_bottom", StereoMode::SideBySide).description("Render left eye above right eye");
+        builder.field("top_bottom", StereoMode::TopBottom).description("Render left eye above right eye");
         return builder.build();
     }
 };
@@ -350,7 +373,8 @@ void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &dev
     builder.endpoint("get-camera", [&](ObjectParams params) { return getCameraSettings(objects, params); })
         .description("Get the base properties of a camera of any type");
 
-    builder.endpoint("update-camera", [&](CameraUpdate params) { return updateCameraSettings(objects, params); })
+    builder
+        .endpoint("update-camera", [&](CameraUpdate params) { return updateCameraSettings(objects, device, params); })
         .description("Update the base properties of a camera of any type");
 }
 }
