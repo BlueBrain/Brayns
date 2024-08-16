@@ -34,3 +34,4 @@
 #include "types/Primitives.h"
 #include "types/Schema.h"
 #include "types/Variants.h"
+#include "types/Vectors.h"

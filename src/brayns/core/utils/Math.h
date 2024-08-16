@@ -49,10 +49,13 @@ using Color4 = Vector4;
 
 using Quaternion = rkcommon::math::quaternionf;
 
+template<typename T>
+using Range = rkcommon::math::range_t<T>;
+
 template<typename T, int S>
 using BoxT = rkcommon::math::box_t<T, S>;
 
-using Box1 = rkcommon::math::box1f;
+using Box1 = Range<float>;
 using Box2 = BoxT<float, 2>;
 using Box3 = BoxT<float, 3>;
 
@@ -67,9 +70,9 @@ T reduceMultiply(const Vector<T, S> &value)
 
 struct Transform
 {
-    Vector3 translation = {0, 0, 0};
-    Quaternion rotation = {1, 0, 0, 0};
-    Vector3 scale = {1, 1, 1};
+    Vector3 translation = {0.0F, 0.0F, 0.0F};
+    Quaternion rotation = {1.0F, 0.0F, 0.0F, 0.0F};
+    Vector3 scale = {1.0F, 1.0F, 1.0F};
 
     auto operator<=>(const Transform &other) const = default;
 };

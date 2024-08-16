@@ -23,81 +23,49 @@
 
 #include <brayns/core/utils/Math.h>
 
-#include "Primitives.h"
+#include "Objects.h"
+#include "Vectors.h"
 
 namespace brayns
 {
 template<typename T>
-struct JsonMathReflector
+struct JsonBoxReflector
 {
-    using ValueType = typename T::Scalar;
-
-    static inline constexpr auto itemCount = sizeof(T) / sizeof(ValueType);
-
-    static JsonSchema getSchema()
+    static auto reflect()
     {
-        return {
-            .type = JsonType::Array,
-            .items = {getJsonSchema<ValueType>()},
-            .minItems = itemCount,
-            .maxItems = itemCount,
-        };
-    }
-
-    static JsonValue serialize(const T &value)
-    {
-        auto array = createJsonArray();
-        for (auto i = std::size_t(0); i < itemCount; ++i)
-        {
-            const auto &item = getItem(value, i);
-            auto jsonItem = serializeToJson(item);
-            array->add(jsonItem);
-        }
-        return array;
-    }
-
-    static T deserialize(const JsonValue &json)
-    {
-        const auto &array = getArray(json);
-        auto value = T();
-        if (array.size() != itemCount)
-        {
-            throw JsonException("Invalid static array size");
-        }
-        auto i = std::size_t(0);
-        for (const auto &jsonItem : array)
-        {
-            auto &item = getItem(value, i);
-            item = deserializeAs<ValueType>(jsonItem);
-            ++i;
-        }
-        return value;
-    }
-
-private:
-    static auto &getItem(auto &value, std::size_t index)
-    {
-        return value[index];
-    }
-
-    static auto &getItem(const Quaternion &value, std::size_t index)
-    {
-        return (&value.i)[index];
-    }
-
-    static auto &getItem(Quaternion &value, std::size_t index)
-    {
-        return (&value.i)[index];
+        auto builder = JsonBuilder<T>();
+        builder.field("min", [](auto &object) { return &object.lower; }).description("Lower bounds");
+        builder.field("max", [](auto &object) { return &object.upper; }).description("Upper bounds");
+        return builder.build();
     }
 };
 
+template<typename T>
+struct JsonObjectReflector<Range<T>> : JsonBoxReflector<Range<T>>
+{
+};
+
 template<typename T, int S>
-struct JsonReflector<rkcommon::math::vec_t<T, S>> : JsonMathReflector<rkcommon::math::vec_t<T, S>>
+struct JsonObjectReflector<BoxT<T, S>> : JsonBoxReflector<BoxT<T, S>>
 {
 };
 
 template<>
-struct JsonReflector<Quaternion> : JsonMathReflector<Quaternion>
+struct JsonObjectReflector<Transform>
 {
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Transform>();
+        builder.field("translation", [](auto &object) { return &object.translation; })
+            .description("Translation XYZ")
+            .defaultValue(Vector3(0.0F, 0.0F, 0.0F));
+        builder.field("rotation", [](auto &object) { return &object.rotation; })
+            .description("Rotation quaternion XYZW")
+            .defaultValue(Quaternion(1.0F, 0.0F, 0.0F, 0.0F));
+        builder.field("scale", [](auto &object) { return &object.scale; })
+            .description("Scale XYZ")
+            .defaultValue(Vector3(1.0F, 1.0F, 1.0F));
+        return builder.build();
+    }
 };
 }

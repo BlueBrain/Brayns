@@ -21,12 +21,13 @@
 import math
 from abc import ABC
 from dataclasses import dataclass, field, replace
+from enum import Enum
 from typing import Any, NewType, Protocol
 
 from brayns.network.connection import Connection
-from brayns.utils.box import Box3
-from brayns.utils.parsing import get
-from brayns.utils.vector import Vector3
+from brayns.utils.box import Box2, Box3
+from brayns.utils.parsing import deserialize_box, deserialize_vector, get, serialize_box, try_get
+from brayns.utils.vector import Vector2, Vector3
 from brayns.utils.view import View, Z
 
 from .objects import create_composed_object, get_specific_object, update_specific_object
@@ -38,25 +39,28 @@ CameraId = NewType("CameraId", int)
 class CameraSettings:
     view: View = field(default_factory=View)
     near_clip: float = 0.0
+    image_region: Box2 = Box2(Vector2.zeros(), Vector2.ones())
 
 
-def serialize_camera_settings(value: CameraSettings) -> dict[str, Any]:
+def serialize_camera_settings(settings: CameraSettings) -> dict[str, Any]:
     return {
-        "position": value.view.position,
-        "direction": value.view.direction,
-        "up": value.view.up,
-        "near_clip": value.near_clip,
+        "position": settings.view.position,
+        "direction": settings.view.direction,
+        "up": settings.view.up,
+        "near_clip": settings.near_clip,
+        "image_region": serialize_box(settings.image_region),
     }
 
 
 def deserialize_camera_settings(message: dict[str, Any]) -> CameraSettings:
     return CameraSettings(
         view=View(
-            position=Vector3(*get(message, "position", list[float])),
-            direction=Vector3(*get(message, "direction", list[float])),
-            up=Vector3(*get(message, "up", list[float])),
+            position=deserialize_vector(message, "position", Vector3),
+            direction=deserialize_vector(message, "direction", Vector3),
+            up=deserialize_vector(message, "up", Vector3),
         ),
         near_clip=get(message, "near_clip", float),
+        image_region=deserialize_box(get(message, "image_region", dict[str, Any]), Box2),
     )
 
 
@@ -110,14 +114,6 @@ class Camera(ABC):
     def view(self, value: View) -> None:
         self._settings.view = value
 
-    @property
-    def near_clip(self) -> float:
-        return self._settings.near_clip
-
-    @near_clip.setter
-    def near_clip(self, value: float) -> None:
-        self._settings.near_clip = value
-
     async def push(self, connection: Connection) -> None:
         await update_camera_settings(connection, self._id, self._settings)
         await self._protocol.push(connection, self._id)
@@ -128,22 +124,87 @@ class Camera(ABC):
 
     def look_at(self, target: Box3) -> None:
         distance = self._protocol.look_at(target)
-        distance = max(distance, self.near_clip)
+        distance = max(distance, self.settings.near_clip)
         distance += target.depth / 2
         self.view = View(position=distance * Z)
 
 
 @dataclass
+class DepthOfField:
+    aperture_radius: float = 0.0
+    focus_distance: float = 1.0
+
+
+class StereoMode(Enum):
+    NONE = "none"
+    LEFT = "left"
+    RIGHT = "right"
+    SIDE_BY_SIDE = "side_by_side"
+    TOP_BOTTOM = "top_bottom"
+
+
+@dataclass
+class Stereo:
+    mode: StereoMode = StereoMode.NONE
+    interpupillary_distance: float = 0.0635
+
+
+@dataclass
 class PerspectiveSettings:
     fovy: float = math.radians(45)
+    depth_of_field: DepthOfField | None = None
+    architectural: bool = False
+    stereo: Stereo | None = None
 
 
-def serialize_perspective_settings(value: PerspectiveSettings) -> dict[str, Any]:
-    return {"fovy": math.degrees(value.fovy)}
+def serialize_perspective_settings(settings: PerspectiveSettings) -> dict[str, Any]:
+    depth_of_field = None
+
+    if settings.depth_of_field is not None:
+        depth_of_field = {
+            "aperture_radius": settings.depth_of_field.aperture_radius,
+            "focus_distance": settings.depth_of_field.focus_distance,
+        }
+
+    stereo = None
+
+    if settings.stereo is not None:
+        stereo = {
+            "mode": settings.stereo.mode.value,
+            "interpupillary_distance": settings.stereo.interpupillary_distance,
+        }
+
+    return {
+        "fovy": math.degrees(settings.fovy),
+        "depth_of_field": depth_of_field,
+        "architectural": settings.architectural,
+        "stereo": stereo,
+    }
 
 
 def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSettings:
-    return PerspectiveSettings(fovy=math.radians(get(message, "fovy", float)))
+    depth_of_field = try_get(message, "depth_of_field", dict[str, Any])
+
+    if depth_of_field is not None:
+        depth_of_field = DepthOfField(
+            aperture_radius=get(depth_of_field, "aperture_radius", float),
+            focus_distance=get(depth_of_field, "focus_distance", float),
+        )
+
+    stereo = try_get(message, "stereo", dict[str, Any])
+
+    if stereo is not None:
+        stereo = Stereo(
+            mode=StereoMode(get(stereo, "mode", str)),
+            interpupillary_distance=get(stereo, "interpupillary_distance", float),
+        )
+
+    return PerspectiveSettings(
+        fovy=math.radians(get(message, "fovy", float)),
+        depth_of_field=depth_of_field,
+        architectural=get(message, "architectural", bool),
+        stereo=stereo,
+    )
 
 
 async def get_perspective_settings(connection: Connection, id: CameraId) -> PerspectiveSettings:

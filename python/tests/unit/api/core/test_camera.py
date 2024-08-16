@@ -52,7 +52,7 @@ def test_look_at() -> None:
     assert camera.view.position.z == pytest.approx(2)
     assert camera.orthographic.height == target.height
 
-    camera.near_clip = 10
+    camera.settings.near_clip = 10
     camera.look_at(target)
 
     assert camera.view.position.z == 12
@@ -71,8 +71,8 @@ def test_properties() -> None:
     camera.view = settings.view
     assert camera.view is settings.view
 
-    camera.near_clip = settings.near_clip
-    assert camera.near_clip is settings.near_clip
+    camera.settings.near_clip = settings.near_clip
+    assert camera.settings.near_clip is settings.near_clip
 
     camera.perspective.fovy = perspective.fovy
     assert camera.perspective.fovy is perspective.fovy

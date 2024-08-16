@@ -25,7 +25,10 @@ import pytest
 from brayns import (
     Camera,
     Connection,
+    DepthOfField,
     JsonRpcError,
+    Stereo,
+    Vector2,
     Vector3,
     Y,
     Z,
@@ -51,7 +54,9 @@ def check_camera_defaults(camera: Camera) -> None:
     assert camera.view.position == Vector3()
     assert camera.view.direction == -Z
     assert camera.view.up == Y
-    assert camera.near_clip == 0
+    assert camera.settings.near_clip == 0
+    assert camera.settings.image_region.min == Vector2(0, 0)
+    assert camera.settings.image_region.max == Vector2(1, 1)
 
 
 @pytest.mark.integration_test
@@ -68,13 +73,15 @@ async def test_perspective_camera(connection: Connection) -> None:
 
     camera.view.position = Vector3(1, 2, 3)
     camera.perspective.fovy = math.radians(60)
+    camera.perspective.depth_of_field = DepthOfField()
+    camera.perspective.stereo = Stereo()
     await camera.push(connection)
 
     settings = await get_camera_settings(connection, camera.id)
     assert camera.settings == settings
 
     perspective = await get_perspective_settings(connection, camera.id)
-    assert camera.perspective.fovy == pytest.approx(perspective.fovy)
+    assert perspective == camera.perspective
 
     settings.near_clip = 10
     await update_camera_settings(connection, camera.id, settings)

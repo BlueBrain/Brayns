@@ -41,6 +41,9 @@ struct JsonObjectReflector<CameraSettings>
         builder.field("near_clip", [](auto &object) { return &object.nearClip; })
             .description("Distance to clip objects that are too close to the camera")
             .defaultValue(0.0F);
+        builder.field("image_region", [](auto &object) { return &object.imageRegion; })
+            .description("Normalized region of the camera to be rendered (does not affect framebuffer resolution)")
+            .defaultValue(Box2{{0.0F, 0.0F}, {1.0F, 1.0F}});
         return builder.build();
     }
 };
