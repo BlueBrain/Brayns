@@ -139,6 +139,14 @@ near_clip
     :undoc-members:
     :show-inheritance:
 
+region
+------
+
+.. automodule:: brayns.core.region
+    :members: get_camera_region, set_camera_region
+    :undoc-members:
+    :show-inheritance:
+
 view
 ----
 
