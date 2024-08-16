@@ -80,6 +80,8 @@ class TestGBufferExporter(unittest.TestCase):
             "camera_view": mock_view_message(),
             "camera": brayns.PerspectiveProjection().get_properties_with_name(),
             "camera_near_clip": 1.5,
+            "image_start": [0, 1],
+            "image_end": [1, 0],
             "renderer": brayns.ProductionRenderer().get_properties_with_name(),
             "simulation_frame": 12,
         }

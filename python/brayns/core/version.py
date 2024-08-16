@@ -21,10 +21,9 @@
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.version import VERSION
-
 from brayns.network import Instance
 from brayns.utils import Error
+from brayns.version import VERSION
 
 
 @dataclass

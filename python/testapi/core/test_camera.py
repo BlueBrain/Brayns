@@ -105,3 +105,14 @@ class TestCamera(SimpleTestCase):
         render_and_validate(self, "clip_two", settings)
         camera.near_clipping_distance = 3
         render_and_validate(self, "clip_one", settings)
+
+    def test_getset_region(self) -> None:
+        lower, upper = brayns.get_camera_region(self.instance)
+        self.assertEqual(lower, brayns.Vector2(0, 1))
+        self.assertEqual(upper, brayns.Vector2(1, 0))
+        brayns.set_camera_region(
+            self.instance, brayns.Vector2(0.5, 0.5), brayns.Vector2(1, 1)
+        )
+        lower, upper = brayns.get_camera_region(self.instance)
+        self.assertEqual(lower, brayns.Vector2(0.5, 0.5))
+        self.assertEqual(upper, brayns.Vector2(1, 1))

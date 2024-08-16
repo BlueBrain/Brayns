@@ -61,6 +61,11 @@ using Quaternion = math::quaternionf;
 using AxisAlignedBounds = math::box3f;
 
 /**
+ * 2D box
+ */
+using Box2 = math::box2f;
+
+/**
  * Matrix definitions
  */
 class TransformMatrix

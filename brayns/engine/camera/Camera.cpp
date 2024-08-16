@@ -72,6 +72,26 @@ public:
     }
 };
 
+class ImageRegionIntegrity
+{
+public:
+    static void check(const brayns::Box2 &region)
+    {
+        auto checkBetween = [](auto value, auto min, auto max)
+        {
+            if (value < min || value > max)
+            {
+                throw std::invalid_argument("Image region should be normalized and not empty");
+            }
+        };
+
+        checkBetween(region.upper.x, 0.0F, 1.0F);
+        checkBetween(region.upper.y, 0.0F, 1.0F);
+        checkBetween(region.lower.x, 0.0F, 1.0F);
+        checkBetween(region.lower.y, 0.0F, 1.0F);
+    }
+};
+
 class FrameSizeIntegrity
 {
 public:
@@ -99,6 +119,7 @@ Camera &Camera::operator=(Camera &&other) noexcept
     _data = std::move(other._data);
     _view = other._view;
     _nearClippingDistance = other._nearClippingDistance;
+    _imageRegion = other._imageRegion;
     _aspectRatio = other._aspectRatio;
     _flag = std::move(other._flag);
     return *this;
@@ -117,6 +138,7 @@ Camera &Camera::operator=(const Camera &other)
     _data->pushTo(_handle);
     _view = other._view;
     _nearClippingDistance = other._nearClippingDistance;
+    _imageRegion = other._imageRegion;
     _aspectRatio = other._aspectRatio;
     _flag.setModified(true);
     return *this;
@@ -147,6 +169,17 @@ void Camera::setNearClippingDistance(float distance)
 {
     NearClipIntegrity::check(distance);
     _flag.update(_nearClippingDistance, distance);
+}
+
+const Box2 &Camera::getImageRegion() const
+{
+    return _imageRegion;
+}
+
+void Camera::setImageRegion(const Box2 &imageRegion)
+{
+    ImageRegionIntegrity::check(imageRegion);
+    _flag.update(_imageRegion, imageRegion);
 }
 
 void Camera::setAspectRatioFromFrameSize(const Vector2ui &frameSize)
@@ -202,7 +235,7 @@ void Camera::_updateAspectRatio()
 
 void Camera::_updateImageOrientation()
 {
-    _handle.setParam(CameraParameters::imageStart, Vector2f(0, 1));
-    _handle.setParam(CameraParameters::imageEnd, Vector2f(1, 0));
+    _handle.setParam(CameraParameters::imageStart, _imageRegion.lower);
+    _handle.setParam(CameraParameters::imageEnd, _imageRegion.upper);
 }
 }

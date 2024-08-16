@@ -48,6 +48,10 @@ public:
         params.camera_view = view;
         params.camera_near_clip = camera.getNearClippingDistance();
 
+        const auto &region = camera.getImageRegion();
+        params.image_start = region.lower;
+        params.image_end = region.upper;
+
         auto &paramsManager = engine.getParametersManager();
 
         auto &appParams = paramsManager.getApplicationParameters();
@@ -178,6 +182,7 @@ public:
         camera.setAspectRatioFromFrameSize(imageSize);
         camera.setView(params.camera_view);
         camera.setNearClippingDistance(params.camera_near_clip);
+        camera.setImageRegion({params.image_start, params.image_end});
         camera.commit();
 
         // Scene
