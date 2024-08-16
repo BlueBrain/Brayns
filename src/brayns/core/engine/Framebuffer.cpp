@@ -47,6 +47,13 @@ float Framebuffer::getVariance()
     return ospGetVariance(handle);
 }
 
+void Framebuffer::setImageOperations(const std::optional<Data<ImageOperation>> &imageOperations)
+{
+    auto handle = getHandle();
+    setObjectParam(handle, "imageOperation", imageOperations);
+    commitObject(handle);
+}
+
 Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings)
 {
     auto width = static_cast<int>(settings.resolution[0]);

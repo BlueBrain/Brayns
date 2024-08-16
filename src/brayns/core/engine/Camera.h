@@ -32,6 +32,7 @@ struct CameraSettings
     Vector3 direction = {0.0F, 0.0F, 1.0F};
     Vector3 up = {0.0F, 1.0F, 0.0F};
     float nearClip = 1.0e-6F;
+    Box2 imageRegion = {{0.0F, 0.0F}, {1.0F, 1.0F}};
 };
 
 class Camera : public Managed<OSPCamera>
@@ -42,10 +43,34 @@ public:
     void update(const CameraSettings &settings);
 };
 
+struct DepthOfField
+{
+    float apertureRadius = 0.0F;
+    float focusDistance = 1.0F;
+};
+
+enum class StereoMode
+{
+    None = OSP_STEREO_NONE,
+    Left = OSP_STEREO_LEFT,
+    Right = OSP_STEREO_RIGHT,
+    SideBySide = OSP_STEREO_SIDE_BY_SIDE,
+    TopBottom = OSP_STEREO_TOP_BOTTOM,
+};
+
+struct Stereo
+{
+    StereoMode mode = StereoMode::None;
+    float interpupillaryDistance = 0.0635F;
+};
+
 struct PerspectiveSettings
 {
     float fovy = 60.0F;
     float aspect = 1.0F;
+    std::optional<DepthOfField> depthOfField = std::nullopt;
+    bool architectural = false;
+    std::optional<Stereo> stereo = std::nullopt;
 };
 
 class PerspectiveCamera : public Camera
@@ -53,7 +78,7 @@ class PerspectiveCamera : public Camera
 public:
     using Camera::Camera;
 
-    void setFovy(float fovy);
+    void update(const PerspectiveSettings &settings);
     void setAspect(float aspect);
 };
 
@@ -73,7 +98,7 @@ class OrthographicCamera : public Camera
 public:
     using Camera::Camera;
 
-    void setHeight(float height);
+    void update(const OrthographicSettings &settings);
     void setAspect(float aspect);
 };
 

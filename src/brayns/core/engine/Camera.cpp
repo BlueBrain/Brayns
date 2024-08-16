@@ -31,6 +31,44 @@ void setCameraParams(OSPCamera handle, const CameraSettings &settings)
     setObjectParam(handle, "direction", settings.direction);
     setObjectParam(handle, "up", settings.up);
     setObjectParam(handle, "nearClip", settings.nearClip);
+    setObjectParam(handle, "imageStart", settings.imageRegion.lower);
+    setObjectParam(handle, "imageEnd", settings.imageRegion.upper);
+}
+
+void setPerspectiveParams(OSPCamera handle, const PerspectiveSettings &settings)
+{
+    setObjectParam(handle, "fovy", settings.fovy);
+    setObjectParam(handle, "aspect", settings.aspect);
+
+    if (settings.depthOfField)
+    {
+        setObjectParam(handle, "apertureRadius", settings.depthOfField->apertureRadius);
+        setObjectParam(handle, "focusDistance", settings.depthOfField->focusDistance);
+    }
+    else
+    {
+        removeObjectParam(handle, "apertureRadius");
+        removeObjectParam(handle, "focusDistance");
+    }
+
+    setObjectParam(handle, "architectural", settings.architectural);
+
+    if (settings.stereo)
+    {
+        setObjectParam(handle, "stereoMode", static_cast<OSPStereoMode>(settings.stereo->mode));
+        setObjectParam(handle, "interpupillaryDistance", settings.stereo->interpupillaryDistance);
+    }
+    else
+    {
+        removeObjectParam(handle, "stereoMode");
+        removeObjectParam(handle, "interpupillaryDistance");
+    }
+}
+
+void setOrthographicParams(OSPCamera handle, const OrthographicSettings &settings)
+{
+    setObjectParam(handle, "height", settings.height);
+    setObjectParam(handle, "aspect", settings.aspect);
 }
 }
 
@@ -43,10 +81,10 @@ void Camera::update(const CameraSettings &settings)
     commitObject(handle);
 }
 
-void PerspectiveCamera::setFovy(float fovy)
+void PerspectiveCamera::update(const PerspectiveSettings &settings)
 {
     auto handle = getHandle();
-    setObjectParam(handle, "fovy", fovy);
+    setPerspectiveParams(handle, settings);
     commitObject(handle);
 }
 
@@ -66,19 +104,17 @@ PerspectiveCamera createPerspectiveCamera(
     auto camera = wrapObjectHandleAs<PerspectiveCamera>(device, handle);
 
     setCameraParams(handle, settings);
-
-    setObjectParam(handle, "fovy", perspective.fovy);
-    setObjectParam(handle, "aspect", perspective.aspect);
+    setPerspectiveParams(handle, perspective);
 
     commitObject(handle);
 
     return camera;
 }
 
-void OrthographicCamera::setHeight(float height)
+void OrthographicCamera::update(const OrthographicSettings &settings)
 {
     auto handle = getHandle();
-    setObjectParam(handle, "height", height);
+    setOrthographicParams(handle, settings);
     commitObject(handle);
 }
 
@@ -98,9 +134,7 @@ OrthographicCamera createOrthographicCamera(
     auto camera = wrapObjectHandleAs<OrthographicCamera>(device, handle);
 
     setCameraParams(handle, settings);
-
-    setObjectParam(handle, "height", orthographic.height);
-    setObjectParam(handle, "aspect", orthographic.aspect);
+    setOrthographicParams(handle, orthographic);
 
     commitObject(handle);
 

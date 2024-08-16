@@ -208,6 +208,53 @@ void addCameraType(ApiBuilder &builder, LockedObjects &objects, Device &device)
 }
 
 template<>
+struct JsonObjectReflector<DepthOfField>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<DepthOfField>();
+        builder.field("aperture_radius", [](auto &object) { return &object.apertureRadius; })
+            .description("Size of the aperture radius (0 is no depth of field)")
+            .defaultValue(0.0F);
+        builder.field("focus_distance", [](auto &object) { return &object.focusDistance; })
+            .description("Distance at which the image is the sharpest")
+            .defaultValue(1.0F);
+        return builder.build();
+    }
+};
+
+template<>
+struct EnumReflector<StereoMode>
+{
+    static auto reflect()
+    {
+        auto builder = EnumBuilder<StereoMode>();
+        builder.field("none", StereoMode::None).description("Disable stereo");
+        builder.field("left", StereoMode::Left).description("Render left eye");
+        builder.field("right", StereoMode::Right).description("Render right eye");
+        builder.field("side_by_side", StereoMode::SideBySide).description("Render both eyes side by side");
+        builder.field("top_bottom", StereoMode::SideBySide).description("Render left eye above right eye");
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonObjectReflector<Stereo>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Stereo>();
+        builder.field("mode", [](auto &object) { return &object.mode; })
+            .description("Size of the aperture radius (0 is no depth of field)")
+            .defaultValue(StereoMode::None);
+        builder.field("interpupillary_distance", [](auto &object) { return &object.interpupillaryDistance; })
+            .description("Distance between observer eyes")
+            .defaultValue(0.0635F);
+        return builder.build();
+    }
+};
+
+template<>
 struct JsonObjectReflector<PerspectiveSettings>
 {
     static auto reflect()
@@ -216,6 +263,13 @@ struct JsonObjectReflector<PerspectiveSettings>
         builder.field("fovy", [](auto &object) { return &object.fovy; })
             .description("Camera vertical field of view in degrees (horizontal is deduced from framebuffer aspect)")
             .defaultValue(45.0F);
+        builder.field("depth_of_field", [](auto &object) { return &object.depthOfField; })
+            .description("Depth of field settings, set to null to disable it");
+        builder.field("architectural", [](auto &object) { return &object.architectural; })
+            .description("Vertical edges are projected to be parallel")
+            .defaultValue(false);
+        builder.field("stereo", [](auto &object) { return &object.stereo; })
+            .description("Stereo settings, set to null to disable it");
         return builder.build();
     }
 };
@@ -237,7 +291,7 @@ struct CameraReflector<PerspectiveCamera>
 
     static void update(PerspectiveCamera &camera, const PerspectiveSettings &settings)
     {
-        camera.setFovy(settings.fovy);
+        camera.update(settings);
     }
 
     static void setAspect(PerspectiveCamera &camera, float aspect)
@@ -276,7 +330,7 @@ struct CameraReflector<OrthographicCamera>
 
     static void update(OrthographicCamera &camera, const OrthographicSettings &settings)
     {
-        camera.setHeight(settings.height);
+        camera.update(settings);
     }
 
     static void setAspect(OrthographicCamera &camera, float aspect)

@@ -25,7 +25,7 @@ namespace
 {
 using namespace brayns;
 
-void setBackgroundParam(OSPRenderer handle, const Color4 &color)
+void setBackgroundParam(OSPRenderer handle, const auto &color)
 {
     setObjectParam(handle, "backgroundColor", color);
 }
@@ -44,9 +44,9 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 {
     setObjectParam(handle, "material", settings.materials);
 
-    setObjectParam(handle, "pixelSamples", static_cast<int>(settings.pixelSamples));
-    setObjectParam(handle, "maxPathLength", static_cast<int>(settings.maxRayRecursionDepth));
-    setObjectParam(handle, "minContribution", settings.minSampleContribution);
+    setObjectParam(handle, "pixelSamples", static_cast<int>(settings.samples));
+    setObjectParam(handle, "maxPathLength", static_cast<int>(settings.maxRecursion));
+    setObjectParam(handle, "minContribution", settings.minContribution);
     setObjectParam(handle, "varianceThreshold", settings.varianceThreshold);
     setBackground(handle, settings.background);
 

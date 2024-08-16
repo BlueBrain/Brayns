@@ -72,6 +72,7 @@ public:
     void unmap(const void *data);
     void resetAccumulation();
     float getVariance();
+    void setImageOperations(const std::optional<Data<ImageOperation>> &imageOperations);
 };
 
 Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings);
