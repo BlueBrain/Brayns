@@ -13,7 +13,7 @@ mesh
 
 Can load the following formats: **off**, **stl**, **ply**, **obj**.
 
-This loader does not support loading binary data using 'upload-model'.
+This loader supports loading binary data using 'upload-model'.
 
 .. jsonschema::
 
@@ -4418,6 +4418,24 @@ progress notifications.
                 "description": "Path to save the buffer as EXR, encoded data is returned if unset",
                 "type": "string"
             },
+            "image_end": {
+                "description": "Image region end XY normalized",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            },
+            "image_start": {
+                "description": "Image region start XY normalized",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            },
             "renderer": {
                 "title": "EngineObjectData",
                 "description": "Renderer",
@@ -4592,6 +4610,50 @@ This entrypoint has no params, the "params" field can hence be omitted or null.
                 "type": "number"
             }
         },
+        "additionalProperties": false
+    }
+
+----
+
+get-camera-region
+~~~~~~~~~~~~~~~~~
+
+Retreive the current camera image region.
+
+**Params**:
+
+This entrypoint has no params, the "params" field can hence be omitted or null.
+
+**Result**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "image_end": {
+                "description": "Camera image region upper bound XY normalized",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            },
+            "image_start": {
+                "description": "Camera image region lower bound XY normalized",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            }
+        },
+        "required": [
+            "image_end",
+            "image_start"
+        ],
         "additionalProperties": false
     }
 
@@ -6796,6 +6858,51 @@ null.
 
 ----
 
+set-camera-region
+~~~~~~~~~~~~~~~~~
+
+Update the camera image region.
+
+**Params**:
+
+.. jsonschema::
+
+    {
+        "type": "object",
+        "properties": {
+            "image_end": {
+                "description": "Camera image region upper bound XY normalized",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            },
+            "image_start": {
+                "description": "Camera image region lower bound XY normalized",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            }
+        },
+        "required": [
+            "image_end",
+            "image_start"
+        ],
+        "additionalProperties": false
+    }
+
+**Result**:
+
+This entrypoint has no result, the "result" field is still present but is always
+null.
+
+----
+
 set-camera-view
 ~~~~~~~~~~~~~~~
 
@@ -7720,6 +7827,15 @@ progress notifications.
                 "description": "Path to save image, raw encoded data will be returned if empty",
                 "type": "string"
             },
+            "image_end": {
+                "description": "Image region end XY normalized",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+            },
             "image_settings": {
                 "title": "ImageSettings",
                 "description": "Image settings",
@@ -7748,6 +7864,15 @@ progress notifications.
                     }
                 },
                 "additionalProperties": false
+            },
+            "image_start": {
+                "description": "Image region start XY normalized",
+                "type": "array",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
             },
             "metadata": {
                 "title": "ImageMetadata",
