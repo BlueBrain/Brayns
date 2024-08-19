@@ -26,7 +26,7 @@
 
 #include <brayns/core/api/ApiBuilder.h>
 #include <brayns/core/engine/ImageOperation.h>
-#include <brayns/core/objects/LockedObjects.h>
+#include <brayns/core/manager/LockedObjects.h>
 
 namespace brayns
 {

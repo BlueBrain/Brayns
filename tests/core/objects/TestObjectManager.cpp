@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/core/objects/ObjectManager.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 #include <doctest.h>
 
