@@ -21,6 +21,63 @@
 
 #pragma once
 
+#include <variant>
+
+#include <brayns/core/json/Json.h>
+
 namespace brayns
 {
+struct JpegCodec
+{
+    int quality;
+};
+
+template<>
+struct JsonObjectReflector<JpegCodec>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<JpegCodec>();
+        builder.constant("type", "Jpeg");
+        builder.field("quality", [](auto &object) { return &object.quality; })
+            .description(
+                "JPEG quality, 1 = worst quality but best compression, 100 = best quality but worst compression")
+            .defaultValue(100)
+            .minimum(1)
+            .maximum(100);
+        return builder.build();
+    }
+};
+
+struct PngCodec
+{
+};
+
+template<>
+struct JsonObjectReflector<PngCodec>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<PngCodec>();
+        builder.constant("type", "Png");
+        return builder.build();
+    }
+};
+
+struct ExrCodec
+{
+};
+
+template<>
+struct JsonObjectReflector<ExrCodec>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<ExrCodec>();
+        builder.constant("type", "Exr");
+        return builder.build();
+    }
+};
+
+using Codec = std::variant<std::monostate, JpegCodec, PngCodec, ExrCodec>;
 }

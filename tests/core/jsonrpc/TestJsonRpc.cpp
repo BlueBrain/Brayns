@@ -19,6 +19,7 @@
 
 #include <doctest.h>
 
+#include <brayns/core/jsonrpc/Binary.h>
 #include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/jsonrpc/Messages.h>
 #include <brayns/core/jsonrpc/Parser.h>
@@ -102,4 +103,38 @@ TEST_CASE("JsonRpcParser")
         auto data = std::string("\x10\x00\x00\x00", 4) + "{}";
         CHECK_THROWS_AS(parseBinaryJsonRpcRequest(data), ParseError);
     }
+}
+
+TEST_CASE("Binary")
+{
+    auto builder = BinaryBuilder();
+
+    auto data = std::vector<std::uint16_t>{0, 1, 2};
+
+    auto descriptor = builder.add(data);
+
+    CHECK_EQ(descriptor.size, 6);
+    CHECK_EQ(descriptor.offset, 0);
+
+    descriptor = builder.add(data);
+
+    CHECK_EQ(descriptor.size, 6);
+    CHECK_EQ(descriptor.offset, 6);
+
+    auto built = builder.build();
+
+    CHECK_EQ(built.size(), 12);
+
+    auto retreived = parseBytesAsVectorOf<std::uint16_t>(built);
+
+    CHECK_EQ(retreived.size(), 6);
+    CHECK_EQ(retreived[0], 0);
+    CHECK_EQ(retreived[1], 1);
+    CHECK_EQ(retreived[2], 2);
+    CHECK_EQ(retreived[3], 0);
+    CHECK_EQ(retreived[4], 1);
+    CHECK_EQ(retreived[5], 2);
+
+    CHECK_THROWS_AS(parseBytesAsVectorOf<float>(built, 12), InvalidParams);
+    CHECK_THROWS_AS(parseBytesAsVectorOf<double>(built), InvalidParams);
 }
