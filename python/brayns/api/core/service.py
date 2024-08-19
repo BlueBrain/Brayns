@@ -129,6 +129,10 @@ async def cancel_task(connection: Connection, task_id: int) -> None:
     await connection.get_result("cancelTask", {"taskId": task_id})
 
 
+async def cancel_all_tasks(connection: Connection) -> None:
+    await connection.get_result("cancelAllTasks")
+
+
 async def get_task_result(connection: Connection, task_id: int) -> Response:
     return await connection.request("getTaskResult", {"taskId": task_id})
 

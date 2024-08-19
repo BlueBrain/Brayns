@@ -138,6 +138,8 @@ void addServiceEndpoints(ApiBuilder &builder, Api &api, StopToken &token)
     builder.endpoint("cancelTask", [&](TaskParams params) { api.cancelTask(params.taskId); })
         .description("Cancel given task");
 
+    builder.endpoint("cancelAllTasks", [&] { api.cancelAllTasks(); }).description("Cancel all tasks");
+
     builder.endpoint("getTaskResult", [&](TaskParams params) { return api.waitForTaskResult(params.taskId); })
         .description("Wait for given task to finish and return its result");
 

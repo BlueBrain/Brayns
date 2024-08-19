@@ -70,10 +70,7 @@ Api::Api(std::map<std::string, Endpoint> endpoints):
 
 Api::~Api()
 {
-    for (const auto &[id, task] : _tasks)
-    {
-        task.cancel();
-    }
+    cancelAllTasks();
 }
 
 std::vector<std::string> Api::getMethods() const
@@ -181,5 +178,16 @@ void Api::cancelTask(TaskId id)
 
     _tasks.erase(id);
     _ids.recycle(id);
+}
+
+void Api::cancelAllTasks()
+{
+    for (const auto &[id, task] : _tasks)
+    {
+        task.cancel();
+    }
+
+    _tasks.clear();
+    _ids.reset();
 }
 }
