@@ -80,6 +80,9 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(test.view, view)
         self.assertEqual(test.projection, ref.projection)
         self.assertIsNot(test.projection, ref.projection)
+        self.assertEqual(test.near_clipping_distance, ref.near_clipping_distance)
+        self.assertEqual(test.image_start, ref.image_start)
+        self.assertEqual(test.image_end, ref.image_end)
 
     def test_rotate_around_target(self) -> None:
         rotation = brayns.euler(1, 2, 3, degrees=True)
@@ -89,3 +92,6 @@ class TestCamera(unittest.TestCase):
         self.assertEqual(test.view, view)
         self.assertEqual(test.projection, ref.projection)
         self.assertIsNot(test.projection, ref.projection)
+        self.assertEqual(test.near_clipping_distance, ref.near_clipping_distance)
+        self.assertEqual(test.image_start, ref.image_start)
+        self.assertEqual(test.image_end, ref.image_end)
