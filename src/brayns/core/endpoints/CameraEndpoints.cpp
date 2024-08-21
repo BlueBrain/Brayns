@@ -21,9 +21,6 @@
 
 #include "CameraEndpoints.h"
 
-#include <any>
-#include <functional>
-
 namespace brayns
 {
 template<>

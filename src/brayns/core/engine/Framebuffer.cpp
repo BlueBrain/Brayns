@@ -23,16 +23,26 @@
 
 namespace brayns
 {
-const void *Framebuffer::map(FramebufferChannel channel)
+FramebufferData::FramebufferData(const void *data, OSPFrameBuffer handle):
+    _data(data, Deleter{handle})
 {
-    auto handle = getHandle();
-    return ospMapFrameBuffer(handle, static_cast<OSPFrameBufferChannel>(channel));
 }
 
-void Framebuffer::unmap(const void *data)
+const void *FramebufferData::get() const
+{
+    return _data.get();
+}
+
+void FramebufferData::Deleter::operator()(const void *data) const
+{
+    ospUnmapFrameBuffer(data, handle);
+}
+
+FramebufferData Framebuffer::map(FramebufferChannel channel)
 {
     auto handle = getHandle();
-    ospUnmapFrameBuffer(data, handle);
+    const auto *data = ospMapFrameBuffer(handle, static_cast<OSPFrameBufferChannel>(channel));
+    return FramebufferData(data, handle);
 }
 
 void Framebuffer::resetAccumulation()

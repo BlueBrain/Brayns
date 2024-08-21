@@ -26,7 +26,7 @@
 
 #include <brayns/core/utils/Math.h>
 
-#include "ImageView.h"
+#include "Common.h"
 
 namespace brayns
 {
@@ -40,7 +40,7 @@ struct ExrChannel
 {
     std::string name;
     const void *data;
-    ExrDataType dataType;
+    ExrDataType dataType = ExrDataType::F32;
     std::size_t stride = 0;
 };
 

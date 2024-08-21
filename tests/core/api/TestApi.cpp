@@ -185,7 +185,7 @@ TEST_CASE("Task")
     CHECK(binary.empty());
 
     auto object = getObject(json);
-    auto taskId = object.get("task_id").extract<TaskId>();
+    auto taskId = object.get("taskId").extract<TaskId>();
 
     CHECK_EQ(taskId, 0);
 

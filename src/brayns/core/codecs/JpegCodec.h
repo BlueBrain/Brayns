@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include "ImageView.h"
+#include "Common.h"
 
 namespace brayns
 {

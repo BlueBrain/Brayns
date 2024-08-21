@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <set>
 
@@ -63,13 +64,36 @@ struct FramebufferSettings
     std::optional<Data<ImageOperation>> imageOperations = std::nullopt;
 };
 
+class FramebufferData
+{
+public:
+    explicit FramebufferData(const void *data, OSPFrameBuffer handle);
+
+    const void *get() const;
+
+    template<typename T>
+    const T *as() const
+    {
+        return static_cast<const T *>(get());
+    }
+
+private:
+    struct Deleter
+    {
+        OSPFrameBuffer handle;
+
+        void operator()(const void *data) const;
+    };
+
+    std::unique_ptr<const void, Deleter> _data;
+};
+
 class Framebuffer : public Managed<OSPFrameBuffer>
 {
 public:
     using Managed::Managed;
 
-    const void *map(FramebufferChannel channel);
-    void unmap(const void *data);
+    FramebufferData map(FramebufferChannel channel);
     void resetAccumulation();
     float getVariance();
     void setImageOperations(const std::optional<Data<ImageOperation>> &imageOperations);

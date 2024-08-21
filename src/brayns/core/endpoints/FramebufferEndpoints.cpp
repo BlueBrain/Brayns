@@ -23,6 +23,81 @@
 
 namespace brayns
 {
+template<>
+struct EnumReflector<FramebufferFormat>
+{
+    static auto reflect()
+    {
+        auto builder = EnumBuilder<FramebufferFormat>();
+        builder.field("Rgba", FramebufferFormat::Rgba8).description("8 bit linear RGBA");
+        builder.field("Srgba8", FramebufferFormat::Srgba8).description("8 bit gamma-encoded RGB and linear A");
+        builder.field("Rgba32F", FramebufferFormat::Rgba32F).description("32 bit float RGBA");
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonObjectReflector<Accumulation>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Accumulation>();
+        builder.field("variance", [](auto &object) { return &object.variance; })
+            .description("Wether to store per-pixel variance in a channel")
+            .defaultValue(false);
+        return builder.build();
+    }
+};
+
+struct FramebufferParams
+{
+    FramebufferSettings settings;
+    std::vector<ObjectId> imageOperations;
+};
+
+template<>
+struct JsonObjectReflector<FramebufferParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<FramebufferParams>();
+        builder.field("resolution", [](auto &object) { return &object.settings.resolution; })
+            .description("Framebuffer resolution in pixel");
+        builder.field("format", [](auto &object) { return &object.settings.format; })
+            .description("Format of the framebuffer color channel")
+            .defaultValue(FramebufferFormat::Srgba8);
+        builder.field("channels", [](auto &object) { return &object.settings.channels; })
+            .description("Framebuffer channels that can be accessed by user")
+            .defaultValue(std::set<FramebufferChannel>{FramebufferChannel::Color});
+        builder.field("accumulation", [](auto &object) { return &object.settings.accumulation; })
+            .description("If not null, the framebuffer will use accumulation with given settings");
+        builder.field("imageOperations", [](auto &object) { return &object.imageOperations; })
+            .description("List of image operation IDs that will be applied on the framebuffer")
+            .defaultValue(std::vector<ObjectId>());
+        return builder.build();
+    }
+};
+
+struct FramebufferResult
+{
+    FramebufferParams params;
+    float variance;
+};
+
+template<>
+struct JsonObjectReflector<FramebufferResult>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<FramebufferResult>();
+        builder.field("params", [](auto &object) { return &object.params; })
+            .description("Params used to create the framebuffer");
+        builder.field("variance", [](auto &object) { return &object.variance; })
+            .description("Variance of the framebuffer (0 if no accumulation)");
+        return builder.build();
+    }
+};
+
 std::vector<Stored<ImageOperationInterface>> getImageOperations(ObjectManager &objects, const std::vector<ObjectId> &ids)
 {
     auto interfaces = std::vector<Stored<ImageOperationInterface>>();
@@ -95,7 +170,7 @@ ObjectResult addFramebuffer(LockedObjects &locked, Device &device, FramebufferPa
         });
 }
 
-FramebufferParams getFramebuffer(LockedObjects &locked, const ObjectParams &params)
+FramebufferResult getFramebuffer(LockedObjects &locked, const ObjectParams &params)
 {
     return locked.visit(
         [&](ObjectManager &objects)
@@ -104,7 +179,10 @@ FramebufferParams getFramebuffer(LockedObjects &locked, const ObjectParams &para
 
             auto ids = getImageOperationIds(framebuffer.imageOperations);
 
-            return FramebufferParams{framebuffer.settings, std::move(ids)};
+            auto params = FramebufferParams{framebuffer.settings, std::move(ids)};
+            auto variance = framebuffer.deviceObject.getVariance();
+
+            return FramebufferResult{std::move(params), variance};
         });
 }
 
@@ -145,6 +223,16 @@ void updateFramebuffer(LockedObjects &locked, Device &device, const FramebufferU
         });
 }
 
+void clearFramebuffer(LockedObjects &locked, const ObjectParams &params)
+{
+    locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto &framebuffer = objects.get<UserFramebuffer>(params.id);
+            framebuffer.deviceObject.resetAccumulation();
+        });
+}
+
 void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
     builder
@@ -155,6 +243,9 @@ void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device
         .description("Get properties of a given framebuffer");
 
     builder.endpoint("updateFramebuffer", [&](FramebufferUpdate params) { updateFramebuffer(objects, device, params); })
-        .description("Get properties of a given framebuffer");
+        .description("Update properties of a given framebuffer");
+
+    builder.endpoint("clearFramebuffer", [&](ObjectParams params) { clearFramebuffer(objects, params); })
+        .description("Reset accumulating channels of the framebuffer");
 }
 }

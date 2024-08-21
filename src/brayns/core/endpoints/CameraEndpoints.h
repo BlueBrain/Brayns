@@ -21,6 +21,10 @@
 
 #pragma once
 
+#include <any>
+#include <functional>
+#include <string>
+
 #include <brayns/core/api/ApiBuilder.h>
 #include <brayns/core/engine/Camera.h>
 #include <brayns/core/manager/LockedObjects.h>

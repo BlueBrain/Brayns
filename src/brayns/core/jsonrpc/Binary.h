@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <span>
+#include <ranges>
 #include <utility>
 
 #include <brayns/core/json/Json.h>
@@ -31,66 +31,6 @@
 
 namespace brayns
 {
-struct BinaryDescriptor
-{
-    std::size_t size = 0;
-    std::size_t offset = 0;
-};
-
-template<>
-struct JsonObjectReflector<BinaryDescriptor>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<BinaryDescriptor>();
-        builder.field("size", [](auto &object) { return &object.size; })
-            .description("Object size in the binary part of the message");
-        builder.field("offset", [](auto &object) { return &object.offset; })
-            .description("Object offset in binary part of the message");
-        return builder.build();
-    }
-};
-
-class BinaryBuilder
-{
-public:
-    explicit BinaryBuilder(std::endian endian = std::endian::little):
-        _endian(endian)
-    {
-    }
-
-    template<typename T>
-    BinaryDescriptor add(std::span<T> items)
-    {
-        auto offset = _data.size();
-        auto size = items.size() * getBinarySize<T>();
-
-        _data.reserve(offset + size);
-
-        for (const auto &item : items)
-        {
-            composeBytesTo(item, _endian, _data);
-        }
-
-        return {size, offset};
-    }
-
-    template<typename T>
-    BinaryDescriptor add(const std::vector<T> &items)
-    {
-        return add(std::span<const T>(items));
-    }
-
-    std::string build()
-    {
-        return std::exchange(_data, {});
-    }
-
-private:
-    std::endian _endian;
-    std::string _data;
-};
-
 template<typename T>
 std::vector<T> extractBytesAsVectorOf(std::string_view &bytes, std::size_t itemCount)
 {
@@ -129,5 +69,21 @@ std::vector<T> parseBytesAsVectorOf(std::string_view bytes)
     }
 
     return extractBytesAsVectorOf<T>(bytes, itemCount);
+}
+
+template<std::ranges::range T>
+std::string composeRangeToBinary(T items)
+{
+    auto output = std::string();
+    output.reserve(items.size() + getBinarySize<std::ranges::range_value_t<T>>());
+
+    auto endian = std::endian::little;
+
+    for (const auto &item : items)
+    {
+        composeBytesTo(item, endian, output);
+    }
+
+    return output;
 }
 }

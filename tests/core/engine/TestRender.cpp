@@ -200,9 +200,7 @@ TEST_CASE("Render")
 
     auto data = framebuffer.map(FramebufferChannel::Color);
 
-    rkcommon::utility::writePPM("test.ppm", width, height, static_cast<const std::uint32_t *>(data));
-
-    framebuffer.unmap(data);
+    rkcommon::utility::writePPM("test.ppm", width, height, data.as<std::uint32_t>());
 
     CHECK(error.empty());
 }

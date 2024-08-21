@@ -311,7 +311,7 @@ TEST_CASE("Object")
     object->set("required", true);
     object->set("bounded", 2);
     object->set("description", true);
-    object->set("enum", "value2");
+    object->set("enum", "Value2");
     object->set("array", serializeToJson(std::vector<int>{1, 2, 3}));
     object->set("internal", internal);
 

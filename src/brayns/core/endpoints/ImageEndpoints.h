@@ -19,8 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Codecs.h"
+#pragma once
+
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/manager/LockedObjects.h>
 
 namespace brayns
 {
+void addImageEndpoints(ApiBuilder &builder, LockedObjects &objects);
 }
