@@ -25,13 +25,18 @@
 
 #include <brayns/core/endpoints/CameraEndpoints.h>
 #include <brayns/core/endpoints/FramebufferEndpoints.h>
+#include <brayns/core/endpoints/ImageEndpoints.h>
 #include <brayns/core/endpoints/ImageOperationEndpoints.h>
 #include <brayns/core/endpoints/ObjectEndpoints.h>
 #include <brayns/core/endpoints/ServiceEndpoints.h>
+
 #include <brayns/core/engine/Device.h>
+
 #include <brayns/core/service/Service.h>
+
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/utils/String.h>
+
 #include <brayns/core/websocket/WebSocketServer.h>
 
 namespace
@@ -69,6 +74,9 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     logger.info("{}", getCopyright());
 
+    auto device = createDevice(logger);
+    logger.info("OSPRay device version: {}", device.getVersion());
+
     logger.debug("Service options:{}", stringifyArgvSettings(settings));
 
     auto token = StopToken();
@@ -85,11 +93,11 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     addObjectEndpoints(builder, locked);
 
-    auto device = createDevice(logger);
-
     addCameraEndpoints(builder, locked, device);
     addImageOperationEndpoints(builder, locked, device);
     addFramebufferEndpoints(builder, locked, device);
+
+    addImageEndpoints(builder, locked);
 
     api = builder.build();
 

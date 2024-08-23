@@ -45,7 +45,7 @@ DistantLight createDistantLight(Device &device, const DistantLightSettings &sett
     setObjectParam(handle, "direction", settings.direction);
     setObjectParam(handle, "angularDiameter", settings.angularDiameter);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return light;
 }
@@ -60,7 +60,7 @@ SphereLight createSphereLight(Device &device, const SphereLightSettings &setting
     setObjectParam(handle, "position", settings.position);
     setObjectParam(handle, "radius", settings.radius);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return light;
 }
@@ -79,7 +79,7 @@ SpotLight createSpotLight(Device &device, const SpotLightSettings &settings)
     setObjectParam(handle, "radius", settings.outerRadius);
     setObjectParam(handle, "innerRadius", settings.innerRadius);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return light;
 }
@@ -95,7 +95,7 @@ QuadLight createQuadLight(Device &device, const QuadLightSettings &settings)
     setObjectParam(handle, "edge1", settings.edge1);
     setObjectParam(handle, "edge2", settings.edge2);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return light;
 }
@@ -111,7 +111,7 @@ CylinderLight createCylinderLight(Device &device, const CylinderLightSettings &s
     setObjectParam(handle, "position1", settings.end);
     setObjectParam(handle, "radius", settings.radius);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return light;
 }
@@ -127,7 +127,7 @@ HdriLight createHdriLight(Device &device, const HdriLightSettings &settings)
     setObjectParam(handle, "direction", settings.direction);
     setObjectParam(handle, "map", settings.map);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return light;
 }
@@ -139,7 +139,7 @@ AmbientLight createAmbientLight(Device &device, const AmbientLightSettings &sett
 
     setLightParams(handle, settings.base);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return light;
 }
@@ -157,7 +157,7 @@ SunSkyLight createSunSkyLight(Device &device, const SunSkyLightSettings &setting
     setObjectParam(handle, "albedo", settings.albedo);
     setObjectParam(handle, "horizonExtension", settings.horizonExtension);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return light;
 }

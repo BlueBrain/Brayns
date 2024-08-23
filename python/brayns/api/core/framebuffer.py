@@ -23,7 +23,7 @@ from enum import Enum
 from typing import Any, NewType
 
 from brayns.network.connection import Connection
-from brayns.utils.parsing import get, get_tuple
+from brayns.utils.parsing import get, get_tuple, try_get
 
 from .image_operation import ImageOperationId
 from .objects import create_specific_object, get_specific_object, update_specific_object
@@ -42,7 +42,7 @@ class FramebufferChannel(Enum):
     DEPTH = "Depth"
     NORMAL = "Normal"
     ALBEDO = "Albedo"
-    PRIMITIVE_ID = "PrimtiveId"
+    PRIMITIVE_ID = "PrimitiveId"
     MODEL_ID = "ModelId"
     INSTANCE_ID = "InstanceId"
 
@@ -63,20 +63,20 @@ class FramebufferSettings:
 
 def serialize_framebuffer_settings(settings: FramebufferSettings) -> dict[str, Any]:
     accumulation = settings.accumulation
-    child = None if accumulation is None else {"variance": accumulation.variance}
+    accumulation = None if accumulation is None else {"variance": accumulation.variance}
 
     return {
         "resolution": list(settings.resolution),
         "format": settings.format.value,
         "channels": [channel.value for channel in settings.channels],
-        "accumulation": child,
+        "accumulation": accumulation,
         "imageOperations": list(settings.image_operations),
     }
 
 
 def deserialize_framebuffer_settings(message: dict[str, Any]) -> FramebufferSettings:
-    child = message.get("accumulation")
-    accumulation = None if child is None else Accumulation(get(child, "variance", bool))
+    accumulation = try_get(message, "accumulation", dict[str, Any])
+    accumulation = None if accumulation is None else Accumulation(get(accumulation, "variance", bool))
 
     return FramebufferSettings(
         resolution=tuple(get_tuple(message, "resolution", int, 2)),
@@ -87,9 +87,22 @@ def deserialize_framebuffer_settings(message: dict[str, Any]) -> FramebufferSett
     )
 
 
-async def get_framebuffer_settings(connection: Connection, id: FramebufferId) -> FramebufferSettings:
+@dataclass
+class FramebufferInfo:
+    settings: FramebufferSettings
+    variance: float | None = None
+
+
+def deserialize_framebuffer_info(message: dict[str, Any]) -> FramebufferInfo:
+    return FramebufferInfo(
+        settings=deserialize_framebuffer_settings(get(message, "params", dict[str, Any])),
+        variance=try_get(message, "variance", float),
+    )
+
+
+async def get_framebuffer_info(connection: Connection, id: FramebufferId) -> FramebufferInfo:
     result = await get_specific_object(connection, "Framebuffer", id)
-    return deserialize_framebuffer_settings(result)
+    return deserialize_framebuffer_info(result)
 
 
 async def update_framebuffer(
@@ -100,31 +113,35 @@ async def update_framebuffer(
 
 
 class Framebuffer:
-    def __init__(self, id: FramebufferId, settings: FramebufferSettings) -> None:
+    def __init__(self, id: FramebufferId, info: FramebufferInfo) -> None:
         self._id = id
-        self._settings = settings
+        self._info = info
 
     @property
     def id(self) -> FramebufferId:
         return self._id
 
     @property
+    def info(self) -> FramebufferInfo:
+        return self._info
+
+    @property
     def settings(self) -> FramebufferSettings:
-        return self._settings
+        return self._info.settings
 
     @property
     def image_operations(self) -> set[ImageOperationId]:
-        return self._settings.image_operations
+        return self._info.settings.image_operations
 
     @image_operations.setter
     def image_operations(self, value: set[ImageOperationId]) -> None:
-        self._settings.image_operations = value
+        self._info.settings.image_operations = value
 
     async def push(self, connection: Connection) -> None:
-        await update_framebuffer(connection, self.id, self._settings.image_operations)
+        await update_framebuffer(connection, self.id, self._info.settings.image_operations)
 
     async def pull(self, connection: Connection) -> None:
-        self._settings = await get_framebuffer_settings(connection, self._id)
+        self._info = await get_framebuffer_info(connection, self._id)
 
 
 async def create_framebuffer(
@@ -132,9 +149,9 @@ async def create_framebuffer(
 ) -> Framebuffer:
     params = serialize_framebuffer_settings(settings)
     id = await create_specific_object(connection, "Framebuffer", params)
-    return Framebuffer(FramebufferId(id), replace(settings))
+    return Framebuffer(FramebufferId(id), FramebufferInfo(replace(settings)))
 
 
 async def get_framebuffer(connection: Connection, id: FramebufferId) -> Framebuffer:
-    settings = await get_framebuffer_settings(connection, id)
-    return Framebuffer(id, settings)
+    info = await get_framebuffer_info(connection, id)
+    return Framebuffer(id, info)

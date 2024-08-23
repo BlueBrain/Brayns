@@ -27,16 +27,31 @@
 #include <span>
 #include <type_traits>
 
+#include <fmt/format.h>
+
 #include <brayns/core/codecs/Common.h>
 #include <brayns/core/codecs/ExrCodec.h>
 #include <brayns/core/codecs/JpegCodec.h>
 #include <brayns/core/codecs/PngCodec.h>
 #include <brayns/core/jsonrpc/Binary.h>
+#include <brayns/core/jsonrpc/Errors.h>
 
 #include "FramebufferEndpoints.h"
 
 namespace brayns
 {
+void checkChannelInFramebuffer(const UserFramebuffer &framebuffer, FramebufferChannel channel)
+{
+    if (framebuffer.settings.channels.contains(channel))
+    {
+        return;
+    }
+
+    const auto &name = getEnumName(channel);
+
+    throw InvalidParams(fmt::format("The given framebuffer was created without the channel {}", name));
+}
+
 struct RawImageParams
 {
     FramebufferChannel channel;
@@ -55,7 +70,7 @@ struct JsonObjectReflector<RawImageParams>
 };
 
 template<typename T>
-std::string encodeChannelOf(UserFramebuffer &framebuffer, FramebufferChannel channel)
+std::string readChannelAs(UserFramebuffer &framebuffer, FramebufferChannel channel)
 {
     auto &deviceObject = framebuffer.deviceObject;
     const auto &size = framebuffer.settings.resolution;
@@ -68,24 +83,24 @@ std::string encodeChannelOf(UserFramebuffer &framebuffer, FramebufferChannel cha
     return composeRangeToBinary(items);
 }
 
-std::string encodeChannel(UserFramebuffer &framebuffer, FramebufferChannel channel)
+std::string readChannel(UserFramebuffer &framebuffer, FramebufferChannel channel)
 {
     switch (channel)
     {
     case FramebufferChannel::Color:
-        return encodeChannelOf<Color4>(framebuffer, channel);
+        return readChannelAs<Color4>(framebuffer, channel);
     case FramebufferChannel::Depth:
-        return encodeChannelOf<float>(framebuffer, channel);
+        return readChannelAs<float>(framebuffer, channel);
     case FramebufferChannel::Normal:
-        return encodeChannelOf<Vector3>(framebuffer, channel);
+        return readChannelAs<Vector3>(framebuffer, channel);
     case FramebufferChannel::Albedo:
-        return encodeChannelOf<Color3>(framebuffer, channel);
+        return readChannelAs<Color3>(framebuffer, channel);
     case FramebufferChannel::PrimitiveId:
-        return encodeChannelOf<std::uint32_t>(framebuffer, channel);
+        return readChannelAs<std::uint32_t>(framebuffer, channel);
     case FramebufferChannel::ModelId:
-        return encodeChannelOf<std::uint32_t>(framebuffer, channel);
+        return readChannelAs<std::uint32_t>(framebuffer, channel);
     case FramebufferChannel::InstanceId:
-        return encodeChannelOf<std::uint32_t>(framebuffer, channel);
+        return readChannelAs<std::uint32_t>(framebuffer, channel);
     default:
         throw std::invalid_argument("Invalid raw channel");
     };
@@ -271,8 +286,6 @@ std::vector<ExrMappedData> mapExrChannels(
     FramebufferFormat format,
     const std::set<FramebufferChannel> &channels)
 {
-    auto convertColorBuffer = format != FramebufferFormat::Rgba32F;
-
     auto result = std::vector<ExrMappedData>();
     result.reserve(channels.size());
 
@@ -280,9 +293,9 @@ std::vector<ExrMappedData> mapExrChannels(
     {
         auto data = framebuffer.map(channel);
 
-        if (convertColorBuffer && channel == FramebufferChannel::Color)
+        if (format != FramebufferFormat::Rgba32F && channel == FramebufferChannel::Color)
         {
-            auto pixels = std::string_view(data.as<char>(), pixelCount);
+            auto pixels = std::string_view(data.as<char>(), 4 * pixelCount);
             auto items = convertToFloat<4>(pixels);
 
             result.push_back(std::move(items));
@@ -398,7 +411,7 @@ std::string encodeChannelsToExr(UserFramebuffer &framebuffer, const std::set<Fra
 template<ReflectedJson T>
 struct ImageParams
 {
-    ObjectId framebuffer;
+    ObjectId id;
     T settings;
 };
 
@@ -408,8 +421,7 @@ struct JsonObjectReflector<ImageParams<T>>
     static auto reflect()
     {
         auto builder = JsonBuilder<ImageParams<T>>();
-        builder.field("framebuffer", [](auto &object) { return &object.framebuffer; })
-            .description("ID of the framebuffer to read");
+        builder.field("id", [](auto &object) { return &object.id; }).description("ID of the framebuffer to read");
         builder.field("settings", [](auto &object) { return &object.settings; })
             .description("Settings to encode the framebuffer content");
         return builder.build();
@@ -421,8 +433,12 @@ Result<NullJson> readFramebuffer(LockedObjects &locked, const ImageParams<RawIma
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &framebuffer = objects.get<UserFramebuffer>(params.framebuffer);
-            auto data = encodeChannel(framebuffer, params.settings.channel);
+            auto &framebuffer = objects.get<UserFramebuffer>(params.id);
+
+            checkChannelInFramebuffer(framebuffer, params.settings.channel);
+
+            auto data = readChannel(framebuffer, params.settings.channel);
+
             return Result<NullJson>{{}, std::move(data)};
         });
 }
@@ -432,8 +448,13 @@ Result<NullJson> readFramebufferAsJpeg(LockedObjects &locked, const ImageParams<
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &framebuffer = objects.get<UserFramebuffer>(params.framebuffer);
+            auto &framebuffer = objects.get<UserFramebuffer>(params.id);
+
+            auto channel = static_cast<FramebufferChannel>(params.settings.channel);
+            checkChannelInFramebuffer(framebuffer, channel);
+
             auto data = encodeChannelToJpeg(framebuffer, params.settings.channel, params.settings.settings);
+
             return Result<NullJson>{{}, std::move(data)};
         });
 }
@@ -443,8 +464,13 @@ Result<NullJson> readFramebufferAsPng(LockedObjects &locked, const ImageParams<P
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &framebuffer = objects.get<UserFramebuffer>(params.framebuffer);
+            auto &framebuffer = objects.get<UserFramebuffer>(params.id);
+
+            auto channel = static_cast<FramebufferChannel>(params.settings.channel);
+            checkChannelInFramebuffer(framebuffer, channel);
+
             auto data = encodeChannelToPng(framebuffer, params.settings.channel);
+
             return Result<NullJson>{{}, std::move(data)};
         });
 }
@@ -454,8 +480,15 @@ Result<NullJson> readFramebufferAsExr(LockedObjects &locked, const ImageParams<E
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &framebuffer = objects.get<UserFramebuffer>(params.framebuffer);
+            auto &framebuffer = objects.get<UserFramebuffer>(params.id);
+
+            for (auto channel : params.settings.channels)
+            {
+                checkChannelInFramebuffer(framebuffer, channel);
+            }
+
             auto data = encodeChannelsToExr(framebuffer, params.settings.channels);
+
             return Result<NullJson>{{}, std::move(data)};
         });
 }

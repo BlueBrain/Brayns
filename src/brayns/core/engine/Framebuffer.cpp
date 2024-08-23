@@ -21,6 +21,9 @@
 
 #include "Framebuffer.h"
 
+#include <cmath>
+#include <stdexcept>
+
 namespace brayns
 {
 FramebufferData::FramebufferData(const void *data, OSPFrameBuffer handle):
@@ -42,6 +45,12 @@ FramebufferData Framebuffer::map(FramebufferChannel channel)
 {
     auto handle = getHandle();
     const auto *data = ospMapFrameBuffer(handle, static_cast<OSPFrameBufferChannel>(channel));
+
+    if (data == nullptr)
+    {
+        throw std::invalid_argument("Cannot map channel (probably not in framebuffer)");
+    }
+
     return FramebufferData(data, handle);
 }
 
@@ -51,10 +60,17 @@ void Framebuffer::resetAccumulation()
     ospResetAccumulation(handle);
 }
 
-float Framebuffer::getVariance()
+std::optional<float> Framebuffer::getVariance()
 {
     auto handle = getHandle();
-    return ospGetVariance(handle);
+    auto variance = ospGetVariance(handle);
+
+    if (std::isfinite(variance))
+    {
+        return variance;
+    }
+
+    return std::nullopt;
 }
 
 void Framebuffer::setImageOperations(const std::optional<Data<ImageOperation>> &imageOperations)
@@ -93,7 +109,7 @@ Framebuffer createFramebuffer(Device &device, const FramebufferSettings &setting
 
     setObjectParam(handle, "imageOperation", settings.imageOperations);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return framebuffer;
 }

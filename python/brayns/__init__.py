@@ -48,6 +48,7 @@ from .api.core.camera import (
     update_perspective_settings,
 )
 from .api.core.framebuffer import (
+    Accumulation,
     Framebuffer,
     FramebufferChannel,
     FramebufferFormat,
@@ -55,7 +56,15 @@ from .api.core.framebuffer import (
     FramebufferSettings,
     create_framebuffer,
     get_framebuffer,
-    get_framebuffer_settings,
+    get_framebuffer_info,
+)
+from .api.core.image import (
+    JpegChannel,
+    PngChannel,
+    read_framebuffer,
+    read_framebuffer_as_exr,
+    read_framebuffer_as_jpeg,
+    read_framebuffer_as_png,
 )
 from .api.core.image_operation import (
     ImageOperation,
@@ -114,6 +123,7 @@ __version__ = VERSION
 """Version tag of brayns Python package (major.minor.patch)."""
 
 __all__ = [
+    "Accumulation",
     "axis_angle",
     "Box2",
     "Box3",
@@ -143,7 +153,7 @@ __all__ = [
     "get_all_objects",
     "get_camera_settings",
     "get_endpoint",
-    "get_framebuffer_settings",
+    "get_framebuffer_info",
     "get_framebuffer",
     "get_methods",
     "get_object",
@@ -161,6 +171,7 @@ __all__ = [
     "get_version",
     "ImageOperation",
     "ImageOperationId",
+    "JpegChannel",
     "JsonRpcError",
     "JsonRpcErrorResponse",
     "JsonRpcId",
@@ -172,7 +183,12 @@ __all__ = [
     "OrthographicSettings",
     "PerspectiveCamera",
     "PerspectiveSettings",
+    "PngChannel",
     "Quaternion",
+    "read_framebuffer_as_exr",
+    "read_framebuffer_as_jpeg",
+    "read_framebuffer_as_png",
+    "read_framebuffer",
     "remove_objects",
     "Request",
     "Response",

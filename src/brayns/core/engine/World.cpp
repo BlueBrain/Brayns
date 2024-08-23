@@ -39,7 +39,7 @@ Group createGroup(Device &device, const GroupSettings &settings)
     setObjectParam(handle, "volume", settings.volumes);
     setObjectParam(handle, "light", settings.lights);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return group;
 }
@@ -59,7 +59,7 @@ Instance createInstance(Device &device, const InstanceSettings &settings)
     setObjectParam(handle, "transform", toAffine(settings.transform));
     setObjectParam(handle, "id", settings.id);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return instance;
 }
@@ -77,7 +77,7 @@ World createWorld(Device &device, const WorldSettings &settings)
 
     setObjectParam(handle, "instance", settings.instances);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return world;
 }

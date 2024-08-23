@@ -59,7 +59,7 @@ GeometricModel createGeometricModel(Device &device, const GeometricModelSettings
     setObjectParam(handle, "invertNormals", settings.invertedNormals);
     setObjectParam(handle, "id", settings.id);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return model;
 }

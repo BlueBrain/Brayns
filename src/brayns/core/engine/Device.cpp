@@ -21,6 +21,8 @@
 
 #include "Device.h"
 
+#include <fmt/format.h>
+
 namespace brayns
 {
 DeviceException::DeviceException(OSPError error, const char *message):
@@ -68,6 +70,15 @@ Device::Device(OSPDevice device, std::unique_ptr<DeviceErrorHandler> handler):
 OSPDevice Device::getHandle() const
 {
     return _device.get();
+}
+
+std::string Device::getVersion() const
+{
+    auto major = ospDeviceGetProperty(_device.get(), OSP_DEVICE_VERSION_MAJOR);
+    auto minor = ospDeviceGetProperty(_device.get(), OSP_DEVICE_VERSION_MINOR);
+    auto patch = ospDeviceGetProperty(_device.get(), OSP_DEVICE_VERSION_PATCH);
+
+    return fmt::format("{}.{}.{}", major, minor, patch);
 }
 
 void Device::throwIfError()

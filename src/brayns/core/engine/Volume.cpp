@@ -33,7 +33,7 @@ RegularVolume createRegularVolume(Device &device, const RegularVolumeSettings &s
     setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
     setObjectParam(handle, "background", settings.background);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return volume;
 }

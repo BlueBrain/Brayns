@@ -106,7 +106,7 @@ PerspectiveCamera createPerspectiveCamera(
     setCameraParams(handle, settings);
     setPerspectiveParams(handle, perspective);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return camera;
 }
@@ -136,7 +136,7 @@ OrthographicCamera createOrthographicCamera(
     setCameraParams(handle, settings);
     setOrthographicParams(handle, orthographic);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return camera;
 }

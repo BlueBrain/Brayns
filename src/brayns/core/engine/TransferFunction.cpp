@@ -40,7 +40,7 @@ LinearTransferFunction createLinearTransferFunction(Device &device, const Linear
     auto opacities = createDataView<float>(settings.colors, {colorCount, stride, offset});
     setObjectParam(handle, "opacity", opacities);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return transferFunction;
 }

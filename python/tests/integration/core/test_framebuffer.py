@@ -21,12 +21,15 @@
 import pytest
 
 from brayns import (
+    Accumulation,
     Connection,
+    FramebufferChannel,
+    FramebufferFormat,
     FramebufferSettings,
     create_framebuffer,
     create_tone_mapper,
     get_framebuffer,
-    get_framebuffer_settings,
+    get_framebuffer_info,
     remove_objects,
 )
 
@@ -34,7 +37,13 @@ from brayns import (
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_framebuffer(connection: Connection) -> None:
-    settings = FramebufferSettings(resolution=(1920, 1080))
+    settings = FramebufferSettings(
+        resolution=(1920, 1080),
+        format=FramebufferFormat.RGBA32F,
+        channels=set(FramebufferChannel),
+        accumulation=Accumulation(variance=True),
+    )
+
     framebuffer = await create_framebuffer(connection, settings)
 
     assert framebuffer.id == 1
@@ -45,16 +54,16 @@ async def test_framebuffer(connection: Connection) -> None:
     assert retreived.id == framebuffer.id
     assert retreived.settings == framebuffer.settings
 
-    settings2 = await get_framebuffer_settings(connection, framebuffer.id)
-    assert settings2 == settings
+    info = await get_framebuffer_info(connection, framebuffer.id)
+    assert info.settings == settings
 
     tone_mapper = await create_tone_mapper(connection)
     framebuffer.image_operations = {tone_mapper.id}
 
     await framebuffer.push(connection)
 
-    settings2 = await get_framebuffer_settings(connection, framebuffer.id)
-    assert settings2 == framebuffer.settings
+    info = await get_framebuffer_info(connection, framebuffer.id)
+    assert info.settings == framebuffer.settings
 
     framebuffer.image_operations = set()
     await framebuffer.pull(connection)
@@ -70,10 +79,10 @@ async def test_remove_operations(connection: Connection) -> None:
     settings = FramebufferSettings(image_operations={tone_mapper.id})
     framebuffer = await create_framebuffer(connection, settings)
 
-    before_remove = await get_framebuffer_settings(connection, framebuffer.id)
-    assert before_remove.image_operations == {tone_mapper.id}
+    before_remove = await get_framebuffer_info(connection, framebuffer.id)
+    assert before_remove.settings.image_operations == {tone_mapper.id}
 
     await remove_objects(connection, [tone_mapper.id])
 
-    after_remove = await get_framebuffer_settings(connection, framebuffer.id)
-    assert after_remove.image_operations == {0}
+    after_remove = await get_framebuffer_info(connection, framebuffer.id)
+    assert after_remove.settings.image_operations == {0}

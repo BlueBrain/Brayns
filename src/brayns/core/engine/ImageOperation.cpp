@@ -45,7 +45,7 @@ ToneMapper createToneMapper(Device &device, const ToneMapperSettings &settings)
 
     setToneMapperParams(handle, settings);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return toneMapper;
 }

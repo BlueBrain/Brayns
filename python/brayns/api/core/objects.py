@@ -82,7 +82,14 @@ async def create_specific_object(connection: Connection, typename: str, params: 
 async def create_composed_object(
     connection: Connection, typename: str, base: dict[str, Any] | None, derived: dict[str, Any] | None
 ) -> int:
-    params = {"base": base, "derived": derived}
+    params = {}
+
+    if base is not None:
+        params["base"] = base
+
+    if derived is not None:
+        params["derived"] = derived
+
     return await create_specific_object(connection, typename, params)
 
 

@@ -73,7 +73,7 @@ AoRenderer createAoRenderer(Device &device, const AoRendererSettings &settings)
     setObjectParam(handle, "aoIntensity", settings.aoIntensity);
     setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return renderer;
 }
@@ -91,7 +91,7 @@ ScivisRenderer createScivisRenderer(Device &device, const ScivisRendererSettings
     setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
     setObjectParam(handle, "visibleLights", settings.showVisibleLights);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return renderer;
 }
@@ -103,7 +103,7 @@ PathTracer createPathTracer(Device &device, const PathTracerSettings &settings)
 
     setRendererParams(handle, settings.base);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return renderer;
 }

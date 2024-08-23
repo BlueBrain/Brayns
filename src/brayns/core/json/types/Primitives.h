@@ -37,12 +37,15 @@ struct JsonReflector<T>
     static JsonSchema getSchema()
     {
         constexpr auto type = jsonTypeOf<T>;
+
         auto schema = JsonSchema{.type = type};
+
         if constexpr (isNumeric(type))
         {
             schema.minimum = std::numeric_limits<T>::lowest();
             schema.maximum = std::numeric_limits<T>::max();
         }
+
         return schema;
     }
 
@@ -61,6 +64,7 @@ struct JsonReflector<T>
     static T deserialize(const JsonValue &json)
     {
         throwIfNotCompatible<T>(json);
+
         if constexpr (std::is_same_v<T, JsonValue>)
         {
             return json;

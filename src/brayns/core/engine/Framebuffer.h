@@ -95,7 +95,7 @@ public:
 
     FramebufferData map(FramebufferChannel channel);
     void resetAccumulation();
-    float getVariance();
+    std::optional<float> getVariance();
     void setImageOperations(const std::optional<Data<ImageOperation>> &imageOperations);
 };
 

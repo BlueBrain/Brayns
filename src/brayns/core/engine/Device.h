@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 #include <brayns/core/utils/Logger.h>
 
@@ -60,6 +61,7 @@ public:
     explicit Device(OSPDevice device, std::unique_ptr<DeviceErrorHandler> handler);
 
     OSPDevice getHandle() const;
+    std::string getVersion() const;
     void throwIfError();
 
 private:

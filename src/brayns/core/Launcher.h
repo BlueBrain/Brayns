@@ -72,7 +72,7 @@ struct ArgvSettingsReflector<ServiceSettings>
             .defaultValue(5000);
         builder.option("max-thread-count", [](auto &settings) { return &settings.maxThreadCount; })
             .description("Maximum number of threads for the websocket server")
-            .defaultValue(2);
+            .defaultValue(10);
         builder.option("max-queue-size", [](auto &settings) { return &settings.maxQueueSize; })
             .description("Maximum number of queued connections before they are rejected")
             .defaultValue(64);

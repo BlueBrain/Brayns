@@ -21,6 +21,8 @@
 
 #include "FramebufferEndpoints.h"
 
+#include <cmath>
+
 namespace brayns
 {
 template<>
@@ -29,7 +31,7 @@ struct EnumReflector<FramebufferFormat>
     static auto reflect()
     {
         auto builder = EnumBuilder<FramebufferFormat>();
-        builder.field("Rgba", FramebufferFormat::Rgba8).description("8 bit linear RGBA");
+        builder.field("Rgba8", FramebufferFormat::Rgba8).description("8 bit linear RGBA");
         builder.field("Srgba8", FramebufferFormat::Srgba8).description("8 bit gamma-encoded RGB and linear A");
         builder.field("Rgba32F", FramebufferFormat::Rgba32F).description("32 bit float RGBA");
         return builder.build();
@@ -62,7 +64,9 @@ struct JsonObjectReflector<FramebufferParams>
     {
         auto builder = JsonBuilder<FramebufferParams>();
         builder.field("resolution", [](auto &object) { return &object.settings.resolution; })
-            .description("Framebuffer resolution in pixel");
+            .description("Framebuffer resolution in pixel (max supported by ospray is currently 20kx20k)")
+            .items()
+            .maximum(20'000);
         builder.field("format", [](auto &object) { return &object.settings.format; })
             .description("Format of the framebuffer color channel")
             .defaultValue(FramebufferFormat::Srgba8);
@@ -81,7 +85,7 @@ struct JsonObjectReflector<FramebufferParams>
 struct FramebufferResult
 {
     FramebufferParams params;
-    float variance;
+    std::optional<float> variance;
 };
 
 template<>
@@ -93,7 +97,7 @@ struct JsonObjectReflector<FramebufferResult>
         builder.field("params", [](auto &object) { return &object.params; })
             .description("Params used to create the framebuffer");
         builder.field("variance", [](auto &object) { return &object.variance; })
-            .description("Variance of the framebuffer (0 if no accumulation)");
+            .description("Variance of the framebuffer (null if no estimate is available)");
         return builder.build();
     }
 };
@@ -180,6 +184,7 @@ FramebufferResult getFramebuffer(LockedObjects &locked, const ObjectParams &para
             auto ids = getImageOperationIds(framebuffer.imageOperations);
 
             auto params = FramebufferParams{framebuffer.settings, std::move(ids)};
+
             auto variance = framebuffer.deviceObject.getVariance();
 
             return FramebufferResult{std::move(params), variance};

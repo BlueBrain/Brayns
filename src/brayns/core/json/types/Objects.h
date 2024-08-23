@@ -147,56 +147,61 @@ struct JsonReflector<T>
     }
 };
 
-template<typename ParentType>
 class JsonFieldBuilder
 {
 public:
-    explicit JsonFieldBuilder(JsonField<ParentType> &field):
-        _field(&field)
+    explicit JsonFieldBuilder(JsonSchema &schema):
+        _schema(&schema)
     {
     }
 
     JsonFieldBuilder description(std::string value)
     {
-        _field->schema.description = std::move(value);
+        _schema->description = std::move(value);
         return *this;
     }
 
     JsonFieldBuilder required(bool value)
     {
-        _field->schema.required = value;
+        _schema->required = value;
         return *this;
     }
 
     JsonFieldBuilder minimum(std::optional<double> value)
     {
-        _field->schema.minimum = value;
+        _schema->minimum = value;
         return *this;
     }
 
     JsonFieldBuilder maximum(std::optional<double> value)
     {
-        _field->schema.maximum = value;
+        _schema->maximum = value;
         return *this;
     }
 
     JsonFieldBuilder minItems(std::optional<std::size_t> value)
     {
-        _field->schema.minItems = value;
+        _schema->minItems = value;
         return *this;
     }
 
     JsonFieldBuilder maxItems(std::optional<std::size_t> value)
     {
-        _field->schema.maxItems = value;
+        _schema->maxItems = value;
         return *this;
+    }
+
+    JsonFieldBuilder items()
+    {
+        assert(!_schema->items.empty());
+        return JsonFieldBuilder(_schema->items[0]);
     }
 
     template<ReflectedJson T>
     JsonFieldBuilder defaultValue(const T &value)
     {
-        _field->schema.defaultValue = serializeToJson(value);
-        _field->schema.required = false;
+        _schema->defaultValue = serializeToJson(value);
+        _schema->required = false;
         return *this;
     }
 
@@ -206,7 +211,7 @@ public:
     }
 
 private:
-    JsonField<ParentType> *_field;
+    JsonSchema *_schema;
 };
 
 template<typename GetterType, typename ObjectType>
@@ -229,7 +234,7 @@ public:
     }
 
     template<JsonFieldGetter<T> U>
-    JsonFieldBuilder<T> field(std::string name, U getFieldPtr)
+    JsonFieldBuilder field(std::string name, U getFieldPtr)
     {
         using FieldType = GetFieldType<U, T>;
 
@@ -251,10 +256,10 @@ public:
             value = deserializeAs<FieldType>(json);
         };
 
-        return JsonFieldBuilder<T>(field);
+        return JsonFieldBuilder(field.schema);
     }
 
-    JsonFieldBuilder<T> constant(std::string name, const std::string &value)
+    JsonFieldBuilder constant(std::string name, const std::string &value)
     {
         auto &field = _fields.emplace_back();
 
@@ -275,7 +280,7 @@ public:
             }
         };
 
-        return JsonFieldBuilder<T>(field);
+        return JsonFieldBuilder(field.schema);
     }
 
     JsonObjectInfo<T> build()
