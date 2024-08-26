@@ -112,8 +112,11 @@ struct JsonObjectReflector<ComposedParams<Base, Derived>>
                 .description("Base properties common to all derived objects (camera, renderer)");
         }
 
-        builder.field("derived", [](auto &object) { return &object.derived; })
-            .description("Derived properties that are specific to the object type (perspective, scivis)");
+        if (!std::is_same_v<Derived, NullJson>)
+        {
+            builder.field("derived", [](auto &object) { return &object.derived; })
+                .description("Derived properties that are specific to the object type (perspective, scivis)");
+        }
 
         return builder.build();
     }

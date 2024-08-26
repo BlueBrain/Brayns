@@ -21,14 +21,10 @@
 
 #pragma once
 
-#include <any>
 #include <map>
 #include <string>
 #include <vector>
 
-#include <fmt/format.h>
-
-#include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/utils/IdGenerator.h>
 
 #include "Messages.h"
@@ -64,7 +60,8 @@ public:
 
         try
         {
-            auto user = UserObject<T>{id, std::move(object)};
+            auto info = ObjectInfo{id, getObjectType(object)};
+            auto user = UserObjectOf<T>{std::move(info), std::move(object)};
             auto ptr = std::make_shared<decltype(user)>(std::move(user));
 
             addObject(ptr->value, id);
@@ -89,20 +86,11 @@ private:
     const ObjectInterface &getInterface(ObjectId id) const;
 
     template<ReflectedObject T>
-    const std::shared_ptr<UserObject<T>> &getShared(ObjectId id) const
+    const std::shared_ptr<UserObjectOf<T>> &getShared(ObjectId id) const
     {
         const auto &interface = getInterface(id);
 
-        auto ptr = std::any_cast<std::shared_ptr<UserObject<T>>>(&interface.value);
-
-        if (ptr != nullptr)
-        {
-            return *ptr;
-        }
-
-        auto type = interface.getType();
-
-        throw InvalidParams(fmt::format("Invalid type for object with ID {}: {}", id, type));
+        return castSharedObject<UserObjectOf<T>>(interface.value, interface.getInfo());
     }
 };
 }

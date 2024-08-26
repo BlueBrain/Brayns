@@ -29,6 +29,7 @@
 #include <brayns/core/endpoints/ImageOperationEndpoints.h>
 #include <brayns/core/endpoints/ObjectEndpoints.h>
 #include <brayns/core/endpoints/ServiceEndpoints.h>
+#include <brayns/core/endpoints/TransferFunctionEndpoints.h>
 
 #include <brayns/core/engine/Device.h>
 
@@ -96,6 +97,7 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
     addCameraEndpoints(builder, locked, device);
     addImageOperationEndpoints(builder, locked, device);
     addFramebufferEndpoints(builder, locked, device);
+    addTransferFunctionEndpoints(builder, locked, device);
 
     addImageEndpoints(builder, locked);
 

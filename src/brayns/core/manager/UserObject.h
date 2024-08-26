@@ -21,108 +21,64 @@
 
 #pragma once
 
+#include <any>
 #include <concepts>
 #include <functional>
 #include <string>
-#include <type_traits>
+
+#include <fmt/format.h>
+
+#include <brayns/core/jsonrpc/Errors.h>
 
 #include "Messages.h"
+#include "ObjectReflector.h"
 
 namespace brayns
 {
-template<typename T>
-struct ObjectReflector;
-
-template<typename T>
-concept WithType = std::same_as<std::string, decltype(ObjectReflector<T>::getType(std::declval<const T &>()))>;
-
-template<typename T>
-concept WithAdd = std::is_void_v<decltype(ObjectReflector<T>::add(std::declval<T &>(), ObjectId()))>;
-
-template<typename T>
-concept WithRemove = std::is_void_v<decltype(ObjectReflector<T>::remove(std::declval<T &>()))>;
-
-template<typename T>
-concept ReflectedObject = WithType<T> && std::default_initializable<T>;
-
 template<ReflectedObject T>
-std::string getObjectType(const T &object)
+struct UserObjectOf
 {
-    return ObjectReflector<T>::getType(object);
-}
-
-template<typename T>
-void addObject(T &object, ObjectId id)
-{
-    (void)object;
-    (void)id;
-}
-
-template<WithAdd T>
-void addObject(T &object, ObjectId id)
-{
-    return ObjectReflector<T>::add(object, id);
-}
-
-template<typename T>
-void removeObject(T &object)
-{
-    (void)object;
-}
-
-template<WithRemove T>
-void removeObject(T &object)
-{
-    return ObjectReflector<T>::remove(object);
-}
-
-template<ReflectedObject T>
-struct UserObject
-{
-    ObjectId id;
+    ObjectInfo info;
     T value;
-    JsonValue userData = {};
 };
-
-template<ReflectedObject T>
-void removeUserObject(UserObject<T> &object)
-{
-    object.id = nullId;
-    removeObject(object.value);
-}
 
 template<ReflectedObject T>
 class Stored
 {
 public:
-    explicit Stored(std::shared_ptr<UserObject<T>> object):
+    explicit Stored(std::shared_ptr<UserObjectOf<T>> object):
         _object(std::move(object))
     {
     }
 
     ObjectId getId() const
     {
-        return _object->id;
+        return _object->info.id;
     }
 
     bool isRemoved() const
     {
-        return _object->id == nullId;
+        return _object->info.id == nullId;
     }
 
-    std::string getType() const
+    const std::string &getType() const
     {
-        return getObjectType(_object->value);
+        return _object->info.type;
     }
 
     JsonValue getUserData() const
     {
-        return _object->userData;
+        return _object->info.userData;
     }
 
     void setUserData(const JsonValue &userData)
     {
-        _object->userData = userData;
+        _object->info.userData = userData;
+    }
+
+    const ObjectInfo &getInfo() const
+    {
+        return _object->info;
     }
 
     ObjectResult getResult() const
@@ -135,39 +91,60 @@ public:
         return _object->value;
     }
 
+    T *operator->() const
+    {
+        return &_object->value;
+    }
+
+    T &operator*() const
+    {
+        return _object->value;
+    }
+
 private:
-    std::shared_ptr<UserObject<T>> _object;
+    std::shared_ptr<UserObjectOf<T>> _object;
 };
 
 struct ObjectInterface
 {
     std::any value;
-    std::function<ObjectId()> getId;
+    std::function<ObjectInfo &()> getInfo;
     std::function<void()> remove;
-    std::function<std::string()> getType;
-    std::function<JsonValue()> getUserData;
-    std::function<void(const JsonValue &)> setUserData;
 };
 
 template<ReflectedObject T>
-ObjectInterface createObjectInterface(const std::shared_ptr<UserObject<T>> &object)
+ObjectInterface createObjectInterface(const std::shared_ptr<UserObjectOf<T>> &object)
 {
-    return {
-        .value = object,
-        .getId = [=] { return object->id; },
-        .remove = [=] { removeUserObject(*object); },
-        .getType = [=] { return getObjectType(object->value); },
-        .getUserData = [=] { return object->userData; },
-        .setUserData = [=](const auto &userData) { object->userData = userData; },
+    auto getInfo = [=]() -> auto &
+    {
+        return object->info;
     };
+
+    auto remove = [=]
+    {
+        object->info.id = nullId;
+        removeObject(object->value);
+    };
+
+    return {object, getInfo, remove};
 }
 
-inline ObjectInfo getObjectInfo(const ObjectInterface &object)
+template<typename T>
+const std::shared_ptr<T> &castSharedObject(const std::any &value, const ObjectInfo &info)
 {
-    return {
-        .id = object.getId(),
-        .type = object.getType(),
-        .userData = object.getUserData(),
-    };
+    const auto *ptr = std::any_cast<std::shared_ptr<T>>(&value);
+
+    if (ptr != nullptr)
+    {
+        return *ptr;
+    }
+
+    throw InvalidParams(fmt::format("Invalid type for object with ID {}: {}", info.id, info.type));
+}
+
+template<typename T>
+T &castObject(const std::any &value, const ObjectInfo &info)
+{
+    return *castSharedObject<T>(value, info);
 }
 }

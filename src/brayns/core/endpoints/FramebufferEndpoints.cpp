@@ -129,11 +129,16 @@ std::vector<ObjectId> getImageOperationIds(const std::vector<Stored<ImageOperati
     return ids;
 }
 
-Data<ImageOperation> createImageOperationData(
+std::optional<Data<ImageOperation>> createImageOperationData(
     Device &device,
     const std::vector<Stored<ImageOperationInterface>> &operations)
 {
     auto itemCount = operations.size();
+
+    if (itemCount == 0)
+    {
+        return std::nullopt;
+    }
 
     auto data = allocateData<ImageOperation>(device, itemCount);
     auto items = data.getItems();
@@ -152,10 +157,7 @@ UserFramebuffer createUserFramebuffer(ObjectManager &objects, Device &device, Fr
 {
     auto operations = getImageOperations(objects, params.imageOperations);
 
-    if (!operations.empty())
-    {
-        params.settings.imageOperations = createImageOperationData(device, operations);
-    }
+    params.settings.imageOperations = createImageOperationData(device, operations);
 
     auto framebuffer = createFramebuffer(device, params.settings);
 

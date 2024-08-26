@@ -21,31 +21,30 @@
 
 #pragma once
 
-#include "Data.h"
-#include "Device.h"
-#include "Object.h"
+#include <any>
+#include <functional>
+
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/engine/TransferFunction.h>
+#include <brayns/core/manager/LockedObjects.h>
 
 namespace brayns
 {
-class TransferFunction : public Managed<OSPTransferFunction>
+struct TransferFunctionInterface
 {
-public:
-    using Managed::Managed;
+    std::any value;
+    std::function<std::string()> getType;
+    std::function<TransferFunction()> getDeviceObject;
 };
 
-struct LinearTransferFunctionSettings
+template<>
+struct ObjectReflector<TransferFunctionInterface>
 {
-    Box1 scalarRange;
-    Data<Color4> colors;
+    static std::string getType(const TransferFunctionInterface &operation)
+    {
+        return operation.getType();
+    }
 };
 
-class LinearTransferFunction : public TransferFunction
-{
-public:
-    using TransferFunction::TransferFunction;
-
-    void update(const LinearTransferFunctionSettings &settings);
-};
-
-LinearTransferFunction createLinearTransferFunction(Device &device, const LinearTransferFunctionSettings &settings);
+void addTransferFunctionEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
 }

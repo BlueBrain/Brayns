@@ -21,7 +21,7 @@
 
 #include "ObjectManager.h"
 
-#include <fmt/format.h>
+#include <brayns/core/jsonrpc/Errors.h>
 
 namespace
 {
@@ -49,8 +49,7 @@ std::vector<ObjectInfo> ObjectManager::getAllObjects() const
 
     for (const auto &[id, object] : _objects)
     {
-        auto result = getObjectInfo(object);
-        objects.push_back(std::move(result));
+        objects.push_back(object.getInfo());
     }
 
     return objects;
@@ -60,14 +59,15 @@ ObjectInfo ObjectManager::getObject(ObjectId id) const
 {
     const auto &interface = getInterface(id);
 
-    return getObjectInfo(interface);
+    return interface.getInfo();
 }
 
 void ObjectManager::setUserData(ObjectId id, const JsonValue &userData)
 {
     auto i = getStorageIterator(_objects, id);
+    auto &info = i->second.getInfo();
 
-    i->second.setUserData(userData);
+    info.userData = userData;
 }
 
 void ObjectManager::remove(ObjectId id)

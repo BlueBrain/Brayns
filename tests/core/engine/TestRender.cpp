@@ -54,6 +54,7 @@ TEST_CASE("Object creation")
 
     createPerspectiveCamera(device, {});
     createOrthographicCamera(device, {});
+    createPanoramicCamera(device, {});
 
     createData<int>(device, {1, 2, 3});
     allocateData2D<int>(device, {10, 10});

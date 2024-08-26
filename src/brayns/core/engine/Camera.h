@@ -78,7 +78,7 @@ class PerspectiveCamera : public Camera
 public:
     using Camera::Camera;
 
-    void update(const PerspectiveSettings &settings);
+    void updatePerspective(const PerspectiveSettings &settings);
     void setAspect(float aspect);
 };
 
@@ -98,7 +98,7 @@ class OrthographicCamera : public Camera
 public:
     using Camera::Camera;
 
-    void update(const OrthographicSettings &settings);
+    void updateOrthographic(const OrthographicSettings &settings);
     void setAspect(float aspect);
 };
 
@@ -106,4 +106,22 @@ OrthographicCamera createOrthographicCamera(
     Device &device,
     const CameraSettings &settings = {},
     const OrthographicSettings &orthographic = {});
+
+struct PanoramicSettings
+{
+    std::optional<Stereo> stereo;
+};
+
+class PanoramicCamera : public Camera
+{
+public:
+    using Camera::Camera;
+
+    void updatePanoramic(const PanoramicSettings &settings);
+};
+
+PanoramicCamera createPanoramicCamera(
+    Device &device,
+    const CameraSettings &settings = {},
+    const PanoramicSettings &panoramic = {});
 }

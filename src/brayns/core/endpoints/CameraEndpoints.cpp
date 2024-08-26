@@ -314,7 +314,7 @@ struct CameraReflector<PerspectiveCamera>
 
     static void update(PerspectiveCamera &camera, const PerspectiveSettings &settings)
     {
-        camera.update(settings);
+        camera.updatePerspective(settings);
     }
 
     static void setAspect(PerspectiveCamera &camera, float aspect)
@@ -353,7 +353,7 @@ struct CameraReflector<OrthographicCamera>
 
     static void update(OrthographicCamera &camera, const OrthographicSettings &settings)
     {
-        camera.update(settings);
+        camera.updateOrthographic(settings);
     }
 
     static void setAspect(OrthographicCamera &camera, float aspect)

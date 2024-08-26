@@ -21,13 +21,12 @@
 
 #include "TransferFunction.h"
 
-namespace brayns
+namespace
 {
-LinearTransferFunction createLinearTransferFunction(Device &device, const LinearTransferFunctionSettings &settings)
-{
-    auto handle = ospNewTransferFunction("piecewiseLinear");
-    auto transferFunction = wrapObjectHandleAs<LinearTransferFunction>(device, handle);
+using namespace brayns;
 
+void setLinearTransferFunctionParams(OSPTransferFunction handle, const LinearTransferFunctionSettings &settings)
+{
     setObjectParam(handle, "value", settings.scalarRange);
 
     auto stride = static_cast<std::ptrdiff_t>(sizeof(Color4));
@@ -39,9 +38,27 @@ LinearTransferFunction createLinearTransferFunction(Device &device, const Linear
     auto offset = sizeof(Color3);
     auto opacities = createDataView<float>(settings.colors, {colorCount, stride, offset});
     setObjectParam(handle, "opacity", opacities);
+}
+}
+
+namespace brayns
+{
+LinearTransferFunction createLinearTransferFunction(Device &device, const LinearTransferFunctionSettings &settings)
+{
+    auto handle = ospNewTransferFunction("piecewiseLinear");
+    auto transferFunction = wrapObjectHandleAs<LinearTransferFunction>(device, handle);
+
+    setLinearTransferFunctionParams(handle, settings);
 
     commitObject(device, handle);
 
     return transferFunction;
+}
+
+void LinearTransferFunction::update(const LinearTransferFunctionSettings &settings)
+{
+    auto handle = getHandle();
+    setLinearTransferFunctionParams(handle, settings);
+    commitObject(handle);
 }
 }
