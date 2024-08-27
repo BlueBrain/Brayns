@@ -179,6 +179,12 @@ public:
         return *this;
     }
 
+    JsonFieldBuilder uniqueItems(bool value)
+    {
+        _schema->uniqueItems = value;
+        return *this;
+    }
+
     JsonFieldBuilder minItems(std::optional<std::size_t> value)
     {
         _schema->minItems = value;

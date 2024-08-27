@@ -105,6 +105,16 @@ from .api.core.service import (
     get_version,
     stop_service,
 )
+from .api.core.transfer_function import (
+    LinearTransferFunction,
+    LinearTransferFunctionSettings,
+    TransferFunction,
+    TransferFunctionId,
+    create_linear_transfer_function,
+    get_linear_transfer_function,
+    get_linear_transfer_function_settings,
+    update_linear_transfer_function_settings,
+)
 from .network.connection import Connection, FutureResponse, Request, Response, connect
 from .network.json_rpc import (
     JsonRpcError,
@@ -115,7 +125,8 @@ from .network.json_rpc import (
     JsonRpcSuccessResponse,
 )
 from .network.websocket import ServiceUnavailable, WebSocketError
-from .utils.box import Box2, Box3
+from .utils.box import Box1, Box2, Box3
+from .utils.color import Color3, Color4
 from .utils.logger import create_logger
 from .utils.quaternion import Quaternion
 from .utils.rotation import Rotation, axis_angle, euler, get_rotation_between
@@ -129,6 +140,7 @@ __version__ = VERSION
 __all__ = [
     "Accumulation",
     "axis_angle",
+    "Box1",
     "Box2",
     "Box3",
     "Camera",
@@ -137,10 +149,13 @@ __all__ = [
     "cancel_all_tasks",
     "cancel_task",
     "clear_objects",
+    "Color3",
+    "Color4",
     "connect",
     "Connection",
     "create_empty_object",
     "create_framebuffer",
+    "create_linear_transfer_function",
     "create_logger",
     "create_orthographic_camera",
     "create_panoramic_camera",
@@ -160,6 +175,8 @@ __all__ = [
     "get_endpoint",
     "get_framebuffer_info",
     "get_framebuffer",
+    "get_linear_transfer_function_settings",
+    "get_linear_transfer_function",
     "get_methods",
     "get_object",
     "get_orthographic_camera",
@@ -185,6 +202,8 @@ __all__ = [
     "JsonRpcRequest",
     "JsonRpcResponse",
     "JsonRpcSuccessResponse",
+    "LinearTransferFunction",
+    "LinearTransferFunctionSettings",
     "Object",
     "OrthographicCamera",
     "OrthographicSettings",
@@ -209,7 +228,10 @@ __all__ = [
     "TaskOperation",
     "ToneMapper",
     "ToneMapperSettings",
+    "TransferFunction",
+    "TransferFunctionId",
     "update_camera_settings",
+    "update_linear_transfer_function_settings",
     "update_object",
     "update_orthographic_settings",
     "update_panoramic_settings",

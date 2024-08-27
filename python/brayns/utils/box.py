@@ -26,6 +26,34 @@ from .vector import Vector, Vector2, Vector3
 T = TypeVar("T", bound=Vector)
 
 
+class Box1(NamedTuple):
+    min: float
+    max: float
+
+    def __contains__(self, key: float) -> bool:
+        return key >= self.min and key <= self.max
+
+    @property
+    def center(self) -> float:
+        return (self.min + self.max) / 2
+
+    @property
+    def size(self) -> float:
+        return self.max - self.min
+
+    def translate(self, translation: float) -> Self:
+        return type(self)(
+            min=self.min + translation,
+            max=self.max + translation,
+        )
+
+    def scale(self, value: float) -> Self:
+        return type(self)(
+            min=value * self.min,
+            max=value * self.max,
+        )
+
+
 class Box(NamedTuple, Generic[T]):
     min: T
     max: T

@@ -21,7 +21,7 @@
 from types import UnionType
 from typing import Any, TypeVar, cast, get_args, get_origin
 
-from .box import Box, Box2, Box3
+from .box import Box, Box1, Box2, Box3
 from .quaternion import Quaternion
 from .vector import Vector2, Vector3, Vector4
 
@@ -118,4 +118,18 @@ def deserialize_box(message: dict[str, Any], t: type[U]) -> U:
     return t(
         min=deserialize_vector(message, "min", t.vector_type()),
         max=deserialize_vector(message, "max", t.vector_type()),
+    )
+
+
+def serialize_box1(value: Box1) -> dict[str, Any]:
+    return {
+        "min": value.min,
+        "max": value.max,
+    }
+
+
+def deserialize_box1(message: dict[str, Any]) -> Box1:
+    return Box1(
+        min=get(message, "min", float),
+        max=get(message, "max", float),
     )

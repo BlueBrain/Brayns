@@ -18,7 +18,22 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from brayns import Box2, Box3, Vector2, Vector3
+from brayns import Box1, Box2, Box3, Vector2, Vector3
+
+
+def test_box1() -> None:
+    test = Box1(0, 1)
+    assert 0 in test
+    assert 1 in test
+    assert 0.5 in test
+    assert -1 not in test
+    assert 2 not in test
+
+    assert test.center == 0.5
+    assert test.size == 1
+
+    assert test.translate(1) == Box1(1, 2)
+    assert test.scale(2) == Box1(0, 2)
 
 
 def test_vector_type() -> None:

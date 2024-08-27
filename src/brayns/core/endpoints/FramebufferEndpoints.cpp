@@ -77,7 +77,8 @@ struct JsonObjectReflector<FramebufferParams>
             .description("If not null, the framebuffer will use accumulation with given settings");
         builder.field("imageOperations", [](auto &object) { return &object.imageOperations; })
             .description("List of image operation IDs that will be applied on the framebuffer")
-            .defaultValue(std::vector<ObjectId>());
+            .defaultValue(std::vector<ObjectId>())
+            .uniqueItems(true);
         return builder.build();
     }
 };
