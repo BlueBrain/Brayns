@@ -128,16 +128,11 @@ CameraInterface createCameraInterface(const std::shared_ptr<UserCamera<T>> &came
 template<ReflectedCamera T>
 UserCamera<T> &getCamera(ObjectManager &objects, ObjectId id)
 {
-    auto &interface = objects.get<CameraInterface>(id);
-    auto *ptr = std::any_cast<std::shared_ptr<UserCamera<T>>>(&interface.value);
+    auto stored = objects.getStored<CameraInterface>(id);
+    auto &interface = stored.get();
+    const auto &info = stored.getInfo();
 
-    if (ptr != nullptr)
-    {
-        return **ptr;
-    }
-
-    auto type = interface.getType();
-    throw InvalidParams(fmt::format("Invalid camera type for object {}: {}", id, type));
+    return castObject<UserCamera<T>>(interface.value, info);
 }
 
 template<ReflectedCamera T>
@@ -362,10 +357,50 @@ struct CameraReflector<OrthographicCamera>
     }
 };
 
+template<>
+struct JsonObjectReflector<PanoramicSettings>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<PanoramicSettings>();
+        builder.field("stereo", [](auto &object) { return &object.stereo; })
+            .description("Stereo settings, set to null to disable it");
+        return builder.build();
+    }
+};
+
+template<>
+struct CameraReflector<PanoramicCamera>
+{
+    using Settings = PanoramicSettings;
+
+    static std::string getType()
+    {
+        return "PanoramicCamera";
+    }
+
+    static PanoramicCamera create(Device &device, const CameraParams<PanoramicCamera> &params)
+    {
+        return createPanoramicCamera(device, params.base, params.derived);
+    }
+
+    static void update(PanoramicCamera &camera, const PanoramicSettings &settings)
+    {
+        camera.updatePanoramic(settings);
+    }
+
+    static void setAspect(PanoramicCamera &camera, float aspect)
+    {
+        (void)camera;
+        (void)aspect;
+    }
+};
+
 void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
     addCameraType<PerspectiveCamera>(builder, objects, device);
     addCameraType<OrthographicCamera>(builder, objects, device);
+    addCameraType<PanoramicCamera>(builder, objects, device);
 
     builder.endpoint("getCamera", [&](ObjectParams params) { return getCameraSettings(objects, params); })
         .description("Get the base properties of a camera of any type");

@@ -34,17 +34,21 @@ from brayns import (
     Z,
     clear_objects,
     create_orthographic_camera,
+    create_panoramic_camera,
     create_perspective_camera,
     get_camera_settings,
     get_object,
     get_orthographic_camera,
     get_orthographic_settings,
+    get_panoramic_camera,
+    get_panoramic_settings,
     get_perspective_camera,
     get_perspective_settings,
     remove_objects,
     update_camera_settings,
     update_object,
     update_orthographic_settings,
+    update_panoramic_settings,
     update_perspective_settings,
 )
 
@@ -136,6 +140,45 @@ async def test_orthographic_camera(connection: Connection) -> None:
     assert retreived.id == camera.id
     assert retreived.settings == camera.settings
     assert retreived.orthographic == camera.orthographic
+
+
+@pytest.mark.integration_test
+@pytest.mark.asyncio
+async def test_panoramic_camera(connection: Connection) -> None:
+    camera = await create_panoramic_camera(connection)
+
+    check_camera_defaults(camera)
+    assert camera.panoramic.stereo is None
+
+    await camera.pull(connection)
+
+    check_camera_defaults(camera)
+    assert camera.panoramic.stereo is None
+
+    camera.view.position = Vector3(1, 2, 3)
+    camera.panoramic.stereo = Stereo()
+    await camera.push(connection)
+
+    settings = await get_camera_settings(connection, camera.id)
+    assert camera.settings == settings
+
+    panoramic = await get_panoramic_settings(connection, camera.id)
+    assert camera.panoramic == panoramic
+
+    settings.near_clip = 10
+    await update_camera_settings(connection, camera.id, settings)
+
+    panoramic.stereo = Stereo()
+    await update_panoramic_settings(connection, camera.id, panoramic)
+
+    await camera.pull(connection)
+    assert camera.settings == settings
+    assert camera.panoramic == panoramic
+
+    retreived = await get_panoramic_camera(connection, camera.id)
+    assert retreived.id == camera.id
+    assert retreived.settings == camera.settings
+    assert retreived.panoramic == camera.panoramic
 
 
 @pytest.mark.integration_test

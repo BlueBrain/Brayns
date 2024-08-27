@@ -149,6 +149,20 @@ class Stereo:
     interpupillary_distance: float = 0.0635
 
 
+def serialize_stereo(stereo: Stereo) -> dict[str, Any]:
+    return {
+        "mode": stereo.mode.value,
+        "interpupillaryDistance": stereo.interpupillary_distance,
+    }
+
+
+def deserialize_stereo(message: dict[str, Any]) -> Stereo:
+    return Stereo(
+        mode=StereoMode(get(message, "mode", str)),
+        interpupillary_distance=get(message, "interpupillaryDistance", float),
+    )
+
+
 @dataclass
 class PerspectiveSettings:
     fovy: float = math.radians(45)
@@ -169,10 +183,7 @@ def serialize_perspective_settings(settings: PerspectiveSettings) -> dict[str, A
     stereo = None
 
     if settings.stereo is not None:
-        stereo = {
-            "mode": settings.stereo.mode.value,
-            "interpupillaryDistance": settings.stereo.interpupillary_distance,
-        }
+        stereo = serialize_stereo(settings.stereo)
 
     return {
         "fovy": math.degrees(settings.fovy),
@@ -194,10 +205,7 @@ def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSett
     stereo = try_get(message, "stereo", dict[str, Any])
 
     if stereo is not None:
-        stereo = Stereo(
-            mode=StereoMode(get(stereo, "mode", str)),
-            interpupillary_distance=get(stereo, "interpupillaryDistance", float),
-        )
+        stereo = deserialize_stereo(stereo)
 
     return PerspectiveSettings(
         fovy=math.radians(get(message, "fovy", float)),
@@ -334,4 +342,87 @@ async def get_orthographic_camera(connection: Connection, id: CameraId) -> Ortho
         id=id,
         settings=await get_camera_settings(connection, id),
         orthographic=await get_orthographic_settings(connection, id),
+    )
+
+
+@dataclass
+class PanoramicSettings:
+    stereo: Stereo | None = None
+
+
+def serialize_panoramic_settings(settings: PanoramicSettings) -> dict[str, Any]:
+    stereo = None
+
+    if settings.stereo is not None:
+        stereo = serialize_stereo(settings.stereo)
+
+    return {"stereo": stereo}
+
+
+def deserialize_panoramic_settings(message: dict[str, Any]) -> PanoramicSettings:
+    stereo = try_get(message, "stereo", dict[str, Any])
+
+    if stereo is not None:
+        stereo = deserialize_stereo(stereo)
+
+    return PanoramicSettings(stereo)
+
+
+async def get_panoramic_settings(connection: Connection, id: CameraId) -> PanoramicSettings:
+    result = await get_specific_object(connection, "PanoramicCamera", id)
+    return deserialize_panoramic_settings(result)
+
+
+async def update_panoramic_settings(connection: Connection, id: CameraId, settings: PanoramicSettings) -> None:
+    properties = serialize_panoramic_settings(settings)
+    await update_specific_object(connection, "PanoramicCamera", id, properties)
+
+
+def get_panoramic_distance(fovy: float, target_height: float) -> float:
+    return target_height / 2 / math.tan(fovy / 2)
+
+
+@dataclass
+class PanoramicProtocol(CameraProtocol):
+    settings: PanoramicSettings
+
+    async def push(self, connection: Connection, id: CameraId) -> None:
+        await update_panoramic_settings(connection, id, self.settings)
+
+    async def pull(self, connection: Connection, id: CameraId) -> None:
+        self.settings = await get_panoramic_settings(connection, id)
+
+    def look_at(self, target: Box3) -> float:
+        return 0
+
+
+class PanoramicCamera(Camera):
+    def __init__(self, id: CameraId, settings: CameraSettings, panoramic: PanoramicSettings) -> None:
+        self._panoramic = PanoramicProtocol(panoramic)
+        super().__init__(id, settings, self._panoramic)
+
+    @property
+    def panoramic(self) -> PanoramicSettings:
+        return self._panoramic.settings
+
+    @panoramic.setter
+    def panoramic(self, value: PanoramicSettings) -> None:
+        self._panoramic.settings = value
+
+
+async def create_panoramic_camera(
+    connection: Connection,
+    settings: CameraSettings = CameraSettings(),
+    panoramic: PanoramicSettings = PanoramicSettings(),
+) -> PanoramicCamera:
+    derived = serialize_panoramic_settings(panoramic)
+    id = await create_camera(connection, "PanoramicCamera", settings, derived)
+    return PanoramicCamera(id, replace(settings), replace(panoramic))
+
+
+async def get_panoramic_camera(connection: Connection, id: CameraId) -> PanoramicCamera:
+    return PanoramicCamera(
+        id=id,
+        settings=await get_camera_settings(connection, id),
+        panoramic=await get_panoramic_settings(connection, id),
     )
