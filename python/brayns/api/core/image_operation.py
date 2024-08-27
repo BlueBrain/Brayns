@@ -18,9 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC
-from dataclasses import dataclass, replace
-from typing import Any, NewType, Protocol
+from dataclasses import dataclass
+from typing import Any, NewType
 
 from brayns.network.connection import Connection
 from brayns.utils.parsing import get
@@ -33,27 +32,6 @@ ImageOperationId = NewType("ImageOperationId", int)
 async def create_image_operation(connection: Connection, typename: str, derived: dict[str, Any]) -> ImageOperationId:
     id = await create_composed_object(connection, typename, None, derived)
     return ImageOperationId(id)
-
-
-class ImageOperationProtocol(Protocol):
-    async def push(self, connection: Connection, id: ImageOperationId) -> None: ...
-    async def pull(self, connection: Connection, id: ImageOperationId) -> None: ...
-
-
-class ImageOperation(ABC):
-    def __init__(self, id: ImageOperationId, protocol: ImageOperationProtocol) -> None:
-        self._id = id
-        self._protocol = protocol
-
-    @property
-    def id(self) -> ImageOperationId:
-        return self._id
-
-    async def push(self, connection: Connection) -> None:
-        await self._protocol.push(connection, self._id)
-
-    async def pull(self, connection: Connection) -> None:
-        await self._protocol.pull(connection, self._id)
 
 
 @dataclass
@@ -91,49 +69,16 @@ def deserialize_tone_mapper_settings(message: dict[str, Any]) -> ToneMapperSetti
     )
 
 
-async def get_tone_mapper_settings(connection: Connection, id: ImageOperationId) -> ToneMapperSettings:
+async def create_tone_mapper(connection: Connection, settings: ToneMapperSettings) -> ImageOperationId:
+    derived = serialize_tone_mapper_settings(settings)
+    return await create_image_operation(connection, "ToneMapper", derived)
+
+
+async def get_tone_mapper(connection: Connection, id: ImageOperationId) -> ToneMapperSettings:
     result = await get_specific_object(connection, "ToneMapper", id)
     return deserialize_tone_mapper_settings(result)
 
 
-async def update_tone_mapper_settings(
-    connection: Connection, id: ImageOperationId, settings: ToneMapperSettings
-) -> None:
+async def update_tone_mapper(connection: Connection, id: ImageOperationId, settings: ToneMapperSettings) -> None:
     properties = serialize_tone_mapper_settings(settings)
     await update_specific_object(connection, "ToneMapper", id, properties)
-
-
-@dataclass
-class ToneMapperProtocol(ImageOperationProtocol):
-    settings: ToneMapperSettings
-
-    async def push(self, connection: Connection, id: ImageOperationId) -> None:
-        await update_tone_mapper_settings(connection, id, self.settings)
-
-    async def pull(self, connection: Connection, id: ImageOperationId) -> None:
-        self.settings = await get_tone_mapper_settings(connection, id)
-
-
-class ToneMapper(ImageOperation):
-    def __init__(self, id: ImageOperationId, settings: ToneMapperSettings) -> None:
-        self._tone_mapper = ToneMapperProtocol(settings)
-        super().__init__(id, self._tone_mapper)
-
-    @property
-    def settings(self) -> ToneMapperSettings:
-        return self._tone_mapper.settings
-
-
-async def create_tone_mapper(
-    connection: Connection, settings: ToneMapperSettings = ToneMapperSettings()
-) -> ToneMapper:
-    derived = serialize_tone_mapper_settings(settings)
-    id = await create_image_operation(connection, "ToneMapper", derived)
-    return ToneMapper(id, replace(settings))
-
-
-async def get_tone_mapper(connection: Connection, id: ImageOperationId) -> ToneMapper:
-    return ToneMapper(
-        id=id,
-        settings=await get_tone_mapper_settings(connection, id),
-    )

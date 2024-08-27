@@ -26,11 +26,13 @@ from brayns import (
     FramebufferChannel,
     FramebufferFormat,
     FramebufferSettings,
+    Resolution,
+    ToneMapperSettings,
     create_framebuffer,
     create_tone_mapper,
     get_framebuffer,
-    get_framebuffer_info,
     remove_objects,
+    update_framebuffer,
 )
 
 
@@ -38,7 +40,7 @@ from brayns import (
 @pytest.mark.asyncio
 async def test_framebuffer(connection: Connection) -> None:
     settings = FramebufferSettings(
-        resolution=(1920, 1080),
+        resolution=Resolution(1920, 1080),
         format=FramebufferFormat.RGBA32F,
         channels=set(FramebufferChannel),
         accumulation=Accumulation(variance=True),
@@ -46,43 +48,34 @@ async def test_framebuffer(connection: Connection) -> None:
 
     framebuffer = await create_framebuffer(connection, settings)
 
-    assert framebuffer.id == 1
-    assert framebuffer.settings == settings
-
-    retreived = await get_framebuffer(connection, framebuffer.id)
-
-    assert retreived.id == framebuffer.id
-    assert retreived.settings == framebuffer.settings
-
-    info = await get_framebuffer_info(connection, framebuffer.id)
+    info = await get_framebuffer(connection, framebuffer)
     assert info.settings == settings
+    assert info.variance is None
 
-    tone_mapper = await create_tone_mapper(connection)
-    framebuffer.image_operations = {tone_mapper.id}
+    tone_mapper_settings = ToneMapperSettings()
+    tone_mapper = await create_tone_mapper(connection, tone_mapper_settings)
 
-    await framebuffer.push(connection)
+    settings.image_operations = [tone_mapper]
+    await update_framebuffer(connection, framebuffer, settings.image_operations)
 
-    info = await get_framebuffer_info(connection, framebuffer.id)
-    assert info.settings == framebuffer.settings
-
-    framebuffer.image_operations = set()
-    await framebuffer.pull(connection)
-
-    assert framebuffer.image_operations == {tone_mapper.id}
+    info = await get_framebuffer(connection, framebuffer)
+    assert info.settings == settings
+    assert info.variance is None
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_remove_operations(connection: Connection) -> None:
-    tone_mapper = await create_tone_mapper(connection)
+    tone_mapper_settings = ToneMapperSettings()
+    tone_mapper = await create_tone_mapper(connection, tone_mapper_settings)
 
-    settings = FramebufferSettings(image_operations={tone_mapper.id})
+    settings = FramebufferSettings(image_operations=[tone_mapper])
     framebuffer = await create_framebuffer(connection, settings)
 
-    before_remove = await get_framebuffer_info(connection, framebuffer.id)
-    assert before_remove.settings.image_operations == {tone_mapper.id}
+    before_remove = await get_framebuffer(connection, framebuffer)
+    assert before_remove.settings.image_operations == [tone_mapper]
 
-    await remove_objects(connection, [tone_mapper.id])
+    await remove_objects(connection, [tone_mapper])
 
-    after_remove = await get_framebuffer_info(connection, framebuffer.id)
-    assert after_remove.settings.image_operations == {0}
+    after_remove = await get_framebuffer(connection, framebuffer)
+    assert after_remove.settings.image_operations == [0]

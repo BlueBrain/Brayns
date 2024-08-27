@@ -18,9 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from abc import ABC
-from dataclasses import dataclass, field, replace
-from typing import Any, NewType, Protocol
+from dataclasses import dataclass, field
+from typing import Any, NewType
 
 from brayns.network.connection import Connection
 from brayns.utils.box import Box1
@@ -37,27 +36,6 @@ async def create_transfer_function(
 ) -> TransferFunctionId:
     id = await create_composed_object(connection, typename, None, derived)
     return TransferFunctionId(id)
-
-
-class TransferFunctionProtocol(Protocol):
-    async def push(self, connection: Connection, id: TransferFunctionId) -> None: ...
-    async def pull(self, connection: Connection, id: TransferFunctionId) -> None: ...
-
-
-class TransferFunction(ABC):
-    def __init__(self, id: TransferFunctionId, protocol: TransferFunctionProtocol) -> None:
-        self._id = id
-        self._protocol = protocol
-
-    @property
-    def id(self) -> TransferFunctionId:
-        return self._id
-
-    async def push(self, connection: Connection) -> None:
-        await self._protocol.push(connection, self._id)
-
-    async def pull(self, connection: Connection) -> None:
-        await self._protocol.pull(connection, self._id)
 
 
 @dataclass
@@ -80,51 +58,22 @@ def deserialize_linear_transfer_function_settings(message: dict[str, Any]) -> Li
     )
 
 
-async def get_linear_transfer_function_settings(
+async def create_linear_transfer_function(
+    connection: Connection, settings: LinearTransferFunctionSettings
+) -> TransferFunctionId:
+    derived = serialize_linear_transfer_function_settings(settings)
+    return await create_transfer_function(connection, "LinearTransferFunction", derived)
+
+
+async def get_linear_transfer_function(
     connection: Connection, id: TransferFunctionId
 ) -> LinearTransferFunctionSettings:
     result = await get_specific_object(connection, "LinearTransferFunction", id)
     return deserialize_linear_transfer_function_settings(result)
 
 
-async def update_linear_transfer_function_settings(
+async def update_linear_transfer_function(
     connection: Connection, id: TransferFunctionId, settings: LinearTransferFunctionSettings
 ) -> None:
     properties = serialize_linear_transfer_function_settings(settings)
     await update_specific_object(connection, "LinearTransferFunction", id, properties)
-
-
-@dataclass
-class LinearTransferFunctionProtocol(TransferFunctionProtocol):
-    settings: LinearTransferFunctionSettings
-
-    async def push(self, connection: Connection, id: TransferFunctionId) -> None:
-        await update_linear_transfer_function_settings(connection, id, self.settings)
-
-    async def pull(self, connection: Connection, id: TransferFunctionId) -> None:
-        self.settings = await get_linear_transfer_function_settings(connection, id)
-
-
-class LinearTransferFunction(TransferFunction):
-    def __init__(self, id: TransferFunctionId, settings: LinearTransferFunctionSettings) -> None:
-        self._tone_mapper = LinearTransferFunctionProtocol(settings)
-        super().__init__(id, self._tone_mapper)
-
-    @property
-    def settings(self) -> LinearTransferFunctionSettings:
-        return self._tone_mapper.settings
-
-
-async def create_linear_transfer_function(
-    connection: Connection, settings: LinearTransferFunctionSettings = LinearTransferFunctionSettings()
-) -> LinearTransferFunction:
-    derived = serialize_linear_transfer_function_settings(settings)
-    id = await create_transfer_function(connection, "LinearTransferFunction", derived)
-    return LinearTransferFunction(id, replace(settings))
-
-
-async def get_linear_transfer_function(connection: Connection, id: TransferFunctionId) -> LinearTransferFunction:
-    return LinearTransferFunction(
-        id=id,
-        settings=await get_linear_transfer_function_settings(connection, id),
-    )

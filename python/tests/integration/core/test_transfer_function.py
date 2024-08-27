@@ -22,13 +22,11 @@ import pytest
 
 from brayns import (
     Box1,
-    Color4,
     Connection,
     LinearTransferFunctionSettings,
     create_linear_transfer_function,
     get_linear_transfer_function,
-    get_linear_transfer_function_settings,
-    update_linear_transfer_function_settings,
+    update_linear_transfer_function,
 )
 
 
@@ -36,23 +34,11 @@ from brayns import (
 @pytest.mark.asyncio
 async def test_linear_transfer_function(connection: Connection) -> None:
     settings = LinearTransferFunctionSettings()
-    linear_transfer_function = await create_linear_transfer_function(connection, settings)
+    function = await create_linear_transfer_function(connection, settings)
 
-    assert linear_transfer_function.id == 1
-    assert linear_transfer_function.settings == settings
+    assert settings == await get_linear_transfer_function(connection, function)
 
-    retreived = await get_linear_transfer_function(connection, linear_transfer_function.id)
-    assert retreived.id == linear_transfer_function.id
-    assert retreived.settings == linear_transfer_function.settings
+    settings.scalar_range = Box1(-1, 2)
+    await update_linear_transfer_function(connection, function, settings)
 
-    linear_transfer_function.settings.scalar_range = Box1(-1, 2)
-    await linear_transfer_function.push(connection)
-
-    settings = await get_linear_transfer_function_settings(connection, linear_transfer_function.id)
-    assert settings == linear_transfer_function.settings
-
-    settings.colors = [Color4(0, 1, 0)]
-    await update_linear_transfer_function_settings(connection, linear_transfer_function.id, settings)
-
-    await linear_transfer_function.pull(connection)
-    assert linear_transfer_function.settings == settings
+    assert settings == await get_linear_transfer_function(connection, function)

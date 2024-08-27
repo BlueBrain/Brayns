@@ -18,201 +18,139 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import math
 
 import pytest
 
 from brayns import (
-    Camera,
+    CameraSettings,
     Connection,
-    DepthOfField,
     JsonRpcError,
+    OrthographicSettings,
+    PanoramicSettings,
+    PerspectiveSettings,
     Stereo,
-    Vector2,
-    Vector3,
-    Y,
-    Z,
     clear_objects,
     create_orthographic_camera,
     create_panoramic_camera,
     create_perspective_camera,
-    get_camera_settings,
+    get_camera,
     get_object,
     get_orthographic_camera,
-    get_orthographic_settings,
     get_panoramic_camera,
-    get_panoramic_settings,
     get_perspective_camera,
-    get_perspective_settings,
     remove_objects,
-    update_camera_settings,
+    update_camera,
     update_object,
-    update_orthographic_settings,
-    update_panoramic_settings,
-    update_perspective_settings,
+    update_orthographic_camera,
+    update_panoramic_camera,
+    update_perspective_camera,
 )
 
 
-def check_camera_defaults(camera: Camera) -> None:
-    assert camera.id == 1
-    assert camera.view.position == Vector3()
-    assert camera.view.direction == -Z
-    assert camera.view.up == Y
-    assert camera.settings.near_clip == 0
-    assert camera.settings.image_region.min == Vector2(0, 0)
-    assert camera.settings.image_region.max == Vector2(1, 1)
+def check_perspective(left: PerspectiveSettings, right: PerspectiveSettings) -> None:
+    assert left.architectural == right.architectural
+    assert left.depth_of_field == right.depth_of_field
+    assert left.stereo == right.stereo
+    assert left.fovy == pytest.approx(right.fovy)
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_perspective_camera(connection: Connection) -> None:
-    camera = await create_perspective_camera(connection)
+    settings = CameraSettings()
+    perspective = PerspectiveSettings(fovy=1.0)
+    camera = await create_perspective_camera(connection, settings, perspective)
 
-    check_camera_defaults(camera)
-    assert camera.perspective.fovy == pytest.approx(math.radians(45))
+    assert settings == await get_camera(connection, camera)
 
-    await camera.pull(connection)
-    check_camera_defaults(camera)
-    assert camera.perspective.fovy == pytest.approx(math.radians(45))
+    check_perspective(perspective, await get_perspective_camera(connection, camera))
 
-    camera.view.position = Vector3(1, 2, 3)
-    camera.perspective.fovy = math.radians(60)
-    camera.perspective.depth_of_field = DepthOfField()
-    camera.perspective.stereo = Stereo()
-    await camera.push(connection)
+    settings.near_clip = 3
+    await update_camera(connection, camera, settings)
 
-    settings = await get_camera_settings(connection, camera.id)
-    assert camera.settings == settings
+    perspective.stereo = Stereo()
+    await update_perspective_camera(connection, camera, perspective)
 
-    perspective = await get_perspective_settings(connection, camera.id)
-    assert perspective == camera.perspective
+    assert settings == await get_camera(connection, camera)
 
-    settings.near_clip = 10
-    await update_camera_settings(connection, camera.id, settings)
-
-    perspective.fovy = math.radians(30)
-    await update_perspective_settings(connection, camera.id, perspective)
-
-    await camera.pull(connection)
-    assert camera.settings == settings
-    assert camera.perspective.fovy == pytest.approx(perspective.fovy)
-
-    retreived = await get_perspective_camera(connection, camera.id)
-    assert retreived.id == camera.id
-    assert retreived.settings == camera.settings
-    assert retreived.perspective == camera.perspective
+    check_perspective(perspective, await get_perspective_camera(connection, camera))
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_orthographic_camera(connection: Connection) -> None:
-    camera = await create_orthographic_camera(connection)
+    settings = CameraSettings()
+    orthographic = OrthographicSettings(height=2.0)
+    camera = await create_orthographic_camera(connection, settings, orthographic)
 
-    check_camera_defaults(camera)
-    assert camera.orthographic.height == 1
+    assert settings == await get_camera(connection, camera)
+    assert orthographic == await get_orthographic_camera(connection, camera)
 
-    await camera.pull(connection)
+    settings.near_clip = 3
+    await update_camera(connection, camera, settings)
 
-    check_camera_defaults(camera)
-    assert camera.orthographic.height == 1
+    orthographic.height = 3.0
+    await update_orthographic_camera(connection, camera, orthographic)
 
-    camera.view.position = Vector3(1, 2, 3)
-    camera.orthographic.height = 2
-    await camera.push(connection)
-
-    settings = await get_camera_settings(connection, camera.id)
-    assert camera.settings == settings
-
-    orthographic = await get_orthographic_settings(connection, camera.id)
-    assert camera.orthographic == orthographic
-
-    settings.near_clip = 10
-    await update_camera_settings(connection, camera.id, settings)
-
-    orthographic.height = 3
-    await update_orthographic_settings(connection, camera.id, orthographic)
-
-    await camera.pull(connection)
-    assert camera.settings == settings
-    assert camera.orthographic == orthographic
-
-    retreived = await get_orthographic_camera(connection, camera.id)
-    assert retreived.id == camera.id
-    assert retreived.settings == camera.settings
-    assert retreived.orthographic == camera.orthographic
+    assert settings == await get_camera(connection, camera)
+    assert orthographic == await get_orthographic_camera(connection, camera)
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_panoramic_camera(connection: Connection) -> None:
-    camera = await create_panoramic_camera(connection)
+    settings = CameraSettings()
+    panoramic = PanoramicSettings()
+    camera = await create_panoramic_camera(connection, settings, panoramic)
 
-    check_camera_defaults(camera)
-    assert camera.panoramic.stereo is None
+    assert settings == await get_camera(connection, camera)
+    assert panoramic == await get_panoramic_camera(connection, camera)
 
-    await camera.pull(connection)
-
-    check_camera_defaults(camera)
-    assert camera.panoramic.stereo is None
-
-    camera.view.position = Vector3(1, 2, 3)
-    camera.panoramic.stereo = Stereo()
-    await camera.push(connection)
-
-    settings = await get_camera_settings(connection, camera.id)
-    assert camera.settings == settings
-
-    panoramic = await get_panoramic_settings(connection, camera.id)
-    assert camera.panoramic == panoramic
-
-    settings.near_clip = 10
-    await update_camera_settings(connection, camera.id, settings)
+    settings.near_clip = 3
+    await update_camera(connection, camera, settings)
 
     panoramic.stereo = Stereo()
-    await update_panoramic_settings(connection, camera.id, panoramic)
+    await update_panoramic_camera(connection, camera, panoramic)
 
-    await camera.pull(connection)
-    assert camera.settings == settings
-    assert camera.panoramic == panoramic
-
-    retreived = await get_panoramic_camera(connection, camera.id)
-    assert retreived.id == camera.id
-    assert retreived.settings == camera.settings
-    assert retreived.panoramic == camera.panoramic
+    assert settings == await get_camera(connection, camera)
+    assert panoramic == await get_panoramic_camera(connection, camera)
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_object_management(connection: Connection) -> None:
-    camera1 = await create_perspective_camera(connection)
-    camera2 = await create_orthographic_camera(connection)
-    camera3 = await create_orthographic_camera(connection)
+    settings = CameraSettings()
+    perspective = PerspectiveSettings()
+    orthographic = OrthographicSettings()
 
-    await update_object(connection, camera1.id, "test")
+    camera1 = await create_perspective_camera(connection, settings, perspective)
+    camera2 = await create_orthographic_camera(connection, settings, orthographic)
 
-    object1 = await get_object(connection, camera1.id)
+    with pytest.raises(JsonRpcError):
+        await get_orthographic_camera(connection, camera1)
 
-    assert object1.id == camera1.id
+    await update_object(connection, camera1, "test")
+
+    object1 = await get_object(connection, camera1)
+
+    assert object1.id == camera1
     assert object1.type == "PerspectiveCamera"
     assert object1.user_data == "test"
 
-    object2 = await get_object(connection, camera2.id)
+    object2 = await get_object(connection, camera2)
 
-    assert object2.id == camera2.id
+    assert object2.id == camera2
     assert object2.type == "OrthographicCamera"
     assert object2.user_data is None
 
-    await remove_objects(connection, [camera1.id, camera2.id])
+    await remove_objects(connection, [camera1])
 
     with pytest.raises(JsonRpcError):
-        await get_object(connection, camera1.id)
+        await get_object(connection, camera1)
 
-    with pytest.raises(JsonRpcError):
-        await get_object(connection, camera2.id)
-
-    await get_object(connection, camera3.id)
+    await get_object(connection, camera2)
 
     await clear_objects(connection)
 
     with pytest.raises(JsonRpcError):
-        await get_object(connection, camera3.id)
+        await get_object(connection, camera2)

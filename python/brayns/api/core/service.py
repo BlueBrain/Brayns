@@ -94,9 +94,6 @@ class TaskInfo:
         return index == self.operation_count - 1 and completion == 1.0
 
 
-T = TypeVar("T")
-
-
 def deserialize_task(message: dict[str, Any]) -> TaskInfo:
     operation = get(message, "currentOperation", dict[str, Any])
 
@@ -137,6 +134,13 @@ async def get_task_result(connection: Connection, task_id: int) -> Response:
     return await connection.request("getTaskResult", {"taskId": task_id})
 
 
+async def stop_service(connection: Connection) -> None:
+    await connection.get_result("stop")
+
+
+T = TypeVar("T")
+
+
 class Task(Generic[T]):
     def __init__(self, connection: Connection, id: int, parser: Callable[[Response], T]) -> None:
         self._connection = connection
@@ -160,7 +164,3 @@ class Task(Generic[T]):
     async def wait(self) -> T:
         result = await get_task_result(self._connection, self._id)
         return self._parser(result)
-
-
-async def stop_service(connection: Connection) -> None:
-    await connection.get_result("stop")

@@ -25,8 +25,7 @@ from brayns import (
     ToneMapperSettings,
     create_tone_mapper,
     get_tone_mapper,
-    get_tone_mapper_settings,
-    update_tone_mapper_settings,
+    update_tone_mapper,
 )
 
 
@@ -36,21 +35,9 @@ async def test_tone_mapper(connection: Connection) -> None:
     settings = ToneMapperSettings()
     tone_mapper = await create_tone_mapper(connection, settings)
 
-    assert tone_mapper.id == 1
-    assert tone_mapper.settings == settings
+    assert settings == await get_tone_mapper(connection, tone_mapper)
 
-    retreived = await get_tone_mapper(connection, tone_mapper.id)
-    assert retreived.id == tone_mapper.id
-    assert retreived.settings == tone_mapper.settings
+    settings.aces_color = False
+    await update_tone_mapper(connection, tone_mapper, settings)
 
-    tone_mapper.settings.aces_color = False
-    await tone_mapper.push(connection)
-
-    settings = await get_tone_mapper_settings(connection, tone_mapper.id)
-    assert settings == tone_mapper.settings
-
-    settings.contrast = 2
-    await update_tone_mapper_settings(connection, tone_mapper.id, settings)
-
-    await tone_mapper.pull(connection)
-    assert tone_mapper.settings == settings
+    assert settings == await get_tone_mapper(connection, tone_mapper)

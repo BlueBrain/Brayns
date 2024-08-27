@@ -19,16 +19,15 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import math
-from abc import ABC
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, NewType, Protocol
+from typing import Any, NewType
 
 from brayns.network.connection import Connection
-from brayns.utils.box import Box2, Box3
+from brayns.utils.box import Box2
 from brayns.utils.parsing import deserialize_box, deserialize_vector, get, serialize_box, try_get
 from brayns.utils.vector import Vector2, Vector3
-from brayns.utils.view import View, Z
+from brayns.utils.view import View
 
 from .objects import create_composed_object, get_specific_object, update_specific_object
 
@@ -39,7 +38,7 @@ CameraId = NewType("CameraId", int)
 class CameraSettings:
     view: View = field(default_factory=View)
     near_clip: float = 0.0
-    image_region: Box2 = Box2(Vector2.zeros(), Vector2.ones())
+    image_region: Box2 = Box2(Vector2(0, 0), Vector2(1, 1))
 
 
 def serialize_camera_settings(settings: CameraSettings) -> dict[str, Any]:
@@ -72,61 +71,14 @@ async def create_camera(
     return CameraId(id)
 
 
-async def get_camera_settings(connection: Connection, id: CameraId) -> CameraSettings:
+async def get_camera(connection: Connection, id: CameraId) -> CameraSettings:
     result = await get_specific_object(connection, "Camera", id)
     return deserialize_camera_settings(result)
 
 
-async def update_camera_settings(connection: Connection, id: CameraId, settings: CameraSettings) -> None:
+async def update_camera(connection: Connection, id: CameraId, settings: CameraSettings) -> None:
     properties = serialize_camera_settings(settings)
     await update_specific_object(connection, "Camera", id, properties)
-
-
-class CameraProtocol(Protocol):
-    async def push(self, connection: Connection, id: CameraId) -> None: ...
-    async def pull(self, connection: Connection, id: CameraId) -> None: ...
-    def look_at(self, target: Box3) -> float: ...
-
-
-class Camera(ABC):
-    def __init__(self, id: CameraId, settings: CameraSettings, protocol: CameraProtocol) -> None:
-        self._id = id
-        self._settings = settings
-        self._protocol = protocol
-
-    @property
-    def id(self) -> CameraId:
-        return self._id
-
-    @property
-    def settings(self) -> CameraSettings:
-        return self._settings
-
-    @settings.setter
-    def settings(self, value: CameraSettings) -> None:
-        self._settings = value
-
-    @property
-    def view(self) -> View:
-        return self._settings.view
-
-    @view.setter
-    def view(self, value: View) -> None:
-        self._settings.view = value
-
-    async def push(self, connection: Connection) -> None:
-        await update_camera_settings(connection, self._id, self._settings)
-        await self._protocol.push(connection, self._id)
-
-    async def pull(self, connection: Connection) -> None:
-        self._settings = await get_camera_settings(connection, self._id)
-        await self._protocol.pull(connection, self._id)
-
-    def look_at(self, target: Box3) -> None:
-        distance = self._protocol.look_at(target)
-        distance = max(distance, self.settings.near_clip)
-        distance += target.depth / 2
-        self.view = View(position=distance * Z)
 
 
 @dataclass
@@ -215,64 +167,21 @@ def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSett
     )
 
 
-async def get_perspective_settings(connection: Connection, id: CameraId) -> PerspectiveSettings:
+async def create_perspective_camera(
+    connection: Connection, settings: CameraSettings, perspective: PerspectiveSettings
+) -> CameraId:
+    derived = serialize_perspective_settings(perspective)
+    return await create_camera(connection, "PerspectiveCamera", settings, derived)
+
+
+async def get_perspective_camera(connection: Connection, id: CameraId) -> PerspectiveSettings:
     result = await get_specific_object(connection, "PerspectiveCamera", id)
     return deserialize_perspective_settings(result)
 
 
-async def update_perspective_settings(connection: Connection, id: CameraId, settings: PerspectiveSettings) -> None:
+async def update_perspective_camera(connection: Connection, id: CameraId, settings: PerspectiveSettings) -> None:
     properties = serialize_perspective_settings(settings)
     await update_specific_object(connection, "PerspectiveCamera", id, properties)
-
-
-def get_perspective_distance(fovy: float, target_height: float) -> float:
-    return target_height / 2 / math.tan(fovy / 2)
-
-
-@dataclass
-class PerspectiveProtocol(CameraProtocol):
-    settings: PerspectiveSettings
-
-    async def push(self, connection: Connection, id: CameraId) -> None:
-        await update_perspective_settings(connection, id, self.settings)
-
-    async def pull(self, connection: Connection, id: CameraId) -> None:
-        self.settings = await get_perspective_settings(connection, id)
-
-    def look_at(self, target: Box3) -> float:
-        return get_perspective_distance(self.settings.fovy, target.height)
-
-
-class PerspectiveCamera(Camera):
-    def __init__(self, id: CameraId, settings: CameraSettings, perspective: PerspectiveSettings) -> None:
-        self._perspective = PerspectiveProtocol(perspective)
-        super().__init__(id, settings, self._perspective)
-
-    @property
-    def perspective(self) -> PerspectiveSettings:
-        return self._perspective.settings
-
-    @perspective.setter
-    def perspective(self, value: PerspectiveSettings) -> None:
-        self._perspective.settings = value
-
-
-async def create_perspective_camera(
-    connection: Connection,
-    settings: CameraSettings = CameraSettings(),
-    perspective: PerspectiveSettings = PerspectiveSettings(),
-) -> PerspectiveCamera:
-    derived = serialize_perspective_settings(perspective)
-    id = await create_camera(connection, "PerspectiveCamera", settings, derived)
-    return PerspectiveCamera(id, replace(settings), replace(perspective))
-
-
-async def get_perspective_camera(connection: Connection, id: CameraId) -> PerspectiveCamera:
-    return PerspectiveCamera(
-        id=id,
-        settings=await get_camera_settings(connection, id),
-        perspective=await get_perspective_settings(connection, id),
-    )
 
 
 @dataclass
@@ -288,61 +197,21 @@ def deserialize_orthographic_settings(message: dict[str, Any]) -> OrthographicSe
     return OrthographicSettings(height=get(message, "height", float))
 
 
-async def get_orthographic_settings(connection: Connection, id: CameraId) -> OrthographicSettings:
+async def create_orthographic_camera(
+    connection: Connection, settings: CameraSettings, orthographic: OrthographicSettings
+) -> CameraId:
+    derived = serialize_orthographic_settings(orthographic)
+    return await create_camera(connection, "OrthographicCamera", settings, derived)
+
+
+async def get_orthographic_camera(connection: Connection, id: CameraId) -> OrthographicSettings:
     result = await get_specific_object(connection, "OrthographicCamera", id)
     return deserialize_orthographic_settings(result)
 
 
-async def update_orthographic_settings(connection: Connection, id: CameraId, settings: OrthographicSettings) -> None:
+async def update_orthographic_camera(connection: Connection, id: CameraId, settings: OrthographicSettings) -> None:
     properties = serialize_orthographic_settings(settings)
     await update_specific_object(connection, "OrthographicCamera", id, properties)
-
-
-@dataclass
-class OrthographicProtocol(CameraProtocol):
-    settings: OrthographicSettings
-
-    async def push(self, connection: Connection, id: CameraId) -> None:
-        await update_orthographic_settings(connection, id, self.settings)
-
-    async def pull(self, connection: Connection, id: CameraId) -> None:
-        self.settings = await get_orthographic_settings(connection, id)
-
-    def look_at(self, target: Box3) -> float:
-        self.settings.height = target.height
-        return 0
-
-
-class OrthographicCamera(Camera):
-    def __init__(self, id: CameraId, settings: CameraSettings, orthographic: OrthographicSettings) -> None:
-        self._orthographic = OrthographicProtocol(orthographic)
-        super().__init__(id, settings, self._orthographic)
-
-    @property
-    def orthographic(self) -> OrthographicSettings:
-        return self._orthographic.settings
-
-    @orthographic.setter
-    def orthographic(self, value: OrthographicSettings) -> None:
-        self._orthographic.settings = value
-
-
-async def create_orthographic_camera(
-    connection: Connection,
-    settings: CameraSettings = CameraSettings(),
-    orthographic: OrthographicSettings = OrthographicSettings(),
-) -> OrthographicCamera:
-    derived = serialize_orthographic_settings(orthographic)
-    id = await create_camera(connection, "OrthographicCamera", settings, derived)
-    return OrthographicCamera(id, replace(settings), replace(orthographic))
-
-
-async def get_orthographic_camera(connection: Connection, id: CameraId) -> OrthographicCamera:
-    return OrthographicCamera(
-        id=id,
-        settings=await get_camera_settings(connection, id),
-        orthographic=await get_orthographic_settings(connection, id),
-    )
 
 
 @dataclass
@@ -368,61 +237,18 @@ def deserialize_panoramic_settings(message: dict[str, Any]) -> PanoramicSettings
     return PanoramicSettings(stereo)
 
 
-async def get_panoramic_settings(connection: Connection, id: CameraId) -> PanoramicSettings:
+async def create_panoramic_camera(
+    connection: Connection, settings: CameraSettings, panoramic: PanoramicSettings
+) -> CameraId:
+    derived = serialize_panoramic_settings(panoramic)
+    return await create_camera(connection, "PanoramicCamera", settings, derived)
+
+
+async def get_panoramic_camera(connection: Connection, id: CameraId) -> PanoramicSettings:
     result = await get_specific_object(connection, "PanoramicCamera", id)
     return deserialize_panoramic_settings(result)
 
 
-async def update_panoramic_settings(connection: Connection, id: CameraId, settings: PanoramicSettings) -> None:
+async def update_panoramic_camera(connection: Connection, id: CameraId, settings: PanoramicSettings) -> None:
     properties = serialize_panoramic_settings(settings)
     await update_specific_object(connection, "PanoramicCamera", id, properties)
-
-
-def get_panoramic_distance(fovy: float, target_height: float) -> float:
-    return target_height / 2 / math.tan(fovy / 2)
-
-
-@dataclass
-class PanoramicProtocol(CameraProtocol):
-    settings: PanoramicSettings
-
-    async def push(self, connection: Connection, id: CameraId) -> None:
-        await update_panoramic_settings(connection, id, self.settings)
-
-    async def pull(self, connection: Connection, id: CameraId) -> None:
-        self.settings = await get_panoramic_settings(connection, id)
-
-    def look_at(self, target: Box3) -> float:
-        return 0
-
-
-class PanoramicCamera(Camera):
-    def __init__(self, id: CameraId, settings: CameraSettings, panoramic: PanoramicSettings) -> None:
-        self._panoramic = PanoramicProtocol(panoramic)
-        super().__init__(id, settings, self._panoramic)
-
-    @property
-    def panoramic(self) -> PanoramicSettings:
-        return self._panoramic.settings
-
-    @panoramic.setter
-    def panoramic(self, value: PanoramicSettings) -> None:
-        self._panoramic.settings = value
-
-
-async def create_panoramic_camera(
-    connection: Connection,
-    settings: CameraSettings = CameraSettings(),
-    panoramic: PanoramicSettings = PanoramicSettings(),
-) -> PanoramicCamera:
-    derived = serialize_panoramic_settings(panoramic)
-    id = await create_camera(connection, "PanoramicCamera", settings, derived)
-    return PanoramicCamera(id, replace(settings), replace(panoramic))
-
-
-async def get_panoramic_camera(connection: Connection, id: CameraId) -> PanoramicCamera:
-    return PanoramicCamera(
-        id=id,
-        settings=await get_camera_settings(connection, id),
-        panoramic=await get_panoramic_settings(connection, id),
-    )
