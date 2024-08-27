@@ -33,5 +33,6 @@
 #include "types/Objects.h"
 #include "types/Primitives.h"
 #include "types/Schema.h"
+#include "types/Sets.h"
 #include "types/Variants.h"
 #include "types/Vectors.h"

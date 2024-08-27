@@ -21,16 +21,15 @@
 
 #pragma once
 
-#include <deque>
-#include <list>
-#include <vector>
+#include <set>
+#include <unordered_set>
 
 #include "Primitives.h"
 
 namespace brayns
 {
 template<typename T>
-struct JsonArrayReflector
+struct JsonSetReflector
 {
     using ValueType = typename T::value_type;
 
@@ -39,6 +38,7 @@ struct JsonArrayReflector
         return {
             .type = JsonType::Array,
             .items = {getJsonSchema<ValueType>()},
+            .uniqueItems = true,
         };
     }
 
@@ -64,7 +64,12 @@ struct JsonArrayReflector
         for (const auto &jsonItem : array)
         {
             auto item = deserializeAs<ValueType>(jsonItem);
-            value.push_back(std::move(item));
+            auto [i, inserted] = value.insert(std::move(item));
+
+            if (!inserted)
+            {
+                throw JsonException("Duplicated item in set");
+            }
         }
 
         return value;
@@ -72,17 +77,12 @@ struct JsonArrayReflector
 };
 
 template<typename T>
-struct JsonReflector<std::vector<T>> : JsonArrayReflector<std::vector<T>>
+struct JsonReflector<std::set<T>> : JsonSetReflector<std::set<T>>
 {
 };
 
 template<typename T>
-struct JsonReflector<std::deque<T>> : JsonArrayReflector<std::deque<T>>
-{
-};
-
-template<typename T>
-struct JsonReflector<std::list<T>> : JsonArrayReflector<std::list<T>>
+struct JsonReflector<std::unordered_set<T>> : JsonSetReflector<std::unordered_set<T>>
 {
 };
 }

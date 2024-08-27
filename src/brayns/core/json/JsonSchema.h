@@ -168,6 +168,7 @@ struct JsonSchema
     std::optional<double> minimum = {};
     std::optional<double> maximum = {};
     std::vector<JsonSchema> items = {};
+    bool uniqueItems = false;
     std::optional<std::size_t> minItems = {};
     std::optional<std::size_t> maxItems = {};
     std::map<std::string, JsonSchema> properties = {};

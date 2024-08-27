@@ -176,14 +176,23 @@ TEST_CASE("Array")
 {
     CHECK_EQ(
         getJsonSchema<std::vector<std::string>>(),
-        JsonSchema{.type = JsonType::Array, .items = {JsonSchema{.type = JsonType::String}}});
+        JsonSchema{
+            .type = JsonType::Array,
+            .items = {JsonSchema{.type = JsonType::String}},
+        });
     CHECK_EQ(parseJsonAs<std::vector<int>>("[1,2,3]"), std::vector<int>{1, 2, 3});
     CHECK_EQ(stringifyToJson(std::vector<int>{1, 2, 3}), "[1,2,3]");
 }
 
 TEST_CASE("Set")
 {
-    CHECK_EQ(getJsonSchema<std::set<std::string>>(), getJsonSchema<std::vector<std::string>>());
+    CHECK_EQ(
+        getJsonSchema<std::set<std::string>>(),
+        JsonSchema{
+            .type = JsonType::Array,
+            .items = {JsonSchema{.type = JsonType::String}},
+            .uniqueItems = true,
+        });
     CHECK_EQ(parseJsonAs<std::set<int>>("[1,2,3]"), std::set<int>{1, 2, 3});
     CHECK_EQ(stringifyToJson(std::set<int>{1, 2, 3}), "[1,2,3]");
 }
