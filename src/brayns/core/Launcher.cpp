@@ -68,6 +68,14 @@ WebSocketServerSettings extractServerSettings(const ServiceSettings &settings)
     };
 }
 
+DeviceSettings extractDeviceSettings(const ServiceSettings &settings)
+{
+    return {
+        .threadCount = settings.deviceThreadCount,
+        .affinity = settings.deviceAffinity,
+    };
+}
+
 void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 {
     auto level = getEnumValue<LogLevel>(settings.logLevel);
@@ -75,7 +83,9 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     logger.info("{}", getCopyright());
 
-    auto device = createDevice(logger);
+    auto deviceSettings = extractDeviceSettings(settings);
+
+    auto device = createDevice(logger, deviceSettings);
     logger.info("OSPRay device version: {}", device.getVersion());
 
     logger.debug("Service options:{}", stringifyArgvSettings(settings));
