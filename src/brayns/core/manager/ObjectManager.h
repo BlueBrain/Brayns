@@ -28,7 +28,7 @@
 #include <brayns/core/utils/IdGenerator.h>
 
 #include "Messages.h"
-#include "UserObject.h"
+#include "Object.h"
 
 namespace brayns
 {
@@ -41,30 +41,28 @@ public:
     void remove(ObjectId id);
     void clear();
 
-    template<ReflectedObject T>
+    template<typename T>
     T &get(ObjectId id) const
     {
         return getShared<T>(id)->value;
     }
 
-    template<ReflectedObject T>
+    template<typename T>
     Stored<T> getStored(ObjectId id) const
     {
         return Stored<T>(getShared<T>(id));
     }
 
-    template<ReflectedObject T>
-    Stored<T> add(T object)
+    template<typename T>
+    Stored<T> add(T object, std::string type)
     {
         auto id = _ids.next();
 
         try
         {
-            auto info = ObjectInfo{id, getObjectType(object)};
-            auto user = UserObjectOf<T>{std::move(info), std::move(object)};
+            auto info = ObjectInfo{id, std::move(type)};
+            auto user = ObjectStorage<T>{std::move(info), std::move(object)};
             auto ptr = std::make_shared<decltype(user)>(std::move(user));
-
-            addObject(ptr->value, id);
 
             auto interface = createObjectInterface(ptr);
 
@@ -85,12 +83,12 @@ private:
 
     const ObjectInterface &getInterface(ObjectId id) const;
 
-    template<ReflectedObject T>
-    const std::shared_ptr<UserObjectOf<T>> &getShared(ObjectId id) const
+    template<typename T>
+    const std::shared_ptr<ObjectStorage<T>> &getShared(ObjectId id) const
     {
         const auto &interface = getInterface(id);
 
-        return castSharedObject<UserObjectOf<T>>(interface.value, interface.getInfo());
+        return castObjectAsShared<ObjectStorage<T>>(interface.value, interface.getInfo());
     }
 };
 }

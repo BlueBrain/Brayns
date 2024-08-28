@@ -33,17 +33,7 @@ namespace brayns
 struct TransferFunctionInterface
 {
     std::any value;
-    std::function<std::string()> getType;
     std::function<TransferFunction()> getDeviceObject;
-};
-
-template<>
-struct ObjectReflector<TransferFunctionInterface>
-{
-    static std::string getType(const TransferFunctionInterface &operation)
-    {
-        return operation.getType();
-    }
 };
 
 void addTransferFunctionEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);

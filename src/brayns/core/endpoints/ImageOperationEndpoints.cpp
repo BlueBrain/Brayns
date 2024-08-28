@@ -33,40 +33,19 @@ template<std::derived_from<ImageOperation> T>
 using ImageOperationParams = ComposedParams<NullJson, GetImageOperationSettings<T>>;
 
 template<std::derived_from<ImageOperation> T>
-using ImageOperationUpdate = UpdateParams<GetImageOperationSettings<T>>;
+using ImageOperationUpdateOf = UpdateParams<GetImageOperationSettings<T>>;
 
 template<typename T>
-concept ReflectedImageOperation =
-    ReflectedJson<GetImageOperationSettings<T>>
+concept ReflectedImageOperation = ReflectedJson<GetImageOperationSettings<T>>
     && std::same_as<std::string, decltype(ImageOperationReflector<T>::getType())>
-    && std::same_as<
-        T,
-        decltype(ImageOperationReflector<T>::create(std::declval<Device &>(), GetImageOperationSettings<T>()))>
+    && std::same_as<T, decltype(ImageOperationReflector<T>::create(std::declval<Device &>(), ImageOperationParams<T>()))>
     && std::is_void_v<decltype(ImageOperationReflector<T>::update(std::declval<T &>(), GetImageOperationSettings<T>()))>;
-
-template<ReflectedImageOperation T>
-std::string getImageOperationType()
-{
-    return ImageOperationReflector<T>::getType();
-}
-
-template<ReflectedImageOperation T>
-T createImageOperation(Device &device, const GetImageOperationSettings<T> &settings)
-{
-    return ImageOperationReflector<T>::create(device, settings);
-}
-
-template<ReflectedImageOperation T>
-void updateImageOperation(T &operation, const GetImageOperationSettings<T> &settings)
-{
-    return ImageOperationReflector<T>::update(operation, settings);
-}
 
 template<ReflectedImageOperation T>
 struct UserImageOperation
 {
     T deviceObject;
-    GetImageOperationSettings<T> settings;
+    ImageOperationParams<T> params;
 };
 
 template<ReflectedImageOperation T>
@@ -74,41 +53,33 @@ ImageOperationInterface createImageOperationInterface(const std::shared_ptr<User
 {
     return {
         .value = operation,
-        .getType = [] { return getImageOperationType<T>(); },
         .getDeviceObject = [=] { return operation->deviceObject; },
     };
 }
 
 template<ReflectedImageOperation T>
-UserImageOperation<T> &getImageOperation(ObjectManager &objects, ObjectId id)
+UserImageOperation<T> &castImageOperationAs(ObjectManager &objects, ObjectId id)
 {
-    auto &interface = objects.get<ImageOperationInterface>(id);
-    auto *ptr = std::any_cast<std::shared_ptr<UserImageOperation<T>>>(&interface.value);
-
-    if (ptr != nullptr)
-    {
-        return **ptr;
-    }
-
-    auto type = interface.getType();
-    throw InvalidParams(fmt::format("Invalid image operation type for object {}: {}", id, type));
+    auto interface = objects.getStored<ImageOperationInterface>(id);
+    return castObjectAs<UserImageOperation<T>>(interface->value, interface.getInfo());
 }
 
 template<ReflectedImageOperation T>
-ObjectResult addImageOperation(LockedObjects &locked, Device &device, const GetImageOperationSettings<T> &settings)
+ObjectResult createImageOperationAs(LockedObjects &locked, Device &device, const ImageOperationParams<T> &params)
 {
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto operation = createImageOperation<T>(device, settings);
-            auto object = UserImageOperation<T>{operation, settings};
+            auto operation = ImageOperationReflector<T>::create(device, params);
+            auto object = UserImageOperation<T>{operation, params};
             auto ptr = std::make_shared<decltype(object)>(std::move(object));
 
             auto interface = createImageOperationInterface(ptr);
+            auto type = ImageOperationReflector<T>::getType();
 
-            auto stored = objects.add(std::move(interface));
+            auto stored = objects.add(std::move(interface), std::move(type));
 
-            return stored.getResult();
+            return ObjectResult{stored.getId()};
         });
 }
 
@@ -118,36 +89,35 @@ GetImageOperationSettings<T> getImageOperationAs(LockedObjects &locked, const Ob
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &operation = getImageOperation<T>(objects, params.id);
-
-            return operation.settings;
+            auto &operation = castImageOperationAs<T>(objects, params.id);
+            return operation.params.derived;
         });
 }
 
 template<ReflectedImageOperation T>
-void updateImageOperationAs(LockedObjects &locked, Device &device, const ImageOperationUpdate<T> &params)
+void updateImageOperationAs(LockedObjects &locked, Device &device, const ImageOperationUpdateOf<T> &params)
 {
     locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &operation = getImageOperation<T>(objects, params.id);
+            auto &operation = castImageOperationAs<T>(objects, params.id);
 
-            updateImageOperation(operation.deviceObject, params.properties);
+            ImageOperationReflector<T>::update(operation.deviceObject, params.properties);
             device.throwIfError();
 
-            operation.settings = params.properties;
+            operation.params.derived = params.properties;
         });
 }
 
 template<ReflectedImageOperation T>
 void addImageOperationType(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
-    auto type = getImageOperationType<T>();
+    auto type = ImageOperationReflector<T>::getType();
 
     builder
         .endpoint(
             "create" + type,
-            [&](ImageOperationParams<T> params) { return addImageOperation<T>(objects, device, params.derived); })
+            [&](ImageOperationParams<T> params) { return createImageOperationAs<T>(objects, device, params); })
         .description("Create an image operation of type " + type);
 
     builder.endpoint("get" + type, [&](ObjectParams params) { return getImageOperationAs<T>(objects, params); })
@@ -156,7 +126,7 @@ void addImageOperationType(ApiBuilder &builder, LockedObjects &objects, Device &
     builder
         .endpoint(
             "update" + type,
-            [&](ImageOperationUpdate<T> params) { updateImageOperationAs<T>(objects, device, params); })
+            [&](ImageOperationUpdateOf<T> params) { updateImageOperationAs<T>(objects, device, params); })
         .description("Update derived properties of an image operation of type " + type);
 }
 
@@ -201,9 +171,9 @@ struct ImageOperationReflector<ToneMapper>
         return "ToneMapper";
     }
 
-    static ToneMapper create(Device &device, const ToneMapperSettings &settings)
+    static ToneMapper create(Device &device, const ImageOperationParams<ToneMapper> &settings)
     {
-        return createToneMapper(device, settings);
+        return createToneMapper(device, settings.derived);
     }
 
     static void update(ToneMapper &toneMapper, const ToneMapperSettings &settings)

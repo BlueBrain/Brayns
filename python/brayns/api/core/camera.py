@@ -43,20 +43,24 @@ class CameraSettings:
 
 def serialize_camera_settings(settings: CameraSettings) -> dict[str, Any]:
     return {
-        "position": settings.view.position,
-        "direction": settings.view.direction,
-        "up": settings.view.up,
+        "view": {
+            "position": settings.view.position,
+            "direction": settings.view.direction,
+            "up": settings.view.up,
+        },
         "nearClip": settings.near_clip,
         "imageRegion": serialize_box(settings.image_region),
     }
 
 
 def deserialize_camera_settings(message: dict[str, Any]) -> CameraSettings:
+    view = get(message, "view", dict[str, Any])
+
     return CameraSettings(
         view=View(
-            position=deserialize_vector(message, "position", Vector3),
-            direction=deserialize_vector(message, "direction", Vector3),
-            up=deserialize_vector(message, "up", Vector3),
+            position=deserialize_vector(view, "position", Vector3),
+            direction=deserialize_vector(view, "direction", Vector3),
+            up=deserialize_vector(view, "up", Vector3),
         ),
         near_clip=get(message, "nearClip", float),
         image_region=deserialize_box(get(message, "imageRegion", dict[str, Any]), Box2),
@@ -88,7 +92,6 @@ class DepthOfField:
 
 
 class StereoMode(Enum):
-    NONE = "None"
     LEFT = "Left"
     RIGHT = "Right"
     SIDE_BY_SIDE = "SideBySide"
@@ -97,7 +100,7 @@ class StereoMode(Enum):
 
 @dataclass
 class Stereo:
-    mode: StereoMode = StereoMode.NONE
+    mode: StereoMode = StereoMode.SIDE_BY_SIDE
     interpupillary_distance: float = 0.0635
 
 

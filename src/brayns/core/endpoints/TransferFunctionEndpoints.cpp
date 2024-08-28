@@ -33,43 +33,22 @@ template<std::derived_from<TransferFunction> T>
 using TransferFunctionParams = ComposedParams<NullJson, GetTransferFunctionSettings<T>>;
 
 template<std::derived_from<TransferFunction> T>
-using TransferFunctionUpdate = UpdateParams<GetTransferFunctionSettings<T>>;
+using TransferFunctionUpdateOf = UpdateParams<GetTransferFunctionSettings<T>>;
 
 template<typename T>
-concept ReflectedTransferFunction =
-    ReflectedJson<GetTransferFunctionSettings<T>>
-    && std::same_as<std::string, decltype(TransferFunctionReflector<T>::getType())>
-    && std::same_as<
-        T,
-        decltype(TransferFunctionReflector<T>::create(std::declval<Device &>(), GetTransferFunctionSettings<T>()))>
+concept ReflectedTransferFunction = ReflectedJson<GetTransferFunctionSettings<T>>
+    && std::same_as<T,
+                    decltype(TransferFunctionReflector<T>::create(std::declval<Device &>(), TransferFunctionParams<T>()))>
     && std::is_void_v<decltype(TransferFunctionReflector<T>::update(
         std::declval<Device &>(),
         std::declval<T &>(),
         GetTransferFunctionSettings<T>()))>;
 
 template<ReflectedTransferFunction T>
-std::string getTransferFunctionType()
-{
-    return TransferFunctionReflector<T>::getType();
-}
-
-template<ReflectedTransferFunction T>
-T createTransferFunction(Device &device, const GetTransferFunctionSettings<T> &settings)
-{
-    return TransferFunctionReflector<T>::create(device, settings);
-}
-
-template<ReflectedTransferFunction T>
-void updateTransferFunction(Device &device, T &function, const GetTransferFunctionSettings<T> &settings)
-{
-    return TransferFunctionReflector<T>::update(device, function, settings);
-}
-
-template<ReflectedTransferFunction T>
 struct UserTransferFunction
 {
     T deviceObject;
-    GetTransferFunctionSettings<T> settings;
+    TransferFunctionParams<T> params;
 };
 
 template<ReflectedTransferFunction T>
@@ -77,41 +56,33 @@ TransferFunctionInterface createTransferFunctionInterface(const std::shared_ptr<
 {
     return {
         .value = function,
-        .getType = [] { return getTransferFunctionType<T>(); },
         .getDeviceObject = [=] { return function->deviceObject; },
     };
 }
 
 template<ReflectedTransferFunction T>
-UserTransferFunction<T> &getTransferFunction(ObjectManager &objects, ObjectId id)
+UserTransferFunction<T> &castTransferFunctionAs(ObjectManager &objects, ObjectId id)
 {
-    auto &interface = objects.get<TransferFunctionInterface>(id);
-    auto *ptr = std::any_cast<std::shared_ptr<UserTransferFunction<T>>>(&interface.value);
-
-    if (ptr != nullptr)
-    {
-        return **ptr;
-    }
-
-    auto type = interface.getType();
-    throw InvalidParams(fmt::format("Invalid image function type for object {}: {}", id, type));
+    auto interface = objects.getStored<TransferFunctionInterface>(id);
+    return castObjectAs<UserTransferFunction<T>>(interface->value, interface.getInfo());
 }
 
 template<ReflectedTransferFunction T>
-ObjectResult addTransferFunction(LockedObjects &locked, Device &device, const GetTransferFunctionSettings<T> &settings)
+ObjectResult createTransferFunctionAs(LockedObjects &locked, Device &device, const TransferFunctionParams<T> &params)
 {
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto function = createTransferFunction<T>(device, settings);
-            auto object = UserTransferFunction<T>{function, settings};
+            auto function = TransferFunctionReflector<T>::create(device, params);
+            auto object = UserTransferFunction<T>{function, params};
             auto ptr = std::make_shared<decltype(object)>(std::move(object));
 
             auto interface = createTransferFunctionInterface(ptr);
+            auto type = TransferFunctionReflector<T>::getType();
 
-            auto stored = objects.add(std::move(interface));
+            auto stored = objects.add(std::move(interface), std::move(type));
 
-            return stored.getResult();
+            return ObjectResult{stored.getId()};
         });
 }
 
@@ -121,37 +92,36 @@ GetTransferFunctionSettings<T> getTransferFunctionAs(LockedObjects &locked, cons
     return locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &function = getTransferFunction<T>(objects, params.id);
-
-            return function.settings;
+            auto &function = castTransferFunctionAs<T>(objects, params.id);
+            return function.params.derived;
         });
 }
 
 template<ReflectedTransferFunction T>
-void updateTransferFunctionAs(LockedObjects &locked, Device &device, const TransferFunctionUpdate<T> &params)
+void updateTransferFunctionAs(LockedObjects &locked, Device &device, const TransferFunctionUpdateOf<T> &params)
 {
     locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &function = getTransferFunction<T>(objects, params.id);
+            auto &function = castTransferFunctionAs<T>(objects, params.id);
 
-            updateTransferFunction(device, function.deviceObject, params.properties);
+            TransferFunctionReflector<T>::update(device, function.deviceObject, params.properties);
             device.throwIfError();
 
-            function.settings = params.properties;
+            function.params.derived = params.properties;
         });
 }
 
 template<ReflectedTransferFunction T>
 void addTransferFunctionType(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
-    auto type = getTransferFunctionType<T>();
+    auto type = TransferFunctionReflector<T>::getType();
 
     builder
         .endpoint(
             "create" + type,
-            [&](TransferFunctionParams<T> params) { return addTransferFunction<T>(objects, device, params.derived); })
-        .description("Create a transfer function of type " + type);
+            [&](TransferFunctionParams<T> params) { return createTransferFunctionAs<T>(objects, device, params); })
+        .description("Create an image function of type " + type);
 
     builder.endpoint("get" + type, [&](ObjectParams params) { return getTransferFunctionAs<T>(objects, params); })
         .description("Get derived properties of an image function of type " + type);
@@ -159,7 +129,7 @@ void addTransferFunctionType(ApiBuilder &builder, LockedObjects &objects, Device
     builder
         .endpoint(
             "update" + type,
-            [&](TransferFunctionUpdate<T> params) { updateTransferFunctionAs<T>(objects, device, params); })
+            [&](TransferFunctionUpdateOf<T> params) { updateTransferFunctionAs<T>(objects, device, params); })
         .description("Update derived properties of an image function of type " + type);
 }
 
@@ -194,11 +164,11 @@ struct TransferFunctionReflector<LinearTransferFunction>
         return "LinearTransferFunction";
     }
 
-    static LinearTransferFunction create(Device &device, const LinearTransferFunctionParams &params)
+    static LinearTransferFunction create(Device &device, const TransferFunctionParams<LinearTransferFunction> &params)
     {
-        auto data = createData<Color4>(device, params.colors);
+        auto data = createData<Color4>(device, params.derived.colors);
 
-        return createLinearTransferFunction(device, {params.scalarRange, std::move(data)});
+        return createLinearTransferFunction(device, {params.derived.scalarRange, std::move(data)});
     }
 
     static void update(Device &device, LinearTransferFunction &function, const LinearTransferFunctionParams &params)

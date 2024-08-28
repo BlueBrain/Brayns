@@ -23,39 +23,18 @@
 
 using namespace brayns;
 
-namespace brayns
-{
 struct TestObject
 {
-    std::string type;
-    ObjectId id = nullId;
+    std::string value;
 };
-
-template<>
-struct ObjectReflector<TestObject>
-{
-    static std::string getType(const TestObject &object)
-    {
-        return object.type;
-    }
-
-    static void add(TestObject &object, ObjectId id)
-    {
-        object.id = id;
-    }
-
-    static void remove(TestObject &object)
-    {
-        object.id = nullId;
-    }
-};
-}
 
 TEST_CASE("Create and remove objects")
 {
     auto objects = ObjectManager();
 
-    auto object = objects.add(TestObject{"Type"});
+    auto object = objects.add(TestObject{"test"}, "Test");
+
+    object.onRemove([](TestObject &object) { object.value = "removed"; });
 
     auto id = object.getId();
 
@@ -64,19 +43,18 @@ TEST_CASE("Create and remove objects")
     auto info = objects.getObject(id);
 
     CHECK_EQ(info.id, id);
-    CHECK_EQ(info.type, "Type");
+    CHECK_EQ(info.type, "Test");
     CHECK(info.userData.isEmpty());
 
     auto &retreived = objects.get<TestObject>(id);
 
-    CHECK_EQ(retreived.type, "Type");
-    CHECK_EQ(retreived.id, id);
+    CHECK_EQ(retreived.value, "test");
 
     auto stored = objects.getStored<TestObject>(id);
 
     CHECK_EQ(stored.getId(), id);
 
-    auto object2 = objects.add(TestObject());
+    auto object2 = objects.add(TestObject(), "Test");
     auto id2 = object2.getId();
 
     CHECK_EQ(objects.getAllObjects().size(), 2);
@@ -84,13 +62,13 @@ TEST_CASE("Create and remove objects")
     objects.remove(id);
 
     CHECK(stored.isRemoved());
-    CHECK_EQ(stored.get().id, nullId);
+    CHECK_EQ(stored.getId(), nullId);
 
     CHECK_THROWS_AS(objects.getObject(id), InvalidParams);
     CHECK_THROWS_AS(objects.get<TestObject>(id), InvalidParams);
     CHECK_THROWS_AS(objects.getStored<TestObject>(id), InvalidParams);
 
-    auto object3 = objects.add(TestObject());
+    auto object3 = objects.add(TestObject(), "Test");
     CHECK_EQ(object3.getId(), 1);
 
     auto stored2 = objects.getStored<TestObject>(id2);
@@ -107,7 +85,7 @@ TEST_CASE("Errors")
 {
     auto objects = ObjectManager();
 
-    objects.add<TestObject>({});
+    objects.add(TestObject(), "Test");
 
     CHECK_THROWS_AS(objects.getObject(0), InvalidParams);
     CHECK_THROWS_AS(objects.getObject(2), InvalidParams);

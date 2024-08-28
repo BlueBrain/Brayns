@@ -111,22 +111,13 @@ struct EmptyObject
 {
 };
 
-template<>
-struct ObjectReflector<EmptyObject>
-{
-    static std::string getType(const EmptyObject &)
-    {
-        return "EmptyObject";
-    }
-};
-
 ObjectResult createEmptyObject(LockedObjects &locked)
 {
     return locked.visit(
         [&](auto &objects)
         {
-            auto object = objects.add(EmptyObject());
-            return object.getResult();
+            auto object = objects.add(EmptyObject(), "EmptyObject");
+            return ObjectResult{object.getId()};
         });
 }
 

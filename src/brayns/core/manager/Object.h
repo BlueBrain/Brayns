@@ -31,24 +31,29 @@
 #include <brayns/core/jsonrpc/Errors.h>
 
 #include "Messages.h"
-#include "ObjectReflector.h"
 
 namespace brayns
 {
-template<ReflectedObject T>
-struct UserObjectOf
+template<typename T>
+struct ObjectStorage
 {
     ObjectInfo info;
     T value;
+    std::function<void(T &)> remove = [](auto &) {};
 };
 
-template<ReflectedObject T>
+template<typename T>
 class Stored
 {
 public:
-    explicit Stored(std::shared_ptr<UserObjectOf<T>> object):
+    explicit Stored(std::shared_ptr<ObjectStorage<T>> object):
         _object(std::move(object))
     {
+    }
+
+    const ObjectInfo &getInfo() const
+    {
+        return _object->info;
     }
 
     ObjectId getId() const
@@ -61,29 +66,9 @@ public:
         return _object->info.id == nullId;
     }
 
-    const std::string &getType() const
+    void onRemove(std::function<void(T &)> handler)
     {
-        return _object->info.type;
-    }
-
-    JsonValue getUserData() const
-    {
-        return _object->info.userData;
-    }
-
-    void setUserData(const JsonValue &userData)
-    {
-        _object->info.userData = userData;
-    }
-
-    const ObjectInfo &getInfo() const
-    {
-        return _object->info;
-    }
-
-    ObjectResult getResult() const
-    {
-        return {getId()};
+        _object->remove = std::move(handler);
     }
 
     T &get() const
@@ -102,7 +87,7 @@ public:
     }
 
 private:
-    std::shared_ptr<UserObjectOf<T>> _object;
+    std::shared_ptr<ObjectStorage<T>> _object;
 };
 
 struct ObjectInterface
@@ -112,8 +97,8 @@ struct ObjectInterface
     std::function<void()> remove;
 };
 
-template<ReflectedObject T>
-ObjectInterface createObjectInterface(const std::shared_ptr<UserObjectOf<T>> &object)
+template<typename T>
+ObjectInterface createObjectInterface(const std::shared_ptr<ObjectStorage<T>> &object)
 {
     auto getInfo = [=]() -> auto &
     {
@@ -122,15 +107,15 @@ ObjectInterface createObjectInterface(const std::shared_ptr<UserObjectOf<T>> &ob
 
     auto remove = [=]
     {
+        object->remove(object->value);
         object->info.id = nullId;
-        removeObject(object->value);
     };
 
     return {object, getInfo, remove};
 }
 
 template<typename T>
-const std::shared_ptr<T> &castSharedObject(const std::any &value, const ObjectInfo &info)
+const std::shared_ptr<T> &castObjectAsShared(const std::any &value, const ObjectInfo &info)
 {
     const auto *ptr = std::any_cast<std::shared_ptr<T>>(&value);
 
@@ -143,8 +128,8 @@ const std::shared_ptr<T> &castSharedObject(const std::any &value, const ObjectIn
 }
 
 template<typename T>
-T &castObject(const std::any &value, const ObjectInfo &info)
+T &castObjectAs(const std::any &value, const ObjectInfo &info)
 {
-    return *castSharedObject<T>(value, info);
+    return *castObjectAsShared<T>(value, info);
 }
 }

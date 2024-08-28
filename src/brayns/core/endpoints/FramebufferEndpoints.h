@@ -59,14 +59,5 @@ struct UserFramebuffer
     std::vector<Stored<ImageOperationInterface>> imageOperations;
 };
 
-template<>
-struct ObjectReflector<UserFramebuffer>
-{
-    static std::string getType(const UserFramebuffer &)
-    {
-        return "Framebuffer";
-    }
-};
-
 void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
 }

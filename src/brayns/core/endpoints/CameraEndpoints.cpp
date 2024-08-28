@@ -21,20 +21,33 @@
 
 #include "CameraEndpoints.h"
 
+#include <concepts>
+#include <type_traits>
+
 namespace brayns
 {
+template<>
+struct JsonObjectReflector<View>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<View>();
+        builder.field("position", [](auto &object) { return &object.position; }).description("Position XYZ");
+        builder.field("direction", [](auto &object) { return &object.direction; }).description("Forward direction XYZ");
+        builder.field("up", [](auto &object) { return &object.up; })
+            .description("Up direction XYZ")
+            .defaultValue(Vector3(0.0F, 1.0F, 0.0F));
+        return builder.build();
+    }
+};
+
 template<>
 struct JsonObjectReflector<CameraSettings>
 {
     static auto reflect()
     {
         auto builder = JsonBuilder<CameraSettings>();
-        builder.field("position", [](auto &object) { return &object.position; }).description("Camera position XYZ");
-        builder.field("direction", [](auto &object) { return &object.direction; })
-            .description("Camera forward direction XYZ");
-        builder.field("up", [](auto &object) { return &object.up; })
-            .description("Camera up direction XYZ")
-            .defaultValue(Vector3(0.0F, 1.0F, 0.0F));
+        builder.field("view", [](auto &object) { return &object.view; }).description("Camera viewpoint in 3D space");
         builder.field("nearClip", [](auto &object) { return &object.nearClip; })
             .description("Distance to clip objects that are too close to the camera")
             .defaultValue(0.0F);
@@ -47,7 +60,8 @@ struct JsonObjectReflector<CameraSettings>
 
 void validateCameraSettings(const CameraSettings &settings)
 {
-    auto right = cross(settings.direction, settings.up);
+    auto &view = settings.view;
+    auto right = cross(view.direction, view.up);
 
     if (right.x == 0.0F && right.y == 0.0F && right.z == 0.0F)
     {
@@ -60,125 +74,19 @@ void validateCameraSettings(const CameraSettings &settings)
     }
 }
 
-template<typename T>
-struct CameraReflector;
-
-template<std::derived_from<Camera> T>
-using GetCameraSettings = typename CameraReflector<T>::Settings;
-
-template<std::derived_from<Camera> T>
-using CameraParams = ComposedParams<CameraSettings, GetCameraSettings<T>>;
-
-template<std::derived_from<Camera> T>
-using CameraUpdateOf = UpdateParams<GetCameraSettings<T>>;
-
-using CameraUpdate = UpdateParams<CameraSettings>;
-
-template<typename T>
-concept ReflectedCamera =
-    ReflectedJson<GetCameraSettings<T>> && std::same_as<std::string, decltype(CameraReflector<T>::getType())>
-    && std::same_as<T, decltype(CameraReflector<T>::create(std::declval<Device &>(), CameraParams<T>()))>
-    && std::is_void_v<decltype(CameraReflector<T>::update(std::declval<T &>(), GetCameraSettings<T>()))>
-    && std::is_void_v<decltype(CameraReflector<T>::setAspect(std::declval<T &>(), 0.0F))>;
-
-template<ReflectedCamera T>
-std::string getCameraType()
-{
-    return CameraReflector<T>::getType();
-}
-
-template<ReflectedCamera T>
-T createCamera(Device &device, const CameraParams<T> &params)
-{
-    return CameraReflector<T>::create(device, params);
-}
-
-template<ReflectedCamera T>
-void updateCamera(T &camera, const GetCameraSettings<T> &settings)
-{
-    CameraReflector<T>::update(camera, settings);
-}
-
-template<ReflectedCamera T>
-void setCameraAspect(T &camera, float aspect)
-{
-    CameraReflector<T>::setAspect(camera, aspect);
-}
-
-template<ReflectedCamera T>
-struct UserCamera
-{
-    T deviceObject;
-    CameraParams<T> params;
-};
-
-template<ReflectedCamera T>
-CameraInterface createCameraInterface(const std::shared_ptr<UserCamera<T>> &camera)
-{
-    return {
-        .value = camera,
-        .getType = [] { return getCameraType<T>(); },
-        .getDeviceObject = [=] { return camera->deviceObject; },
-        .getSettings = [=] { return camera->params.base; },
-        .update = [=](const auto &settings) { camera->params.base = settings; },
-        .setAspect = [=](auto aspect) { setCameraAspect(camera->deviceObject, aspect); },
-    };
-}
-
-template<ReflectedCamera T>
-UserCamera<T> &getCamera(ObjectManager &objects, ObjectId id)
-{
-    auto stored = objects.getStored<CameraInterface>(id);
-    auto &interface = stored.get();
-    const auto &info = stored.getInfo();
-
-    return castObject<UserCamera<T>>(interface.value, info);
-}
-
-template<ReflectedCamera T>
-ObjectResult addCamera(LockedObjects &locked, Device &device, const CameraParams<T> &params)
-{
-    validateCameraSettings(params.base);
-
-    return locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto camera = createCamera<T>(device, params);
-            auto object = UserCamera<T>{camera, params};
-            auto ptr = std::make_shared<decltype(object)>(std::move(object));
-
-            auto interface = createCameraInterface(ptr);
-
-            auto stored = objects.add(std::move(interface));
-
-            return stored.getResult();
-        });
-}
-
-CameraSettings getCameraSettings(LockedObjects &locked, const ObjectParams &params)
+CameraSettings getCamera(LockedObjects &locked, const ObjectParams &params)
 {
     return locked.visit(
         [&](ObjectManager &objects)
         {
             auto &camera = objects.get<CameraInterface>(params.id);
-
             return camera.getSettings();
         });
 }
 
-template<ReflectedCamera T>
-GetCameraSettings<T> getCameraAs(LockedObjects &locked, const ObjectParams &params)
-{
-    return locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto &camera = getCamera<T>(objects, params.id);
+using CameraUpdate = UpdateParams<CameraSettings>;
 
-            return camera.params.derived;
-        });
-}
-
-void updateCameraSettings(LockedObjects &locked, Device &device, const CameraUpdate &params)
+void updateCamera(LockedObjects &locked, Device &device, const CameraUpdate &params)
 {
     validateCameraSettings(params.properties);
 
@@ -195,15 +103,92 @@ void updateCameraSettings(LockedObjects &locked, Device &device, const CameraUpd
         });
 }
 
+template<typename T>
+struct CameraReflector;
+
+template<std::derived_from<Camera> T>
+using GetCameraSettings = typename CameraReflector<T>::Settings;
+
+template<std::derived_from<Camera> T>
+using CameraParams = ComposedParams<CameraSettings, GetCameraSettings<T>>;
+
+template<typename T>
+concept ReflectedCamera =
+    ReflectedJson<GetCameraSettings<T>> && std::same_as<std::string, decltype(CameraReflector<T>::getType())>
+    && std::same_as<T, decltype(CameraReflector<T>::create(std::declval<Device &>(), CameraParams<T>()))>
+    && std::is_void_v<decltype(CameraReflector<T>::update(std::declval<T &>(), GetCameraSettings<T>()))>
+    && std::is_void_v<decltype(CameraReflector<T>::setAspect(std::declval<T &>(), 0.0F))>;
+
+template<ReflectedCamera T>
+using CameraUpdateOf = UpdateParams<GetCameraSettings<T>>;
+
+template<ReflectedCamera T>
+struct UserCamera
+{
+    T deviceObject;
+    CameraParams<T> params;
+};
+
+template<ReflectedCamera T>
+CameraInterface createCameraInterface(const std::shared_ptr<UserCamera<T>> &camera)
+{
+    return {
+        .value = camera,
+        .getDeviceObject = [=] { return camera->deviceObject; },
+        .getSettings = [=] { return camera->params.base; },
+        .update = [=](const auto &settings) { camera->params.base = settings; },
+        .setAspect = [=](auto aspect) { CameraReflector<T>::setAspect(camera->deviceObject, aspect); },
+    };
+}
+
+template<ReflectedCamera T>
+UserCamera<T> &castCameraAs(ObjectManager &objects, ObjectId id)
+{
+    auto interface = objects.getStored<CameraInterface>(id);
+    return castObjectAs<UserCamera<T>>(interface->value, interface.getInfo());
+}
+
+template<ReflectedCamera T>
+ObjectResult createCameraAs(LockedObjects &locked, Device &device, const CameraParams<T> &params)
+{
+    validateCameraSettings(params.base);
+
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto camera = CameraReflector<T>::create(device, params);
+            auto object = UserCamera<T>{camera, params};
+            auto ptr = std::make_shared<decltype(object)>(std::move(object));
+
+            auto interface = createCameraInterface(ptr);
+            auto type = CameraReflector<T>::getType();
+
+            auto stored = objects.add(std::move(interface), std::move(type));
+
+            return ObjectResult{stored.getId()};
+        });
+}
+
+template<ReflectedCamera T>
+GetCameraSettings<T> getCameraAs(LockedObjects &locked, const ObjectParams &params)
+{
+    return locked.visit(
+        [&](ObjectManager &objects)
+        {
+            auto &camera = castCameraAs<T>(objects, params.id);
+            return camera.params.derived;
+        });
+}
+
 template<ReflectedCamera T>
 void updateCameraAs(LockedObjects &locked, Device &device, const CameraUpdateOf<T> &params)
 {
     locked.visit(
         [&](ObjectManager &objects)
         {
-            auto &camera = getCamera<T>(objects, params.id);
+            auto &camera = castCameraAs<T>(objects, params.id);
 
-            updateCamera(camera.deviceObject, params.properties);
+            CameraReflector<T>::update(camera.deviceObject, params.properties);
             device.throwIfError();
 
             camera.params.derived = params.properties;
@@ -213,9 +198,10 @@ void updateCameraAs(LockedObjects &locked, Device &device, const CameraUpdateOf<
 template<ReflectedCamera T>
 void addCameraType(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
-    auto type = getCameraType<T>();
+    auto type = CameraReflector<T>::getType();
 
-    builder.endpoint("create" + type, [&](CameraParams<T> params) { return addCamera<T>(objects, device, params); })
+    builder
+        .endpoint("create" + type, [&](CameraParams<T> params) { return createCameraAs<T>(objects, device, params); })
         .description("Create a camera of type " + type);
 
     builder.endpoint("get" + type, [&](ObjectParams params) { return getCameraAs<T>(objects, params); })
@@ -247,7 +233,6 @@ struct EnumReflector<StereoMode>
     static auto reflect()
     {
         auto builder = EnumBuilder<StereoMode>();
-        builder.field("None", StereoMode::None).description("Disable stereo");
         builder.field("Left", StereoMode::Left).description("Render left eye");
         builder.field("Right", StereoMode::Right).description("Render right eye");
         builder.field("SideBySide", StereoMode::SideBySide).description("Render both eyes side by side");
@@ -264,7 +249,7 @@ struct JsonObjectReflector<Stereo>
         auto builder = JsonBuilder<Stereo>();
         builder.field("mode", [](auto &object) { return &object.mode; })
             .description("Size of the aperture radius (0 is no depth of field)")
-            .defaultValue(StereoMode::None);
+            .defaultValue(StereoMode::SideBySide);
         builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
             .description("Distance between observer eyes")
             .defaultValue(0.0635F);
@@ -309,7 +294,7 @@ struct CameraReflector<PerspectiveCamera>
 
     static void update(PerspectiveCamera &camera, const PerspectiveSettings &settings)
     {
-        camera.updatePerspective(settings);
+        camera.update(settings);
     }
 
     static void setAspect(PerspectiveCamera &camera, float aspect)
@@ -348,7 +333,7 @@ struct CameraReflector<OrthographicCamera>
 
     static void update(OrthographicCamera &camera, const OrthographicSettings &settings)
     {
-        camera.updateOrthographic(settings);
+        camera.update(settings);
     }
 
     static void setAspect(OrthographicCamera &camera, float aspect)
@@ -386,7 +371,7 @@ struct CameraReflector<PanoramicCamera>
 
     static void update(PanoramicCamera &camera, const PanoramicSettings &settings)
     {
-        camera.updatePanoramic(settings);
+        camera.update(settings);
     }
 
     static void setAspect(PanoramicCamera &camera, float aspect)
@@ -402,10 +387,10 @@ void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &dev
     addCameraType<OrthographicCamera>(builder, objects, device);
     addCameraType<PanoramicCamera>(builder, objects, device);
 
-    builder.endpoint("getCamera", [&](ObjectParams params) { return getCameraSettings(objects, params); })
+    builder.endpoint("getCamera", [&](ObjectParams params) { return getCamera(objects, params); })
         .description("Get the base properties of a camera of any type");
 
-    builder.endpoint("updateCamera", [&](CameraUpdate params) { return updateCameraSettings(objects, device, params); })
+    builder.endpoint("updateCamera", [&](CameraUpdate params) { return updateCamera(objects, device, params); })
         .description("Update the base properties of a camera of any type");
 }
 }

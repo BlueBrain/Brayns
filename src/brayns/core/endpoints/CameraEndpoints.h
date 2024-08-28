@@ -34,20 +34,10 @@ namespace brayns
 struct CameraInterface
 {
     std::any value;
-    std::function<std::string()> getType;
     std::function<Camera()> getDeviceObject;
     std::function<CameraSettings()> getSettings;
     std::function<void(const CameraSettings &)> update;
     std::function<void(float)> setAspect;
-};
-
-template<>
-struct ObjectReflector<CameraInterface>
-{
-    static std::string getType(const CameraInterface &camera)
-    {
-        return camera.getType();
-    }
 };
 
 void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);

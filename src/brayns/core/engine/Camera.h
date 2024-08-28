@@ -26,11 +26,16 @@
 
 namespace brayns
 {
-struct CameraSettings
+struct View
 {
     Vector3 position = {0.0F, 0.0F, 0.0F};
     Vector3 direction = {0.0F, 0.0F, 1.0F};
     Vector3 up = {0.0F, 1.0F, 0.0F};
+};
+
+struct CameraSettings
+{
+    View view = {};
     float nearClip = 1.0e-6F;
     Box2 imageRegion = {{0.0F, 0.0F}, {1.0F, 1.0F}};
 };
@@ -45,13 +50,12 @@ public:
 
 struct DepthOfField
 {
-    float apertureRadius = 0.0F;
+    float apertureRadius;
     float focusDistance = 1.0F;
 };
 
 enum class StereoMode
 {
-    None = OSP_STEREO_NONE,
     Left = OSP_STEREO_LEFT,
     Right = OSP_STEREO_RIGHT,
     SideBySide = OSP_STEREO_SIDE_BY_SIDE,
@@ -60,7 +64,7 @@ enum class StereoMode
 
 struct Stereo
 {
-    StereoMode mode = StereoMode::None;
+    StereoMode mode = StereoMode::SideBySide;
     float interpupillaryDistance = 0.0635F;
 };
 
@@ -77,8 +81,9 @@ class PerspectiveCamera : public Camera
 {
 public:
     using Camera::Camera;
+    using Camera::update;
 
-    void updatePerspective(const PerspectiveSettings &settings);
+    void update(const PerspectiveSettings &settings);
     void setAspect(float aspect);
 };
 
@@ -97,8 +102,9 @@ class OrthographicCamera : public Camera
 {
 public:
     using Camera::Camera;
+    using Camera::update;
 
-    void updateOrthographic(const OrthographicSettings &settings);
+    void update(const OrthographicSettings &settings);
     void setAspect(float aspect);
 };
 
@@ -116,8 +122,9 @@ class PanoramicCamera : public Camera
 {
 public:
     using Camera::Camera;
+    using Camera::update;
 
-    void updatePanoramic(const PanoramicSettings &settings);
+    void update(const PanoramicSettings &settings);
 };
 
 PanoramicCamera createPanoramicCamera(

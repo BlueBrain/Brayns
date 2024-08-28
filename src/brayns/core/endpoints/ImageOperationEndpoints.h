@@ -33,17 +33,7 @@ namespace brayns
 struct ImageOperationInterface
 {
     std::any value;
-    std::function<std::string()> getType;
     std::function<ImageOperation()> getDeviceObject;
-};
-
-template<>
-struct ObjectReflector<ImageOperationInterface>
-{
-    static std::string getType(const ImageOperationInterface &operation)
-    {
-        return operation.getType();
-    }
 };
 
 void addImageOperationEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);

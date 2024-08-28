@@ -171,9 +171,9 @@ ObjectResult addFramebuffer(LockedObjects &locked, Device &device, FramebufferPa
         [&](ObjectManager &objects)
         {
             auto framebuffer = createUserFramebuffer(objects, device, std::move(params));
-            auto stored = objects.add(std::move(framebuffer));
+            auto stored = objects.add(std::move(framebuffer), "Framebuffer");
 
-            return stored.getResult();
+            return ObjectResult{stored.getId()};
         });
 }
 

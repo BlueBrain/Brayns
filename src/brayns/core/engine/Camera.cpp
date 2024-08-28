@@ -27,9 +27,9 @@ using namespace brayns;
 
 void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 {
-    setObjectParam(handle, "position", settings.position);
-    setObjectParam(handle, "direction", settings.direction);
-    setObjectParam(handle, "up", settings.up);
+    setObjectParam(handle, "position", settings.view.position);
+    setObjectParam(handle, "direction", settings.view.direction);
+    setObjectParam(handle, "up", settings.view.up);
     setObjectParam(handle, "nearClip", settings.nearClip);
     setObjectParam(handle, "imageStart", settings.imageRegion.lower);
     setObjectParam(handle, "imageEnd", settings.imageRegion.upper);
@@ -91,7 +91,7 @@ void Camera::update(const CameraSettings &settings)
     commitObject(handle);
 }
 
-void PerspectiveCamera::updatePerspective(const PerspectiveSettings &settings)
+void PerspectiveCamera::update(const PerspectiveSettings &settings)
 {
     auto handle = getHandle();
     setPerspectiveParams(handle, settings);
@@ -121,7 +121,7 @@ PerspectiveCamera createPerspectiveCamera(
     return camera;
 }
 
-void OrthographicCamera::updateOrthographic(const OrthographicSettings &settings)
+void OrthographicCamera::update(const OrthographicSettings &settings)
 {
     auto handle = getHandle();
     setOrthographicParams(handle, settings);
@@ -151,7 +151,7 @@ OrthographicCamera createOrthographicCamera(
     return camera;
 }
 
-void PanoramicCamera::updatePanoramic(const PanoramicSettings &settings)
+void PanoramicCamera::update(const PanoramicSettings &settings)
 {
     auto handle = getHandle();
     setPanoramicParams(handle, settings);
