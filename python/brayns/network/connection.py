@@ -155,6 +155,9 @@ class Connection:
     async def __aexit__(self, *args) -> None:
         await self._websocket.close()
 
+    async def close(self) -> None:
+        await self._websocket.close()
+
     async def send_json_rpc(self, request: JsonRpcRequest) -> FutureResponse:
         if request.id is not None and self._buffer.is_running(request.id):
             raise ValueError(f"A request with ID {request.id} is already running")
