@@ -74,7 +74,7 @@ void checkOneOf(const JsonValue &json, const JsonSchema &schema, ErrorBuilder &e
         }
     }
 
-    errors.add(InvalidOneOf{});
+    errors.add(InvalidOneOf{json});
 }
 
 bool checkType(const JsonValue &json, const JsonSchema &schema, ErrorBuilder &errors)
@@ -92,9 +92,29 @@ bool checkType(const JsonValue &json, const JsonSchema &schema, ErrorBuilder &er
     return false;
 }
 
-void checkConst(const std::string &value, const JsonSchema &schema, ErrorBuilder &errors)
+bool checkConst(const JsonValue &value, const JsonSchema &schema)
 {
-    if (value != schema.constant)
+    if (value.isBoolean() && schema.constant.isBoolean())
+    {
+        return value.extract<bool>() == schema.constant.extract<bool>();
+    }
+
+    if (value.isNumeric() && schema.constant.isNumeric())
+    {
+        return value == schema.constant;
+    }
+
+    if (value.isString() && schema.constant.isString())
+    {
+        return value == schema.constant;
+    }
+
+    return false;
+}
+
+void checkConst(const JsonValue &value, const JsonSchema &schema, ErrorBuilder &errors)
+{
+    if (!checkConst(value, schema))
     {
         errors.add(InvalidConst{value, schema.constant});
     }
@@ -247,10 +267,9 @@ void check(const JsonValue &json, const JsonSchema &schema, ErrorBuilder &errors
         return;
     }
 
-    if (!schema.constant.empty())
+    if (!schema.constant.isEmpty())
     {
-        const auto &value = json.extract<std::string>();
-        checkConst(value, schema, errors);
+        checkConst(json, schema, errors);
         return;
     }
 
@@ -357,9 +376,9 @@ std::string toString(const UnknownProperty &error)
     return fmt::format("Unknown property: '{}'", error.name);
 }
 
-std::string toString(const InvalidOneOf &)
+std::string toString(const InvalidOneOf &error)
 {
-    return "Invalid oneOf";
+    return fmt::format("Invalid oneOf: {}", stringify(error.value));
 }
 
 std::string toString(const JsonError &error)

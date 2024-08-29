@@ -149,6 +149,14 @@ TEST_CASE("String")
     CHECK_THROWS_AS(deserializeAs<std::string>(1), JsonException);
 }
 
+TEST_CASE("Const")
+{
+    CHECK_EQ(getJsonSchema<JsonFalse>(), JsonSchema{.type = JsonType::Boolean, .constant = false});
+    CHECK_EQ(deserializeAs<JsonFalse>(false), JsonFalse());
+    CHECK_EQ(serializeToJson(JsonFalse()), false);
+    CHECK_THROWS_AS(deserializeAs<JsonFalse>(1), JsonException);
+}
+
 TEST_CASE("Enum")
 {
     CHECK_EQ(

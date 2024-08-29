@@ -49,7 +49,7 @@ TEST_CASE("One of")
 
     errors = validate(true, schema);
     CHECK_EQ(errors.size(), 1);
-    CHECK_EQ(toString(errors[0].error), "Invalid oneOf");
+    CHECK_EQ(toString(errors[0].error), "Invalid oneOf: true");
 }
 
 TEST_CASE("Invalid type")

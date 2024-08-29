@@ -29,6 +29,8 @@
 
 #include <brayns/core/json/JsonReflector.h>
 
+#include "Primitives.h"
+
 namespace brayns
 {
 template<typename ParentType>
@@ -265,21 +267,23 @@ public:
         return JsonFieldBuilder(field.schema);
     }
 
-    JsonFieldBuilder constant(std::string name, const std::string &value)
+    template<ReflectedJson U>
+    JsonFieldBuilder constant(std::string name, const U &value)
     {
         auto &field = _fields.emplace_back();
 
         field.name = std::move(name);
 
-        field.schema = getJsonSchema<std::string>();
+        field.schema = JsonSchema{.type = jsonTypeOf<U>};
 
-        field.schema.constant = value;
+        field.schema.constant = serializeToJson(value);
 
         field.serialize = [=](const auto &) { return value; };
 
         field.deserialize = [=](const auto &json, auto &)
         {
             auto item = deserializeAs<std::string>(json);
+
             if (item != value)
             {
                 throw JsonException("Invalid const");
@@ -287,6 +291,11 @@ public:
         };
 
         return JsonFieldBuilder(field.schema);
+    }
+
+    JsonFieldBuilder constant(std::string name, const char *value)
+    {
+        return constant(std::move(name), std::string(value));
     }
 
     JsonObjectInfo<T> build()

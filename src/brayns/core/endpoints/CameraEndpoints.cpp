@@ -258,11 +258,11 @@ struct JsonObjectReflector<Stereo>
 };
 
 template<>
-struct JsonObjectReflector<PerspectiveSettings>
+struct JsonObjectReflector<PerspectiveCameraSettings>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<PerspectiveSettings>();
+        auto builder = JsonBuilder<PerspectiveCameraSettings>();
         builder.field("fovy", [](auto &object) { return &object.fovy; })
             .description("Camera vertical field of view in degrees (horizontal is deduced from framebuffer aspect)")
             .defaultValue(45.0F);
@@ -280,7 +280,7 @@ struct JsonObjectReflector<PerspectiveSettings>
 template<>
 struct CameraReflector<PerspectiveCamera>
 {
-    using Settings = PerspectiveSettings;
+    using Settings = PerspectiveCameraSettings;
 
     static std::string getType()
     {
@@ -292,7 +292,7 @@ struct CameraReflector<PerspectiveCamera>
         return createPerspectiveCamera(device, params.base, params.derived);
     }
 
-    static void update(PerspectiveCamera &camera, const PerspectiveSettings &settings)
+    static void update(PerspectiveCamera &camera, const PerspectiveCameraSettings &settings)
     {
         camera.update(settings);
     }
@@ -304,11 +304,11 @@ struct CameraReflector<PerspectiveCamera>
 };
 
 template<>
-struct JsonObjectReflector<OrthographicSettings>
+struct JsonObjectReflector<OrthographicCameraSettings>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<OrthographicSettings>();
+        auto builder = JsonBuilder<OrthographicCameraSettings>();
         builder.field("height", [](auto &object) { return &object.height; })
             .description("Camera viewport height in world coordinates (horizontal is deduced from framebuffer aspect)")
             .defaultValue(1.0F);
@@ -319,7 +319,7 @@ struct JsonObjectReflector<OrthographicSettings>
 template<>
 struct CameraReflector<OrthographicCamera>
 {
-    using Settings = OrthographicSettings;
+    using Settings = OrthographicCameraSettings;
 
     static std::string getType()
     {
@@ -331,7 +331,7 @@ struct CameraReflector<OrthographicCamera>
         return createOrthographicCamera(device, params.base, params.derived);
     }
 
-    static void update(OrthographicCamera &camera, const OrthographicSettings &settings)
+    static void update(OrthographicCamera &camera, const OrthographicCameraSettings &settings)
     {
         camera.update(settings);
     }
@@ -343,11 +343,11 @@ struct CameraReflector<OrthographicCamera>
 };
 
 template<>
-struct JsonObjectReflector<PanoramicSettings>
+struct JsonObjectReflector<PanoramicCameraSettings>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<PanoramicSettings>();
+        auto builder = JsonBuilder<PanoramicCameraSettings>();
         builder.field("stereo", [](auto &object) { return &object.stereo; })
             .description("Stereo settings, set to null to disable it");
         return builder.build();
@@ -357,7 +357,7 @@ struct JsonObjectReflector<PanoramicSettings>
 template<>
 struct CameraReflector<PanoramicCamera>
 {
-    using Settings = PanoramicSettings;
+    using Settings = PanoramicCameraSettings;
 
     static std::string getType()
     {
@@ -369,7 +369,7 @@ struct CameraReflector<PanoramicCamera>
         return createPanoramicCamera(device, params.base, params.derived);
     }
 
-    static void update(PanoramicCamera &camera, const PanoramicSettings &settings)
+    static void update(PanoramicCamera &camera, const PanoramicCameraSettings &settings)
     {
         camera.update(settings);
     }

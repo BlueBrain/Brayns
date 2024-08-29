@@ -21,19 +21,48 @@
 
 #pragma once
 
-#include "JsonReflector.h"
-#include "JsonSchema.h"
-#include "JsonValidator.h"
-#include "JsonValue.h"
+#include <concepts>
 
-#include "types/Arrays.h"
-#include "types/Constants.h"
-#include "types/Enums.h"
-#include "types/Maps.h"
-#include "types/Math.h"
-#include "types/Objects.h"
-#include "types/Primitives.h"
-#include "types/Schema.h"
-#include "types/Sets.h"
-#include "types/Variants.h"
-#include "types/Vectors.h"
+#include "Primitives.h"
+
+namespace brayns
+{
+struct JsonConstant
+{
+    auto operator<=>(const JsonConstant &) const = default;
+};
+
+template<typename T>
+concept ValidJsonConstant = std::derived_from<T, JsonConstant> && JsonPrimitive<decltype(T::value)>;
+
+template<ValidJsonConstant T>
+struct JsonReflector<T>
+{
+    using Type = decltype(T::value);
+
+    static JsonSchema getSchema()
+    {
+        return {.type = jsonTypeOf<Type>, .constant = T::value};
+    }
+
+    static JsonValue serialize(const T &)
+    {
+        return serializeToJson(T::value);
+    }
+
+    static T deserialize(const JsonValue &json)
+    {
+        if (json != T::value)
+        {
+            throw JsonException("Invalid const");
+        }
+
+        return {};
+    }
+};
+
+struct JsonFalse : JsonConstant
+{
+    static constexpr auto value = false;
+};
+}

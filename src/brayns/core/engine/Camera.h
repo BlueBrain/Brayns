@@ -68,7 +68,7 @@ struct Stereo
     float interpupillaryDistance = 0.0635F;
 };
 
-struct PerspectiveSettings
+struct PerspectiveCameraSettings
 {
     float fovy = 60.0F;
     float aspect = 1.0F;
@@ -83,16 +83,16 @@ public:
     using Camera::Camera;
     using Camera::update;
 
-    void update(const PerspectiveSettings &settings);
+    void update(const PerspectiveCameraSettings &settings);
     void setAspect(float aspect);
 };
 
 PerspectiveCamera createPerspectiveCamera(
     Device &device,
     const CameraSettings &settings = {},
-    const PerspectiveSettings &perspective = {});
+    const PerspectiveCameraSettings &perspective = {});
 
-struct OrthographicSettings
+struct OrthographicCameraSettings
 {
     float height = 1.0F;
     float aspect = 1.0F;
@@ -104,16 +104,16 @@ public:
     using Camera::Camera;
     using Camera::update;
 
-    void update(const OrthographicSettings &settings);
+    void update(const OrthographicCameraSettings &settings);
     void setAspect(float aspect);
 };
 
 OrthographicCamera createOrthographicCamera(
     Device &device,
     const CameraSettings &settings = {},
-    const OrthographicSettings &orthographic = {});
+    const OrthographicCameraSettings &orthographic = {});
 
-struct PanoramicSettings
+struct PanoramicCameraSettings
 {
     std::optional<Stereo> stereo;
 };
@@ -124,11 +124,11 @@ public:
     using Camera::Camera;
     using Camera::update;
 
-    void update(const PanoramicSettings &settings);
+    void update(const PanoramicCameraSettings &settings);
 };
 
 PanoramicCamera createPanoramicCamera(
     Device &device,
     const CameraSettings &settings = {},
-    const PanoramicSettings &panoramic = {});
+    const PanoramicCameraSettings &panoramic = {});
 }

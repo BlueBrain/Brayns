@@ -106,6 +106,7 @@ std::string toString(const UnknownProperty &error);
 
 struct InvalidOneOf
 {
+    JsonValue value;
 };
 
 std::string toString(const InvalidOneOf &error);

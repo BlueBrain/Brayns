@@ -117,7 +117,7 @@ struct JsonTypeReflector<std::string>
 };
 
 template<typename T>
-constexpr JsonType jsonTypeOf = JsonTypeReflector<T>::type;
+constexpr JsonType jsonTypeOf = JsonTypeReflector<std::decay_t<T>>::type;
 
 JsonType getJsonType(const JsonValue &json);
 
@@ -164,7 +164,7 @@ struct JsonSchema
     JsonValue defaultValue = {};
     std::vector<JsonSchema> oneOf = {};
     JsonType type = JsonType::Undefined;
-    std::string constant = {};
+    JsonValue constant = {};
     std::optional<double> minimum = {};
     std::optional<double> maximum = {};
     std::vector<JsonSchema> items = {};
