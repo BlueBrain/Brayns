@@ -21,7 +21,7 @@
 import math
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, NewType
+from typing import Any
 
 from brayns.network.connection import Connection
 from brayns.utils.box import Box2
@@ -29,9 +29,10 @@ from brayns.utils.parsing import deserialize_box, deserialize_vector, get, seria
 from brayns.utils.vector import Vector2, Vector3
 from brayns.utils.view import View
 
-from .objects import create_composed_object, get_specific_object, update_specific_object
+from .objects import Object, create_composed_object, get_specific_object, update_specific_object
 
-CameraId = NewType("CameraId", int)
+
+class Camera(Object): ...
 
 
 @dataclass
@@ -69,25 +70,28 @@ def deserialize_camera_settings(message: dict[str, Any]) -> CameraSettings:
 
 async def create_camera(
     connection: Connection, typename: str, settings: CameraSettings, derived: dict[str, Any]
-) -> CameraId:
+) -> Camera:
     base = serialize_camera_settings(settings)
-    id = await create_composed_object(connection, typename, base, derived)
-    return CameraId(id)
+    object = await create_composed_object(connection, typename, base, derived)
+    return Camera(object.id)
 
 
-async def get_camera(connection: Connection, id: CameraId) -> CameraSettings:
-    result = await get_specific_object(connection, "Camera", id)
+async def get_camera(connection: Connection, camera: Camera) -> CameraSettings:
+    result = await get_specific_object(connection, "Camera", camera)
     return deserialize_camera_settings(result)
 
 
-async def update_camera(connection: Connection, id: CameraId, settings: CameraSettings) -> None:
+async def update_camera(connection: Connection, camera: Camera, settings: CameraSettings) -> None:
     properties = serialize_camera_settings(settings)
-    await update_specific_object(connection, "Camera", id, properties)
+    await update_specific_object(connection, "Camera", camera, properties)
+
+
+class PerspectiveCamera(Camera): ...
 
 
 @dataclass
 class DepthOfField:
-    aperture_radius: float = 0.0
+    aperture_radius: float
     focus_distance: float = 1.0
 
 
@@ -100,7 +104,7 @@ class StereoMode(Enum):
 
 @dataclass
 class Stereo:
-    mode: StereoMode = StereoMode.SIDE_BY_SIDE
+    mode: StereoMode
     interpupillary_distance: float = 0.0635
 
 
@@ -172,19 +176,25 @@ def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSett
 
 async def create_perspective_camera(
     connection: Connection, settings: CameraSettings, perspective: PerspectiveSettings
-) -> CameraId:
+) -> PerspectiveCamera:
     derived = serialize_perspective_settings(perspective)
-    return await create_camera(connection, "PerspectiveCamera", settings, derived)
+    object = await create_camera(connection, "PerspectiveCamera", settings, derived)
+    return PerspectiveCamera(object.id)
 
 
-async def get_perspective_camera(connection: Connection, id: CameraId) -> PerspectiveSettings:
-    result = await get_specific_object(connection, "PerspectiveCamera", id)
+async def get_perspective_camera(connection: Connection, camera: PerspectiveCamera) -> PerspectiveSettings:
+    result = await get_specific_object(connection, "PerspectiveCamera", camera)
     return deserialize_perspective_settings(result)
 
 
-async def update_perspective_camera(connection: Connection, id: CameraId, settings: PerspectiveSettings) -> None:
+async def update_perspective_camera(
+    connection: Connection, camera: PerspectiveCamera, settings: PerspectiveSettings
+) -> None:
     properties = serialize_perspective_settings(settings)
-    await update_specific_object(connection, "PerspectiveCamera", id, properties)
+    await update_specific_object(connection, "PerspectiveCamera", camera, properties)
+
+
+class OrthographicCamera(Camera): ...
 
 
 @dataclass
@@ -202,19 +212,25 @@ def deserialize_orthographic_settings(message: dict[str, Any]) -> OrthographicSe
 
 async def create_orthographic_camera(
     connection: Connection, settings: CameraSettings, orthographic: OrthographicSettings
-) -> CameraId:
+) -> OrthographicCamera:
     derived = serialize_orthographic_settings(orthographic)
-    return await create_camera(connection, "OrthographicCamera", settings, derived)
+    camera = await create_camera(connection, "OrthographicCamera", settings, derived)
+    return OrthographicCamera(camera.id)
 
 
-async def get_orthographic_camera(connection: Connection, id: CameraId) -> OrthographicSettings:
-    result = await get_specific_object(connection, "OrthographicCamera", id)
+async def get_orthographic_camera(connection: Connection, camera: OrthographicCamera) -> OrthographicSettings:
+    result = await get_specific_object(connection, "OrthographicCamera", camera)
     return deserialize_orthographic_settings(result)
 
 
-async def update_orthographic_camera(connection: Connection, id: CameraId, settings: OrthographicSettings) -> None:
+async def update_orthographic_camera(
+    connection: Connection, camera: OrthographicCamera, settings: OrthographicSettings
+) -> None:
     properties = serialize_orthographic_settings(settings)
-    await update_specific_object(connection, "OrthographicCamera", id, properties)
+    await update_specific_object(connection, "OrthographicCamera", camera, properties)
+
+
+class PanoramicCamera(Camera): ...
 
 
 @dataclass
@@ -242,16 +258,19 @@ def deserialize_panoramic_settings(message: dict[str, Any]) -> PanoramicSettings
 
 async def create_panoramic_camera(
     connection: Connection, settings: CameraSettings, panoramic: PanoramicSettings
-) -> CameraId:
+) -> PanoramicCamera:
     derived = serialize_panoramic_settings(panoramic)
-    return await create_camera(connection, "PanoramicCamera", settings, derived)
+    camera = await create_camera(connection, "PanoramicCamera", settings, derived)
+    return PanoramicCamera(camera.id)
 
 
-async def get_panoramic_camera(connection: Connection, id: CameraId) -> PanoramicSettings:
-    result = await get_specific_object(connection, "PanoramicCamera", id)
+async def get_panoramic_camera(connection: Connection, camera: PanoramicCamera) -> PanoramicSettings:
+    result = await get_specific_object(connection, "PanoramicCamera", camera)
     return deserialize_panoramic_settings(result)
 
 
-async def update_panoramic_camera(connection: Connection, id: CameraId, settings: PanoramicSettings) -> None:
+async def update_panoramic_camera(
+    connection: Connection, camera: PanoramicCamera, settings: PanoramicSettings
+) -> None:
     properties = serialize_panoramic_settings(settings)
-    await update_specific_object(connection, "PanoramicCamera", id, properties)
+    await update_specific_object(connection, "PanoramicCamera", camera, properties)

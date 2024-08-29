@@ -64,7 +64,7 @@ enum class StereoMode
 
 struct Stereo
 {
-    StereoMode mode = StereoMode::SideBySide;
+    StereoMode mode;
     float interpupillaryDistance = 0.0635F;
 };
 

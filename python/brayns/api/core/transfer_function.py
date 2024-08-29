@@ -19,23 +19,25 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
-from typing import Any, NewType
+from typing import Any
 
 from brayns.network.connection import Connection
 from brayns.utils.box import Box1
 from brayns.utils.color import Color4
 from brayns.utils.parsing import deserialize_box1, get, serialize_box1
 
-from .objects import create_composed_object, get_specific_object, update_specific_object
-
-TransferFunctionId = NewType("TransferFunctionId", int)
+from .objects import Object, create_composed_object, get_specific_object, update_specific_object
 
 
-async def create_transfer_function(
-    connection: Connection, typename: str, derived: dict[str, Any]
-) -> TransferFunctionId:
-    id = await create_composed_object(connection, typename, None, derived)
-    return TransferFunctionId(id)
+class TransferFunction(Object): ...
+
+
+async def create_transfer_function(connection: Connection, typename: str, derived: dict[str, Any]) -> TransferFunction:
+    object = await create_composed_object(connection, typename, None, derived)
+    return TransferFunction(object.id)
+
+
+class LinearTransferFunction(TransferFunction): ...
 
 
 @dataclass
@@ -60,20 +62,21 @@ def deserialize_linear_transfer_function_settings(message: dict[str, Any]) -> Li
 
 async def create_linear_transfer_function(
     connection: Connection, settings: LinearTransferFunctionSettings
-) -> TransferFunctionId:
+) -> LinearTransferFunction:
     derived = serialize_linear_transfer_function_settings(settings)
-    return await create_transfer_function(connection, "LinearTransferFunction", derived)
+    object = await create_transfer_function(connection, "LinearTransferFunction", derived)
+    return LinearTransferFunction(object.id)
 
 
 async def get_linear_transfer_function(
-    connection: Connection, id: TransferFunctionId
+    connection: Connection, transfer_function: LinearTransferFunction
 ) -> LinearTransferFunctionSettings:
-    result = await get_specific_object(connection, "LinearTransferFunction", id)
+    result = await get_specific_object(connection, "LinearTransferFunction", transfer_function)
     return deserialize_linear_transfer_function_settings(result)
 
 
 async def update_linear_transfer_function(
-    connection: Connection, id: TransferFunctionId, settings: LinearTransferFunctionSettings
+    connection: Connection, transfer_function: LinearTransferFunction, settings: LinearTransferFunctionSettings
 ) -> None:
     properties = serialize_linear_transfer_function_settings(settings)
-    await update_specific_object(connection, "LinearTransferFunction", id, properties)
+    await update_specific_object(connection, "LinearTransferFunction", transfer_function, properties)

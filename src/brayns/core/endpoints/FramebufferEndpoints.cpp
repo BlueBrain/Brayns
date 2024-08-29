@@ -83,18 +83,18 @@ struct JsonObjectReflector<FramebufferParams>
     }
 };
 
-struct FramebufferResult
+struct FramebufferInfo
 {
     FramebufferParams params;
     std::optional<float> variance;
 };
 
 template<>
-struct JsonObjectReflector<FramebufferResult>
+struct JsonObjectReflector<FramebufferInfo>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<FramebufferResult>();
+        auto builder = JsonBuilder<FramebufferInfo>();
         builder.field("params", [](auto &object) { return &object.params; })
             .description("Params used to create the framebuffer");
         builder.field("variance", [](auto &object) { return &object.variance; })
@@ -177,7 +177,7 @@ ObjectResult addFramebuffer(LockedObjects &locked, Device &device, FramebufferPa
         });
 }
 
-FramebufferResult getFramebuffer(LockedObjects &locked, const ObjectParams &params)
+FramebufferInfo getFramebuffer(LockedObjects &locked, const ObjectParams &params)
 {
     return locked.visit(
         [&](ObjectManager &objects)
@@ -190,30 +190,28 @@ FramebufferResult getFramebuffer(LockedObjects &locked, const ObjectParams &para
 
             auto variance = framebuffer.deviceObject.getVariance();
 
-            return FramebufferResult{std::move(params), variance};
+            return FramebufferInfo{std::move(params), variance};
         });
 }
 
-struct FramebufferOperations
+struct FramebufferUpdate
 {
     std::vector<ObjectId> imageOperations;
 };
 
 template<>
-struct JsonObjectReflector<FramebufferOperations>
+struct JsonObjectReflector<FramebufferUpdate>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<FramebufferOperations>();
+        auto builder = JsonBuilder<FramebufferUpdate>();
         builder.field("imageOperations", [](auto &object) { return &object.imageOperations; })
             .description("IDs of the image operations to attach to the framebuffer");
         return builder.build();
     }
 };
 
-using FramebufferUpdate = UpdateParams<FramebufferOperations>;
-
-void updateFramebuffer(LockedObjects &locked, Device &device, const FramebufferUpdate &params)
+void updateFramebuffer(LockedObjects &locked, Device &device, const UpdateParams<FramebufferUpdate> &params)
 {
     locked.visit(
         [&](ObjectManager &objects)
@@ -250,7 +248,10 @@ void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device
     builder.endpoint("getFramebuffer", [&](ObjectParams params) { return getFramebuffer(objects, params); })
         .description("Get properties of a given framebuffer");
 
-    builder.endpoint("updateFramebuffer", [&](FramebufferUpdate params) { updateFramebuffer(objects, device, params); })
+    builder
+        .endpoint(
+            "updateFramebuffer",
+            [&](UpdateParams<FramebufferUpdate> params) { updateFramebuffer(objects, device, params); })
         .description("Update properties of a given framebuffer");
 
     builder.endpoint("clearFramebuffer", [&](ObjectParams params) { clearFramebuffer(objects, params); })

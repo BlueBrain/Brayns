@@ -78,4 +78,4 @@ async def test_remove_operations(connection: Connection) -> None:
     await remove_objects(connection, [tone_mapper])
 
     after_remove = await get_framebuffer(connection, framebuffer)
-    assert after_remove.settings.image_operations == [0]
+    assert after_remove.settings.image_operations[0].id == 0

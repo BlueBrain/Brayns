@@ -24,6 +24,7 @@ from brayns import (
     VERSION,
     Connection,
     JsonRpcError,
+    Task,
     cancel_task,
     get_endpoint,
     get_methods,
@@ -65,10 +66,10 @@ async def test_tasks(connection: Connection) -> None:
     assert not tasks
 
     with pytest.raises(JsonRpcError):
-        await get_task(connection, 0)
+        await get_task(connection, Task(0))
 
     with pytest.raises(JsonRpcError):
-        await cancel_task(connection, 0)
+        await cancel_task(connection, Task(0))
 
     with pytest.raises(JsonRpcError):
-        await get_task_result(connection, 0)
+        await get_task_result(connection, Task(0))

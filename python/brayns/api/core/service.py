@@ -74,6 +74,15 @@ async def get_endpoint(connection: Connection, method: str) -> Endpoint:
     )
 
 
+class Task:
+    def __init__(self, id: int) -> None:
+        self._id = id
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+
 @dataclass
 class TaskOperation:
     description: str
@@ -110,28 +119,25 @@ def deserialize_task(message: dict[str, Any]) -> TaskInfo:
 
 async def get_tasks(connection: Connection) -> list[TaskInfo]:
     result = await connection.get_result("getTasks")
-
-    tasks: list[dict[str, Any]] = get(result, "tasks", list[dict[str, Any]])
-
+    tasks = get(result, "tasks", list[dict[str, Any]])
     return [deserialize_task(task) for task in tasks]
 
 
-async def get_task(connection: Connection, task_id: int) -> TaskInfo:
-    result = await connection.get_result("getTask", {"taskId": task_id})
-
+async def get_task(connection: Connection, task: Task) -> TaskInfo:
+    result = await connection.get_result("getTask", {"taskId": task.id})
     return deserialize_task(result)
 
 
-async def cancel_task(connection: Connection, task_id: int) -> None:
-    await connection.get_result("cancelTask", {"taskId": task_id})
+async def cancel_task(connection: Connection, task: Task) -> None:
+    await connection.get_result("cancelTask", {"taskId": task.id})
 
 
 async def cancel_all_tasks(connection: Connection) -> None:
     await connection.get_result("cancelAllTasks")
 
 
-async def get_task_result(connection: Connection, task_id: int) -> Response:
-    return await connection.request("getTaskResult", {"taskId": task_id})
+async def get_task_result(connection: Connection, task: Task) -> Response:
+    return await connection.request("getTaskResult", {"taskId": task.id})
 
 
 async def stop_service(connection: Connection) -> None:
@@ -141,26 +147,25 @@ async def stop_service(connection: Connection) -> None:
 T = TypeVar("T")
 
 
-class Task(Generic[T]):
-    def __init__(self, connection: Connection, id: int, parser: Callable[[Response], T]) -> None:
-        self._connection = connection
-        self._id = id
+class TaskWrapper(Generic[T]):
+    def __init__(self, task: Task, parser: Callable[[Response], T]) -> None:
+        self._task = task
         self._parser = parser
 
     @property
     def id(self) -> int:
-        return self._id
+        return self._task.id
 
-    async def get_status(self) -> TaskInfo:
-        return await get_task(self._connection, self._id)
+    async def get_status(self, connection: Connection) -> TaskInfo:
+        return await get_task(connection, self._task)
 
-    async def is_done(self) -> bool:
-        status = await self.get_status()
+    async def is_done(self, connection: Connection) -> bool:
+        status = await self.get_status(connection)
         return status.done
 
-    async def cancel(self) -> None:
-        await cancel_task(self._connection, self._id)
+    async def cancel(self, connection: Connection) -> None:
+        await cancel_task(connection, self._task)
 
-    async def wait(self) -> T:
-        result = await get_task_result(self._connection, self._id)
+    async def wait(self, connection: Connection) -> T:
+        result = await get_task_result(connection, self._task)
         return self._parser(result)

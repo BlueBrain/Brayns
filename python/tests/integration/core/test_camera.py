@@ -25,10 +25,12 @@ from brayns import (
     CameraSettings,
     Connection,
     JsonRpcError,
+    OrthographicCamera,
     OrthographicSettings,
     PanoramicSettings,
     PerspectiveSettings,
     Stereo,
+    StereoMode,
     clear_objects,
     create_orthographic_camera,
     create_panoramic_camera,
@@ -68,7 +70,7 @@ async def test_perspective_camera(connection: Connection) -> None:
     settings.near_clip = 3
     await update_camera(connection, camera, settings)
 
-    perspective.stereo = Stereo()
+    perspective.stereo = Stereo(mode=StereoMode.SIDE_BY_SIDE)
     await update_perspective_camera(connection, camera, perspective)
 
     assert settings == await get_camera(connection, camera)
@@ -109,7 +111,7 @@ async def test_panoramic_camera(connection: Connection) -> None:
     settings.near_clip = 3
     await update_camera(connection, camera, settings)
 
-    panoramic.stereo = Stereo()
+    panoramic.stereo = Stereo(mode=StereoMode.SIDE_BY_SIDE)
     await update_panoramic_camera(connection, camera, panoramic)
 
     assert settings == await get_camera(connection, camera)
@@ -127,19 +129,19 @@ async def test_object_management(connection: Connection) -> None:
     camera2 = await create_orthographic_camera(connection, settings, orthographic)
 
     with pytest.raises(JsonRpcError):
-        await get_orthographic_camera(connection, camera1)
+        await get_orthographic_camera(connection, OrthographicCamera(camera1.id))
 
     await update_object(connection, camera1, "test")
 
     object1 = await get_object(connection, camera1)
 
-    assert object1.id == camera1
+    assert object1.id == camera1.id
     assert object1.type == "PerspectiveCamera"
     assert object1.user_data == "test"
 
     object2 = await get_object(connection, camera2)
 
-    assert object2.id == camera2
+    assert object2.id == camera2.id
     assert object2.type == "OrthographicCamera"
     assert object2.user_data is None
 

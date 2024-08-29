@@ -84,9 +84,7 @@ CameraSettings getCamera(LockedObjects &locked, const ObjectParams &params)
         });
 }
 
-using CameraUpdate = UpdateParams<CameraSettings>;
-
-void updateCamera(LockedObjects &locked, Device &device, const CameraUpdate &params)
+void updateCamera(LockedObjects &locked, Device &device, const UpdateParams<CameraSettings> &params)
 {
     validateCameraSettings(params.properties);
 
@@ -219,7 +217,7 @@ struct JsonObjectReflector<DepthOfField>
         auto builder = JsonBuilder<DepthOfField>();
         builder.field("apertureRadius", [](auto &object) { return &object.apertureRadius; })
             .description("Size of the aperture radius (0 is no depth of field)")
-            .defaultValue(0.0F);
+            .defaultValue(0.1F);
         builder.field("focusDistance", [](auto &object) { return &object.focusDistance; })
             .description("Distance at which the image is the sharpest")
             .defaultValue(1.0F);
@@ -248,8 +246,7 @@ struct JsonObjectReflector<Stereo>
     {
         auto builder = JsonBuilder<Stereo>();
         builder.field("mode", [](auto &object) { return &object.mode; })
-            .description("Size of the aperture radius (0 is no depth of field)")
-            .defaultValue(StereoMode::SideBySide);
+            .description("How to render images for each eye");
         builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
             .description("Distance between observer eyes")
             .defaultValue(0.0635F);
@@ -390,7 +387,10 @@ void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &dev
     builder.endpoint("getCamera", [&](ObjectParams params) { return getCamera(objects, params); })
         .description("Get the base properties of a camera of any type");
 
-    builder.endpoint("updateCamera", [&](CameraUpdate params) { return updateCamera(objects, device, params); })
+    builder
+        .endpoint(
+            "updateCamera",
+            [&](UpdateParams<CameraSettings> params) { return updateCamera(objects, device, params); })
         .description("Update the base properties of a camera of any type");
 }
 }

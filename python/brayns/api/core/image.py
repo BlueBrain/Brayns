@@ -22,11 +22,11 @@ from enum import Enum
 
 from brayns.network.connection import Connection
 
-from .framebuffer import FramebufferChannel, FramebufferId
+from .framebuffer import Framebuffer, FramebufferChannel
 
 
-async def read_framebuffer(connection: Connection, id: FramebufferId, channel: FramebufferChannel) -> bytes:
-    params = {"id": id, "settings": {"channel": channel.value}}
+async def read_framebuffer(connection: Connection, framebuffer: Framebuffer, channel: FramebufferChannel) -> bytes:
+    params = {"id": framebuffer.id, "settings": {"channel": channel.value}}
     response = await connection.request("readFramebuffer", params)
     return response.binary
 
@@ -37,9 +37,9 @@ class JpegChannel(Enum):
 
 
 async def read_framebuffer_as_jpeg(
-    connection: Connection, id: FramebufferId, channel: JpegChannel, quality: int = 100
+    connection: Connection, framebuffer: Framebuffer, channel: JpegChannel, quality: int = 100
 ) -> bytes:
-    params = {"id": id, "settings": {"channel": channel.value, "settings": {"quality": quality}}}
+    params = {"id": framebuffer.id, "settings": {"channel": channel.value, "settings": {"quality": quality}}}
     response = await connection.request("readFramebufferAsJpeg", params)
     return response.binary
 
@@ -47,15 +47,15 @@ async def read_framebuffer_as_jpeg(
 PngChannel = JpegChannel
 
 
-async def read_framebuffer_as_png(connection: Connection, id: FramebufferId, channel: PngChannel) -> bytes:
-    params = {"id": id, "settings": {"channel": channel.value}}
+async def read_framebuffer_as_png(connection: Connection, framebuffer: Framebuffer, channel: PngChannel) -> bytes:
+    params = {"id": framebuffer.id, "settings": {"channel": channel.value}}
     response = await connection.request("readFramebufferAsPng", params)
     return response.binary
 
 
 async def read_framebuffer_as_exr(
-    connection: Connection, id: FramebufferId, channels: set[FramebufferChannel]
+    connection: Connection, framebuffer: Framebuffer, channels: set[FramebufferChannel]
 ) -> bytes:
-    params = {"id": id, "settings": {"channels": [channel.value for channel in channels]}}
+    params = {"id": framebuffer.id, "settings": {"channels": [channel.value for channel in channels]}}
     response = await connection.request("readFramebufferAsExr", params)
     return response.binary
