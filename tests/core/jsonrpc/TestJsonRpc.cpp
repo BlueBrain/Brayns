@@ -19,7 +19,6 @@
 
 #include <doctest.h>
 
-#include <brayns/core/jsonrpc/Binary.h>
 #include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/jsonrpc/Messages.h>
 #include <brayns/core/jsonrpc/Parser.h>
@@ -103,20 +102,4 @@ TEST_CASE("JsonRpcParser")
         auto data = std::string("\x10\x00\x00\x00", 4) + "{}";
         CHECK_THROWS_AS(parseBinaryJsonRpcRequest(data), ParseError);
     }
-}
-
-TEST_CASE("Binary")
-{
-    auto data = std::vector<std::uint16_t>{0, 1, 2};
-
-    auto binary = composeRangeToBinary(data);
-
-    CHECK_EQ(binary.size(), 6);
-
-    auto retreived = parseBytesAsVectorOf<std::uint16_t>(binary);
-
-    CHECK_EQ(retreived, data);
-
-    CHECK_THROWS_AS(parseBytesAsVectorOf<float>(binary, 12), InvalidParams);
-    CHECK_THROWS_AS(parseBytesAsVectorOf<double>(binary), InvalidParams);
 }

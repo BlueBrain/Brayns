@@ -221,7 +221,7 @@ void updateFramebuffer(LockedObjects &locked, Device &device, const UpdateParams
             auto operations = getImageOperations(objects, params.properties.imageOperations);
             auto data = createImageOperationData(device, operations);
 
-            framebuffer.deviceObject.setImageOperations(data);
+            framebuffer.deviceObject.update(data);
             device.throwIfError();
 
             framebuffer.imageOperations = std::move(operations);

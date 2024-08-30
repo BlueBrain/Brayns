@@ -33,10 +33,10 @@
 #include <brayns/core/codecs/ExrCodec.h>
 #include <brayns/core/codecs/JpegCodec.h>
 #include <brayns/core/codecs/PngCodec.h>
-#include <brayns/core/jsonrpc/Binary.h>
 #include <brayns/core/jsonrpc/Errors.h>
 
 #include "FramebufferEndpoints.h"
+#include "common/Binary.h"
 
 namespace brayns
 {
@@ -48,7 +48,6 @@ void checkChannelInFramebuffer(const UserFramebuffer &framebuffer, FramebufferCh
     }
 
     const auto &name = getEnumName(channel);
-
     throw InvalidParams(fmt::format("The given framebuffer was created without the channel {}", name));
 }
 

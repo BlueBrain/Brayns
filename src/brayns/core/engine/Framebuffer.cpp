@@ -73,7 +73,7 @@ std::optional<float> Framebuffer::getVariance()
     return std::nullopt;
 }
 
-void Framebuffer::setImageOperations(const std::optional<Data<ImageOperation>> &imageOperations)
+void Framebuffer::update(const std::optional<Data<ImageOperation>> &imageOperations)
 {
     auto handle = getHandle();
     setObjectParam(handle, "imageOperation", imageOperations);

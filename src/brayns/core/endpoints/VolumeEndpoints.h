@@ -25,19 +25,16 @@
 #include <functional>
 
 #include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/engine/Camera.h>
+#include <brayns/core/engine/Volume.h>
 #include <brayns/core/manager/LockedObjects.h>
 
 namespace brayns
 {
-struct CameraInterface
+struct VolumeInterface
 {
     std::any value;
-    std::function<Camera()> getDeviceObject;
-    std::function<CameraSettings()> getSettings;
-    std::function<void(const CameraSettings &)> update;
-    std::function<void(float)> setAspect;
+    std::function<Volume()> getDeviceObject;
 };
 
-void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
+void addVolumeEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
 }

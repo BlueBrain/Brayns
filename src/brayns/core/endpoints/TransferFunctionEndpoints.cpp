@@ -121,16 +121,16 @@ void addTransferFunctionType(ApiBuilder &builder, LockedObjects &objects, Device
         .endpoint(
             "create" + type,
             [&](TransferFunctionParams<T> params) { return createTransferFunctionAs<T>(objects, device, params); })
-        .description("Create an image function of type " + type);
+        .description("Create a transfer function of type " + type);
 
     builder.endpoint("get" + type, [&](ObjectParams params) { return getTransferFunctionAs<T>(objects, params); })
-        .description("Get derived properties of an image function of type " + type);
+        .description("Get derived properties of a transfer function of type " + type);
 
     builder
         .endpoint(
             "update" + type,
             [&](TransferFunctionUpdateOf<T> params) { updateTransferFunctionAs<T>(objects, device, params); })
-        .description("Update derived properties of an image function of type " + type);
+        .description("Update derived properties of a transfer function of type " + type);
 }
 
 struct LinearTransferFunctionParams

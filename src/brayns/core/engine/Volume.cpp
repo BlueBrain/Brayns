@@ -21,17 +21,36 @@
 
 #include "Volume.h"
 
+namespace
+{
+using namespace brayns;
+
+void setRegularVolumeParams(OSPVolume handle, const RegularVolumeSettings &settings)
+{
+    setObjectParam(handle, "gridOrigin", settings.origin);
+    setObjectParam(handle, "gridSpacing", settings.spacing);
+    setObjectParam(handle, "cellCentered", settings.schema == VolumeSchema::CellCentered);
+    setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
+    setObjectParam(handle, "background", settings.background);
+}
+}
+
 namespace brayns
 {
-RegularVolume createRegularVolume(Device &device, const RegularVolumeSettings &settings)
+void RegularVolume::update(const RegularVolumeSettings &settings)
+{
+    auto handle = getHandle();
+    setRegularVolumeParams(handle, settings);
+    commitObject(handle);
+}
+
+RegularVolume createRegularVolume(Device &device, const RegularVolumeData &data, const RegularVolumeSettings &settings)
 {
     auto handle = ospNewVolume("structuredRegular");
     auto volume = wrapObjectHandleAs<RegularVolume>(device, handle);
 
-    setObjectParam(handle, "data", settings.data);
-    setObjectParam(handle, "cellCentered", settings.voxelType == VoxelType::CellCentered);
-    setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
-    setObjectParam(handle, "background", settings.background);
+    setObjectParam(handle, "data", data);
+    setRegularVolumeParams(handle, settings);
 
     commitObject(device, handle);
 

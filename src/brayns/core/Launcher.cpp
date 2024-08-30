@@ -23,13 +23,9 @@
 
 #include <iostream>
 
-#include <brayns/core/endpoints/CameraEndpoints.h>
-#include <brayns/core/endpoints/FramebufferEndpoints.h>
-#include <brayns/core/endpoints/ImageEndpoints.h>
-#include <brayns/core/endpoints/ImageOperationEndpoints.h>
+#include <brayns/core/endpoints/DeviceEndpoints.h>
 #include <brayns/core/endpoints/ObjectEndpoints.h>
 #include <brayns/core/endpoints/ServiceEndpoints.h>
-#include <brayns/core/endpoints/TransferFunctionEndpoints.h>
 
 #include <brayns/core/engine/Device.h>
 
@@ -104,12 +100,7 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     addObjectEndpoints(builder, locked);
 
-    addCameraEndpoints(builder, locked, device);
-    addImageOperationEndpoints(builder, locked, device);
-    addFramebufferEndpoints(builder, locked, device);
-    addTransferFunctionEndpoints(builder, locked, device);
-
-    addImageEndpoints(builder, locked);
+    addDeviceEndpoints(builder, locked, device);
 
     api = builder.build();
 

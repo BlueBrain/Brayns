@@ -65,7 +65,7 @@ TEST_CASE("Object creation")
 
     auto volumeData = allocateData3D<float>(device, {10, 10, 10});
     std::ranges::fill(volumeData.getItems(), 1.0F);
-    auto volume = createRegularVolume(device, {volumeData});
+    auto volume = createRegularVolume(device, volumeData, {});
 
     auto colors = createData<Color4>(device, {Color4{1, 0, 0, 1}, Color4{0, 0, 1, 1}});
     auto transferFunction = createLinearTransferFunction(device, {{0, 1}, colors});

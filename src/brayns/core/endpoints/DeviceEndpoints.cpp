@@ -19,25 +19,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "DeviceEndpoints.h"
 
-#include <any>
-#include <functional>
-
-#include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/engine/Camera.h>
-#include <brayns/core/manager/LockedObjects.h>
+#include "CameraEndpoints.h"
+#include "FramebufferEndpoints.h"
+#include "ImageEndpoints.h"
+#include "ImageOperationEndpoints.h"
+#include "TransferFunctionEndpoints.h"
+#include "VolumeEndpoints.h"
 
 namespace brayns
 {
-struct CameraInterface
+void addDeviceEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
 {
-    std::any value;
-    std::function<Camera()> getDeviceObject;
-    std::function<CameraSettings()> getSettings;
-    std::function<void(const CameraSettings &)> update;
-    std::function<void(float)> setAspect;
-};
-
-void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
+    addCameraEndpoints(builder, objects, device);
+    addFramebufferEndpoints(builder, objects, device);
+    addImageEndpoints(builder, objects);
+    addTransferFunctionEndpoints(builder, objects, device);
+    addVolumeEndpoints(builder, objects, device);
+}
 }

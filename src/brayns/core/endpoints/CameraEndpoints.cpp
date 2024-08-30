@@ -47,10 +47,11 @@ struct JsonObjectReflector<CameraSettings>
     static auto reflect()
     {
         auto builder = JsonBuilder<CameraSettings>();
-        builder.field("view", [](auto &object) { return &object.view; }).description("Camera viewpoint in 3D space");
+        builder.field("view", [](auto &object) { return &object.view; }).description("Camera view in 3D space");
         builder.field("nearClip", [](auto &object) { return &object.nearClip; })
             .description("Distance to clip objects that are too close to the camera")
-            .defaultValue(0.0F);
+            .defaultValue(0.0F)
+            .minimum(0.0F);
         builder.field("imageRegion", [](auto &object) { return &object.imageRegion; })
             .description("Normalized region of the camera to be rendered (does not affect framebuffer resolution)")
             .defaultValue(Box2{{0.0F, 0.0F}, {1.0F, 1.0F}});
@@ -66,11 +67,6 @@ void validateCameraSettings(const CameraSettings &settings)
     if (right.x == 0.0F && right.y == 0.0F && right.z == 0.0F)
     {
         throw InvalidParams("Camera up and direction are colinear");
-    }
-
-    if (settings.nearClip < 0.0F)
-    {
-        throw InvalidParams("Camera near clip must be positive");
     }
 }
 

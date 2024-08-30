@@ -21,23 +21,11 @@
 
 #pragma once
 
-#include <any>
-#include <functional>
-
 #include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/engine/Camera.h>
+#include <brayns/core/engine/Device.h>
 #include <brayns/core/manager/LockedObjects.h>
 
 namespace brayns
 {
-struct CameraInterface
-{
-    std::any value;
-    std::function<Camera()> getDeviceObject;
-    std::function<CameraSettings()> getSettings;
-    std::function<void(const CameraSettings &)> update;
-    std::function<void(float)> setAspect;
-};
-
-void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
+void addDeviceEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
 }
