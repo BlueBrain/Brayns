@@ -1,6 +1,6 @@
 /* Copyright (c) 2015-2024, EPFL/Blue Brain Project
  * All rights reserved. Do not distribute without permission.
- * Responsible Author: Nadir Roman Guerrero <nadir.romanguerrero@epfl.ch>
+ * Responsible Author: Adrien Fleury <adrien.fleury@epfl.ch>
  *
  * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
  *
@@ -20,11 +20,12 @@
 
 #pragma once
 
-enum class VoxelType
+#include <api/IUseCase.h>
+
+class VectorField : public IUseCase
 {
-    Scalar,
-    Orientation,
-    Flatmap,
-    LayerDistance,
-    Vector,
+public:
+    std::string getName() const override;
+    bool isValidAtlas(const Atlas &atlas) const override;
+    std::shared_ptr<brayns::Model> run(const Atlas &atlas, const brayns::JsonValue &payload) const override;
 };
