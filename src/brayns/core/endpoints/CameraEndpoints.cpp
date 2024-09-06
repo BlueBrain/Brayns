@@ -21,43 +21,12 @@
 
 #include "CameraEndpoints.h"
 
-#include <concepts>
-#include <type_traits>
+#include <brayns/core/jsonrpc/Errors.h>
+#include <brayns/core/objects/CameraObjects.h>
 
-namespace brayns
+namespace
 {
-template<>
-struct JsonObjectReflector<View>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<View>();
-        builder.field("position", [](auto &object) { return &object.position; }).description("Position XYZ");
-        builder.field("direction", [](auto &object) { return &object.direction; }).description("Forward direction XYZ");
-        builder.field("up", [](auto &object) { return &object.up; })
-            .description("Up direction XYZ")
-            .defaultValue(Vector3(0.0F, 1.0F, 0.0F));
-        return builder.build();
-    }
-};
-
-template<>
-struct JsonObjectReflector<CameraSettings>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<CameraSettings>();
-        builder.field("view", [](auto &object) { return &object.view; }).description("Camera view in 3D space");
-        builder.field("nearClip", [](auto &object) { return &object.nearClip; })
-            .description("Distance to clip objects that are too close to the camera")
-            .defaultValue(0.0F)
-            .minimum(0.0F);
-        builder.field("imageRegion", [](auto &object) { return &object.imageRegion; })
-            .description("Normalized region of the camera to be rendered (does not affect framebuffer resolution)")
-            .defaultValue(Box2{{0.0F, 0.0F}, {1.0F, 1.0F}});
-        return builder.build();
-    }
-};
+using namespace brayns;
 
 void validateCameraSettings(const CameraSettings &settings)
 {
@@ -69,324 +38,112 @@ void validateCameraSettings(const CameraSettings &settings)
         throw InvalidParams("Camera up and direction are colinear");
     }
 }
-
-CameraSettings getCamera(LockedObjects &locked, const ObjectParams &params)
-{
-    return locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto &camera = objects.get<CameraInterface>(params.id);
-            return camera.getSettings();
-        });
 }
 
-void updateCamera(LockedObjects &locked, Device &device, const UpdateParams<CameraSettings> &params)
+namespace brayns
 {
-    validateCameraSettings(params.properties);
-
-    locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto &camera = objects.get<CameraInterface>(params.id);
-            auto deviceObject = camera.getDeviceObject();
-
-            deviceObject.update(params.properties);
-            device.throwIfError();
-
-            camera.update(params.properties);
-        });
+CameraInfo getCamera(ObjectManager &manager, const ObjectParams &params)
+{
+    return manager.visit([&](ObjectRegistry &objects) { return getCamera(objects, params); });
 }
 
-template<typename T>
-struct CameraReflector;
-
-template<std::derived_from<Camera> T>
-using GetCameraSettings = typename CameraReflector<T>::Settings;
-
-template<std::derived_from<Camera> T>
-using CameraParams = ComposedParams<CameraSettings, GetCameraSettings<T>>;
-
-template<typename T>
-concept ReflectedCamera =
-    ReflectedJson<GetCameraSettings<T>> && std::same_as<std::string, decltype(CameraReflector<T>::getType())>
-    && std::same_as<T, decltype(CameraReflector<T>::create(std::declval<Device &>(), CameraParams<T>()))>
-    && std::is_void_v<decltype(CameraReflector<T>::update(std::declval<T &>(), GetCameraSettings<T>()))>
-    && std::is_void_v<decltype(CameraReflector<T>::setAspect(std::declval<T &>(), 0.0F))>;
-
-template<ReflectedCamera T>
-using CameraUpdateOf = UpdateParams<GetCameraSettings<T>>;
-
-template<ReflectedCamera T>
-struct UserCamera
+void updateCamera(ObjectManager &manager, const CameraUpdate &params)
 {
-    T deviceObject;
-    CameraParams<T> params;
-};
-
-template<ReflectedCamera T>
-CameraInterface createCameraInterface(const std::shared_ptr<UserCamera<T>> &camera)
-{
-    return {
-        .value = camera,
-        .getDeviceObject = [=] { return camera->deviceObject; },
-        .getSettings = [=] { return camera->params.base; },
-        .update = [=](const auto &settings) { camera->params.base = settings; },
-        .setAspect = [=](auto aspect) { CameraReflector<T>::setAspect(camera->deviceObject, aspect); },
-    };
+    validateCameraSettings(params.settings);
+    manager.visit([&](ObjectRegistry &objects) { updateCamera(objects, params); });
 }
 
-template<ReflectedCamera T>
-UserCamera<T> &castCameraAs(ObjectManager &objects, ObjectId id)
-{
-    auto interface = objects.getStored<CameraInterface>(id);
-    return castObjectAs<UserCamera<T>>(interface->value, interface.getInfo());
-}
-
-template<ReflectedCamera T>
-ObjectResult createCameraAs(LockedObjects &locked, Device &device, const CameraParams<T> &params)
+ObjectResult createPerspectiveCamera(ObjectManager &manager, Device &device, const PerspectiveCameraParams &params)
 {
     validateCameraSettings(params.base);
-
-    return locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto camera = CameraReflector<T>::create(device, params);
-            auto object = UserCamera<T>{camera, params};
-            auto ptr = std::make_shared<decltype(object)>(std::move(object));
-
-            auto interface = createCameraInterface(ptr);
-            auto type = CameraReflector<T>::getType();
-
-            auto stored = objects.add(std::move(interface), std::move(type));
-
-            return ObjectResult{stored.getId()};
-        });
+    return manager.visit([&](ObjectRegistry &objects) { return createPerspectiveCamera(objects, device, params); });
 }
 
-template<ReflectedCamera T>
-GetCameraSettings<T> getCameraAs(LockedObjects &locked, const ObjectParams &params)
+PerspectiveCameraInfo getPerspectiveCamera(ObjectManager &manager, const ObjectParams &params)
 {
-    return locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto &camera = castCameraAs<T>(objects, params.id);
-            return camera.params.derived;
-        });
+    return manager.visit([&](ObjectRegistry &objects) { return getPerspectiveCamera(objects, params); });
 }
 
-template<ReflectedCamera T>
-void updateCameraAs(LockedObjects &locked, Device &device, const CameraUpdateOf<T> &params)
+void updatePerspectiveCamera(ObjectManager &manager, const PerspectiveCameraUpdate &params)
 {
-    locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto &camera = castCameraAs<T>(objects, params.id);
-
-            CameraReflector<T>::update(camera.deviceObject, params.properties);
-            device.throwIfError();
-
-            camera.params.derived = params.properties;
-        });
+    manager.visit([&](ObjectRegistry &objects) { return updatePerspectiveCamera(objects, params); });
 }
 
-template<ReflectedCamera T>
-void addCameraType(ApiBuilder &builder, LockedObjects &objects, Device &device)
+ObjectResult createOrthographicCamera(ObjectManager &manager, Device &device, const OrthographicCameraParams &params)
 {
-    auto type = CameraReflector<T>::getType();
-
-    builder
-        .endpoint("create" + type, [&](CameraParams<T> params) { return createCameraAs<T>(objects, device, params); })
-        .description("Create a camera of type " + type);
-
-    builder.endpoint("get" + type, [&](ObjectParams params) { return getCameraAs<T>(objects, params); })
-        .description("Get derived properties of a camera of type " + type);
-
-    builder.endpoint("update" + type, [&](CameraUpdateOf<T> params) { updateCameraAs<T>(objects, device, params); })
-        .description("Update derived properties of a camera of type " + type);
+    validateCameraSettings(params.base);
+    return manager.visit([&](ObjectRegistry &objects) { return createOrthographicCamera(objects, device, params); });
 }
 
-template<>
-struct JsonObjectReflector<DepthOfField>
+OrthographicCameraInfo getOrthographicCamera(ObjectManager &manager, const ObjectParams &params)
 {
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<DepthOfField>();
-        builder.field("apertureRadius", [](auto &object) { return &object.apertureRadius; })
-            .description("Size of the aperture radius (0 is no depth of field)")
-            .defaultValue(0.1F);
-        builder.field("focusDistance", [](auto &object) { return &object.focusDistance; })
-            .description("Distance at which the image is the sharpest")
-            .defaultValue(1.0F);
-        return builder.build();
-    }
-};
+    return manager.visit([&](ObjectRegistry &objects) { return getOrthographicCamera(objects, params); });
+}
 
-template<>
-struct EnumReflector<StereoMode>
+void updateOrthographicCamera(ObjectManager &manager, const OrthographicCameraUpdate &params)
 {
-    static auto reflect()
-    {
-        auto builder = EnumBuilder<StereoMode>();
-        builder.field("Left", StereoMode::Left).description("Render left eye");
-        builder.field("Right", StereoMode::Right).description("Render right eye");
-        builder.field("SideBySide", StereoMode::SideBySide).description("Render both eyes side by side");
-        builder.field("TopBottom", StereoMode::TopBottom).description("Render left eye above right eye");
-        return builder.build();
-    }
-};
+    manager.visit([&](ObjectRegistry &objects) { return updateOrthographicCamera(objects, params); });
+}
 
-template<>
-struct JsonObjectReflector<Stereo>
+ObjectResult createPanoramicCamera(ObjectManager &manager, Device &device, const PanoramicCameraParams &params)
 {
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Stereo>();
-        builder.field("mode", [](auto &object) { return &object.mode; })
-            .description("How to render images for each eye");
-        builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
-            .description("Distance between observer eyes")
-            .defaultValue(0.0635F);
-        return builder.build();
-    }
-};
+    validateCameraSettings(params.base);
+    return manager.visit([&](ObjectRegistry &objects) { return createPanoramicCamera(objects, device, params); });
+}
 
-template<>
-struct JsonObjectReflector<PerspectiveCameraSettings>
+PanoramicCameraInfo getPanoramicCamera(ObjectManager &manager, const ObjectParams &params)
 {
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<PerspectiveCameraSettings>();
-        builder.field("fovy", [](auto &object) { return &object.fovy; })
-            .description("Camera vertical field of view in degrees (horizontal is deduced from framebuffer aspect)")
-            .defaultValue(45.0F);
-        builder.field("depthOfField", [](auto &object) { return &object.depthOfField; })
-            .description("Depth of field settings, set to null to disable it");
-        builder.field("architectural", [](auto &object) { return &object.architectural; })
-            .description("Vertical edges are projected to be parallel")
-            .defaultValue(false);
-        builder.field("stereo", [](auto &object) { return &object.stereo; })
-            .description("Stereo settings, set to null to disable it");
-        return builder.build();
-    }
-};
+    return manager.visit([&](ObjectRegistry &objects) { return getPanoramicCamera(objects, params); });
+}
 
-template<>
-struct CameraReflector<PerspectiveCamera>
+void updatePanoramicCamera(ObjectManager &manager, const PanoramicCameraUpdate &params)
 {
-    using Settings = PerspectiveCameraSettings;
+    manager.visit([&](ObjectRegistry &objects) { return updatePanoramicCamera(objects, params); });
+}
 
-    static std::string getType()
-    {
-        return "PerspectiveCamera";
-    }
-
-    static PerspectiveCamera create(Device &device, const CameraParams<PerspectiveCamera> &params)
-    {
-        return createPerspectiveCamera(device, params.base, params.derived);
-    }
-
-    static void update(PerspectiveCamera &camera, const PerspectiveCameraSettings &settings)
-    {
-        camera.update(settings);
-    }
-
-    static void setAspect(PerspectiveCamera &camera, float aspect)
-    {
-        camera.setAspect(aspect);
-    }
-};
-
-template<>
-struct JsonObjectReflector<OrthographicCameraSettings>
+void addCameraEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
 {
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<OrthographicCameraSettings>();
-        builder.field("height", [](auto &object) { return &object.height; })
-            .description("Camera viewport height in world coordinates (horizontal is deduced from framebuffer aspect)")
-            .defaultValue(1.0F);
-        return builder.build();
-    }
-};
-
-template<>
-struct CameraReflector<OrthographicCamera>
-{
-    using Settings = OrthographicCameraSettings;
-
-    static std::string getType()
-    {
-        return "OrthographicCamera";
-    }
-
-    static OrthographicCamera create(Device &device, const CameraParams<OrthographicCamera> &params)
-    {
-        return createOrthographicCamera(device, params.base, params.derived);
-    }
-
-    static void update(OrthographicCamera &camera, const OrthographicCameraSettings &settings)
-    {
-        camera.update(settings);
-    }
-
-    static void setAspect(OrthographicCamera &camera, float aspect)
-    {
-        camera.setAspect(aspect);
-    }
-};
-
-template<>
-struct JsonObjectReflector<PanoramicCameraSettings>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<PanoramicCameraSettings>();
-        builder.field("stereo", [](auto &object) { return &object.stereo; })
-            .description("Stereo settings, set to null to disable it");
-        return builder.build();
-    }
-};
-
-template<>
-struct CameraReflector<PanoramicCamera>
-{
-    using Settings = PanoramicCameraSettings;
-
-    static std::string getType()
-    {
-        return "PanoramicCamera";
-    }
-
-    static PanoramicCamera create(Device &device, const CameraParams<PanoramicCamera> &params)
-    {
-        return createPanoramicCamera(device, params.base, params.derived);
-    }
-
-    static void update(PanoramicCamera &camera, const PanoramicCameraSettings &settings)
-    {
-        camera.update(settings);
-    }
-
-    static void setAspect(PanoramicCamera &camera, float aspect)
-    {
-        (void)camera;
-        (void)aspect;
-    }
-};
-
-void addCameraEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
-{
-    addCameraType<PerspectiveCamera>(builder, objects, device);
-    addCameraType<OrthographicCamera>(builder, objects, device);
-    addCameraType<PanoramicCamera>(builder, objects, device);
-
-    builder.endpoint("getCamera", [&](ObjectParams params) { return getCamera(objects, params); })
-        .description("Get the base properties of a camera of any type");
+    builder.endpoint("getCamera", [&](ObjectParams params) { return getCamera(manager, params); })
+        .description("Get a camera of any type");
+    builder.endpoint("updateCamera", [&](CameraUpdate params) { updateCamera(manager, params); })
+        .description("Update a camera of any type");
 
     builder
         .endpoint(
-            "updateCamera",
-            [&](UpdateParams<CameraSettings> params) { return updateCamera(objects, device, params); })
-        .description("Update the base properties of a camera of any type");
+            "createPerspectiveCamera",
+            [&](PerspectiveCameraParams params) { return createPerspectiveCamera(manager, device, params); })
+        .description("Create a new perspective camera");
+    builder.endpoint("getPerspectiveCamera", [&](ObjectParams params) { return getPerspectiveCamera(manager, params); })
+        .description("Get perspective camera specific params");
+    builder
+        .endpoint(
+            "updatePerspectiveCamera",
+            [&](PerspectiveCameraUpdate params) { updatePerspectiveCamera(manager, params); })
+        .description("Update perspective camera specific params");
+
+    builder
+        .endpoint(
+            "createOrthographicCamera",
+            [&](OrthographicCameraParams params) { return createOrthographicCamera(manager, device, params); })
+        .description("Create a new panoramic camera");
+    builder
+        .endpoint("getOrthographicCamera", [&](ObjectParams params) { return getOrthographicCamera(manager, params); })
+        .description("Get panoramic camera specific params");
+    builder
+        .endpoint(
+            "updateOrthographicCamera",
+            [&](OrthographicCameraUpdate params) { updateOrthographicCamera(manager, params); })
+        .description("Update panoramic camera specific params");
+
+    builder
+        .endpoint(
+            "createPanoramicCamera",
+            [&](PanoramicCameraParams params) { return createPanoramicCamera(manager, device, params); })
+        .description("Create a new panoramic camera");
+    builder.endpoint("getPanoramicCamera", [&](ObjectParams params) { return getPanoramicCamera(manager, params); })
+        .description("Get panoramic camera specific params");
+    builder
+        .endpoint("updatePanoramicCamera", [&](PanoramicCameraUpdate params) { updatePanoramicCamera(manager, params); })
+        .description("Update panoramic camera specific params");
 }
 }

@@ -21,74 +21,36 @@
 
 #pragma once
 
-#include <map>
-#include <string>
-#include <vector>
+#include <concepts>
+#include <mutex>
 
-#include <brayns/core/utils/IdGenerator.h>
+#include <brayns/core/utils/Logger.h>
 
-#include "Messages.h"
-#include "Object.h"
+#include "ObjectRegistry.h"
 
 namespace brayns
 {
 class ObjectManager
 {
 public:
-    std::vector<ObjectInfo> getAllObjects() const;
-    ObjectInfo getObject(ObjectId id) const;
-    void setUserData(ObjectId id, const JsonValue &userData);
-    void remove(ObjectId id);
-    void clear();
-
-    template<typename T>
-    T &get(ObjectId id) const
+    explicit ObjectManager(ObjectRegistry objects, Logger &logger):
+        _objects(std::move(objects)),
+        _logger(&logger)
     {
-        return getShared<T>(id)->value;
     }
 
-    template<typename T>
-    Stored<T> getStored(ObjectId id) const
+    auto visit(std::invocable<ObjectRegistry &> auto &&callable) -> decltype(callable(std::declval<ObjectRegistry &>()))
     {
-        return Stored<T>(getShared<T>(id));
-    }
+        _logger->info("Waiting for object manager lock");
+        auto lock = std::lock_guard(_mutex);
+        _logger->info("Object manager lock acquired");
 
-    template<typename T>
-    Stored<T> add(T object, std::string type)
-    {
-        auto id = _ids.next();
-
-        try
-        {
-            auto info = ObjectInfo{id, std::move(type)};
-            auto user = ObjectStorage<T>{std::move(info), std::move(object)};
-            auto ptr = std::make_shared<decltype(user)>(std::move(user));
-
-            auto interface = createObjectInterface(ptr);
-
-            _objects.emplace(id, std::move(interface));
-
-            return Stored<T>(std::move(ptr));
-        }
-        catch (...)
-        {
-            _ids.recycle(id);
-            throw;
-        }
+        return callable(_objects);
     }
 
 private:
-    std::map<ObjectId, ObjectInterface> _objects;
-    IdGenerator<ObjectId> _ids{1};
-
-    const ObjectInterface &getInterface(ObjectId id) const;
-
-    template<typename T>
-    const std::shared_ptr<ObjectStorage<T>> &getShared(ObjectId id) const
-    {
-        const auto &interface = getInterface(id);
-
-        return castObjectAsShared<ObjectStorage<T>>(interface.value, interface.getInfo());
-    }
+    std::mutex _mutex;
+    ObjectRegistry _objects;
+    Logger *_logger;
 };
 }

@@ -22,42 +22,10 @@
 #pragma once
 
 #include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/engine/Framebuffer.h>
-#include <brayns/core/manager/LockedObjects.h>
-
-#include "ImageOperationEndpoints.h"
+#include <brayns/core/engine/Device.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-template<>
-struct EnumReflector<FramebufferChannel>
-{
-    static auto reflect()
-    {
-        auto builder = EnumBuilder<FramebufferChannel>();
-        builder.field("Color", FramebufferChannel::Color)
-            .description("Color RGBA, uint8 or float32 depending on framebuffer format");
-        builder.field("Depth", FramebufferChannel::Depth)
-            .description("Euclidean distance from camera of the closest hit as float32");
-        builder.field("Normal", FramebufferChannel::Normal).description("Accumulated normal XYZ as 3 x float32");
-        builder.field("Albedo", FramebufferChannel::Albedo)
-            .description("Accumulated color without illumination RGB as 3 x float32");
-        builder.field("PrimitiveId", FramebufferChannel::PrimitiveId)
-            .description("Index of first primitive hit as uint32");
-        builder.field("ModelId", FramebufferChannel::ModelId)
-            .description("ID set by user of the first geometric/volumetric model hit as uint32");
-        builder.field("InstanceId", FramebufferChannel::InstanceId)
-            .description("ID set by user of the first instance hit as uint32");
-        return builder.build();
-    }
-};
-
-struct UserFramebuffer
-{
-    Framebuffer deviceObject;
-    FramebufferSettings settings;
-    std::vector<Stored<ImageOperationInterface>> imageOperations;
-};
-
-void addFramebufferEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
+void addFramebufferEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
 }

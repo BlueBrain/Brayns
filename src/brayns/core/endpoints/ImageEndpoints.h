@@ -22,9 +22,9 @@
 #pragma once
 
 #include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/manager/LockedObjects.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-void addImageEndpoints(ApiBuilder &builder, LockedObjects &objects);
+void addImageEndpoints(ApiBuilder &builder, ObjectManager &manager);
 }

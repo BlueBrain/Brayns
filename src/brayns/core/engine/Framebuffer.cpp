@@ -73,10 +73,10 @@ std::optional<float> Framebuffer::getVariance()
     return std::nullopt;
 }
 
-void Framebuffer::update(const std::optional<Data<ImageOperation>> &imageOperations)
+void Framebuffer::update(const std::optional<Data<ImageOperation>> &operations)
 {
     auto handle = getHandle();
-    setObjectParam(handle, "imageOperation", imageOperations);
+    setObjectParam(handle, "imageOperation", operations);
     commitObject(handle);
 }
 
@@ -107,7 +107,7 @@ Framebuffer createFramebuffer(Device &device, const FramebufferSettings &setting
     auto handle = ospNewFrameBuffer(width, height, format, channels);
     auto framebuffer = wrapObjectHandleAs<Framebuffer>(device, handle);
 
-    setObjectParam(handle, "imageOperation", settings.imageOperations);
+    setObjectParam(handle, "imageOperation", settings.operations);
 
     commitObject(device, handle);
 

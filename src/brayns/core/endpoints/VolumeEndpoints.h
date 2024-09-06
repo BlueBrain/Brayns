@@ -21,20 +21,11 @@
 
 #pragma once
 
-#include <any>
-#include <functional>
-
 #include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/engine/Volume.h>
-#include <brayns/core/manager/LockedObjects.h>
+#include <brayns/core/engine/Device.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-struct VolumeInterface
-{
-    std::any value;
-    std::function<Volume()> getDeviceObject;
-};
-
-void addVolumeEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
+void addVolumeEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
 }

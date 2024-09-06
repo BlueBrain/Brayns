@@ -95,8 +95,8 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     addServiceEndpoints(builder, api, token);
 
-    auto objects = ObjectManager();
-    auto locked = LockedObjects(std::move(objects), logger);
+    auto objects = ObjectRegistry();
+    auto locked = ObjectManager(std::move(objects), logger);
 
     addObjectEndpoints(builder, locked);
 

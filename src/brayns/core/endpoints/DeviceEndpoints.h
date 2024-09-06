@@ -23,9 +23,9 @@
 
 #include <brayns/core/api/ApiBuilder.h>
 #include <brayns/core/engine/Device.h>
-#include <brayns/core/manager/LockedObjects.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-void addDeviceEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
+void addDeviceEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
 }

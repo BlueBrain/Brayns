@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ObjectManager.h"
+#include "ObjectRegistry.h"
 
 #include <brayns/core/jsonrpc/Errors.h>
 
@@ -27,7 +27,7 @@ namespace
 {
 using namespace brayns;
 
-auto getStorageIterator(auto &objects, ObjectId id)
+auto getIterator(auto &objects, ObjectId id)
 {
     auto i = objects.find(id);
 
@@ -42,59 +42,71 @@ auto getStorageIterator(auto &objects, ObjectId id)
 
 namespace brayns
 {
-std::vector<ObjectInfo> ObjectManager::getAllObjects() const
+void ObjectRegistry::remove(ObjectId id)
 {
-    auto objects = std::vector<ObjectInfo>();
-    objects.reserve(_objects.size());
+    auto i = getIterator(_objects, id);
 
-    for (const auto &[id, object] : _objects)
-    {
-        objects.push_back(object.getInfo());
-    }
-
-    return objects;
-}
-
-ObjectInfo ObjectManager::getObject(ObjectId id) const
-{
-    const auto &interface = getInterface(id);
-
-    return interface.getInfo();
-}
-
-void ObjectManager::setUserData(ObjectId id, const JsonValue &userData)
-{
-    auto i = getStorageIterator(_objects, id);
-    auto &info = i->second.getInfo();
-
-    info.userData = userData;
-}
-
-void ObjectManager::remove(ObjectId id)
-{
-    auto i = getStorageIterator(_objects, id);
-
-    i->second.remove();
+    i->second->info.id = nullId;
 
     _objects.erase(i);
     _ids.recycle(id);
 }
 
-void ObjectManager::clear()
+void ObjectRegistry::clear()
 {
     for (const auto &[id, object] : _objects)
     {
-        object.remove();
+        object->info.id = nullId;
     }
 
     _objects.clear();
     _ids.reset();
 }
 
-const ObjectInterface &ObjectManager::getInterface(ObjectId id) const
+ObjectInfo ObjectRegistry::get(ObjectId id) const
 {
-    auto i = getStorageIterator(_objects, id);
+    const auto &object = retreive(id);
+    return object->info;
+}
 
+std::vector<ObjectInfo> ObjectRegistry::getAll() const
+{
+    auto objects = std::vector<ObjectInfo>();
+    objects.reserve(_objects.size());
+
+    for (const auto &[id, object] : _objects)
+    {
+        objects.push_back(object->info);
+    }
+
+    return objects;
+}
+
+void ObjectRegistry::update(ObjectId id, const JsonValue &userData)
+{
+    auto i = getIterator(_objects, id);
+    i->second->info.userData = userData;
+}
+
+void ObjectRegistry::store(std::shared_ptr<UserObject> object)
+{
+    auto id = _ids.next();
+
+    try
+    {
+        object->info.id = id;
+        _objects[id] = std::move(object);
+    }
+    catch (...)
+    {
+        _ids.recycle(id);
+        throw;
+    }
+}
+
+const std::shared_ptr<UserObject> &ObjectRegistry::retreive(ObjectId id) const
+{
+    auto i = getIterator(_objects, id);
     return i->second;
 }
 }

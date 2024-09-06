@@ -33,8 +33,8 @@ constexpr auto nullId = ObjectId(0);
 
 struct ObjectInfo
 {
-    ObjectId id;
     std::string type;
+    ObjectId id = nullId;
     JsonValue userData = {};
 };
 
@@ -44,10 +44,10 @@ struct JsonObjectReflector<ObjectInfo>
     static auto reflect()
     {
         auto builder = JsonBuilder<ObjectInfo>();
-        builder.field("id", [](auto &object) { return &object.id; })
-            .description("Object ID (starts at 1, uses 0 for objects that are not in registry)");
         builder.field("type", [](auto &object) { return &object.type; })
             .description("Object type, use 'get{type}' to query detailed information about the object");
+        builder.field("id", [](auto &object) { return &object.id; })
+            .description("Object ID (starts at 1, uses 0 for objects that are not in registry)");
         builder.field("userData", [](auto &object) { return &object.userData; })
             .description("Data set by user (not used by Brayns)");
         return builder.build();
@@ -58,8 +58,6 @@ struct ObjectParams
 {
     ObjectId id;
 };
-
-using ObjectResult = ObjectParams;
 
 template<>
 struct JsonObjectReflector<ObjectParams>
@@ -72,11 +70,13 @@ struct JsonObjectReflector<ObjectParams>
     }
 };
 
+using ObjectResult = ObjectParams;
+
 template<ReflectedJson T>
 struct UpdateParams
 {
     ObjectId id;
-    T properties;
+    T settings;
 };
 
 template<ReflectedJson T>
@@ -86,8 +86,8 @@ struct JsonObjectReflector<UpdateParams<T>>
     {
         auto builder = JsonBuilder<UpdateParams<T>>();
         builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to update");
-        builder.field("properties", [](auto &object) { return &object.properties; })
-            .description("New object properties");
+        builder.field("settings", [](auto &object) { return &object.settings; })
+            .description("Settings to update the object");
         return builder.build();
     }
 };

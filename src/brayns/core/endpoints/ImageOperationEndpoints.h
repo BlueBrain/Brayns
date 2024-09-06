@@ -21,20 +21,11 @@
 
 #pragma once
 
-#include <any>
-#include <functional>
-
 #include <brayns/core/api/ApiBuilder.h>
-#include <brayns/core/engine/ImageOperation.h>
-#include <brayns/core/manager/LockedObjects.h>
+#include <brayns/core/engine/Device.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-struct ImageOperationInterface
-{
-    std::any value;
-    std::function<ImageOperation()> getDeviceObject;
-};
-
-void addImageOperationEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device);
+void addImageOperationEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
 }

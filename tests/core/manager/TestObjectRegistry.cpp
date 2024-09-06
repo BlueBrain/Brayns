@@ -17,7 +17,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <brayns/core/manager/ObjectManager.h>
+#include <brayns/core/manager/ObjectRegistry.h>
 
 #include <doctest.h>
 
@@ -30,64 +30,58 @@ struct TestObject
 
 TEST_CASE("Create and remove objects")
 {
-    auto objects = ObjectManager();
+    auto objects = ObjectRegistry();
 
-    auto object = objects.add(TestObject{"test"}, "Test");
-
-    object.onRemove([](TestObject &object) { object.value = "removed"; });
+    auto object = objects.add(TestObject{"3"}, "TestObject");
 
     auto id = object.getId();
 
     CHECK_EQ(id, 1);
+    CHECK_EQ(object.get().value, "3");
 
-    auto info = objects.getObject(id);
+    auto info = objects.get(id);
 
     CHECK_EQ(info.id, id);
-    CHECK_EQ(info.type, "Test");
+    CHECK_EQ(info.type, "TestObject");
     CHECK(info.userData.isEmpty());
 
-    auto &retreived = objects.get<TestObject>(id);
+    auto stored = objects.getAsStored<TestObject>(id);
 
-    CHECK_EQ(retreived.value, "test");
+    CHECK_EQ(stored.get().value, "1.5");
 
-    auto stored = objects.getStored<TestObject>(id);
-
-    CHECK_EQ(stored.getId(), id);
-
-    auto object2 = objects.add(TestObject(), "Test");
+    auto object2 = objects.add(TestObject{"2"}, "TestObject");
     auto id2 = object2.getId();
 
-    CHECK_EQ(objects.getAllObjects().size(), 2);
+    CHECK_EQ(objects.getAll().size(), 2);
 
     objects.remove(id);
 
     CHECK(stored.isRemoved());
     CHECK_EQ(stored.getId(), nullId);
 
-    CHECK_THROWS_AS(objects.getObject(id), InvalidParams);
-    CHECK_THROWS_AS(objects.get<TestObject>(id), InvalidParams);
-    CHECK_THROWS_AS(objects.getStored<TestObject>(id), InvalidParams);
+    CHECK_THROWS_AS(objects.get(id), InvalidParams);
+    CHECK_THROWS_AS(objects.getAs<TestObject>(id), InvalidParams);
 
-    auto object3 = objects.add(TestObject(), "Test");
+    auto object3 = objects.add(TestObject{"0"}, "TestObject");
     CHECK_EQ(object3.getId(), 1);
 
-    auto stored2 = objects.getStored<TestObject>(id2);
+    auto stored2 = objects.getAsStored<TestObject>(id2);
 
     objects.clear();
 
     CHECK(stored2.isRemoved());
     CHECK(object3.isRemoved());
 
-    CHECK(objects.getAllObjects().empty());
+    CHECK(objects.getAll().empty());
 }
 
 TEST_CASE("Errors")
 {
-    auto objects = ObjectManager();
+    auto objects = ObjectRegistry();
 
-    objects.add(TestObject(), "Test");
+    objects.add(TestObject{"0"}, "TestObject");
 
-    CHECK_THROWS_AS(objects.getObject(0), InvalidParams);
-    CHECK_THROWS_AS(objects.getObject(2), InvalidParams);
+    CHECK_THROWS_AS(objects.get(0), InvalidParams);
+    CHECK_THROWS_AS(objects.get(2), InvalidParams);
     CHECK_THROWS_AS(objects.remove(2), InvalidParams);
 }

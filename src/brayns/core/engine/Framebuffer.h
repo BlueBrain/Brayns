@@ -61,7 +61,7 @@ struct FramebufferSettings
     FramebufferFormat format = FramebufferFormat::Srgba8;
     std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
     std::optional<Accumulation> accumulation = std::nullopt;
-    std::optional<Data<ImageOperation>> imageOperations = std::nullopt;
+    std::optional<Data<ImageOperation>> operations = std::nullopt;
 };
 
 class FramebufferData
@@ -96,7 +96,7 @@ public:
     FramebufferData map(FramebufferChannel channel);
     void resetAccumulation();
     std::optional<float> getVariance();
-    void update(const std::optional<Data<ImageOperation>> &imageOperations);
+    void update(const std::optional<Data<ImageOperation>> &operations);
 };
 
 Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings);

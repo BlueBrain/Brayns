@@ -30,12 +30,12 @@
 
 namespace brayns
 {
-void addDeviceEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
+void addDeviceEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
 {
-    addCameraEndpoints(builder, objects, device);
-    addFramebufferEndpoints(builder, objects, device);
-    addImageEndpoints(builder, objects);
-    addTransferFunctionEndpoints(builder, objects, device);
-    addVolumeEndpoints(builder, objects, device);
+    addCameraEndpoints(builder, manager, device);
+    addFramebufferEndpoints(builder, manager, device);
+    addImageEndpoints(builder, manager);
+    addTransferFunctionEndpoints(builder, manager, device);
+    addVolumeEndpoints(builder, manager, device);
 }
 }

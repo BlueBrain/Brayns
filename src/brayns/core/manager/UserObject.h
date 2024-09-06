@@ -23,10 +23,8 @@
 
 #include <any>
 #include <concepts>
-#include <functional>
+#include <memory>
 #include <string>
-
-#include <fmt/format.h>
 
 #include <brayns/core/jsonrpc/Errors.h>
 
@@ -34,88 +32,49 @@
 
 namespace brayns
 {
-template<typename T>
-struct ObjectStorage
+struct UserObject
 {
     ObjectInfo info;
-    T value;
-    std::function<void(T &)> remove = [](auto &) {};
+    std::any value;
 };
 
 template<typename T>
 class Stored
 {
 public:
-    explicit Stored(std::shared_ptr<ObjectStorage<T>> object):
+    explicit Stored(std::shared_ptr<UserObject> wrapper, std::shared_ptr<T> object):
+        _wrapper(std::move(wrapper)),
         _object(std::move(object))
     {
     }
 
     const ObjectInfo &getInfo() const
     {
-        return _object->info;
+        return _wrapper->info;
     }
 
     ObjectId getId() const
     {
-        return _object->info.id;
+        return _wrapper->info.id;
     }
 
     bool isRemoved() const
     {
-        return _object->info.id == nullId;
-    }
-
-    void onRemove(std::function<void(T &)> handler)
-    {
-        _object->remove = std::move(handler);
+        return getId() == nullId;
     }
 
     T &get() const
     {
-        return _object->value;
-    }
-
-    T *operator->() const
-    {
-        return &_object->value;
-    }
-
-    T &operator*() const
-    {
-        return _object->value;
+        return *_object;
     }
 
 private:
-    std::shared_ptr<ObjectStorage<T>> _object;
-};
-
-struct ObjectInterface
-{
-    std::any value;
-    std::function<ObjectInfo &()> getInfo;
-    std::function<void()> remove;
+    std::shared_ptr<UserObject> _wrapper;
+    std::shared_ptr<T> _object;
 };
 
 template<typename T>
-ObjectInterface createObjectInterface(const std::shared_ptr<ObjectStorage<T>> &object)
-{
-    auto getInfo = [=]() -> auto &
-    {
-        return object->info;
-    };
-
-    auto remove = [=]
-    {
-        object->remove(object->value);
-        object->info.id = nullId;
-    };
-
-    return {object, getInfo, remove};
-}
-
-template<typename T>
-const std::shared_ptr<T> &castObjectAsShared(const std::any &value, const ObjectInfo &info)
+const std::shared_ptr<T> &castAsShared(const std::any &value, const ObjectInfo &info)
 {
     const auto *ptr = std::any_cast<std::shared_ptr<T>>(&value);
 
@@ -128,8 +87,8 @@ const std::shared_ptr<T> &castObjectAsShared(const std::any &value, const Object
 }
 
 template<typename T>
-T &castObjectAs(const std::any &value, const ObjectInfo &info)
+T &castAs(const std::any &value, const ObjectInfo &info)
 {
-    return *castObjectAsShared<T>(value, info);
+    return *castAsShared<T>(value, info);
 }
 }

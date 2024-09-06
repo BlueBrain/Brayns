@@ -21,166 +21,47 @@
 
 #include "TransferFunctionEndpoints.h"
 
+#include <brayns/core/objects/TransferFunctionObjects.h>
+
 namespace brayns
 {
-template<typename T>
-struct TransferFunctionReflector;
-
-template<std::derived_from<TransferFunction> T>
-using GetTransferFunctionSettings = typename TransferFunctionReflector<T>::Settings;
-
-template<std::derived_from<TransferFunction> T>
-using TransferFunctionParams = ComposedParams<NullJson, GetTransferFunctionSettings<T>>;
-
-template<std::derived_from<TransferFunction> T>
-using TransferFunctionUpdateOf = UpdateParams<GetTransferFunctionSettings<T>>;
-
-template<typename T>
-concept ReflectedTransferFunction = ReflectedJson<GetTransferFunctionSettings<T>>
-    && std::same_as<T,
-                    decltype(TransferFunctionReflector<T>::create(std::declval<Device &>(), TransferFunctionParams<T>()))>
-    && std::is_void_v<decltype(TransferFunctionReflector<T>::update(
-        std::declval<Device &>(),
-        std::declval<T &>(),
-        GetTransferFunctionSettings<T>()))>;
-
-template<ReflectedTransferFunction T>
-struct UserTransferFunction
+ObjectResult createLinearTransferFunction(
+    ObjectManager &manager,
+    Device &device,
+    const LinearTransferFunctionParams &params)
 {
-    T deviceObject;
-    TransferFunctionParams<T> params;
-};
-
-template<ReflectedTransferFunction T>
-TransferFunctionInterface createTransferFunctionInterface(const std::shared_ptr<UserTransferFunction<T>> &function)
-{
-    return {
-        .value = function,
-        .getDeviceObject = [=] { return function->deviceObject; },
-    };
+    return manager.visit(
+        [&](ObjectRegistry &objects) { return createLinearTransferFunction(objects, device, params); });
 }
 
-template<ReflectedTransferFunction T>
-UserTransferFunction<T> &castTransferFunctionAs(ObjectManager &objects, ObjectId id)
+LinearTransferFunctionInfo getLinearTransferFunction(ObjectManager &manager, const ObjectParams &params)
 {
-    auto interface = objects.getStored<TransferFunctionInterface>(id);
-    return castObjectAs<UserTransferFunction<T>>(interface->value, interface.getInfo());
+    return manager.visit([&](ObjectRegistry &objects) { return getLinearTransferFunction(objects, params); });
 }
 
-template<ReflectedTransferFunction T>
-ObjectResult createTransferFunctionAs(LockedObjects &locked, Device &device, const TransferFunctionParams<T> &params)
+void updateLinearTransferFunction(ObjectManager &manager, const LinearTransferFunctionUpdate &params)
 {
-    return locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto function = TransferFunctionReflector<T>::create(device, params);
-            auto object = UserTransferFunction<T>{function, params};
-            auto ptr = std::make_shared<decltype(object)>(std::move(object));
-
-            auto interface = createTransferFunctionInterface(ptr);
-            auto type = TransferFunctionReflector<T>::getType();
-
-            auto stored = objects.add(std::move(interface), std::move(type));
-
-            return ObjectResult{stored.getId()};
-        });
+    return manager.visit([&](ObjectRegistry &objects) { updateLinearTransferFunction(objects, params); });
 }
 
-template<ReflectedTransferFunction T>
-GetTransferFunctionSettings<T> getTransferFunctionAs(LockedObjects &locked, const ObjectParams &params)
+void addTransferFunctionEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
 {
-    return locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto &function = castTransferFunctionAs<T>(objects, params.id);
-            return function.params.derived;
-        });
-}
-
-template<ReflectedTransferFunction T>
-void updateTransferFunctionAs(LockedObjects &locked, Device &device, const TransferFunctionUpdateOf<T> &params)
-{
-    locked.visit(
-        [&](ObjectManager &objects)
-        {
-            auto &function = castTransferFunctionAs<T>(objects, params.id);
-
-            TransferFunctionReflector<T>::update(device, function.deviceObject, params.properties);
-            device.throwIfError();
-
-            function.params.derived = params.properties;
-        });
-}
-
-template<ReflectedTransferFunction T>
-void addTransferFunctionType(ApiBuilder &builder, LockedObjects &objects, Device &device)
-{
-    auto type = TransferFunctionReflector<T>::getType();
+    builder
+        .endpoint(
+            "createLinearTransferFunction",
+            [&](LinearTransferFunctionParams params) { return createLinearTransferFunction(manager, device, params); })
+        .description("Create a linear transfer function that can be attached to a volume");
 
     builder
         .endpoint(
-            "create" + type,
-            [&](TransferFunctionParams<T> params) { return createTransferFunctionAs<T>(objects, device, params); })
-        .description("Create a transfer function of type " + type);
-
-    builder.endpoint("get" + type, [&](ObjectParams params) { return getTransferFunctionAs<T>(objects, params); })
-        .description("Get derived properties of a transfer function of type " + type);
+            "getLinearTransferFunction",
+            [&](ObjectParams params) { return getLinearTransferFunction(manager, params); })
+        .description("Get linear transfer function specific params");
 
     builder
         .endpoint(
-            "update" + type,
-            [&](TransferFunctionUpdateOf<T> params) { updateTransferFunctionAs<T>(objects, device, params); })
-        .description("Update derived properties of a transfer function of type " + type);
-}
-
-struct LinearTransferFunctionParams
-{
-    Box1 scalarRange;
-    std::vector<Color4> colors;
-};
-
-template<>
-struct JsonObjectReflector<LinearTransferFunctionParams>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<LinearTransferFunctionParams>();
-        builder.field("scalarRange", [](auto &object) { return &object.scalarRange; })
-            .description("Range of the scalar values sampled from the volume that will be mapped to colors");
-        builder.field("colors", [](auto &object) { return &object.colors; })
-            .description("Colors to map the values sampled from the volume")
-            .minItems(1);
-        return builder.build();
-    }
-};
-
-template<>
-struct TransferFunctionReflector<LinearTransferFunction>
-{
-    using Settings = LinearTransferFunctionParams;
-
-    static std::string getType()
-    {
-        return "LinearTransferFunction";
-    }
-
-    static LinearTransferFunction create(Device &device, const TransferFunctionParams<LinearTransferFunction> &params)
-    {
-        auto data = createData<Color4>(device, params.derived.colors);
-
-        return createLinearTransferFunction(device, {params.derived.scalarRange, std::move(data)});
-    }
-
-    static void update(Device &device, LinearTransferFunction &function, const LinearTransferFunctionParams &params)
-    {
-        auto data = createData<Color4>(device, params.colors);
-
-        function.update({params.scalarRange, std::move(data)});
-    }
-};
-
-void addTransferFunctionEndpoints(ApiBuilder &builder, LockedObjects &objects, Device &device)
-{
-    addTransferFunctionType<LinearTransferFunction>(builder, objects, device);
+            "updateLinearTransferFunction",
+            [&](LinearTransferFunctionUpdate params) { updateLinearTransferFunction(manager, params); })
+        .description("Update linear transfer function specific params");
 }
 }
