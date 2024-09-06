@@ -26,7 +26,7 @@ from brayns import (
     FramebufferChannel,
     FramebufferFormat,
     FramebufferSettings,
-    Resolution,
+    Size2,
     ToneMapperSettings,
     create_framebuffer,
     create_tone_mapper,
@@ -40,7 +40,7 @@ from brayns import (
 @pytest.mark.asyncio
 async def test_framebuffer(connection: Connection) -> None:
     settings = FramebufferSettings(
-        resolution=Resolution(1920, 1080),
+        resolution=Size2(1920, 1080),
         format=FramebufferFormat.RGBA32F,
         channels=set(FramebufferChannel),
         accumulation=Accumulation(variance=True),

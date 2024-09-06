@@ -29,15 +29,15 @@ using namespace brayns;
 
 RegularVolumeData createVolumeData(Device &device, const RegularVolumeInfo &params, std::string_view binary)
 {
-    switch (params.voxelDataType)
+    switch (params.voxelType)
     {
-    case VoxelDataType::U8:
+    case VoxelType::U8:
         return createData3DFromBinaryOf<std::uint8_t>(device, params.voxelCount, binary);
-    case VoxelDataType::U16:
+    case VoxelType::U16:
         return createData3DFromBinaryOf<std::uint16_t>(device, params.voxelCount, binary);
-    case VoxelDataType::F32:
+    case VoxelType::F32:
         return createData3DFromBinaryOf<float>(device, params.voxelCount, binary);
-    case VoxelDataType::F64:
+    case VoxelType::F64:
         return createData3DFromBinaryOf<double>(device, params.voxelCount, binary);
     default:
         throw std::invalid_argument("Invalid voxel data type");

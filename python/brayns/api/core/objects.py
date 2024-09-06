@@ -71,16 +71,22 @@ async def clear_objects(connection: Connection) -> None:
     await connection.get_result("clearObjects")
 
 
-async def create_specific_object(connection: Connection, typename: str, params: dict[str, Any] | None) -> Object:
+async def create_specific_object(
+    connection: Connection, typename: str, params: dict[str, Any] | None = None, binary: bytes = b""
+) -> Object:
     method = "create" + typename
-    result = await connection.get_result(method, params)
+    result = await connection.get_result(method, params, binary)
     check_type(result, dict[str, Any])
     id = get(result, "id", int)
     return Object(id)
 
 
 async def create_composed_object(
-    connection: Connection, typename: str, base: dict[str, Any] | None, derived: dict[str, Any] | None
+    connection: Connection,
+    typename: str,
+    base: dict[str, Any] | None = None,
+    derived: dict[str, Any] | None = None,
+    binary: bytes = b"",
 ) -> Object:
     params = {}
 
@@ -90,7 +96,7 @@ async def create_composed_object(
     if derived is not None:
         params["derived"] = derived
 
-    return await create_specific_object(connection, typename, params)
+    return await create_specific_object(connection, typename, params, binary)
 
 
 async def get_specific_object(connection: Connection, typename: str, object: Object) -> dict[str, Any]:

@@ -85,5 +85,5 @@ async def get_tone_mapper(connection: Connection, tone_mapper: ToneMapper) -> To
 
 
 async def update_tone_mapper(connection: Connection, tone_mapper: ToneMapper, settings: ToneMapperSettings) -> None:
-    properties = serialize_tone_mapper_settings(settings)
-    await update_specific_object(connection, "ToneMapper", tone_mapper, properties)
+    params = serialize_tone_mapper_settings(settings)
+    await update_specific_object(connection, "ToneMapper", tone_mapper, params)

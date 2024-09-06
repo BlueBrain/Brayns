@@ -33,7 +33,7 @@ from .objects import Object, create_specific_object, get_specific_object, update
 class Framebuffer(Object): ...
 
 
-class Resolution(NamedTuple):
+class Size2(NamedTuple):
     width: int
     height: int
 
@@ -61,7 +61,7 @@ class Accumulation:
 
 @dataclass
 class FramebufferSettings:
-    resolution: Resolution = Resolution(1920, 1080)
+    resolution: Size2 = Size2(1920, 1080)
     format: FramebufferFormat = FramebufferFormat.SRGBA8
     channels: set[FramebufferChannel] = field(default_factory=lambda: {FramebufferChannel.COLOR})
     accumulation: Accumulation | None = None
@@ -86,7 +86,7 @@ def deserialize_framebuffer_settings(message: dict[str, Any]) -> FramebufferSett
     accumulation = None if accumulation is None else Accumulation(get(accumulation, "variance", bool))
 
     return FramebufferSettings(
-        resolution=Resolution(*get_tuple(message, "resolution", int, 2)),
+        resolution=Size2(*get_tuple(message, "resolution", int, 2)),
         format=FramebufferFormat(get(message, "format", str)),
         channels={FramebufferChannel(value) for value in get(message, "channels", list[str])},
         accumulation=accumulation,
@@ -119,7 +119,7 @@ async def get_framebuffer(connection: Connection, framebuffer: Framebuffer) -> F
 
 
 async def update_framebuffer(
-    connection: Connection, framebuffer: Framebuffer, image_operations: Iterable[ImageOperation]
+    connection: Connection, framebuffer: Framebuffer, operations: Iterable[ImageOperation]
 ) -> None:
-    properties = {"operations": [operation.id for operation in image_operations]}
+    properties = {"operations": [operation.id for operation in operations]}
     await update_specific_object(connection, "Framebuffer", framebuffer, properties)

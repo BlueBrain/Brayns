@@ -82,8 +82,8 @@ async def get_camera(connection: Connection, camera: Camera) -> CameraSettings:
 
 
 async def update_camera(connection: Connection, camera: Camera, settings: CameraSettings) -> None:
-    properties = serialize_camera_settings(settings)
-    await update_specific_object(connection, "Camera", camera, properties)
+    params = serialize_camera_settings(settings)
+    await update_specific_object(connection, "Camera", camera, params)
 
 
 class PerspectiveCamera(Camera): ...
@@ -190,8 +190,8 @@ async def get_perspective_camera(connection: Connection, camera: PerspectiveCame
 async def update_perspective_camera(
     connection: Connection, camera: PerspectiveCamera, settings: PerspectiveSettings
 ) -> None:
-    properties = serialize_perspective_settings(settings)
-    await update_specific_object(connection, "PerspectiveCamera", camera, properties)
+    params = serialize_perspective_settings(settings)
+    await update_specific_object(connection, "PerspectiveCamera", camera, params)
 
 
 class OrthographicCamera(Camera): ...
@@ -226,8 +226,8 @@ async def get_orthographic_camera(connection: Connection, camera: OrthographicCa
 async def update_orthographic_camera(
     connection: Connection, camera: OrthographicCamera, settings: OrthographicSettings
 ) -> None:
-    properties = serialize_orthographic_settings(settings)
-    await update_specific_object(connection, "OrthographicCamera", camera, properties)
+    params = serialize_orthographic_settings(settings)
+    await update_specific_object(connection, "OrthographicCamera", camera, params)
 
 
 class PanoramicCamera(Camera): ...
@@ -272,5 +272,5 @@ async def get_panoramic_camera(connection: Connection, camera: PanoramicCamera) 
 async def update_panoramic_camera(
     connection: Connection, camera: PanoramicCamera, settings: PanoramicSettings
 ) -> None:
-    properties = serialize_panoramic_settings(settings)
-    await update_specific_object(connection, "PanoramicCamera", camera, properties)
+    params = serialize_panoramic_settings(settings)
+    await update_specific_object(connection, "PanoramicCamera", camera, params)

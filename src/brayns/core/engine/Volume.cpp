@@ -29,7 +29,7 @@ void setRegularVolumeParams(OSPVolume handle, const RegularVolumeSettings &setti
 {
     setObjectParam(handle, "gridOrigin", settings.origin);
     setObjectParam(handle, "gridSpacing", settings.spacing);
-    setObjectParam(handle, "cellCentered", settings.schema == VolumeSchema::CellCentered);
+    setObjectParam(handle, "cellCentered", settings.type == VolumeType::CellCentered);
     setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
     setObjectParam(handle, "background", settings.background);
 }

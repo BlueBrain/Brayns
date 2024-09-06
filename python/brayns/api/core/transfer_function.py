@@ -78,5 +78,5 @@ async def get_linear_transfer_function(
 async def update_linear_transfer_function(
     connection: Connection, transfer_function: LinearTransferFunction, settings: LinearTransferFunctionSettings
 ) -> None:
-    properties = serialize_linear_transfer_function_settings(settings)
-    await update_specific_object(connection, "LinearTransferFunction", transfer_function, properties)
+    params = serialize_linear_transfer_function_settings(settings)
+    await update_specific_object(connection, "LinearTransferFunction", transfer_function, params)

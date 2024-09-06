@@ -48,7 +48,7 @@ struct DerivedVolume
     T value;
 };
 
-enum class VoxelDataType
+enum class VoxelType
 {
     U8,
     U16,
@@ -57,15 +57,15 @@ enum class VoxelDataType
 };
 
 template<>
-struct EnumReflector<VoxelDataType>
+struct EnumReflector<VoxelType>
 {
     static auto reflect()
     {
-        auto builder = EnumBuilder<VoxelDataType>();
-        builder.field("U8", VoxelDataType::U8).description("8 bit unsigned int");
-        builder.field("U16", VoxelDataType::U16).description("16 bit unsigned int");
-        builder.field("F32", VoxelDataType::F32).description("32 bit float");
-        builder.field("F64", VoxelDataType::F64).description("32 bit float");
+        auto builder = EnumBuilder<VoxelType>();
+        builder.field("U8", VoxelType::U8).description("8 bit unsigned int");
+        builder.field("U16", VoxelType::U16).description("16 bit unsigned int");
+        builder.field("F32", VoxelType::F32).description("32 bit float");
+        builder.field("F64", VoxelType::F64).description("32 bit float");
         return builder.build();
     }
 };
@@ -84,13 +84,13 @@ struct EnumReflector<VolumeFilter>
 };
 
 template<>
-struct EnumReflector<VolumeSchema>
+struct EnumReflector<VolumeType>
 {
     static auto reflect()
     {
-        auto builder = EnumBuilder<VolumeSchema>();
-        builder.field("CellCentered", VolumeSchema::CellCentered).description("Volume data is provided per cell");
-        builder.field("VertexCentered", VolumeSchema::VertexCentered).description("Volume data is provided per vertex");
+        auto builder = EnumBuilder<VolumeType>();
+        builder.field("CellCentered", VolumeType::CellCentered).description("Volume data is provided per cell");
+        builder.field("VertexCentered", VolumeType::VertexCentered).description("Volume data is provided per vertex");
         return builder.build();
     }
 };
@@ -107,9 +107,9 @@ struct JsonObjectReflector<RegularVolumeSettings>
         builder.field("spacing", [](auto &object) { return &object.spacing; })
             .description("Size of the volume cells")
             .defaultValue(Vector3(0, 0, 0));
-        builder.field("schema", [](auto &object) { return &object.schema; })
+        builder.field("type", [](auto &object) { return &object.type; })
             .description("Wether the data is provided per vertex or per cell")
-            .defaultValue(VolumeSchema::VertexCentered);
+            .defaultValue(VolumeType::VertexCentered);
         builder.field("filter", [](auto &object) { return &object.filter; })
             .description("How to interpolate sampled voxels")
             .defaultValue(VolumeFilter::Linear);
@@ -121,7 +121,7 @@ struct JsonObjectReflector<RegularVolumeSettings>
 
 struct RegularVolumeInfo
 {
-    VoxelDataType voxelDataType;
+    VoxelType voxelType;
     Size3 voxelCount;
     RegularVolumeSettings settings;
 };
@@ -132,10 +132,10 @@ struct JsonObjectReflector<RegularVolumeInfo>
     static auto reflect()
     {
         auto builder = JsonBuilder<RegularVolumeInfo>();
-        builder.field("voxelDataType", [](auto &object) { return &object.voxelDataType; })
+        builder.field("voxelType", [](auto &object) { return &object.voxelType; })
             .description("Type of the provided voxels");
         builder.field("voxelCount", [](auto &object) { return &object.voxelCount; })
-            .description("Volume dimensions in voxels");
+            .description("Volume dimensions XYZ");
         builder.field("settings", [](auto &object) { return &object.settings; })
             .description("Additional settings that can be updated");
         return builder.build();

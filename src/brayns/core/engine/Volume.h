@@ -44,7 +44,7 @@ enum class VolumeFilter
 
 using RegularVolumeData = std::variant<Data3D<std::uint8_t>, Data3D<std::uint16_t>, Data3D<float>, Data3D<double>>;
 
-enum class VolumeSchema
+enum class VolumeType
 {
     CellCentered,
     VertexCentered,
@@ -54,7 +54,7 @@ struct RegularVolumeSettings
 {
     Vector3 origin = {0.0F, 0.0F, 0.0F};
     Vector3 spacing = {1.0F, 1.0F, 1.0F};
-    VolumeSchema schema = VolumeSchema::VertexCentered;
+    VolumeType type = VolumeType::VertexCentered;
     VolumeFilter filter = VolumeFilter::Linear;
     std::optional<float> background = std::nullopt;
 };
