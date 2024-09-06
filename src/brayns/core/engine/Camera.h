@@ -70,7 +70,7 @@ struct Stereo
 
 struct PerspectiveCameraSettings
 {
-    float fovy = 60.0F;
+    float fovy = radians(60.0F);
     float aspect = 1.0F;
     std::optional<DepthOfField> depthOfField = std::nullopt;
     bool architectural = false;

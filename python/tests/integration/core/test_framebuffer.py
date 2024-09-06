@@ -55,8 +55,8 @@ async def test_framebuffer(connection: Connection) -> None:
     tone_mapper_settings = ToneMapperSettings()
     tone_mapper = await create_tone_mapper(connection, tone_mapper_settings)
 
-    settings.image_operations = [tone_mapper]
-    await update_framebuffer(connection, framebuffer, settings.image_operations)
+    settings.operations = [tone_mapper]
+    await update_framebuffer(connection, framebuffer, settings.operations)
 
     info = await get_framebuffer(connection, framebuffer)
     assert info.settings == settings
@@ -69,13 +69,13 @@ async def test_remove_operations(connection: Connection) -> None:
     tone_mapper_settings = ToneMapperSettings()
     tone_mapper = await create_tone_mapper(connection, tone_mapper_settings)
 
-    settings = FramebufferSettings(image_operations=[tone_mapper])
+    settings = FramebufferSettings(operations=[tone_mapper])
     framebuffer = await create_framebuffer(connection, settings)
 
     before_remove = await get_framebuffer(connection, framebuffer)
-    assert before_remove.settings.image_operations == [tone_mapper]
+    assert before_remove.settings.operations == [tone_mapper]
 
     await remove_objects(connection, [tone_mapper])
 
     after_remove = await get_framebuffer(connection, framebuffer)
-    assert after_remove.settings.image_operations[0].id == 0
+    assert after_remove.settings.operations[0].id == 0

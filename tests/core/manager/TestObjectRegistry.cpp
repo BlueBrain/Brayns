@@ -47,7 +47,7 @@ TEST_CASE("Create and remove objects")
 
     auto stored = objects.getAsStored<TestObject>(id);
 
-    CHECK_EQ(stored.get().value, "1.5");
+    CHECK_EQ(stored.get().value, "3");
 
     auto object2 = objects.add(TestObject{"2"}, "TestObject");
     auto id2 = object2.getId();

@@ -51,7 +51,7 @@ void setStereoParams(OSPCamera handle, const std::optional<Stereo> &stereo)
 
 void setPerspectiveParams(OSPCamera handle, const PerspectiveCameraSettings &settings)
 {
-    setObjectParam(handle, "fovy", settings.fovy);
+    setObjectParam(handle, "fovy", degrees(settings.fovy));
     setObjectParam(handle, "aspect", settings.aspect);
 
     if (settings.depthOfField)

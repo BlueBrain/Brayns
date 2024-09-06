@@ -145,7 +145,7 @@ def serialize_perspective_settings(settings: PerspectiveSettings) -> dict[str, A
         stereo = serialize_stereo(settings.stereo)
 
     return {
-        "fovy": math.degrees(settings.fovy),
+        "fovy": settings.fovy,
         "depthOfField": depth_of_field,
         "architectural": settings.architectural,
         "stereo": stereo,
@@ -167,7 +167,7 @@ def deserialize_perspective_settings(message: dict[str, Any]) -> PerspectiveSett
         stereo = deserialize_stereo(stereo)
 
     return PerspectiveSettings(
-        fovy=math.radians(get(message, "fovy", float)),
+        fovy=get(message, "fovy", float),
         depth_of_field=depth_of_field,
         architectural=get(message, "architectural", bool),
         stereo=stereo,

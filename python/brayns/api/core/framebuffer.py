@@ -65,7 +65,7 @@ class FramebufferSettings:
     format: FramebufferFormat = FramebufferFormat.SRGBA8
     channels: set[FramebufferChannel] = field(default_factory=lambda: {FramebufferChannel.COLOR})
     accumulation: Accumulation | None = None
-    image_operations: list[ImageOperation] = field(default_factory=list)
+    operations: list[ImageOperation] = field(default_factory=list)
 
 
 def serialize_framebuffer_settings(settings: FramebufferSettings) -> dict[str, Any]:
@@ -77,7 +77,7 @@ def serialize_framebuffer_settings(settings: FramebufferSettings) -> dict[str, A
         "format": settings.format.value,
         "channels": [channel.value for channel in settings.channels],
         "accumulation": accumulation,
-        "imageOperations": [operation.id for operation in settings.image_operations],
+        "operations": [operation.id for operation in settings.operations],
     }
 
 
@@ -90,7 +90,7 @@ def deserialize_framebuffer_settings(message: dict[str, Any]) -> FramebufferSett
         format=FramebufferFormat(get(message, "format", str)),
         channels={FramebufferChannel(value) for value in get(message, "channels", list[str])},
         accumulation=accumulation,
-        image_operations=[ImageOperation(id) for id in get(message, "imageOperations", list[int])],
+        operations=[ImageOperation(id) for id in get(message, "operations", list[int])],
     )
 
 
@@ -121,5 +121,5 @@ async def get_framebuffer(connection: Connection, framebuffer: Framebuffer) -> F
 async def update_framebuffer(
     connection: Connection, framebuffer: Framebuffer, image_operations: Iterable[ImageOperation]
 ) -> None:
-    properties = {"imageOperations": [operation.id for operation in image_operations]}
+    properties = {"operations": [operation.id for operation in image_operations]}
     await update_specific_object(connection, "Framebuffer", framebuffer, properties)

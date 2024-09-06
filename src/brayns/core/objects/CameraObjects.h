@@ -140,8 +140,8 @@ struct JsonObjectReflector<PerspectiveCameraSettings>
     {
         auto builder = JsonBuilder<PerspectiveCameraSettings>();
         builder.field("fovy", [](auto &object) { return &object.fovy; })
-            .description("Camera vertical field of view in degrees (horizontal is deduced from framebuffer aspect)")
-            .defaultValue(45.0F);
+            .description("Camera vertical field of view in radians (horizontal is deduced from framebuffer aspect)")
+            .defaultValue(radians(45.0F));
         builder.field("depthOfField", [](auto &object) { return &object.depthOfField; })
             .description("Depth of field settings, set to null to disable it");
         builder.field("architectural", [](auto &object) { return &object.architectural; })

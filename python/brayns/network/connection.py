@@ -184,12 +184,10 @@ class Connection:
 
     async def task(self, method: str, params: Any = None, binary: bytes = b"") -> FutureResponse:
         request = Request(method, params, binary)
-
         return await self.send(request)
 
     async def request(self, method: str, params: Any = None, binary: bytes = b"") -> Response:
         future = await self.task(method, params, binary)
-
         return await future.wait()
 
     async def get_result(self, method: str, params: Any = None, binary: bytes = b"") -> Any:

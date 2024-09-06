@@ -26,6 +26,8 @@
 #include <rkcommon/math/Quaternion.h>
 #include <rkcommon/math/vec.h>
 
+#include <cmath>
+
 namespace brayns
 {
 template<typename T, int S>
@@ -61,6 +63,18 @@ using Box3 = BoxT<float, 3>;
 
 using Affine2 = rkcommon::math::AffineSpace2f;
 using Affine3 = rkcommon::math::AffineSpace3f;
+
+template<typename T>
+constexpr T radians(T degrees)
+{
+    return degrees * T(M_PI) / T(360);
+}
+
+template<typename T>
+constexpr T degrees(T radians)
+{
+    return radians * T(360) / T(M_PI);
+}
 
 template<typename T, int S>
 T reduceMultiply(const Vector<T, S> &value)

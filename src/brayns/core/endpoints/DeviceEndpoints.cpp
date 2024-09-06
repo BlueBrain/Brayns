@@ -34,6 +34,7 @@ void addDeviceEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &dev
 {
     addCameraEndpoints(builder, manager, device);
     addFramebufferEndpoints(builder, manager, device);
+    addImageOperationEndpoints(builder, manager, device);
     addImageEndpoints(builder, manager);
     addTransferFunctionEndpoints(builder, manager, device);
     addVolumeEndpoints(builder, manager, device);

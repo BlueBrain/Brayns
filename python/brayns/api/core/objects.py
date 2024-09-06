@@ -59,8 +59,8 @@ async def get_object(connection: Connection, object: Object) -> ObjectInfo:
 
 
 async def update_object(connection: Connection, object: Object, user_data: Any) -> None:
-    properties = {"userData": user_data}
-    await connection.get_result("updateObject", {"id": object.id, "properties": properties})
+    settings = {"userData": user_data}
+    await connection.get_result("updateObject", {"id": object.id, "settings": settings})
 
 
 async def remove_objects(connection: Connection, objects: Iterable[Object]) -> None:
@@ -102,10 +102,10 @@ async def get_specific_object(connection: Connection, typename: str, object: Obj
 
 
 async def update_specific_object(
-    connection: Connection, typename: str, object: Object, properties: dict[str, Any]
+    connection: Connection, typename: str, object: Object, settings: dict[str, Any]
 ) -> None:
     method = "update" + typename
-    params = {"id": object.id, "properties": properties}
+    params = {"id": object.id, "settings": settings}
     await connection.get_result(method, params)
 
 
