@@ -70,12 +70,13 @@ Data3D<T> createData3DFromBinaryOf(Device &device, const Size3 &itemCount, std::
 
     if (reduceMultiply(itemCount) != totalItemCount)
     {
-        throw InvalidParams(fmt::format(
-            "Item count in binary {} does not match given item count {}x{}x{}",
-            totalItemCount,
-            itemCount.x,
-            itemCount.y,
-            itemCount.z));
+        throw InvalidParams(
+            fmt::format(
+                "Item count in binary {} does not match given item count {}x{}x{}",
+                totalItemCount,
+                itemCount.x,
+                itemCount.y,
+                itemCount.z));
     }
 
     auto data = allocateData3D<T>(device, itemCount);

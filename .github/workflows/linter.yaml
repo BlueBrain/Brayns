@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Run clang-format
         run: |
-          apt update && apt install -y clang-format-15
+          apt update
+          bash install_llvm.sh
           SOURCES=$(find apps src tests \( -name "*.h" -or -name "*.cpp" \))
-          clang-format-15 --dry-run --Werror $SOURCES
+          clang-format-20 --dry-run --Werror $SOURCES

@@ -45,7 +45,7 @@ struct SslSettings
 struct WebSocketServerSettings
 {
     std::string host = "localhost";
-    std::uint16_t port = 5000;
+    std::uint16_t port = 5'000;
     std::size_t maxThreadCount = 1;
     std::size_t maxQueueSize = 64;
     std::size_t maxFrameSize = std::numeric_limits<int>::max();

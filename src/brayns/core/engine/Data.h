@@ -178,7 +178,7 @@ Data<T> allocateData(Device &device, std::size_t itemCount)
 }
 
 template<OsprayDataType T, std::ranges::range U>
-    requires(std::convertible_to<std::ranges::range_value_t<U>, T>)
+requires std::convertible_to<std::ranges::range_value_t<U>, T>
 Data<T> createData(Device &device, U &&items)
 {
     auto data = allocateData<T>(device, items.size());

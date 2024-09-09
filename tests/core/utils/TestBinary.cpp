@@ -47,7 +47,7 @@ TEST_CASE("As bytes")
 
     swapBytes(test);
 
-    CHECK_EQ(test, 16777216);
+    CHECK_EQ(test, 16'777'216);
 
     swapBytes(test);
 
