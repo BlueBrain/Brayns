@@ -53,7 +53,7 @@ Use cmake config to generate build commands:
 
 Run with
 
-    $ run-clang-tidy-20 -p build/user-debug -quiet -line-filter='["name": "CHECK_"]'
+    $ run-clang-tidy-20 -p build/user-debug
 
 
 ## Running
