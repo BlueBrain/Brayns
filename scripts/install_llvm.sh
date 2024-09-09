@@ -6,7 +6,7 @@
 
 wget https://apt.llvm.org/llvm.sh
 chmod +x llvm.sh
-sudo ./llvm.sh 20
+./llvm.sh 20
 
-sudo apt install clang-format-20
-sudo apt install clang-tidy-20
+apt-get install clang-format-20
+apt-get install clang-tidy-20
