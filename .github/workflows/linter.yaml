@@ -14,6 +14,13 @@ jobs:
       - name: Run clang-format
         run: |
           apt-get update
-          bash scripts/install_llvm.sh
+
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          ./llvm.sh 20
+
+          apt-get install clang-format-20
+          apt-get install clang-tidy-20
+
           SOURCES=$(find apps src tests \( -name "*.h" -or -name "*.cpp" \))
           clang-format-20 --dry-run --Werror $SOURCES
