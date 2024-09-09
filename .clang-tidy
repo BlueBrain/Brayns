@@ -1,0 +1,57 @@
+Checks: -*
+  bugprone-*
+  cert-*
+  concurrency-*
+  cppcoreguidelines-*
+  misc-*
+  modernize-*
+  performance-*
+  portability-*
+  readability-*
+  -cppcoreguidelines-avoid-magic-numbers
+  -cppcoreguidelines-missing-std-forward
+  -cppcoreguidelines-pro-*
+  -misc-include-cleaner
+  -modernize-use-nodiscard
+  -modernize-use-trailing-return-type
+  -readability-identifier-length
+  -readability-magic-numbers
+
+WarningsAsErrors: "*"
+HeaderFilterRegex: "src/.*"
+
+CheckOptions:
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassMemberCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.FunctionIgnoredRegexp
+    value: main|wmain|wWinMain|begin|end
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.StaticConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.StaticVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.MemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMemberPrefix
+    value: _
+  - key: readability-identifier-naming.NamespaceCase
+    value: camelBack
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.TypeAliasCase
+    value: CamelCase
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack

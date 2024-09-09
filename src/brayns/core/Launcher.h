@@ -71,7 +71,7 @@ struct ArgvSettingsReflector<ServiceSettings>
             .defaultValue("localhost");
         builder.option("port", [](auto &settings) { return &settings.port; })
             .description("Websocket server port")
-            .defaultValue(5000);
+            .defaultValue(5'000);
         builder.option("max-thread-count", [](auto &settings) { return &settings.maxThreadCount; })
             .description("Maximum number of threads for the websocket server")
             .defaultValue(10);

@@ -35,6 +35,26 @@ The following cmake options (shown with their default value) can be used during 
 * **BRAYNS_ENABLE_CIRCUITS** (Default ON) - Activate circuit support.
 * **BRAYNS_ENABLE_ATLAS** - (Default ON) Activate atlas support.
 
+### Run linters
+
+Run clang format as follows:
+
+    $ SOURCES=$(find apps src tests \( -name "*.h" -or -name "*.cpp" \))
+    $ clang-format-20 --Werror $SOURCES
+
+Run clang tidy as follows:
+
+Use cmake config to generate build commands:
+
+"cacheVariables": {
+    "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+    "CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES": "/usr/include/c++/11;/usr/include/x86_64-linux-gnu/c++/11"
+}
+
+Run with
+
+    $ run-clang-tidy-20 -p build/user-debug
+
 
 ## Running
 

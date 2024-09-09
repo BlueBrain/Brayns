@@ -131,9 +131,11 @@ template<typename T>
 struct ArgvReflector;
 
 template<typename T>
-concept ReflectedArgvOption = std::same_as<std::string, decltype(ArgvReflector<T>::getType())>
-    && std::same_as<std::string, decltype(ArgvReflector<T>::toString(T()))>
-    && std::same_as<T, decltype(ArgvReflector<T>::parse(std::string_view()))>;
+concept ReflectedArgvOption = requires(T value) {
+    { ArgvReflector<T>::getType() } -> std::same_as<std::string>;
+    { ArgvReflector<T>::toString(value) } -> std::same_as<std::string>;
+    { ArgvReflector<T>::parse(std::string_view()) } -> std::same_as<T>;
+};
 
 template<>
 struct ArgvReflector<bool>
@@ -160,7 +162,7 @@ struct ArgvReflector<bool>
 };
 
 template<typename T>
-    requires std::is_arithmetic_v<T>
+requires std::is_arithmetic_v<T>
 struct ArgvReflector<T>
 {
     static std::string getType()

@@ -35,9 +35,11 @@ template<typename T>
 struct PayloadReflector;
 
 template<typename T>
-concept ReflectedPayload = std::same_as<JsonSchema, decltype(PayloadReflector<T>::getSchema())>
-    && std::same_as<Payload, decltype(PayloadReflector<T>::serialize(std::declval<T>()))>
-    && std::same_as<T, decltype(PayloadReflector<T>::deserialize(Payload()))>;
+concept ReflectedPayload = requires(T value) {
+    { PayloadReflector<T>::getSchema() } -> std::same_as<JsonSchema>;
+    { PayloadReflector<T>::serialize(std::move(value)) } -> std::same_as<Payload>;
+    { PayloadReflector<T>::deserialize(Payload()) } -> std::same_as<T>;
+};
 
 template<>
 struct PayloadReflector<Payload>

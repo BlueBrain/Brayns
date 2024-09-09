@@ -178,7 +178,7 @@ Data<T> allocateData(Device &device, std::size_t itemCount)
 }
 
 template<OsprayDataType T, std::ranges::range U>
-    requires(std::convertible_to<std::ranges::range_value_t<U>, T>)
+requires std::convertible_to<std::ranges::range_value_t<U>, T>
 Data<T> createData(Device &device, U &&items)
 {
     auto data = allocateData<T>(device, items.size());
@@ -249,7 +249,7 @@ Data3D<OutputType> createDataView3D(const Data3D<T> &data, const DataRegion3D &r
 template<OsprayDataType OutputType, OsprayDataType T>
 Data2D<OutputType> createDataView2D(const Data2D<T> &data, const DataRegion2D &region)
 {
-    auto region3D = DataRegion3D{Size3(region.itemCount, 1), Size3(region.stride, 0), region.offset};
+    auto region3D = DataRegion3D{Size3(region.itemCount, 1), Stride3(region.stride, 0), region.offset};
     auto view = createDataView3D<OutputType>(data, region3D);
     return Data2D<OutputType>(std::move(view));
 }
@@ -257,7 +257,7 @@ Data2D<OutputType> createDataView2D(const Data2D<T> &data, const DataRegion2D &r
 template<OsprayDataType OutputType, OsprayDataType T>
 Data<OutputType> createDataView(const Data<T> &data, const DataRegion &region)
 {
-    auto region3D = DataRegion3D{Size3(region.itemCount, 1, 1), Size3(region.stride, 0, 0), region.offset};
+    auto region3D = DataRegion3D{Size3(region.itemCount, 1, 1), Stride3(region.stride, 0, 0), region.offset};
     auto view = createDataView3D<OutputType>(data, region3D);
     return Data<OutputType>(std::move(view));
 }

@@ -11,8 +11,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Update APT package list
+        run: sudo apt-get update
+      - name: Download and install LLVM
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          sudo bash llvm.sh 20
+      - name: Install clang-format
+        run: sudo apt-get -y install clang-format-20
       - name: Run clang-format
         run: |
-          apt update && apt install -y clang-format-15
           SOURCES=$(find apps src tests \( -name "*.h" -or -name "*.cpp" \))
-          clang-format-15 --dry-run --Werror $SOURCES
+          clang-format-20 --dry-run --Werror $SOURCES

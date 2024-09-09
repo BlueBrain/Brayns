@@ -73,10 +73,10 @@ TEST_CASE("Object creation")
     createVolumetricModel(device, {volume, transferFunction});
 
     auto triangles = std::vector<Vector3>{{0, 0, 0}, {1, 1, 1}, {2, 2, 2}};
-    createTriangleMesh(device, {createData<Vector3>(device, triangles)});
+    createTriangleMesh(device, {{createData<Vector3>(device, triangles)}});
 
     auto quads = std::vector<Vector3>{{0, 0, 0}, {1, 1, 1}, {2, 2, 2}, {3, 3, 3}};
-    createQuadMesh(device, {createData<Vector3>(device, quads)});
+    createQuadMesh(device, {{createData<Vector3>(device, quads)}});
 
     auto spheres = std::vector<Vector4>{{0, 0, 0, 1}, {1, 1, 1, 1}};
     auto geometry = createSpheres(device, {createData<Vector4>(device, spheres)});

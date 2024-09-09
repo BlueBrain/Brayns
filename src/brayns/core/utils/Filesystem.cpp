@@ -49,7 +49,7 @@ std::string readFile(const std::filesystem::path &path)
     }
 
     auto size = stream.tellg();
-    auto data = std::string(size, '\0');
+    auto data = std::string(static_cast<std::size_t>(size), '\0');
 
     stream.seekg(0);
     stream.read(data.data(), size);
@@ -66,6 +66,9 @@ void writeFile(std::string_view data, const std::filesystem::path &path)
         throw std::runtime_error(fmt::format("Failed to open file '{}' in write mode", path));
     }
 
-    stream.write(data.data(), data.size());
+    const auto *ptr = data.data();
+    auto size = static_cast<std::streamsize>(data.size());
+
+    stream.write(ptr, size);
 }
 }

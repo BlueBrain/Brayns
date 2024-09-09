@@ -58,42 +58,42 @@ const JsonValue &JsonRpcException::getData() const
 }
 
 ParseError::ParseError(const std::string &message):
-    JsonRpcException(-32700, message)
+    JsonRpcException(-32'700, message)
 {
 }
 
 InvalidRequest::InvalidRequest(const std::string &message):
-    JsonRpcException(-32600, message)
+    JsonRpcException(-32'600, message)
 {
 }
 
 InvalidRequest::InvalidRequest(const std::string &message, const std::vector<JsonSchemaError> &errors):
-    JsonRpcException(-32600, message, serializeToJson(errors))
+    JsonRpcException(-32'600, message, serializeToJson(errors))
 {
 }
 
 MethodNotFound::MethodNotFound(const std::string &method):
-    JsonRpcException(-32601, fmt::format("Method not found: '{}'", method))
+    JsonRpcException(-32'601, fmt::format("Method not found: '{}'", method))
 {
 }
 
 InvalidParams::InvalidParams(const std::string &message):
-    JsonRpcException(-32602, message)
+    JsonRpcException(-32'602, message)
 {
 }
 
 InvalidParams::InvalidParams(const std::string &message, const std::vector<JsonSchemaError> &errors):
-    JsonRpcException(-32602, message, serializeToJson(errors))
+    JsonRpcException(-32'602, message, serializeToJson(errors))
 {
 }
 
 InternalError::InternalError(const std::string &message):
-    JsonRpcException(-32603, message)
+    JsonRpcException(-32'603, message)
 {
 }
 
 InternalError::InternalError(const std::exception &e):
-    JsonRpcException(-32603, e.what())
+    JsonRpcException(-32'603, e.what())
 {
 }
 }

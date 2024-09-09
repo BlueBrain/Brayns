@@ -65,7 +65,7 @@ std::string encodePng(const ImageView &image)
         .message = {},
     };
 
-    auto rowStride = PNG_IMAGE_ROW_STRIDE(png);
+    auto rowStride = png_int_32(PNG_IMAGE_ROW_STRIDE(png));
 
     if (rowOrder == RowOrder::BottomUp)
     {

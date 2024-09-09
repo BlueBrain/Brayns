@@ -90,7 +90,9 @@ void composeBytesAsPrimtive(const T &value, std::endian endian, std::string &out
 
     if (endian != std::endian::native)
     {
-        auto first = output.begin() + output.size() - size;
+        auto offset = static_cast<std::ptrdiff_t>(output.size() - size);
+
+        auto first = output.begin() + offset;
         auto last = output.end();
 
         auto appended = std::span<char>(first, last);
@@ -166,14 +168,16 @@ std::string composeBytes(const T &value, std::endian endian)
 template<typename T, int S>
 struct BinaryReflector<Vector<T, S>>
 {
+    static constexpr auto componentCount = static_cast<std::size_t>(S);
+
     static std::size_t getSize()
     {
-        return static_cast<std::size_t>(S) * sizeof(T);
+        return componentCount * sizeof(T);
     }
 
     static void extract(std::string_view &bytes, std::endian endian, Vector<T, S> &output)
     {
-        for (auto i = 0; i < S; ++i)
+        for (auto i = std::size_t(0); i < componentCount; ++i)
         {
             extractBytesTo(bytes, endian, output[i]);
         }
@@ -181,7 +185,7 @@ struct BinaryReflector<Vector<T, S>>
 
     static void compose(const Vector<T, S> &value, std::endian endian, std::string &output)
     {
-        for (auto i = 0; i < S; ++i)
+        for (auto i = std::size_t(0); i < componentCount; ++i)
         {
             composeBytesTo(value[i], endian, output);
         }

@@ -39,7 +39,7 @@ TestImage createTestImage(ImageFormat format)
 {
     auto width = std::size_t(200);
     auto height = std::size_t(100);
-    auto pixelSize = format == ImageFormat::Rgb8 ? 3 : 4;
+    auto pixelSize = format == ImageFormat::Rgb8 ? std::size_t(3) : std::size_t(4);
     auto rowSize = width * pixelSize;
     auto size = rowSize * height;
     auto rowOrder = RowOrder::BottomUp;
