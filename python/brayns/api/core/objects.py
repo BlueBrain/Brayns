@@ -18,55 +18,106 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, NamedTuple
 
 from brayns.network.connection import Connection
 from brayns.utils.parsing import check_type, get, try_get
 
 
+class Object(NamedTuple):
+    id: int
+
+
 @dataclass
-class Object:
+class ObjectInfo:
     id: int
     type: str
     user_data: Any
 
 
-def parse_object(message: dict[str, Any]) -> Object:
-    return Object(
+def deserialize_object_info(message: dict[str, Any]) -> ObjectInfo:
+    return ObjectInfo(
         id=get(message, "id", int),
         type=get(message, "type", str),
-        user_data=try_get(message, "user_data", Any, None),
+        user_data=try_get(message, "userData", Any, None),
     )
 
 
-async def get_all_objects(connection: Connection) -> list[Object]:
-    result = await connection.get_result("get-all-objects")
+async def get_all_objects(connection: Connection) -> list[ObjectInfo]:
+    result = await connection.get_result("getAllObjects")
     check_type(result, dict[str, Any])
     objects = get(result, "objects", list[dict[str, Any]])
-    return [parse_object(item) for item in objects]
+    return [deserialize_object_info(item) for item in objects]
 
 
-async def get_object(connection: Connection, id: int) -> Object:
-    result = await connection.get_result("get-object", {"id": id})
+async def get_object(connection: Connection, object: Object) -> ObjectInfo:
+    result = await connection.get_result("getObject", {"id": object.id})
     check_type(result, dict[str, Any])
-    return parse_object(result)
+    return deserialize_object_info(result)
 
 
-async def update_object(connection: Connection, id: int, user_data: Any) -> None:
-    properties = {"user_data": user_data}
-    await connection.get_result("update-object", {"id": id, "properties": properties})
+async def update_object(connection: Connection, object: Object, user_data: Any) -> None:
+    settings = {"userData": user_data}
+    await connection.get_result("updateObject", {"id": object.id, "settings": settings})
 
 
-async def remove_objects(connection: Connection, ids: list[int]) -> None:
-    await connection.get_result("remove-objects", {"ids": ids})
+async def remove_objects(connection: Connection, objects: Iterable[Object]) -> None:
+    await connection.get_result("removeObjects", {"ids": [object.id for object in objects]})
 
 
 async def clear_objects(connection: Connection) -> None:
-    await connection.get_result("clear-objects")
+    await connection.get_result("clearObjects")
 
 
-async def create_empty_object(connection: Connection) -> int:
-    result = await connection.get_result("create-empty-object")
+async def create_specific_object(
+    connection: Connection, typename: str, params: dict[str, Any] | None = None, binary: bytes = b""
+) -> Object:
+    method = "create" + typename
+    result = await connection.get_result(method, params, binary)
     check_type(result, dict[str, Any])
-    return get(result, "id", int)
+    id = get(result, "id", int)
+    return Object(id)
+
+
+async def create_composed_object(
+    connection: Connection,
+    typename: str,
+    base: dict[str, Any] | None = None,
+    derived: dict[str, Any] | None = None,
+    binary: bytes = b"",
+) -> Object:
+    params = {}
+
+    if base is not None:
+        params["base"] = base
+
+    if derived is not None:
+        params["derived"] = derived
+
+    return await create_specific_object(connection, typename, params, binary)
+
+
+async def get_specific_object(connection: Connection, typename: str, object: Object) -> dict[str, Any]:
+    method = "get" + typename
+    params = {"id": object.id}
+    result = await connection.get_result(method, params)
+    check_type(result, dict[str, Any])
+    return result
+
+
+async def update_specific_object(
+    connection: Connection, typename: str, object: Object, settings: dict[str, Any]
+) -> None:
+    method = "update" + typename
+    params = {"id": object.id, "settings": settings}
+    await connection.get_result(method, params)
+
+
+class EmptyObject(Object): ...
+
+
+async def create_empty_object(connection: Connection) -> EmptyObject:
+    object = await create_specific_object(connection, "EmptyObject", None)
+    return EmptyObject(object.id)

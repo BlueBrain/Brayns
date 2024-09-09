@@ -23,6 +23,7 @@ import pytest
 from brayns import (
     Connection,
     JsonRpcError,
+    Object,
     clear_objects,
     create_empty_object,
     get_all_objects,
@@ -35,7 +36,8 @@ from brayns import (
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_create_empty_object(connection: Connection) -> None:
-    assert await create_empty_object(connection) == 1
+    object = await create_empty_object(connection)
+    assert object.id == 1
 
 
 @pytest.mark.integration_test
@@ -44,7 +46,7 @@ async def test_get_all_objects(connection: Connection) -> None:
     created = [await create_empty_object(connection) for _ in range(10)]
     retreived = await get_all_objects(connection)
 
-    assert created == [object.id for object in retreived]
+    assert all(x.id == y.id for x, y in zip(created, retreived))
 
 
 @pytest.mark.integration_test
@@ -52,52 +54,52 @@ async def test_get_all_objects(connection: Connection) -> None:
 async def test_get_object(connection: Connection) -> None:
     created = [await create_empty_object(connection) for _ in range(10)]
     retreived = await get_all_objects(connection)
-    tests = [await get_object(connection, id) for id in created]
+    tests = [await get_object(connection, object) for object in created]
 
-    assert tests == retreived
+    assert all(x.id == y.id for x, y in zip(tests, retreived))
 
     with pytest.raises(JsonRpcError):
-        await get_object(connection, 123)
+        await get_object(connection, Object(123))
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_update_object(connection: Connection) -> None:
-    ids = [await create_empty_object(connection) for _ in range(10)]
+    objects = [await create_empty_object(connection) for _ in range(10)]
 
-    await update_object(connection, ids[0], "test")
+    await update_object(connection, objects[0], "test")
 
-    test = await get_object(connection, ids[0])
+    test = await get_object(connection, objects[0])
 
     assert test.id == 1
-    assert test.type == "empty-object"
+    assert test.type == "EmptyObject"
     assert test.user_data == "test"
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_remove_objects(connection: Connection) -> None:
-    ids = [await create_empty_object(connection) for _ in range(10)]
+    objects = [await create_empty_object(connection) for _ in range(10)]
 
-    await remove_objects(connection, [1, 2, 3])
+    await remove_objects(connection, objects[:3])
     tests = await get_all_objects(connection)
 
-    assert [obj.id for obj in tests] == list(range(4, 11))
+    assert [object.id for object in tests] == list(range(4, 11))
 
-    for id in ids[:3]:
+    for object in objects[:3]:
         with pytest.raises(JsonRpcError):
-            await get_object(connection, id)
+            await get_object(connection, object)
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_clear_objects(connection: Connection) -> None:
-    ids = [await create_empty_object(connection) for _ in range(10)]
+    objects = [await create_empty_object(connection) for _ in range(10)]
 
     await clear_objects(connection)
 
     assert not await get_all_objects(connection)
 
-    for id in ids:
+    for object in objects:
         with pytest.raises(JsonRpcError):
-            await get_object(connection, id)
+            await get_object(connection, object)

@@ -33,7 +33,7 @@ Texture2D createTexture2D(Device &device, const Texture2DSettings &settings)
     setObjectParam(handle, "data", settings.data);
     setObjectParam(handle, "wrapMode", static_cast<OSPTextureWrapMode>(settings.wrap));
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return texture;
 }
@@ -46,7 +46,7 @@ VolumeTexture createVolumeTexture(Device &device, const VolumeTextureSettings &s
     setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "transferFunction", settings.transferFunction);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return texture;
 }

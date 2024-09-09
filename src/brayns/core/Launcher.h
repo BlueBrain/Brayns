@@ -41,6 +41,8 @@ struct ServiceSettings
     std::string certificateFile;
     std::string caLocation;
     std::string privateKeyPassphrase;
+    std::size_t deviceThreadCount;
+    bool deviceAffinity;
 };
 
 template<>
@@ -72,7 +74,7 @@ struct ArgvSettingsReflector<ServiceSettings>
             .defaultValue(5000);
         builder.option("max-thread-count", [](auto &settings) { return &settings.maxThreadCount; })
             .description("Maximum number of threads for the websocket server")
-            .defaultValue(2);
+            .defaultValue(10);
         builder.option("max-queue-size", [](auto &settings) { return &settings.maxQueueSize; })
             .description("Maximum number of queued connections before they are rejected")
             .defaultValue(64);
@@ -96,6 +98,13 @@ struct ArgvSettingsReflector<ServiceSettings>
         builder.option("private-key-passphrase", [](auto &settings) { return &settings.privateKeyPassphrase; })
             .description("Passphrase for the private key if encrypted")
             .defaultValue("");
+
+        builder.option("device-thread-count", [](auto &settings) { return &settings.deviceThreadCount; })
+            .description("Number of thread the device is allowed to use to render, use 0 to use all hardware threads")
+            .defaultValue(0);
+        builder.option("device-affinity", [](auto &settings) { return &settings.deviceAffinity; })
+            .description("Bind software threads to hardware threads if true")
+            .defaultValue(false);
 
         return builder.build();
     }

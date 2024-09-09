@@ -18,8 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logging import INFO, Formatter, Logger, StreamHandler
 import sys
+from logging import INFO, Formatter, Logger, StreamHandler
 
 
 def create_logger(level: int | str = INFO) -> Logger:

@@ -156,7 +156,7 @@ JsonValue JsonReflector<JsonSchema>::serialize(const JsonSchema &schema)
         set(*object, "type", schema.type);
     }
 
-    if (!schema.constant.empty())
+    if (!schema.constant.isEmpty())
     {
         set(*object, "const", schema.constant);
         return object;

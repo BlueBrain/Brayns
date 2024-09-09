@@ -49,7 +49,19 @@ enum class JsonType
 template<>
 struct EnumReflector<JsonType>
 {
-    static EnumInfo<JsonType> reflect();
+    static auto reflect()
+    {
+        auto builder = EnumBuilder<JsonType>();
+        builder.field("undefined", JsonType::Undefined);
+        builder.field("null", JsonType::Null);
+        builder.field("boolean", JsonType::Boolean);
+        builder.field("integer", JsonType::Integer);
+        builder.field("number", JsonType::Number);
+        builder.field("string", JsonType::String);
+        builder.field("array", JsonType::Array);
+        builder.field("object", JsonType::Object);
+        return builder.build();
+    }
 };
 
 constexpr bool isNumeric(JsonType type)
@@ -105,7 +117,7 @@ struct JsonTypeReflector<std::string>
 };
 
 template<typename T>
-constexpr JsonType jsonTypeOf = JsonTypeReflector<T>::type;
+constexpr JsonType jsonTypeOf = JsonTypeReflector<std::decay_t<T>>::type;
 
 JsonType getJsonType(const JsonValue &json);
 
@@ -152,10 +164,11 @@ struct JsonSchema
     JsonValue defaultValue = {};
     std::vector<JsonSchema> oneOf = {};
     JsonType type = JsonType::Undefined;
-    std::string constant = {};
+    JsonValue constant = {};
     std::optional<double> minimum = {};
     std::optional<double> maximum = {};
     std::vector<JsonSchema> items = {};
+    bool uniqueItems = false;
     std::optional<std::size_t> minItems = {};
     std::optional<std::size_t> maxItems = {};
     std::map<std::string, JsonSchema> properties = {};

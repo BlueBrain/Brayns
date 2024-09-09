@@ -158,6 +158,12 @@ inline void commitObject(OSPObject handle)
     ospCommit(handle);
 }
 
+inline void commitObject(Device &device, OSPObject handle)
+{
+    ospCommit(handle);
+    device.throwIfError();
+}
+
 inline void removeObjectParam(OSPObject handle, const char *id)
 {
     ospRemoveParam(handle, id);

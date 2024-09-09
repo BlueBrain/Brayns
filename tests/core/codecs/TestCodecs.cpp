@@ -74,12 +74,12 @@ TEST_CASE("JpegCodec")
     auto image = createTestImage(ImageFormat::Rgb8);
 
     auto data = encodeJpeg(view(image));
-    // writeFile(data, "test1.jpg");
+    writeFile(data, "test1.jpg");
 
     image = createTestImage(ImageFormat::Rgba8);
 
     data = encodeJpeg(view(image));
-    // writeFile(data, "test2.jpg");
+    writeFile(data, "test2.jpg");
     (void)data;
 }
 
@@ -88,12 +88,12 @@ TEST_CASE("PngCodec")
     auto image = createTestImage(ImageFormat::Rgb8);
 
     auto data = encodePng(view(image));
-    // writeFile(data, "test1.png");
+    writeFile(data, "test1.png");
 
     image = createTestImage(ImageFormat::Rgba8);
 
     data = encodePng(view(image));
-    // writeFile(data, "test2.png");
+    writeFile(data, "test2.png");
     (void)data;
 }
 
@@ -165,6 +165,6 @@ TEST_CASE("ExrCodec")
         }};
 
     auto data = encodeExr(image);
-    // writeFile(data, "test.exr");
+    writeFile(data, "test.exr");
     (void)data;
 }

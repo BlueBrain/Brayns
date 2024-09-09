@@ -79,7 +79,7 @@ AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings)
     setMaterialParam(handle, "kd", settings.diffuse);
     setMaterialParam(handle, "d", settings.opacity);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return material;
 }
@@ -95,7 +95,7 @@ ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings
     setMaterialParam(handle, "ns", settings.shininess);
     setObjectParam(handle, "tf", settings.transparencyFilter);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return material;
 }
@@ -135,7 +135,7 @@ PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMate
     setMaterialParam(handle, "opacity", settings.opacity);
     setMaterialParam(handle, "emissiveColor", settings.emissiveColor);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return material;
 }

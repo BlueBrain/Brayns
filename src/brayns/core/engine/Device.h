@@ -25,6 +25,7 @@
 
 #include <memory>
 #include <stdexcept>
+#include <string>
 
 #include <brayns/core/utils/Logger.h>
 
@@ -60,6 +61,7 @@ public:
     explicit Device(OSPDevice device, std::unique_ptr<DeviceErrorHandler> handler);
 
     OSPDevice getHandle() const;
+    std::string getVersion() const;
     void throwIfError();
 
 private:
@@ -72,5 +74,11 @@ private:
     std::unique_ptr<DeviceErrorHandler> _handler;
 };
 
-Device createDevice(Logger &logger);
+struct DeviceSettings
+{
+    std::size_t threadCount = 0;
+    bool affinity = false;
+};
+
+Device createDevice(Logger &logger, const DeviceSettings &settings = {});
 }

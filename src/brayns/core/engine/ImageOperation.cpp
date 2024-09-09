@@ -21,6 +21,21 @@
 
 #include "ImageOperation.h"
 
+namespace
+{
+using namespace brayns;
+
+void setToneMapperParams(OSPImageOperation handle, const ToneMapperSettings &settings)
+{
+    setObjectParam(handle, "exposure", settings.exposure);
+    setObjectParam(handle, "contrast", settings.contrast);
+    setObjectParam(handle, "shoulder", settings.shoulder);
+    setObjectParam(handle, "midIn", settings.midIn);
+    setObjectParam(handle, "midOut", settings.midOut);
+    setObjectParam(handle, "acesColor", settings.acesColor);
+}
+}
+
 namespace brayns
 {
 ToneMapper createToneMapper(Device &device, const ToneMapperSettings &settings)
@@ -28,15 +43,17 @@ ToneMapper createToneMapper(Device &device, const ToneMapperSettings &settings)
     auto handle = ospNewImageOperation("tonemapper");
     auto toneMapper = wrapObjectHandleAs<ToneMapper>(device, handle);
 
-    setObjectParam(handle, "exposure", settings.exposure);
-    setObjectParam(handle, "contrast", settings.contrast);
-    setObjectParam(handle, "shoulder", settings.hightlightCompression);
-    setObjectParam(handle, "midIn", settings.midLevelAnchorInput);
-    setObjectParam(handle, "midOut", settings.midLevelAnchorOutput);
-    setObjectParam(handle, "acesColor", settings.aces);
+    setToneMapperParams(handle, settings);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return toneMapper;
+}
+
+void ToneMapper::update(const ToneMapperSettings &settings)
+{
+    auto handle = getHandle();
+    setToneMapperParams(handle, settings);
+    commitObject(handle);
 }
 }

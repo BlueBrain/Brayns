@@ -34,43 +34,41 @@ struct JsonObjectReflector<AllObjectsResult>
     static auto reflect()
     {
         auto builder = JsonBuilder<AllObjectsResult>();
-        builder.field("objects", [](auto &object) { return &object.objects; })
-            .description("Generic properties of all objects in registry");
+        builder.field("objects", [](auto &object) { return &object.objects; }).description("List of object info");
         return builder.build();
     }
 };
 
-AllObjectsResult getAllObjects(LockedObjects &locked)
+AllObjectsResult getAllObjects(ObjectManager &manager)
 {
-    return {locked.visit([](auto &objects) { return objects.getAllObjects(); })};
+    return {manager.visit([](auto &objects) { return objects.getAll(); })};
 }
 
-ObjectInfo getObject(LockedObjects &locked, const ObjectParams &params)
+ObjectInfo getObject(ObjectManager &manager, const ObjectParams &params)
 {
-    return locked.visit([&](auto &objects) { return objects.getObject(params.id); });
+    return manager.visit([&](auto &objects) { return objects.get(params.id); });
 }
 
-struct UserProperties
+struct ObjectUpdate
 {
     JsonValue userData;
 };
 
 template<>
-struct JsonObjectReflector<UserProperties>
+struct JsonObjectReflector<ObjectUpdate>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<UserProperties>();
-        builder.field("user_data", [](auto &object) { return &object.userData; }).description("User data");
+        auto builder = JsonBuilder<ObjectUpdate>();
+        builder.field("userData", [](auto &object) { return &object.userData; })
+            .description("User data to store in the object (not used by Brayns)");
         return builder.build();
     }
 };
 
-using ObjectUpdate = UpdateParams<UserProperties>;
-
-void updateObject(LockedObjects &locked, const ObjectUpdate &params)
+void updateObject(ObjectManager &manager, const UpdateParams<ObjectUpdate> &params)
 {
-    locked.visit([&](auto &objects) { objects.setUserData(params.id, params.properties.userData); });
+    manager.visit([&](auto &objects) { objects.update(params.id, params.settings.userData); });
 }
 
 struct RemoveParams
@@ -89,9 +87,9 @@ struct JsonObjectReflector<RemoveParams>
     }
 };
 
-void removeObjects(LockedObjects &locked, const RemoveParams &params)
+void removeObjects(ObjectManager &manager, const RemoveParams &params)
 {
-    locked.visit(
+    manager.visit(
         [&](auto &objects)
         {
             for (auto id : params.ids)
@@ -101,51 +99,42 @@ void removeObjects(LockedObjects &locked, const RemoveParams &params)
         });
 }
 
-void clearObjects(LockedObjects &locked)
+void clearObjects(ObjectManager &manager)
 {
-    locked.visit([](auto &objects) { objects.clear(); });
+    manager.visit([](auto &objects) { objects.clear(); });
 }
 
 struct EmptyObject
 {
 };
 
-template<>
-struct ObjectReflector<EmptyObject>
+ObjectResult createEmptyObject(ObjectManager &manager)
 {
-    static std::string getType(const EmptyObject &)
-    {
-        return "empty-object";
-    }
-};
-
-ObjectResult createEmptyObject(LockedObjects &locked)
-{
-    return locked.visit(
+    return manager.visit(
         [&](auto &objects)
         {
-            auto object = objects.add(EmptyObject());
-            return object.getResult();
+            auto object = objects.add(EmptyObject(), "EmptyObject");
+            return ObjectResult{object.getId()};
         });
 }
 
-void addObjectEndpoints(ApiBuilder &builder, LockedObjects &objects)
+void addObjectEndpoints(ApiBuilder &builder, ObjectManager &manager)
 {
-    builder.endpoint("get-all-objects", [&] { return getAllObjects(objects); })
+    builder.endpoint("getAllObjects", [&] { return getAllObjects(manager); })
         .description("Get generic properties of all objects, use get-{type} to get details of an object");
 
-    builder.endpoint("get-object", [&](ObjectParams params) { return getObject(objects, params); })
+    builder.endpoint("getObject", [&](ObjectParams params) { return getObject(manager, params); })
         .description("Get generic object properties from given object IDs");
 
-    builder.endpoint("update-object", [&](ObjectUpdate params) { return updateObject(objects, params); });
+    builder.endpoint("updateObject", [&](UpdateParams<ObjectUpdate> params) { return updateObject(manager, params); });
 
-    builder.endpoint("remove-objects", [&](RemoveParams params) { removeObjects(objects, params); })
+    builder.endpoint("removeObjects", [&](RemoveParams params) { removeObjects(manager, params); })
         .description("Remove selected objects from registry (but not from scene)");
 
-    builder.endpoint("clear-objects", [&] { clearObjects(objects); })
+    builder.endpoint("clearObjects", [&] { clearObjects(manager); })
         .description("Remove all objects currently in registry");
 
-    builder.endpoint("create-empty-object", [&] { return createEmptyObject(objects); })
+    builder.endpoint("createEmptyObject", [&] { return createEmptyObject(manager); })
         .description("Create an empty object (for testing or to store user data)");
 }
 }

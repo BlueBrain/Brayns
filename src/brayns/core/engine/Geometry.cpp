@@ -117,7 +117,7 @@ TriangleMesh createTriangleMesh(Device &device, const TriangleMeshSettings &sett
     setMeshParams(handle, settings.base);
     setObjectParam(handle, "index", settings.indices);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return mesh;
 }
@@ -138,7 +138,7 @@ QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings)
         setObjectParam(handle, "quadSoup", true);
     }
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return mesh;
 }
@@ -152,7 +152,7 @@ Spheres createSpheres(Device &device, const SphereSettings &settings)
     setObjectParam(handle, "sphere.texcoord", settings.uvs);
     setObjectParam(handle, "type", OSP_SPHERE);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return spheres;
 }
@@ -175,7 +175,7 @@ Discs createDiscs(Device &device, const DiscSettings &settings)
         setObjectParam(handle, "type", OSP_DISC);
     }
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return discs;
 }
@@ -193,7 +193,7 @@ Cylinders createCylinders(Device &device, const CylinderSettings &settings)
     setObjectParam(handle, "type", OSP_DISJOINT);
     setObjectParam(handle, "basis", OSP_LINEAR);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return cylinders;
 }
@@ -216,7 +216,7 @@ Curve createCurve(Device &device, const CurveSettings &settings)
     std::visit([=](const auto &value) { setCurveType(handle, value); }, settings.type);
     std::visit([=](const auto &value) { setCurveBasis(handle, value); }, settings.basis);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return curve;
 }
@@ -228,7 +228,7 @@ Boxes createBoxes(Device &device, const BoxSettings &settings)
 
     setObjectParam(handle, "box", settings.boxes);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return boxes;
 }
@@ -241,7 +241,7 @@ Planes createPlanes(Device &device, const PlaneSettings &settings)
     setObjectParam(handle, "plane.coefficients", settings.coefficients);
     setObjectParam(handle, "plane.bounds", settings.bounds);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return planes;
 }
@@ -254,7 +254,7 @@ Isosurfaces createIsosurfaces(Device &device, const IsosurfaceSettings &settings
     setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "isovalue", settings.isovalues);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return isosurfaces;
 }

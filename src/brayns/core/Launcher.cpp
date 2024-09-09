@@ -23,13 +23,17 @@
 
 #include <iostream>
 
-#include <brayns/core/endpoints/CameraEndpoints.h>
+#include <brayns/core/endpoints/DeviceEndpoints.h>
 #include <brayns/core/endpoints/ObjectEndpoints.h>
 #include <brayns/core/endpoints/ServiceEndpoints.h>
+
 #include <brayns/core/engine/Device.h>
+
 #include <brayns/core/service/Service.h>
+
 #include <brayns/core/utils/Logger.h>
 #include <brayns/core/utils/String.h>
+
 #include <brayns/core/websocket/WebSocketServer.h>
 
 namespace
@@ -60,12 +64,25 @@ WebSocketServerSettings extractServerSettings(const ServiceSettings &settings)
     };
 }
 
+DeviceSettings extractDeviceSettings(const ServiceSettings &settings)
+{
+    return {
+        .threadCount = settings.deviceThreadCount,
+        .affinity = settings.deviceAffinity,
+    };
+}
+
 void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 {
     auto level = getEnumValue<LogLevel>(settings.logLevel);
     logger.setLevel(level);
 
     logger.info("{}", getCopyright());
+
+    auto deviceSettings = extractDeviceSettings(settings);
+
+    auto device = createDevice(logger, deviceSettings);
+    logger.info("OSPRay device version: {}", device.getVersion());
 
     logger.debug("Service options:{}", stringifyArgvSettings(settings));
 
@@ -78,14 +95,12 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     addServiceEndpoints(builder, api, token);
 
-    auto objects = ObjectManager();
-    auto locked = LockedObjects(std::move(objects), logger);
+    auto objects = ObjectRegistry();
+    auto locked = ObjectManager(std::move(objects), logger);
 
     addObjectEndpoints(builder, locked);
 
-    auto device = createDevice(logger);
-
-    addCameraEndpoints(builder, locked, device);
+    addDeviceEndpoints(builder, locked, device);
 
     api = builder.build();
 

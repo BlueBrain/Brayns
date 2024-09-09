@@ -43,6 +43,8 @@ class LinearTransferFunction : public TransferFunction
 {
 public:
     using TransferFunction::TransferFunction;
+
+    void update(const LinearTransferFunctionSettings &settings);
 };
 
 LinearTransferFunction createLinearTransferFunction(Device &device, const LinearTransferFunctionSettings &settings);

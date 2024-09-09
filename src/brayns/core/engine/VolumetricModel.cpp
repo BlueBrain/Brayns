@@ -34,7 +34,7 @@ VolumetricModel createVolumetricModel(Device &device, const VolumetricModelSetti
     setObjectParam(handle, "anisotropy", settings.anisotropy);
     setObjectParam(handle, "id", settings.id);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return model;
 }

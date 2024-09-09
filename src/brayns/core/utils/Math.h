@@ -26,6 +26,8 @@
 #include <rkcommon/math/Quaternion.h>
 #include <rkcommon/math/vec.h>
 
+#include <cmath>
+
 namespace brayns
 {
 template<typename T, int S>
@@ -49,15 +51,30 @@ using Color4 = Vector4;
 
 using Quaternion = rkcommon::math::quaternionf;
 
+template<typename T>
+using Range = rkcommon::math::range_t<T>;
+
 template<typename T, int S>
 using BoxT = rkcommon::math::box_t<T, S>;
 
-using Box1 = rkcommon::math::box1f;
+using Box1 = Range<float>;
 using Box2 = BoxT<float, 2>;
 using Box3 = BoxT<float, 3>;
 
 using Affine2 = rkcommon::math::AffineSpace2f;
 using Affine3 = rkcommon::math::AffineSpace3f;
+
+template<typename T>
+constexpr T radians(T degrees)
+{
+    return degrees * T(M_PI) / T(360);
+}
+
+template<typename T>
+constexpr T degrees(T radians)
+{
+    return radians * T(360) / T(M_PI);
+}
 
 template<typename T, int S>
 T reduceMultiply(const Vector<T, S> &value)
@@ -65,11 +82,34 @@ T reduceMultiply(const Vector<T, S> &value)
     return rkcommon::math::reduce_mul(value);
 }
 
+template<typename T, int S>
+Vector<T, S> dot(const Vector<T, S> &left, const Vector<T, S> &right)
+{
+    return rkcommon::math::dot(left, right);
+}
+
+template<typename T>
+Vector<T, 3> cross(const Vector<T, 3> &left, const Vector<T, 3> &right)
+{
+    return rkcommon::math::cross(left, right);
+}
+
+template<typename T, int S>
+Vector<T, S> normalize(const Vector<T, S> &value)
+{
+    return rkcommon::math::normalize(value);
+}
+
+inline Quaternion normalize(const Quaternion &value)
+{
+    return rkcommon::math::normalize(value);
+}
+
 struct Transform
 {
-    Vector3 translation = {0, 0, 0};
-    Quaternion rotation = {1, 0, 0, 0};
-    Vector3 scale = {1, 1, 1};
+    Vector3 translation = {0.0F, 0.0F, 0.0F};
+    Quaternion rotation = {1.0F, 0.0F, 0.0F, 0.0F};
+    Vector3 scale = {1.0F, 1.0F, 1.0F};
 
     auto operator<=>(const Transform &other) const = default;
 };

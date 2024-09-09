@@ -28,6 +28,7 @@ from brayns.network.json_rpc import (
     JsonRpcSuccessResponse,
     compose_request,
 )
+
 from .mock_websocket import mock_connection
 
 

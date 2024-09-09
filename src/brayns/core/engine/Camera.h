@@ -26,12 +26,18 @@
 
 namespace brayns
 {
-struct CameraView
+struct View
 {
     Vector3 position = {0.0F, 0.0F, 0.0F};
     Vector3 direction = {0.0F, 0.0F, 1.0F};
     Vector3 up = {0.0F, 1.0F, 0.0F};
-    float nearClippingDistance = 1.0e-6F;
+};
+
+struct CameraSettings
+{
+    View view = {};
+    float nearClip = 1.0e-6F;
+    Box2 imageRegion = {{0.0F, 0.0F}, {1.0F, 1.0F}};
 };
 
 class Camera : public Managed<OSPCamera>
@@ -39,30 +45,54 @@ class Camera : public Managed<OSPCamera>
 public:
     using Managed::Managed;
 
-    void setView(const CameraView &view);
+    void update(const CameraSettings &settings);
 };
 
-struct Perspective
+struct DepthOfField
 {
-    float fovy = 60.0F;
+    float apertureRadius;
+    float focusDistance = 1.0F;
+};
+
+enum class StereoMode
+{
+    Left = OSP_STEREO_LEFT,
+    Right = OSP_STEREO_RIGHT,
+    SideBySide = OSP_STEREO_SIDE_BY_SIDE,
+    TopBottom = OSP_STEREO_TOP_BOTTOM,
+};
+
+struct Stereo
+{
+    StereoMode mode;
+    float interpupillaryDistance = 0.0635F;
+};
+
+struct PerspectiveCameraSettings
+{
+    float fovy = radians(60.0F);
     float aspect = 1.0F;
+    std::optional<DepthOfField> depthOfField = std::nullopt;
+    bool architectural = false;
+    std::optional<Stereo> stereo = std::nullopt;
 };
 
 class PerspectiveCamera : public Camera
 {
 public:
     using Camera::Camera;
+    using Camera::update;
 
-    void setFovy(float fovy);
+    void update(const PerspectiveCameraSettings &settings);
     void setAspect(float aspect);
 };
 
 PerspectiveCamera createPerspectiveCamera(
     Device &device,
-    const CameraView &view = {},
-    const Perspective &projection = {});
+    const CameraSettings &settings = {},
+    const PerspectiveCameraSettings &perspective = {});
 
-struct Orthographic
+struct OrthographicCameraSettings
 {
     float height = 1.0F;
     float aspect = 1.0F;
@@ -72,13 +102,33 @@ class OrthographicCamera : public Camera
 {
 public:
     using Camera::Camera;
+    using Camera::update;
 
-    void setHeight(float height);
+    void update(const OrthographicCameraSettings &settings);
     void setAspect(float aspect);
 };
 
 OrthographicCamera createOrthographicCamera(
     Device &device,
-    const CameraView &view = {},
-    const Orthographic &projection = {});
+    const CameraSettings &settings = {},
+    const OrthographicCameraSettings &orthographic = {});
+
+struct PanoramicCameraSettings
+{
+    std::optional<Stereo> stereo;
+};
+
+class PanoramicCamera : public Camera
+{
+public:
+    using Camera::Camera;
+    using Camera::update;
+
+    void update(const PanoramicCameraSettings &settings);
+};
+
+PanoramicCamera createPanoramicCamera(
+    Device &device,
+    const CameraSettings &settings = {},
+    const PanoramicCameraSettings &panoramic = {});
 }

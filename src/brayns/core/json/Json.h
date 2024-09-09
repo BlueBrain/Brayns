@@ -27,10 +27,13 @@
 #include "JsonValue.h"
 
 #include "types/Arrays.h"
+#include "types/Constants.h"
 #include "types/Enums.h"
 #include "types/Maps.h"
 #include "types/Math.h"
 #include "types/Objects.h"
 #include "types/Primitives.h"
 #include "types/Schema.h"
+#include "types/Sets.h"
 #include "types/Variants.h"
+#include "types/Vectors.h"

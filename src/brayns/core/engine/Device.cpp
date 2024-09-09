@@ -21,6 +21,33 @@
 
 #include "Device.h"
 
+#include <fmt/format.h>
+
+namespace
+{
+using namespace brayns;
+
+OSPLogLevel getLogLevel(LogLevel level)
+{
+    switch (level)
+    {
+    case LogLevel::Trace:
+    case LogLevel::Debug:
+        return OSP_LOG_DEBUG;
+    case LogLevel::Info:
+        return OSP_LOG_INFO;
+    case LogLevel::Warn:
+        return OSP_LOG_WARNING;
+    case LogLevel::Error:
+        return OSP_LOG_ERROR;
+    case LogLevel::Off:
+        return OSP_LOG_NONE;
+    default:
+        throw std::invalid_argument("Invalid log level");
+    }
+}
+}
+
 namespace brayns
 {
 DeviceException::DeviceException(OSPError error, const char *message):
@@ -70,6 +97,15 @@ OSPDevice Device::getHandle() const
     return _device.get();
 }
 
+std::string Device::getVersion() const
+{
+    auto major = ospDeviceGetProperty(_device.get(), OSP_DEVICE_VERSION_MAJOR);
+    auto minor = ospDeviceGetProperty(_device.get(), OSP_DEVICE_VERSION_MINOR);
+    auto patch = ospDeviceGetProperty(_device.get(), OSP_DEVICE_VERSION_PATCH);
+
+    return fmt::format("{}.{}.{}", major, minor, patch);
+}
+
 void Device::throwIfError()
 {
     _handler->throwIfError();
@@ -81,7 +117,7 @@ void Device::Deleter::operator()(OSPDevice device) const
     ospShutdown();
 }
 
-Device createDevice(Logger &logger)
+Device createDevice(Logger &logger, const DeviceSettings &settings)
 {
     auto error = ospLoadModule("cpu");
 
@@ -107,11 +143,19 @@ Device createDevice(Logger &logger)
 
     auto handler = std::make_unique<DeviceErrorHandler>(logger);
 
-    auto logLevel = OSP_LOG_DEBUG;
+    auto logLevel = getLogLevel(logger.getLevel());
     ospDeviceSetParam(device, "logLevel", OSP_UINT, &logLevel);
 
     auto warnAsError = true;
     ospDeviceSetParam(device, "warnAsError", OSP_BOOL, &warnAsError);
+
+    if (settings.threadCount != 0)
+    {
+        auto threadCount = static_cast<int>(settings.threadCount);
+        ospDeviceSetParam(device, "numThreads", OSP_INT, &threadCount);
+    }
+
+    ospDeviceSetParam(device, "setAffinity", OSP_BOOL, &settings.affinity);
 
     auto errorCallback = [](auto *userData, auto error, const auto *message)
     {

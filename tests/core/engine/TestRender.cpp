@@ -54,6 +54,7 @@ TEST_CASE("Object creation")
 
     createPerspectiveCamera(device, {});
     createOrthographicCamera(device, {});
+    createPanoramicCamera(device, {});
 
     createData<int>(device, {1, 2, 3});
     allocateData2D<int>(device, {10, 10});
@@ -64,7 +65,7 @@ TEST_CASE("Object creation")
 
     auto volumeData = allocateData3D<float>(device, {10, 10, 10});
     std::ranges::fill(volumeData.getItems(), 1.0F);
-    auto volume = createRegularVolume(device, {volumeData});
+    auto volume = createRegularVolume(device, volumeData, {});
 
     auto colors = createData<Color4>(device, {Color4{1, 0, 0, 1}, Color4{0, 0, 1, 1}});
     auto transferFunction = createLinearTransferFunction(device, {{0, 1}, colors});
@@ -150,6 +151,7 @@ TEST_CASE("Render")
     auto renderer = createScivisRenderer(device, {{.materials = createData<Material>(device, {material})}});
 
     auto camera = createPerspectiveCamera(device, {}, {.fovy = 45.0F, .aspect = float(width) / float(height)});
+    // auto camera = createOrthographicCamera(device, {}, {.height = 3, .aspect = float(width) / float(height)});
 
     auto sphereData = std::vector<Vector4>{{0, 0, 3, 0.25F}, {1, 0, 3, 0.25F}, {1, 1, 3, 0.25F}};
     auto colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}};
@@ -199,9 +201,7 @@ TEST_CASE("Render")
 
     auto data = framebuffer.map(FramebufferChannel::Color);
 
-    rkcommon::utility::writePPM("test.ppm", width, height, static_cast<const std::uint32_t *>(data));
-
-    framebuffer.unmap(data);
+    rkcommon::utility::writePPM("test.ppm", width, height, data.as<std::uint32_t>());
 
     CHECK(error.empty());
 }

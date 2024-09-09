@@ -25,28 +25,76 @@ namespace
 {
 using namespace brayns;
 
-void setCameraViewParams(OSPCamera handle, const CameraView &view)
+void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 {
-    setObjectParam(handle, "position", view.position);
-    setObjectParam(handle, "direction", view.direction);
-    setObjectParam(handle, "up", view.up);
-    setObjectParam(handle, "nearClip", view.nearClippingDistance);
+    setObjectParam(handle, "position", settings.view.position);
+    setObjectParam(handle, "direction", settings.view.direction);
+    setObjectParam(handle, "up", settings.view.up);
+    setObjectParam(handle, "nearClip", settings.nearClip);
+    setObjectParam(handle, "imageStart", settings.imageRegion.lower);
+    setObjectParam(handle, "imageEnd", settings.imageRegion.upper);
+}
+
+void setStereoParams(OSPCamera handle, const std::optional<Stereo> &stereo)
+{
+    if (stereo)
+    {
+        setObjectParam(handle, "stereoMode", static_cast<OSPStereoMode>(stereo->mode));
+        setObjectParam(handle, "interpupillaryDistance", stereo->interpupillaryDistance);
+    }
+    else
+    {
+        removeObjectParam(handle, "stereoMode");
+        removeObjectParam(handle, "interpupillaryDistance");
+    }
+}
+
+void setPerspectiveParams(OSPCamera handle, const PerspectiveCameraSettings &settings)
+{
+    setObjectParam(handle, "fovy", degrees(settings.fovy));
+    setObjectParam(handle, "aspect", settings.aspect);
+
+    if (settings.depthOfField)
+    {
+        setObjectParam(handle, "apertureRadius", settings.depthOfField->apertureRadius);
+        setObjectParam(handle, "focusDistance", settings.depthOfField->focusDistance);
+    }
+    else
+    {
+        removeObjectParam(handle, "apertureRadius");
+        removeObjectParam(handle, "focusDistance");
+    }
+
+    setObjectParam(handle, "architectural", settings.architectural);
+
+    setStereoParams(handle, settings.stereo);
+}
+
+void setOrthographicParams(OSPCamera handle, const OrthographicCameraSettings &settings)
+{
+    setObjectParam(handle, "height", settings.height);
+    setObjectParam(handle, "aspect", settings.aspect);
+}
+
+void setPanoramicParams(OSPCamera handle, const PanoramicCameraSettings &settings)
+{
+    setStereoParams(handle, settings.stereo);
 }
 }
 
 namespace brayns
 {
-void Camera::setView(const CameraView &view)
+void Camera::update(const CameraSettings &settings)
 {
     auto handle = getHandle();
-    setCameraViewParams(handle, view);
+    setCameraParams(handle, settings);
     commitObject(handle);
 }
 
-void PerspectiveCamera::setFovy(float fovy)
+void PerspectiveCamera::update(const PerspectiveCameraSettings &settings)
 {
     auto handle = getHandle();
-    setObjectParam(handle, "fovy", fovy);
+    setPerspectiveParams(handle, settings);
     commitObject(handle);
 }
 
@@ -57,25 +105,26 @@ void PerspectiveCamera::setAspect(float aspect)
     commitObject(handle);
 }
 
-PerspectiveCamera createPerspectiveCamera(Device &device, const CameraView &view, const Perspective &projection)
+PerspectiveCamera createPerspectiveCamera(
+    Device &device,
+    const CameraSettings &settings,
+    const PerspectiveCameraSettings &perspective)
 {
     auto handle = ospNewCamera("perspective");
     auto camera = wrapObjectHandleAs<PerspectiveCamera>(device, handle);
 
-    setCameraViewParams(handle, view);
+    setCameraParams(handle, settings);
+    setPerspectiveParams(handle, perspective);
 
-    setObjectParam(handle, "fovy", projection.fovy);
-    setObjectParam(handle, "aspect", projection.aspect);
-
-    commitObject(handle);
+    commitObject(device, handle);
 
     return camera;
 }
 
-void OrthographicCamera::setHeight(float height)
+void OrthographicCamera::update(const OrthographicCameraSettings &settings)
 {
     auto handle = getHandle();
-    setObjectParam(handle, "height", height);
+    setOrthographicParams(handle, settings);
     commitObject(handle);
 }
 
@@ -86,17 +135,41 @@ void OrthographicCamera::setAspect(float aspect)
     commitObject(handle);
 }
 
-OrthographicCamera createOrthographicCamera(Device &device, const CameraView &view, const Orthographic &projection)
+OrthographicCamera createOrthographicCamera(
+    Device &device,
+    const CameraSettings &settings,
+    const OrthographicCameraSettings &orthographic)
 {
     auto handle = ospNewCamera("orthographic");
     auto camera = wrapObjectHandleAs<OrthographicCamera>(device, handle);
 
-    setCameraViewParams(handle, view);
+    setCameraParams(handle, settings);
+    setOrthographicParams(handle, orthographic);
 
-    setObjectParam(handle, "height", projection.height);
-    setObjectParam(handle, "aspect", projection.aspect);
+    commitObject(device, handle);
 
+    return camera;
+}
+
+void PanoramicCamera::update(const PanoramicCameraSettings &settings)
+{
+    auto handle = getHandle();
+    setPanoramicParams(handle, settings);
     commitObject(handle);
+}
+
+PanoramicCamera createPanoramicCamera(
+    Device &device,
+    const CameraSettings &settings,
+    const PanoramicCameraSettings &panoramic)
+{
+    auto handle = ospNewCamera("panoramic");
+    auto camera = wrapObjectHandleAs<PanoramicCamera>(device, handle);
+
+    setCameraParams(handle, settings);
+    setPanoramicParams(handle, panoramic);
+
+    commitObject(device, handle);
 
     return camera;
 }

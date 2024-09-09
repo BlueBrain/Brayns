@@ -42,7 +42,7 @@ const TaskInterface &getRawTask(const std::map<TaskId, TaskInterface> &tasks, Ta
     return i->second;
 }
 
-TaskId addTask(TaskInterface task, std::map<TaskId, TaskInterface> &tasks, IdGenerator<TaskId> ids)
+TaskId addTask(TaskInterface task, std::map<TaskId, TaskInterface> &tasks, IdGenerator<TaskId> &ids)
 {
     auto id = ids.next();
     assert(!tasks.contains(id));
@@ -70,10 +70,7 @@ Api::Api(std::map<std::string, Endpoint> endpoints):
 
 Api::~Api()
 {
-    for (const auto &[id, task] : _tasks)
-    {
-        task.cancel();
-    }
+    cancelAllTasks();
 }
 
 std::vector<std::string> Api::getMethods() const
@@ -181,5 +178,16 @@ void Api::cancelTask(TaskId id)
 
     _tasks.erase(id);
     _ids.recycle(id);
+}
+
+void Api::cancelAllTasks()
+{
+    for (const auto &[id, task] : _tasks)
+    {
+        task.cancel();
+    }
+
+    _tasks.clear();
+    _ids.reset();
 }
 }

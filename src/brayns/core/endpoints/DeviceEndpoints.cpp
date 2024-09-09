@@ -19,38 +19,24 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#pragma once
+#include "DeviceEndpoints.h"
 
-#include <concepts>
-#include <mutex>
-
-#include <brayns/core/utils/Logger.h>
-
-#include "ObjectManager.h"
+#include "CameraEndpoints.h"
+#include "FramebufferEndpoints.h"
+#include "ImageEndpoints.h"
+#include "ImageOperationEndpoints.h"
+#include "TransferFunctionEndpoints.h"
+#include "VolumeEndpoints.h"
 
 namespace brayns
 {
-class LockedObjects
+void addDeviceEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
 {
-public:
-    explicit LockedObjects(ObjectManager objects, Logger &logger):
-        _objects(std::move(objects)),
-        _logger(&logger)
-    {
-    }
-
-    auto visit(std::invocable<ObjectManager &> auto &&callable) -> decltype(callable(std::declval<ObjectManager &>()))
-    {
-        _logger->info("Waiting for object manager lock");
-        auto lock = std::lock_guard(_mutex);
-        _logger->info("Object manager lock acquired");
-
-        return callable(_objects);
-    }
-
-private:
-    std::mutex _mutex;
-    ObjectManager _objects;
-    Logger *_logger;
-};
+    addCameraEndpoints(builder, manager, device);
+    addFramebufferEndpoints(builder, manager, device);
+    addImageOperationEndpoints(builder, manager, device);
+    addImageEndpoints(builder, manager);
+    addTransferFunctionEndpoints(builder, manager, device);
+    addVolumeEndpoints(builder, manager, device);
+}
 }

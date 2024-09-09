@@ -29,6 +29,8 @@
 
 #include <brayns/core/json/JsonReflector.h>
 
+#include "Primitives.h"
+
 namespace brayns
 {
 template<typename ParentType>
@@ -147,56 +149,67 @@ struct JsonReflector<T>
     }
 };
 
-template<typename ParentType>
 class JsonFieldBuilder
 {
 public:
-    explicit JsonFieldBuilder(JsonField<ParentType> &field):
-        _field(&field)
+    explicit JsonFieldBuilder(JsonSchema &schema):
+        _schema(&schema)
     {
     }
 
     JsonFieldBuilder description(std::string value)
     {
-        _field->schema.description = std::move(value);
+        _schema->description = std::move(value);
         return *this;
     }
 
     JsonFieldBuilder required(bool value)
     {
-        _field->schema.required = value;
+        _schema->required = value;
         return *this;
     }
 
     JsonFieldBuilder minimum(std::optional<double> value)
     {
-        _field->schema.minimum = value;
+        _schema->minimum = value;
         return *this;
     }
 
     JsonFieldBuilder maximum(std::optional<double> value)
     {
-        _field->schema.maximum = value;
+        _schema->maximum = value;
+        return *this;
+    }
+
+    JsonFieldBuilder uniqueItems(bool value)
+    {
+        _schema->uniqueItems = value;
         return *this;
     }
 
     JsonFieldBuilder minItems(std::optional<std::size_t> value)
     {
-        _field->schema.minItems = value;
+        _schema->minItems = value;
         return *this;
     }
 
     JsonFieldBuilder maxItems(std::optional<std::size_t> value)
     {
-        _field->schema.maxItems = value;
+        _schema->maxItems = value;
         return *this;
     }
 
-    template<typename T>
+    JsonFieldBuilder items()
+    {
+        assert(!_schema->items.empty());
+        return JsonFieldBuilder(_schema->items[0]);
+    }
+
+    template<ReflectedJson T>
     JsonFieldBuilder defaultValue(const T &value)
     {
-        _field->schema.defaultValue = serializeToJson(value);
-        _field->schema.required = false;
+        _schema->defaultValue = serializeToJson(value);
+        _schema->required = false;
         return *this;
     }
 
@@ -206,7 +219,7 @@ public:
     }
 
 private:
-    JsonField<ParentType> *_field;
+    JsonSchema *_schema;
 };
 
 template<typename GetterType, typename ObjectType>
@@ -229,7 +242,7 @@ public:
     }
 
     template<JsonFieldGetter<T> U>
-    JsonFieldBuilder<T> field(std::string name, U getFieldPtr)
+    JsonFieldBuilder field(std::string name, U getFieldPtr)
     {
         using FieldType = GetFieldType<U, T>;
 
@@ -251,31 +264,38 @@ public:
             value = deserializeAs<FieldType>(json);
         };
 
-        return JsonFieldBuilder<T>(field);
+        return JsonFieldBuilder(field.schema);
     }
 
-    JsonFieldBuilder<T> constant(std::string name, const std::string &value)
+    template<ReflectedJson U>
+    JsonFieldBuilder constant(std::string name, const U &value)
     {
         auto &field = _fields.emplace_back();
 
         field.name = std::move(name);
 
-        field.schema = getJsonSchema<std::string>();
+        field.schema = JsonSchema{.type = jsonTypeOf<U>};
 
-        field.schema.constant = value;
+        field.schema.constant = serializeToJson(value);
 
         field.serialize = [=](const auto &) { return value; };
 
         field.deserialize = [=](const auto &json, auto &)
         {
             auto item = deserializeAs<std::string>(json);
+
             if (item != value)
             {
                 throw JsonException("Invalid const");
             }
         };
 
-        return JsonFieldBuilder<T>(field);
+        return JsonFieldBuilder(field.schema);
+    }
+
+    JsonFieldBuilder constant(std::string name, const char *value)
+    {
+        return constant(std::move(name), std::string(value));
     }
 
     JsonObjectInfo<T> build()

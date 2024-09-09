@@ -40,7 +40,7 @@ struct Deleter
     }
 };
 
-using Holder = std::unique_ptr<void, Deleter>;
+using JpegPtr = std::unique_ptr<void, Deleter>;
 
 TJPF getPixelFormat(ImageFormat format)
 {
@@ -82,7 +82,7 @@ std::string encodeJpeg(const ImageView &image, const JpegSettings &settings)
         throw std::runtime_error("Failed to allocate JPEG encoder");
     }
 
-    auto holder = Holder(compressor);
+    auto holder = JpegPtr(compressor);
 
     auto [data, size, format, rowOrder] = image;
 

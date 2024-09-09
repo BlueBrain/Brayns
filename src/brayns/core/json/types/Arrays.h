@@ -45,23 +45,28 @@ struct JsonArrayReflector
     static JsonValue serialize(const T &value)
     {
         auto array = createJsonArray();
+
         for (const auto &item : value)
         {
             auto jsonItem = serializeToJson(item);
             array->add(jsonItem);
         }
+
         return array;
     }
 
     static T deserialize(const JsonValue &json)
     {
         const auto &array = getArray(json);
+
         auto value = T();
+
         for (const auto &jsonItem : array)
         {
             auto item = deserializeAs<ValueType>(jsonItem);
             value.push_back(std::move(item));
         }
+
         return value;
     }
 };

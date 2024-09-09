@@ -67,6 +67,13 @@ struct AboveMaximum
 
 std::string toString(const AboveMaximum &error);
 
+struct DuplicatedItem
+{
+    std::string value;
+};
+
+std::string toString(const DuplicatedItem &error);
+
 struct NotEnoughItems
 {
     std::size_t count;
@@ -99,6 +106,7 @@ std::string toString(const UnknownProperty &error);
 
 struct InvalidOneOf
 {
+    JsonValue value;
 };
 
 std::string toString(const InvalidOneOf &error);
@@ -108,6 +116,7 @@ using JsonError = std::variant<
     InvalidConst,
     AboveMaximum,
     BelowMinimum,
+    DuplicatedItem,
     TooManyItems,
     NotEnoughItems,
     MissingRequiredProperty,

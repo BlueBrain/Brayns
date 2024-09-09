@@ -19,7 +19,11 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from types import UnionType
-from typing import Any, cast, get_args, get_origin
+from typing import Any, TypeVar, cast, get_args, get_origin
+
+from .box import Box, Box1, Box2, Box3
+from .quaternion import Quaternion
+from .vector import Vector2, Vector3, Vector4
 
 
 def has_type(value: Any, t: Any) -> bool:
@@ -65,6 +69,9 @@ def check_type(value: Any, t: Any) -> None:
 def try_get(message: dict[str, Any], key: str, t: Any, default: Any = None) -> Any:
     value = message.get(key, default)
 
+    if value is default:
+        return value
+
     check_type(value, t)
 
     return value
@@ -72,9 +79,57 @@ def try_get(message: dict[str, Any], key: str, t: Any, default: Any = None) -> A
 
 def get(message: dict[str, Any], key: str, t: Any) -> Any:
     if key not in message:
-        raise KeyError(f"Missing mandatory key in JSON-RPC message {key}")
+        raise KeyError(f"Missing mandatory key in JSON-RPC message: '{key}'")
 
     value = message[key]
     check_type(value, t)
 
     return value
+
+
+def get_tuple(message: dict[str, Any], key: str, t: Any, item_count: int) -> Any:
+    value = get(message, key, list[t])
+
+    if len(value) != item_count:
+        raise ValueError(f"Expected {item_count} items for '{key}'")
+
+    return value
+
+
+T = TypeVar("T", Vector2, Vector3, Vector4, Quaternion)
+
+
+def deserialize_vector(message: dict[str, Any], key: str, t: type[T]) -> T:
+    value = get_tuple(message, key, float, t.component_count())
+    return t(*value)
+
+
+def serialize_box(value: Box2 | Box3) -> dict[str, Any]:
+    return {
+        "min": value.min,
+        "max": value.max,
+    }
+
+
+U = TypeVar("U", bound=Box)
+
+
+def deserialize_box(message: dict[str, Any], t: type[U]) -> U:
+    return t(
+        min=deserialize_vector(message, "min", t.vector_type()),
+        max=deserialize_vector(message, "max", t.vector_type()),
+    )
+
+
+def serialize_box1(value: Box1) -> dict[str, Any]:
+    return {
+        "min": value.min,
+        "max": value.max,
+    }
+
+
+def deserialize_box1(message: dict[str, Any]) -> Box1:
+    return Box1(
+        min=get(message, "min", float),
+        max=get(message, "max", float),
+    )

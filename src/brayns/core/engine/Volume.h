@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <limits>
+#include <optional>
 
 #include "Data.h"
 #include "Device.h"
@@ -42,9 +42,9 @@ enum class VolumeFilter
     Cubic = OSP_VOLUME_FILTER_CUBIC,
 };
 
-using VolumeData = std::variant<Data3D<std::uint8_t>, Data3D<std::uint16_t>, Data3D<float>, Data3D<double>>;
+using RegularVolumeData = std::variant<Data3D<std::uint8_t>, Data3D<std::uint16_t>, Data3D<float>, Data3D<double>>;
 
-enum class VoxelType
+enum class VolumeType
 {
     CellCentered,
     VertexCentered,
@@ -52,17 +52,23 @@ enum class VoxelType
 
 struct RegularVolumeSettings
 {
-    VolumeData data;
-    VoxelType voxelType = VoxelType::VertexCentered;
+    Vector3 origin = {0.0F, 0.0F, 0.0F};
+    Vector3 spacing = {1.0F, 1.0F, 1.0F};
+    VolumeType type = VolumeType::VertexCentered;
     VolumeFilter filter = VolumeFilter::Linear;
-    float background = std::numeric_limits<float>::quiet_NaN();
+    std::optional<float> background = std::nullopt;
 };
 
 class RegularVolume : public Volume
 {
 public:
     using Volume::Volume;
+
+    void update(const RegularVolumeSettings &settings);
 };
 
-RegularVolume createRegularVolume(Device &device, const RegularVolumeSettings &settings);
+RegularVolume createRegularVolume(
+    Device &device,
+    const RegularVolumeData &data,
+    const RegularVolumeSettings &settings = {});
 }

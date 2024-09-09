@@ -111,6 +111,9 @@ Note: integration testing can be disable using the pytest --without-integration 
 
 ```json
 {
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit"
+    },
     "python.analysis.typeCheckingMode": "basic",
     "python.testing.pytestArgs": [
         "tests"

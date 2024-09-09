@@ -23,6 +23,7 @@
 
 #include <ranges>
 #include <stdexcept>
+#include <unordered_set>
 #include <utility>
 
 #include <fmt/format.h>
@@ -31,7 +32,7 @@ namespace
 {
 using namespace brayns;
 
-class ErrorContext
+class ErrorBuilder
 {
 public:
     void push(JsonPathItem item)
@@ -59,70 +60,119 @@ private:
     std::vector<JsonSchemaError> _errors;
 };
 
-void check(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors);
+void check(const JsonValue &json, const JsonSchema &schema, ErrorBuilder &errors);
 
-void checkOneOf(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors)
+void checkOneOf(const JsonValue &json, const JsonSchema &schema, ErrorBuilder &errors)
 {
     for (const auto &oneof : schema.oneOf)
     {
         auto suberrors = validate(json, oneof);
+
         if (suberrors.empty())
         {
             return;
         }
     }
-    errors.add(InvalidOneOf{});
+
+    errors.add(InvalidOneOf{json});
 }
 
-bool checkType(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors)
+bool checkType(const JsonValue &json, const JsonSchema &schema, ErrorBuilder &errors)
 {
     auto required = RequiredJsonType{schema.type};
     auto type = getJsonType(json);
+
     if (required.isCompatible(type))
     {
         return true;
     }
+
     errors.add(InvalidType{type, required.value});
+
     return false;
 }
 
-void checkConst(const std::string &value, const JsonSchema &schema, ErrorContext &errors)
+bool checkConst(const JsonValue &value, const JsonSchema &schema)
 {
-    if (value != schema.constant)
+    if (value.isBoolean() && schema.constant.isBoolean())
+    {
+        return value.extract<bool>() == schema.constant.extract<bool>();
+    }
+
+    if (value.isNumeric() && schema.constant.isNumeric())
+    {
+        return value == schema.constant;
+    }
+
+    if (value.isString() && schema.constant.isString())
+    {
+        return value == schema.constant;
+    }
+
+    return false;
+}
+
+void checkConst(const JsonValue &value, const JsonSchema &schema, ErrorBuilder &errors)
+{
+    if (!checkConst(value, schema))
     {
         errors.add(InvalidConst{value, schema.constant});
     }
 }
 
-void checkRange(double value, const JsonSchema &schema, ErrorContext &errors)
+void checkRange(double value, const JsonSchema &schema, ErrorBuilder &errors)
 {
     if (schema.minimum && value < *schema.minimum)
     {
         errors.add(BelowMinimum{value, *schema.minimum});
     }
+
     if (schema.maximum && value > *schema.maximum)
     {
         errors.add(AboveMaximum{value, *schema.maximum});
     }
 }
 
-void checkItemCount(std::size_t count, const JsonSchema &schema, ErrorContext &errors)
+void checkUniqueItems(const JsonArray &array, const JsonSchema &schema, ErrorBuilder &errors)
+{
+    if (!schema.uniqueItems)
+    {
+        return;
+    }
+
+    auto values = std::unordered_set<std::string>();
+
+    for (const auto &item : array)
+    {
+        auto value = item.toString();
+        auto [i, inserted] = values.insert(value);
+
+        if (!inserted)
+        {
+            errors.add(DuplicatedItem{std::move(value)});
+        }
+    }
+}
+
+void checkItemCount(std::size_t count, const JsonSchema &schema, ErrorBuilder &errors)
 {
     if (schema.minItems && count < *schema.minItems)
     {
         errors.add(NotEnoughItems{count, *schema.minItems});
     }
+
     if (schema.maxItems && count > *schema.maxItems)
     {
         errors.add(TooManyItems{count, *schema.maxItems});
     }
 }
 
-void checkArrayItems(const JsonArray &array, const JsonSchema &schema, ErrorContext &errors)
+void checkArrayItems(const JsonArray &array, const JsonSchema &schema, ErrorBuilder &errors)
 {
     const auto &itemSchema = schema.items.at(0);
 
     auto index = std::size_t(0);
+
     for (const auto &value : array)
     {
         errors.push(index);
@@ -133,7 +183,7 @@ void checkArrayItems(const JsonArray &array, const JsonSchema &schema, ErrorCont
     }
 }
 
-void checkMapItems(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+void checkMapItems(const JsonObject &object, const JsonSchema &schema, ErrorBuilder &errors)
 {
     const auto &itemSchema = schema.items.at(0);
 
@@ -145,7 +195,7 @@ void checkMapItems(const JsonObject &object, const JsonSchema &schema, ErrorCont
     }
 }
 
-void checkRequiredProperties(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+void checkRequiredProperties(const JsonObject &object, const JsonSchema &schema, ErrorBuilder &errors)
 {
     for (const auto &[key, property] : schema.properties)
     {
@@ -153,15 +203,17 @@ void checkRequiredProperties(const JsonObject &object, const JsonSchema &schema,
         {
             continue;
         }
+
         if (object.has(key))
         {
             continue;
         }
+
         errors.add(MissingRequiredProperty{key});
     }
 }
 
-void checkUnknownProperties(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+void checkUnknownProperties(const JsonObject &object, const JsonSchema &schema, ErrorBuilder &errors)
 {
     for (const auto &[key, value] : object)
     {
@@ -169,11 +221,12 @@ void checkUnknownProperties(const JsonObject &object, const JsonSchema &schema, 
         {
             continue;
         }
+
         errors.add(UnknownProperty{key});
     }
 }
 
-void checkProperties(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+void checkProperties(const JsonObject &object, const JsonSchema &schema, ErrorBuilder &errors)
 {
     for (const auto &[key, itemSchema] : schema.properties)
     {
@@ -181,54 +234,61 @@ void checkProperties(const JsonObject &object, const JsonSchema &schema, ErrorCo
         {
             continue;
         }
+
         errors.push(key);
         check(object.get(key), itemSchema, errors);
         errors.pop();
     }
 }
 
-void checkObject(const JsonObject &object, const JsonSchema &schema, ErrorContext &errors)
+void checkObject(const JsonObject &object, const JsonSchema &schema, ErrorBuilder &errors)
 {
     if (!schema.items.empty())
     {
         checkMapItems(object, schema, errors);
         return;
     }
+
     checkUnknownProperties(object, schema, errors);
     checkRequiredProperties(object, schema, errors);
     checkProperties(object, schema, errors);
 }
 
-void check(const JsonValue &json, const JsonSchema &schema, ErrorContext &errors)
+void check(const JsonValue &json, const JsonSchema &schema, ErrorBuilder &errors)
 {
     if (!schema.oneOf.empty())
     {
         checkOneOf(json, schema, errors);
         return;
     }
+
     if (!checkType(json, schema, errors))
     {
         return;
     }
-    if (!schema.constant.empty())
+
+    if (!schema.constant.isEmpty())
     {
-        const auto &value = json.extract<std::string>();
-        checkConst(value, schema, errors);
+        checkConst(json, schema, errors);
         return;
     }
+
     if (isNumeric(schema.type))
     {
         auto value = json.convert<double>();
         checkRange(value, schema, errors);
         return;
     }
+
     if (schema.type == JsonType::Array)
     {
         const auto &value = getArray(json);
+        checkUniqueItems(value, schema, errors);
         checkItemCount(value.size(), schema, errors);
         checkArrayItems(value, schema, errors);
         return;
     }
+
     if (schema.type == JsonType::Object)
     {
         const auto &object = getObject(json);
@@ -291,6 +351,11 @@ std::string toString(const AboveMaximum &error)
     return fmt::format("Value above maximum: {} > {}", error.value, error.maximum);
 }
 
+std::string toString(const DuplicatedItem &error)
+{
+    return fmt::format("Duplicated item: '{}'", error.value);
+}
+
 std::string toString(const NotEnoughItems &error)
 {
     return fmt::format("Not enough items: {} < {}", error.count, error.minItems);
@@ -311,9 +376,9 @@ std::string toString(const UnknownProperty &error)
     return fmt::format("Unknown property: '{}'", error.name);
 }
 
-std::string toString(const InvalidOneOf &)
+std::string toString(const InvalidOneOf &error)
 {
-    return "Invalid oneOf";
+    return fmt::format("Invalid oneOf: {}", stringify(error.value));
 }
 
 std::string toString(const JsonError &error)
@@ -323,7 +388,7 @@ std::string toString(const JsonError &error)
 
 std::vector<JsonSchemaError> validate(const JsonValue &json, const JsonSchema &schema)
 {
-    auto errors = ErrorContext();
+    auto errors = ErrorBuilder();
     check(json, schema, errors);
     return errors.build();
 }

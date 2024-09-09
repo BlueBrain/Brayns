@@ -29,6 +29,8 @@
 #include <string>
 #include <string_view>
 
+#include "Math.h"
+
 namespace brayns
 {
 static_assert(std::endian::native == std::endian::little || std::endian::native == std::endian::big);
@@ -48,11 +50,10 @@ std::span<char> asBytes(T &value)
 }
 
 template<typename T>
-T swapBytes(T value)
+void swapBytes(T &value)
 {
     auto bytes = asBytes(value);
     std::ranges::reverse(bytes);
-    return value;
 }
 
 inline std::string_view extractBytes(std::string_view &bytes, std::size_t count)
@@ -63,7 +64,7 @@ inline std::string_view extractBytes(std::string_view &bytes, std::size_t count)
 }
 
 template<typename T>
-T extractBytesAs(std::string_view &bytes, std::endian bytesEndian)
+void extractBytesAsPrimitive(std::string_view &bytes, std::endian endian, T &output)
 {
     static constexpr auto size = sizeof(T);
 
@@ -71,41 +72,144 @@ T extractBytesAs(std::string_view &bytes, std::endian bytesEndian)
 
     auto extracted = extractBytes(bytes, size);
 
-    T value;
-    std::memcpy(&value, extracted.data(), size);
+    std::memcpy(&output, extracted.data(), size);
 
-    if (bytesEndian != std::endian::native)
+    if (endian != std::endian::native)
     {
-        return swapBytes(value);
+        swapBytes(output);
+    }
+}
+
+template<typename T>
+void composeBytesAsPrimtive(const T &value, std::endian endian, std::string &output)
+{
+    auto bytes = asBytes(value);
+    auto size = bytes.size();
+
+    output.append(bytes.data(), size);
+
+    if (endian != std::endian::native)
+    {
+        auto first = output.begin() + output.size() - size;
+        auto last = output.end();
+
+        auto appended = std::span<char>(first, last);
+        std::ranges::reverse(appended);
+    }
+}
+
+template<typename T>
+struct BinaryReflector
+{
+    static std::size_t getSize()
+    {
+        return sizeof(T);
     }
 
+    static void extract(std::string_view &bytes, std::endian endian, T &output)
+    {
+        extractBytesAsPrimitive<T>(bytes, endian, output);
+    }
+
+    static void compose(const T &value, std::endian endian, std::string &output)
+    {
+        composeBytesAsPrimtive(value, endian, output);
+    }
+};
+
+template<typename T>
+std::size_t getBinarySize()
+{
+    return BinaryReflector<std::remove_const_t<T>>::getSize();
+}
+
+template<typename T>
+void extractBytesTo(std::string_view &bytes, std::endian endian, T &output)
+{
+    BinaryReflector<T>::extract(bytes, endian, output);
+}
+
+template<typename T>
+T extractBytesAs(std::string_view &bytes, std::endian endian)
+{
+    T value;
+    extractBytesTo(bytes, endian, value);
     return value;
 }
 
 template<typename T>
-T parseBytesAs(std::string_view bytes, std::endian bytesEndian)
+void parseBytesTo(std::string_view bytes, std::endian endian, T &output)
 {
-    return extractBytesAs<T>(bytes, bytesEndian);
+    return extractBytesTo<T>(bytes, endian, output);
 }
 
 template<typename T>
-void composeBytes(T value, std::endian outputEndian, std::string &output)
+T parseBytesAs(std::string_view bytes, std::endian endian)
 {
-    auto bytes = asBytes(value);
+    return extractBytesAs<T>(bytes, endian);
+}
 
-    if (outputEndian != std::endian::native)
+template<typename T>
+void composeBytesTo(const T &value, std::endian endian, std::string &output)
+{
+    BinaryReflector<T>::compose(value, endian, output);
+}
+
+template<typename T>
+std::string composeBytes(const T &value, std::endian endian)
+{
+    auto output = std::string();
+    BinaryReflector<T>::compose(value, endian, output);
+    return output;
+}
+
+template<typename T, int S>
+struct BinaryReflector<Vector<T, S>>
+{
+    static std::size_t getSize()
     {
-        std::ranges::reverse(bytes);
+        return static_cast<std::size_t>(S) * sizeof(T);
     }
 
-    output.append(bytes.data(), bytes.size());
-}
+    static void extract(std::string_view &bytes, std::endian endian, Vector<T, S> &output)
+    {
+        for (auto i = 0; i < S; ++i)
+        {
+            extractBytesTo(bytes, endian, output[i]);
+        }
+    }
 
-template<typename T>
-std::string composeBytes(T value, std::endian outputEndian)
+    static void compose(const Vector<T, S> &value, std::endian endian, std::string &output)
+    {
+        for (auto i = 0; i < S; ++i)
+        {
+            composeBytesTo(value[i], endian, output);
+        }
+    }
+};
+
+template<>
+struct BinaryReflector<Quaternion>
 {
-    auto bytes = std::string();
-    composeBytes(value, outputEndian, bytes);
-    return bytes;
-}
+    static std::size_t getSize()
+    {
+        return 4 * sizeof(float);
+    }
+
+    static void extract(std::string_view &bytes, std::endian endian, Quaternion &output)
+    {
+        extractBytesTo(bytes, endian, output.i);
+        extractBytesTo(bytes, endian, output.j);
+        extractBytesTo(bytes, endian, output.k);
+        extractBytesTo(bytes, endian, output.r);
+    }
+
+    static void compose(const Quaternion &value, std::endian endian, std::string &output)
+    {
+        composeBytesTo(value.i, endian, output);
+        composeBytesTo(value.j, endian, output);
+        composeBytesTo(value.k, endian, output);
+        composeBytesTo(value.r, endian, output);
+    }
+};
 }

@@ -48,6 +48,7 @@ public:
     TaskInfo getTask(TaskId id) const;
     Payload waitForTaskResult(TaskId id);
     void cancelTask(TaskId id);
+    void cancelAllTasks();
 
 private:
     std::map<std::string, Endpoint> _endpoints;

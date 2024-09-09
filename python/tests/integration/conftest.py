@@ -18,15 +18,15 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from logging import DEBUG
 import os
 from collections.abc import AsyncIterator
+from logging import DEBUG
 from pathlib import Path
-from ssl import SSLContext, create_default_context, Purpose
+from ssl import Purpose, SSLContext, create_default_context
 
 import pytest_asyncio
 
-from brayns import Connection, connect, create_logger, clear_objects
+from brayns import Connection, clear_objects, connect, create_logger
 
 HOST = os.getenv("BRAYNS_HOST", "localhost")
 PORT = int(os.getenv("BRAYNS_PORT", "5000"))

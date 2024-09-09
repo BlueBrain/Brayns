@@ -25,20 +25,6 @@
 
 namespace brayns
 {
-EnumInfo<JsonType> EnumReflector<JsonType>::reflect()
-{
-    auto builder = EnumBuilder<JsonType>();
-    builder.field("undefined", JsonType::Undefined);
-    builder.field("null", JsonType::Null);
-    builder.field("boolean", JsonType::Boolean);
-    builder.field("integer", JsonType::Integer);
-    builder.field("number", JsonType::Number);
-    builder.field("string", JsonType::String);
-    builder.field("array", JsonType::Array);
-    builder.field("object", JsonType::Object);
-    return builder.build();
-}
-
 JsonType getJsonType(const JsonValue &json)
 {
     if (json.isEmpty())

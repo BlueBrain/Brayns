@@ -21,29 +21,11 @@
 
 #pragma once
 
-#include <stdexcept>
-
-#include <brayns/core/utils/Math.h>
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/engine/Device.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-enum class ImageFormat
-{
-    Rgb8,
-    Rgba8,
-};
-
-enum class RowOrder
-{
-    TopDown,
-    BottomUp,
-};
-
-struct ImageView
-{
-    const void *data;
-    Size2 size;
-    ImageFormat format;
-    RowOrder rowOrder = RowOrder::BottomUp;
-};
+void addImageOperationEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
 }

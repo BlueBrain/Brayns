@@ -33,8 +33,8 @@ constexpr auto nullId = ObjectId(0);
 
 struct ObjectInfo
 {
-    ObjectId id;
     std::string type;
+    ObjectId id = nullId;
     JsonValue userData = {};
 };
 
@@ -44,13 +44,12 @@ struct JsonObjectReflector<ObjectInfo>
     static auto reflect()
     {
         auto builder = JsonBuilder<ObjectInfo>();
+        builder.field("type", [](auto &object) { return &object.type; })
+            .description("Object type, use 'get{type}' to query detailed information about the object");
         builder.field("id", [](auto &object) { return &object.id; })
             .description("Object ID (starts at 1, uses 0 for objects that are not in registry)");
-        builder.field("type", [](auto &object) { return &object.type; })
-            .description("Object type, use 'get-{type}' to query detailed information about the object");
-        builder.field("user_data", [](auto &object) { return &object.userData; })
-            .description("Data set by user (not used by Brayns)")
-            .required(false);
+        builder.field("userData", [](auto &object) { return &object.userData; })
+            .description("Data set by user (not used by Brayns)");
         return builder.build();
     }
 };
@@ -59,8 +58,6 @@ struct ObjectParams
 {
     ObjectId id;
 };
-
-using ObjectResult = ObjectParams;
 
 template<>
 struct JsonObjectReflector<ObjectParams>
@@ -73,22 +70,54 @@ struct JsonObjectReflector<ObjectParams>
     }
 };
 
+using ObjectResult = ObjectParams;
+
 template<ReflectedJson T>
 struct UpdateParams
 {
     ObjectId id;
-    T properties;
+    T settings;
 };
 
-template<typename T>
+template<ReflectedJson T>
 struct JsonObjectReflector<UpdateParams<T>>
 {
     static auto reflect()
     {
         auto builder = JsonBuilder<UpdateParams<T>>();
         builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to update");
-        builder.field("properties", [](auto &object) { return &object.properties; })
-            .description("New object properties to replace the old ones");
+        builder.field("settings", [](auto &object) { return &object.settings; })
+            .description("Settings to update the object");
+        return builder.build();
+    }
+};
+
+template<ReflectedJson Base, ReflectedJson Derived>
+struct ComposedParams
+{
+    Base base;
+    Derived derived;
+};
+
+template<ReflectedJson Base, ReflectedJson Derived>
+struct JsonObjectReflector<ComposedParams<Base, Derived>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<ComposedParams<Base, Derived>>();
+
+        if (!std::is_same_v<Base, NullJson>)
+        {
+            builder.field("base", [](auto &object) { return &object.base; })
+                .description("Base properties common to all derived objects (camera, renderer)");
+        }
+
+        if (!std::is_same_v<Derived, NullJson>)
+        {
+            builder.field("derived", [](auto &object) { return &object.derived; })
+                .description("Derived properties that are specific to the object type (perspective, scivis)");
+        }
+
         return builder.build();
     }
 };

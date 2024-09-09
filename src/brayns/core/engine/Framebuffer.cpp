@@ -21,18 +21,37 @@
 
 #include "Framebuffer.h"
 
+#include <cmath>
+#include <stdexcept>
+
 namespace brayns
 {
-const void *Framebuffer::map(FramebufferChannel channel)
+FramebufferData::FramebufferData(const void *data, OSPFrameBuffer handle):
+    _data(data, Deleter{handle})
 {
-    auto handle = getHandle();
-    return ospMapFrameBuffer(handle, static_cast<OSPFrameBufferChannel>(channel));
 }
 
-void Framebuffer::unmap(const void *data)
+const void *FramebufferData::get() const
+{
+    return _data.get();
+}
+
+void FramebufferData::Deleter::operator()(const void *data) const
+{
+    ospUnmapFrameBuffer(data, handle);
+}
+
+FramebufferData Framebuffer::map(FramebufferChannel channel)
 {
     auto handle = getHandle();
-    ospUnmapFrameBuffer(data, handle);
+    const auto *data = ospMapFrameBuffer(handle, static_cast<OSPFrameBufferChannel>(channel));
+
+    if (data == nullptr)
+    {
+        throw std::invalid_argument("Cannot map channel (probably not in framebuffer)");
+    }
+
+    return FramebufferData(data, handle);
 }
 
 void Framebuffer::resetAccumulation()
@@ -41,10 +60,24 @@ void Framebuffer::resetAccumulation()
     ospResetAccumulation(handle);
 }
 
-float Framebuffer::getVariance()
+std::optional<float> Framebuffer::getVariance()
 {
     auto handle = getHandle();
-    return ospGetVariance(handle);
+    auto variance = ospGetVariance(handle);
+
+    if (std::isfinite(variance))
+    {
+        return variance;
+    }
+
+    return std::nullopt;
+}
+
+void Framebuffer::update(const std::optional<Data<ImageOperation>> &operations)
+{
+    auto handle = getHandle();
+    setObjectParam(handle, "imageOperation", operations);
+    commitObject(handle);
 }
 
 Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings)
@@ -76,7 +109,7 @@ Framebuffer createFramebuffer(Device &device, const FramebufferSettings &setting
 
     setObjectParam(handle, "imageOperation", settings.operations);
 
-    commitObject(handle);
+    commitObject(device, handle);
 
     return framebuffer;
 }
