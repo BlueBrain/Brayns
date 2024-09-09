@@ -110,8 +110,6 @@ struct Transform
     Vector3 translation = {0.0F, 0.0F, 0.0F};
     Quaternion rotation = {1.0F, 0.0F, 0.0F, 0.0F};
     Vector3 scale = {1.0F, 1.0F, 1.0F};
-
-    auto operator<=>(const Transform &other) const = default;
 };
 
 inline Affine3 toAffine(const Transform &transform)

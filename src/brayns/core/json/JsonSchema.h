@@ -173,6 +173,6 @@ struct JsonSchema
     std::optional<std::size_t> maxItems = {};
     std::map<std::string, JsonSchema> properties = {};
 
-    auto operator<=>(const JsonSchema &) const = default;
+    bool operator==(const JsonSchema &) const = default;
 };
 }

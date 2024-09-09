@@ -17,7 +17,8 @@ Checks: -*
   -readability-identifier-length
   -readability-magic-numbers
 
-HeaderFilterRegex: "src/*"
+WarningsAsErrors: "*"
+HeaderFilterRegex: "src/.*"
 
 CheckOptions:
   - key: readability-identifier-naming.ClassCase
