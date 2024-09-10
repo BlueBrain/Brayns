@@ -27,7 +27,8 @@ This loader does not support loading binary data using 'upload-model'.
                     "scalar",
                     "orientation",
                     "flatmap",
-                    "layer_distance"
+                    "layer_distance",
+                    "vector"
                 ]
             }
         },
