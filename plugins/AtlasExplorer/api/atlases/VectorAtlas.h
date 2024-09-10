@@ -20,11 +20,21 @@
 
 #pragma once
 
-enum class VoxelType
+#include <api/Atlas.h>
+#include <api/DataMangler.h>
+
+class VectorAtlas final : public Atlas
 {
-    Scalar,
-    Orientation,
-    Flatmap,
-    LayerDistance,
-    Vector,
+public:
+    static inline const VoxelType type = VoxelType::Vector;
+
+public:
+    VectorAtlas(const brayns::Vector3ui &size, const brayns::Vector3f &spacing, const IDataMangler &dataMangler);
+
+    bool isValidVoxel(size_t linealIndex) const noexcept override;
+    VoxelType getVoxelType() const noexcept override;
+    const brayns::Vector3f &operator[](size_t index) const noexcept;
+
+private:
+    std::vector<brayns::Vector3f> _voxels;
 };

@@ -40,7 +40,9 @@ struct EnumReflector<VoxelType>
             {"scalar", VoxelType::Scalar},
             {"orientation", VoxelType::Orientation},
             {"flatmap", VoxelType::Flatmap},
-            {"layer_distance", VoxelType::LayerDistance}};
+            {"layer_distance", VoxelType::LayerDistance},
+            {"vector", VoxelType::Vector},
+        };
     }
 };
 

@@ -24,6 +24,7 @@
 #include "atlases/LayerDistanceAtlas.h"
 #include "atlases/OrientationAtlas.h"
 #include "atlases/ScalarAtlas.h"
+#include "atlases/VectorAtlas.h"
 
 namespace
 {
@@ -60,6 +61,7 @@ AtlasFactory AtlasFactory::createDefault()
     builder.registerType<LayerDistanceAtlas>();
     builder.registerType<OrientationAtlas>();
     builder.registerType<ScalarAtlas>();
+    builder.registerType<VectorAtlas>();
     return AtlasFactory(std::move(builder.factories));
 }
 

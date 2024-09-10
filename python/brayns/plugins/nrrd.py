@@ -35,6 +35,7 @@ class VoxelType(Enum):
     SCALAR = "scalar"
     ORIENTATION = "orientation"
     FLATMAP = "flatmap"
+    VECTOR = "vector"
 
 
 @dataclass

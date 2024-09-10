@@ -199,6 +199,18 @@ class AtlasOrientationField(AtlasUsecase):
         return {}
 
 
+class AtlasVectorField(AtlasUsecase):
+    """Display the volume data as an orientation field."""
+
+    @classmethod
+    @property
+    def name(cls) -> str:
+        return "Vector field"
+
+    def get_properties(self) -> dict[str, Any]:
+        return {}
+
+
 class AtlasShellOutline(AtlasUsecase):
     """Display the volume using its shell outline.
 

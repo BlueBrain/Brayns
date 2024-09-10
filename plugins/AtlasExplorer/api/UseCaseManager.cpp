@@ -27,6 +27,7 @@
 #include <api/usecases/LayerDistance.h>
 #include <api/usecases/OrientationField.h>
 #include <api/usecases/OutlineShell.h>
+#include <api/usecases/VectorField.h>
 
 UseCaseManager UseCaseManager::createDefault()
 {
@@ -36,6 +37,7 @@ UseCaseManager UseCaseManager::createDefault()
     useCases.push_back(std::make_unique<HighlightColumn>());
     useCases.push_back(std::make_unique<LayerDistance>());
     useCases.push_back(std::make_unique<OrientationField>());
+    useCases.push_back(std::make_unique<VectorField>());
     useCases.push_back(std::make_unique<OutlineShell>());
     useCases.push_back(std::make_unique<FlatmapAreas>());
     return UseCaseManager(std::move(useCases));
