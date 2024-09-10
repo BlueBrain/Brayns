@@ -18,5 +18,5 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-VERSION = "3.9.0"
+VERSION = "3.10.0"
 """Version tag of brayns Python package (major.minor.patch)."""
