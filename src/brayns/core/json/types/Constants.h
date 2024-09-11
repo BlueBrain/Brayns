@@ -55,7 +55,7 @@ struct JsonReflector<T>
 
     static void deserialize(const JsonValue &json, T &)
     {
-        if (json != T::value)
+        if (deserializeJsonAs<Type>(json) != T::value)
         {
             throw JsonException("Invalid const");
         }

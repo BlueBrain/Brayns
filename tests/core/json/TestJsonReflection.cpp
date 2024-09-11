@@ -172,6 +172,7 @@ TEST_CASE("Const")
     CHECK_EQ(deserializeJsonAs<JsonFalse>(false), JsonFalse());
     CHECK_EQ(serializeToJson(JsonFalse()), false);
     CHECK_THROWS_AS(deserializeJsonAs<JsonFalse>(1), JsonException);
+    CHECK_THROWS_AS(deserializeJsonAs<JsonFalse>(true), JsonException);
 }
 
 TEST_CASE("Enum")
