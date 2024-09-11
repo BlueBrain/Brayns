@@ -27,43 +27,58 @@
 
 namespace brayns
 {
-struct JsonConstant
-{
-    auto operator<=>(const JsonConstant &) const = default;
-};
+template<typename T>
+struct JsonConstReflector;
 
 template<typename T>
-concept ValidJsonConstant = std::derived_from<T, JsonConstant> && JsonPrimitive<decltype(T::value)>;
+concept ReflectedJsonConst = requires {
+    { JsonConstReflector<T>::reflect() } -> ReflectedJson;
+};
 
-template<ValidJsonConstant T>
+template<ReflectedJsonConst T>
+auto getJsonConst()
+{
+    return JsonConstReflector<T>::reflect();
+}
+
+template<ReflectedJsonConst T>
 struct JsonReflector<T>
 {
-    using Type = decltype(T::value);
+    static inline const auto value = getJsonConst<T>();
 
     static JsonSchema getSchema()
     {
         return {
-            .type = jsonTypeOf<Type>,
-            .constant = T::value,
+            .type = jsonTypeOf<decltype(value)>,
+            .constant = value,
         };
     }
 
     static void serialize(const T &, JsonValue &json)
     {
-        return serializeToJson(T::value, json);
+        return serializeToJson(value, json);
     }
 
     static void deserialize(const JsonValue &json, T &)
     {
-        if (deserializeJsonAs<Type>(json) != T::value)
+        if (deserializeJsonAs<decltype(value)>(json) != value)
         {
             throw JsonException("Invalid const");
         }
     }
 };
 
-struct JsonFalse : JsonConstant
+struct JsonFalse
 {
-    static constexpr auto value = false;
+    auto operator<=>(const JsonFalse &) const = default;
+};
+
+template<>
+struct JsonConstReflector<JsonFalse>
+{
+    static bool reflect()
+    {
+        return false;
+    }
 };
 }

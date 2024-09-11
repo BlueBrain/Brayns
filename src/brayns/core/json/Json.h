@@ -27,7 +27,7 @@
 #include "JsonValue.h"
 
 #include "types/Arrays.h"
-#include "types/Constants.h"
+#include "types/Consts.h"
 #include "types/Enums.h"
 #include "types/Maps.h"
 #include "types/Math.h"

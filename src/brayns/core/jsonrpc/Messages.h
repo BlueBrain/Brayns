@@ -48,6 +48,19 @@ inline std::string toString(const std::optional<JsonRpcId> &id)
     return id ? toString(*id) : "null";
 }
 
+struct JsonRpcVersion
+{
+};
+
+template<>
+struct JsonConstReflector<JsonRpcVersion>
+{
+    static std::string reflect()
+    {
+        return "2.0";
+    }
+};
+
 struct Payload
 {
     JsonValue json;
@@ -59,6 +72,7 @@ struct JsonRpcRequest
     std::string method;
     Payload params;
     std::optional<JsonRpcId> id = {};
+    JsonRpcVersion jsonrpc = {};
 };
 
 template<>
@@ -67,7 +81,7 @@ struct JsonObjectReflector<JsonRpcRequest>
     static auto reflect()
     {
         auto builder = JsonBuilder<JsonRpcRequest>();
-        builder.constant("jsonrpc", "2.0");
+        builder.field("jsonrpc", [](auto &object) { return &object.jsonrpc; });
         builder.field("method", [](auto &object) { return &object.method; });
         builder.field("params", [](auto &object) { return &object.params.json; }).required(false);
         builder.field("id", [](auto &object) { return &object.id; });
@@ -79,6 +93,7 @@ struct JsonRpcSuccessResponse
 {
     JsonRpcId id;
     Payload result;
+    JsonRpcVersion jsonrpc = {};
 };
 
 template<>
@@ -87,7 +102,7 @@ struct JsonObjectReflector<JsonRpcSuccessResponse>
     static auto reflect()
     {
         auto builder = JsonBuilder<JsonRpcSuccessResponse>();
-        builder.constant("jsonrpc", "2.0");
+        builder.field("jsonrpc", [](auto &object) { return &object.jsonrpc; });
         builder.field("id", [](auto &object) { return &object.id; });
         builder.field("result", [](auto &object) { return &object.result.json; });
         return builder.build();
@@ -118,6 +133,7 @@ struct JsonRpcErrorResponse
 {
     JsonRpcError error;
     std::optional<JsonRpcId> id = {};
+    JsonRpcVersion jsonrpc = {};
 };
 
 template<>
@@ -126,7 +142,7 @@ struct JsonObjectReflector<JsonRpcErrorResponse>
     static auto reflect()
     {
         auto builder = JsonBuilder<JsonRpcErrorResponse>();
-        builder.constant("jsonrpc", "2.0");
+        builder.field("jsonrpc", [](auto &object) { return &object.jsonrpc; });
         builder.field("error", [](auto &object) { return &object.error; });
         builder.field("id", [](auto &object) { return &object.id; });
         return builder.build();

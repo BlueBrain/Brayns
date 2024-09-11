@@ -272,39 +272,6 @@ public:
         return JsonFieldBuilder(_info.fields.back().schema);
     }
 
-    template<ReflectedJson U>
-    JsonFieldBuilder constant(std::string name, const U &value)
-    {
-        auto schema = getJsonSchema<U>();
-        schema.constant = serializeToJson(value);
-
-        auto serializeField = [=](const auto &, auto &json) { serializeToJson(value, json); };
-
-        auto deserializeField = [=](const auto &json, auto &)
-        {
-            auto item = deserializeJsonAs<U>(json);
-
-            if (item != value)
-            {
-                throw JsonException("Invalid const field");
-            }
-        };
-
-        _info.fields.push_back({
-            .name = std::move(name),
-            .schema = std::move(schema),
-            .serialize = std::move(serializeField),
-            .deserialize = std::move(deserializeField),
-        });
-
-        return JsonFieldBuilder(_info.fields.back().schema);
-    }
-
-    JsonFieldBuilder constant(std::string name, const char *value)
-    {
-        return constant(std::move(name), std::string(value));
-    }
-
     void removeDefaultValues()
     {
         for (auto &field : _info.fields)
