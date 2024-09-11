@@ -108,6 +108,24 @@ struct JsonObjectReflector<Updatable>
         return builder.build();
     }
 };
+
+struct Extended
+{
+    Updatable child;
+    std::string additional;
+};
+
+template<>
+struct JsonObjectReflector<Extended>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Extended>();
+        builder.extend([](auto &object) { return &object.child; });
+        builder.field("additional", [](auto &object) { return &object.additional; });
+        return builder.build();
+    }
+};
 }
 
 constexpr auto i32Min = std::numeric_limits<int>::lowest();
@@ -375,4 +393,11 @@ TEST_CASE("Empty field")
     deserializeJson(json, object);
 
     CHECK_EQ(object.value, 1);
+}
+
+TEST_CASE("Extension")
+{
+    auto schema = getJsonSchema<Extended>();
+
+    CHECK_EQ(schema.properties.size(), 2);
 }

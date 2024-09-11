@@ -50,6 +50,43 @@ struct JsonObjectInfo
 };
 
 template<typename T>
+struct JsonObjectReflector;
+
+template<typename T>
+concept ReflectedJsonObject = requires {
+    { JsonObjectReflector<T>::reflect() } -> std::same_as<JsonObjectInfo<T>>;
+};
+
+template<ReflectedJsonObject T>
+const JsonObjectInfo<T> &reflectJsonObject()
+{
+    static const auto info = JsonObjectReflector<T>::reflect();
+    return info;
+}
+
+template<ReflectedJsonObject T>
+struct JsonReflector<T>
+{
+    static JsonSchema getSchema()
+    {
+        const auto &info = reflectJsonObject<T>();
+        return getJsonObjectSchema(info);
+    }
+
+    static void serialize(const T &value, JsonValue &json)
+    {
+        const auto &info = reflectJsonObject<T>();
+        serializeJsonObject(info, value, json);
+    }
+
+    static void deserialize(const JsonValue &json, T &value)
+    {
+        const auto &info = reflectJsonObject<T>();
+        deserializeJsonObject(info, json, value);
+    }
+};
+
+template<typename T>
 JsonSchema getJsonObjectSchema(const JsonObjectInfo<T> &info)
 {
     auto schema = JsonSchema{
@@ -106,6 +143,80 @@ void deserializeJsonObject(const JsonObjectInfo<T> &info, const JsonValue &json,
     }
 }
 
+template<typename T>
+concept PtrToReflectedJson = std::is_pointer_v<T> && ReflectedJson<std::decay_t<std::remove_pointer_t<T>>>;
+
+template<typename T>
+concept PtrToMutableReflectedJson = PtrToReflectedJson<T> && !std::is_const_v<std::remove_pointer_t<T>>;
+
+template<typename T, typename Parent>
+concept JsonFieldGetter = requires(T getter, Parent &object) {
+    { getter(std::as_const(object)) } -> PtrToReflectedJson;
+    { getter(object) } -> PtrToMutableReflectedJson;
+};
+
+template<typename Parent>
+JsonField<Parent> createJsonField(std::string name, JsonFieldGetter<Parent> auto getFieldPtr)
+{
+    using Child = std::decay_t<decltype(*getFieldPtr(std::declval<Parent &>()))>;
+
+    auto serializeField = [=](const auto &object, auto &json)
+    {
+        const auto &value = *getFieldPtr(object);
+        serializeToJson(value, json);
+    };
+
+    auto deserializeField = [=](const auto &json, auto &object)
+    {
+        auto &value = *getFieldPtr(object);
+        deserializeJson(json, value);
+    };
+
+    return {
+        .name = std::move(name),
+        .schema = getJsonSchema<Child>(),
+        .serialize = std::move(serializeField),
+        .deserialize = std::move(deserializeField),
+    };
+}
+
+template<typename T>
+concept PtrToReflectedJsonObject = std::is_pointer_v<T> && ReflectedJsonObject<std::decay_t<std::remove_pointer_t<T>>>;
+
+template<typename T>
+concept PtrToMutableReflectedJsonObject = PtrToReflectedJsonObject<T> && !std::is_const_v<std::remove_pointer_t<T>>;
+
+template<typename T, typename Parent>
+concept JsonChildGetter = requires(T callable, Parent parent) {
+    { callable(std::as_const(parent)) } -> PtrToReflectedJsonObject;
+    { callable(parent) } -> PtrToMutableReflectedJsonObject;
+};
+
+template<typename Parent, typename Child>
+JsonField<Parent> convertJsonField(const JsonField<Child> &child, JsonChildGetter<Parent> auto getChildPtr)
+{
+    auto childSerialize = child.serialize;
+    auto parentSerialize = [=](const auto &object, auto &json)
+    {
+        const auto &childObject = *getChildPtr(object);
+        childSerialize(childObject, json);
+    };
+
+    auto childDeserialize = child.deserialize;
+    auto parentDeserialize = [=](const auto &json, auto &object)
+    {
+        auto &childObject = *getChildPtr(object);
+        childDeserialize(json, childObject);
+    };
+
+    return {
+        .name = child.name,
+        .schema = child.schema,
+        .serialize = std::move(parentSerialize),
+        .deserialize = std::move(parentDeserialize),
+    };
+}
+
 inline void removeJsonObjectDefaults(std::map<std::string, JsonSchema> &properties)
 {
     for (auto &[key, field] : properties)
@@ -114,43 +225,6 @@ inline void removeJsonObjectDefaults(std::map<std::string, JsonSchema> &properti
         removeJsonObjectDefaults(field.properties);
     }
 }
-
-template<typename T>
-struct JsonObjectReflector;
-
-template<typename T>
-concept ReflectedJsonObject = requires {
-    { JsonObjectReflector<T>::reflect() } -> std::same_as<JsonObjectInfo<T>>;
-};
-
-template<ReflectedJsonObject T>
-const JsonObjectInfo<T> &reflectJsonObject()
-{
-    static const auto info = JsonObjectReflector<T>::reflect();
-    return info;
-}
-
-template<ReflectedJsonObject T>
-struct JsonReflector<T>
-{
-    static JsonSchema getSchema()
-    {
-        const auto &info = reflectJsonObject<T>();
-        return getJsonObjectSchema(info);
-    }
-
-    static void serialize(const T &value, JsonValue &json)
-    {
-        const auto &info = reflectJsonObject<T>();
-        serializeJsonObject(info, value, json);
-    }
-
-    static void deserialize(const JsonValue &json, T &value)
-    {
-        const auto &info = reflectJsonObject<T>();
-        deserializeJsonObject(info, json, value);
-    }
-};
 
 class JsonFieldBuilder
 {
@@ -226,18 +300,6 @@ private:
 };
 
 template<typename T>
-concept PtrToReflectedJson = std::is_pointer_v<T> && ReflectedJson<std::remove_const_t<std::remove_pointer_t<T>>>;
-
-template<typename T>
-concept PtrToMutableReflectedJson = PtrToReflectedJson<T> && !std::is_const_v<std::remove_pointer_t<T>>;
-
-template<typename T, typename Parent>
-concept JsonFieldGetter = requires(T getter, Parent &object) {
-    { getter(std::as_const(object)) } -> PtrToReflectedJson;
-    { getter(object) } -> PtrToMutableReflectedJson;
-};
-
-template<typename T>
 class JsonBuilder
 {
 public:
@@ -248,28 +310,22 @@ public:
 
     JsonFieldBuilder field(std::string name, JsonFieldGetter<T> auto getFieldPtr)
     {
-        using FieldType = std::decay_t<decltype(*getFieldPtr(std::declval<const T &>()))>;
-
-        auto serializeField = [=](const auto &object, auto &json)
-        {
-            const auto &value = *getFieldPtr(object);
-            serializeToJson(value, json);
-        };
-
-        auto deserializeField = [=](const auto &json, auto &object)
-        {
-            auto &value = *getFieldPtr(object);
-            deserializeJson(json, value);
-        };
-
-        _info.fields.push_back({
-            .name = std::move(name),
-            .schema = getJsonSchema<FieldType>(),
-            .serialize = std::move(serializeField),
-            .deserialize = std::move(deserializeField),
-        });
-
+        auto field = createJsonField<T>(std::move(name), std::move(getFieldPtr));
+        _info.fields.push_back(std::move(field));
         return JsonFieldBuilder(_info.fields.back().schema);
+    }
+
+    void extend(JsonChildGetter<T> auto getChildPtr)
+    {
+        using Child = std::decay_t<decltype(*getChildPtr(std::declval<T &>()))>;
+
+        const auto &child = reflectJsonObject<Child>();
+
+        for (const auto &field : child.fields)
+        {
+            auto parentField = convertJsonField<T>(field, std::move(getChildPtr));
+            _info.fields.push_back(std::move(parentField));
+        }
     }
 
     void removeDefaultValues()
