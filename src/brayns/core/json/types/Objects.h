@@ -309,8 +309,8 @@ public:
     {
         for (auto &field : _info.fields)
         {
-            field.defaultValue = std::nullopt;
-            removeJsonObjectDefaults(field.properties);
+            field.schema.defaultValue = std::nullopt;
+            removeJsonObjectDefaults(field.schema.properties);
         }
     }
 

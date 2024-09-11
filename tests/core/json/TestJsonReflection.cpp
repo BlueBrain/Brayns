@@ -92,6 +92,23 @@ struct JsonObjectReflector<SomeObject>
         return builder.build();
     }
 };
+
+struct Updatable
+{
+    int value;
+};
+
+template<>
+struct JsonObjectReflector<Updatable>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Updatable>();
+        builder.field("value", [](auto &object) { return &object.value; }).defaultValue(0);
+        builder.removeDefaultValues();
+        return builder.build();
+    }
+};
 }
 
 constexpr auto i32Min = std::numeric_limits<int>::lowest();
@@ -349,4 +366,15 @@ TEST_CASE("Object")
     object->set("default", "test");
 
     CHECK_EQ(stringifyToJson(test), stringifyToJson(json));
+}
+
+TEST_CASE("Empty field")
+{
+    auto object = Updatable{1};
+
+    auto json = JsonValue(createJsonObject());
+
+    deserializeJson(json, object);
+
+    CHECK_EQ(object.value, 1);
 }
