@@ -22,57 +22,69 @@
 #pragma once
 
 #include <concepts>
+#include <utility>
 
 #include "JsonSchema.h"
 #include "JsonValue.h"
 
 namespace brayns
 {
+
 template<typename T>
 struct JsonReflector;
 
 template<typename T>
-concept HasJsonSchema = std::same_as<JsonSchema, decltype(JsonReflector<T>::getSchema())>;
+concept ReflectedJson = requires(T value, JsonValue json) {
+    { JsonReflector<T>::getSchema() } -> std::same_as<JsonSchema>;
+    { JsonReflector<T>::serialize(std::as_const(value), json) };
+    { JsonReflector<T>::deserialize(std::as_const(json), value) };
+};
 
-template<typename T>
-concept JsonSerializable = std::same_as<JsonValue, decltype(JsonReflector<T>::serialize(std::declval<T>()))>;
-
-template<typename T>
-concept JsonDeserializable = std::same_as<T, decltype(JsonReflector<T>::deserialize(std::declval<JsonValue>()))>;
-
-template<typename T>
-concept ReflectedJson = HasJsonSchema<T> && JsonSerializable<T> && JsonDeserializable<T>;
-
-template<HasJsonSchema T>
-const JsonSchema &getJsonSchema()
+template<ReflectedJson T>
+JsonSchema getJsonSchema()
 {
-    static const auto schema = JsonReflector<T>::getSchema();
-    return schema;
+    return JsonReflector<T>::getSchema();
 }
 
-template<JsonSerializable T>
+template<ReflectedJson T>
+void serializeToJson(const T &value, JsonValue &json)
+{
+    return JsonReflector<T>::serialize(value, json);
+}
+
+template<ReflectedJson T>
 JsonValue serializeToJson(const T &value)
 {
-    return JsonReflector<T>::serialize(value);
+    auto json = JsonValue();
+    serializeToJson(value, json);
+    return json;
 }
 
-template<JsonDeserializable T>
-T deserializeAs(const JsonValue &json)
+template<ReflectedJson T>
+void deserializeJson(const JsonValue &json, T &value)
 {
-    return JsonReflector<T>::deserialize(json);
+    return JsonReflector<T>::deserialize(json, value);
 }
 
-template<JsonSerializable T>
+template<ReflectedJson T>
+T deserializeJsonAs(const JsonValue &json)
+{
+    auto value = T{};
+    deserializeJson(json, value);
+    return value;
+}
+
+template<ReflectedJson T>
 std::string stringifyToJson(const T &value)
 {
     auto json = serializeToJson(value);
     return stringify(json);
 }
 
-template<JsonDeserializable T>
+template<ReflectedJson T>
 T parseJsonAs(const std::string &data)
 {
     auto json = parseJson(data);
-    return deserializeAs<T>(json);
+    return deserializeJsonAs<T>(json);
 }
 }

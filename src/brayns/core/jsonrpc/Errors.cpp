@@ -26,7 +26,12 @@ namespace brayns
 template<>
 struct JsonReflector<JsonSchemaError>
 {
-    static JsonValue serialize(const JsonSchemaError &value)
+    static JsonSchema getSchema()
+    {
+        throw std::invalid_argument("Not implemented");
+    }
+
+    static void serialize(const JsonSchemaError &value, JsonValue &json)
     {
         auto object = createJsonObject();
 
@@ -36,7 +41,12 @@ struct JsonReflector<JsonSchemaError>
         auto error = toString(value.error);
         object->set("error", error);
 
-        return object;
+        json = object;
+    }
+
+    static void deserialize(const JsonValue &, JsonSchemaError &)
+    {
+        throw std::invalid_argument("Not implemented");
     }
 };
 

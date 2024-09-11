@@ -80,7 +80,7 @@ struct PayloadReflector<T>
             throw InvalidParams("This endpoint does not accept additional binary data");
         }
 
-        return deserializeAs<T>(params.json);
+        return deserializeJsonAs<T>(params.json);
     }
 };
 
@@ -109,7 +109,7 @@ struct PayloadReflector<Params<T>>
 
     static Params<T> deserialize(Payload params)
     {
-        return {deserializeAs<T>(params.json), std::move(params.binary)};
+        return {deserializeJsonAs<T>(params.json), std::move(params.binary)};
     }
 };
 }

@@ -29,7 +29,7 @@ template<>
 struct JsonReflector<JsonSchema>
 {
     static JsonSchema getSchema();
-    static JsonValue serialize(const JsonSchema &schema);
-    static JsonSchema deserialize(const JsonValue &json);
+    static void serialize(const JsonSchema &schema, JsonValue &json);
+    static void deserialize(const JsonValue &json, JsonSchema &schema);
 };
 }

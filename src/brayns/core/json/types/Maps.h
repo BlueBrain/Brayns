@@ -42,26 +42,28 @@ struct JsonMapReflector
         };
     }
 
-    static JsonValue serialize(const T &value)
+    static void serialize(const T &value, JsonValue &json)
     {
         auto object = createJsonObject();
+
         for (const auto &[key, item] : value)
         {
             auto jsonItem = serializeToJson(item);
             object->set(key, jsonItem);
         }
-        return object;
+
+        json = object;
     }
 
-    static T deserialize(const JsonValue &json)
+    static void deserialize(const JsonValue &json, T &value)
     {
         const auto &object = getObject(json);
-        auto value = T();
+        value.clear();
+
         for (const auto &[key, jsonItem] : object)
         {
-            value[key] = deserializeAs<ValueType>(jsonItem);
+            value[key] = deserializeJsonAs<ValueType>(jsonItem);
         }
-        return value;
     }
 };
 

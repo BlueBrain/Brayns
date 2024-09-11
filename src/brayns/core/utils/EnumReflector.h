@@ -39,66 +39,36 @@ struct EnumField
 {
     std::string name;
     T value;
-    std::string description;
+    std::string description = {};
 };
 
 template<typename T>
-class EnumInfo
+struct EnumInfo
 {
-public:
-    explicit EnumInfo(std::vector<EnumField<T>> fields):
-        _fields(std::move(fields))
-    {
-    }
-
-    const std::vector<EnumField<T>> &getFields() const
-    {
-        return _fields;
-    }
-
-    const EnumField<T> *findFieldByName(std::string_view name) const
-    {
-        auto sameName = [&](const auto &field) { return field.name == name; };
-        auto i = std::ranges::find_if(_fields, sameName);
-        return i == _fields.end() ? nullptr : &*i;
-    }
-
-    const EnumField<T> *findFieldByValue(T value) const
-    {
-        auto sameValue = [&](const auto &field) { return field.value == value; };
-        auto i = std::ranges::find_if(_fields, sameValue);
-        return i == _fields.end() ? nullptr : &*i;
-    }
-
-    const EnumField<T> &getFieldByName(std::string_view name) const
-    {
-        const auto *field = findFieldByName(name);
-        if (field)
-        {
-            return *field;
-        }
-        throw std::invalid_argument(fmt::format("Invalid enum name: '{}'", name));
-    }
-
-    const EnumField<T> &getFieldByValue(T value) const
-    {
-        const auto *field = findFieldByValue(value);
-        if (field)
-        {
-            return *field;
-        }
-        throw std::invalid_argument(fmt::format("Invalid enum value: {}", std::underlying_type_t<T>(value)));
-    }
-
-private:
-    std::vector<EnumField<T>> _fields;
+    std::vector<EnumField<T>> fields;
 };
+
+template<typename T>
+const EnumField<T> *findEnumByName(const EnumInfo<T> &info, std::string_view name)
+{
+    auto i = std::ranges::find_if(info.fields, [&](const auto &field) { return field.name == name; });
+    return i == info.fields.end() ? nullptr : &*i;
+}
+
+template<typename T>
+const EnumField<T> *findEnumByValue(const EnumInfo<T> &info, T value)
+{
+    auto i = std::ranges::find_if(info.fields, [&](const auto &field) { return field.value == value; });
+    return i == info.fields.end() ? nullptr : &*i;
+}
 
 template<typename T>
 struct EnumReflector;
 
 template<typename T>
-concept ReflectedEnum = std::same_as<EnumInfo<T>, decltype(EnumReflector<T>::reflect())>;
+concept ReflectedEnum = requires {
+    { EnumReflector<T>::reflect() } -> std::same_as<EnumInfo<T>>;
+};
 
 template<ReflectedEnum T>
 const EnumInfo<T> &reflectEnum()
@@ -111,23 +81,35 @@ template<ReflectedEnum T>
 const std::vector<EnumField<T>> &getEnumFields()
 {
     const auto &info = reflectEnum<T>();
-    return info.getFields();
+    return info.fields;
 }
 
 template<ReflectedEnum T>
 const std::string &getEnumName(T value)
 {
     const auto &info = reflectEnum<T>();
-    const auto &field = info.getFieldByValue(value);
-    return field.name;
+    const auto *field = findEnumByValue(info, value);
+
+    if (field != nullptr)
+    {
+        return field->name;
+    }
+
+    throw std::invalid_argument(fmt::format("Invalid enum value: {}", std::underlying_type_t<T>(value)));
 }
 
 template<ReflectedEnum T>
 T getEnumValue(std::string_view name)
 {
     const auto &info = reflectEnum<T>();
-    const auto &field = info.getFieldByName(name);
-    return field.value;
+    const auto *field = findEnumByName(info, name);
+
+    if (field != nullptr)
+    {
+        return field->value;
+    }
+
+    throw std::invalid_argument(fmt::format("Invalid enum name: '{}'", name));
 }
 
 template<typename T>
@@ -155,10 +137,8 @@ class EnumBuilder
 public:
     EnumFieldBuilder<T> field(std::string name, T value)
     {
-        auto &emplaced = _fields.emplace_back();
-        emplaced.name = std::move(name);
-        emplaced.value = value;
-        return EnumFieldBuilder<T>(emplaced);
+        _fields.push_back({std::move(name), value});
+        return EnumFieldBuilder<T>(_fields.back());
     }
 
     EnumInfo<T> build()

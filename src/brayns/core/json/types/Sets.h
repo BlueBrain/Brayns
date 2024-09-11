@@ -42,7 +42,7 @@ struct JsonSetReflector
         };
     }
 
-    static JsonValue serialize(const T &value)
+    static void serialize(const T &value, JsonValue &json)
     {
         auto array = createJsonArray();
 
@@ -52,18 +52,17 @@ struct JsonSetReflector
             array->add(jsonItem);
         }
 
-        return array;
+        json = array;
     }
 
-    static T deserialize(const JsonValue &json)
+    static void deserialize(const JsonValue &json, T &value)
     {
         const auto &array = getArray(json);
-
-        auto value = T();
+        value.clear();
 
         for (const auto &jsonItem : array)
         {
-            auto item = deserializeAs<ValueType>(jsonItem);
+            auto item = deserializeJsonAs<ValueType>(jsonItem);
             auto [i, inserted] = value.insert(std::move(item));
 
             if (!inserted)
@@ -71,8 +70,6 @@ struct JsonSetReflector
                 throw JsonException("Duplicated item in set");
             }
         }
-
-        return value;
     }
 };
 

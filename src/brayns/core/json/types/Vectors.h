@@ -44,7 +44,7 @@ struct JsonMathReflector
         };
     }
 
-    static JsonValue serialize(const T &value)
+    static void serialize(const T &value, JsonValue &json)
     {
         auto array = createJsonArray();
 
@@ -55,13 +55,13 @@ struct JsonMathReflector
 
             array->add(jsonItem);
         }
-        return array;
+
+        json = array;
     }
 
-    static T deserialize(const JsonValue &json)
+    static void deserialize(const JsonValue &json, T &value)
     {
         const auto &array = getArray(json);
-        auto value = T();
 
         if (array.size() != itemCount)
         {
@@ -73,12 +73,9 @@ struct JsonMathReflector
         for (const auto &jsonItem : array)
         {
             auto &item = getItem(value, i);
-
-            item = deserializeAs<ValueType>(jsonItem);
-
+            deserializeJson(jsonItem, item);
             ++i;
         }
-        return value;
     }
 
 private:

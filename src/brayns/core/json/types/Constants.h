@@ -42,22 +42,23 @@ struct JsonReflector<T>
 
     static JsonSchema getSchema()
     {
-        return {.type = jsonTypeOf<Type>, .constant = T::value};
+        return {
+            .type = jsonTypeOf<Type>,
+            .constant = T::value,
+        };
     }
 
-    static JsonValue serialize(const T &)
+    static void serialize(const T &, JsonValue &json)
     {
-        return serializeToJson(T::value);
+        return serializeToJson(T::value, json);
     }
 
-    static T deserialize(const JsonValue &json)
+    static void deserialize(const JsonValue &json, T &)
     {
         if (json != T::value)
         {
             throw JsonException("Invalid const");
         }
-
-        return {};
     }
 };
 

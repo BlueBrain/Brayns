@@ -131,24 +131,25 @@ JsonSchema JsonReflector<JsonSchema>::getSchema()
     };
 }
 
-JsonValue JsonReflector<JsonSchema>::serialize(const JsonSchema &schema)
+void JsonReflector<JsonSchema>::serialize(const JsonSchema &schema, JsonValue &json)
 {
     auto object = createJsonObject();
+    json = object;
 
     if (!schema.description.empty())
     {
         set(*object, "description", schema.description);
     }
 
-    if (!schema.required)
+    if (schema.defaultValue)
     {
-        set(*object, "default", schema.defaultValue);
+        set(*object, "default", *schema.defaultValue);
     }
 
     if (!schema.oneOf.empty())
     {
         set(*object, "oneOf", schema.oneOf);
-        return object;
+        return;
     }
 
     if (schema.type != JsonType::Undefined)
@@ -159,38 +160,38 @@ JsonValue JsonReflector<JsonSchema>::serialize(const JsonSchema &schema)
     if (!schema.constant.isEmpty())
     {
         set(*object, "const", schema.constant);
-        return object;
+        return;
     }
 
     if (isNumeric(schema.type))
     {
         serializeNumber(*object, schema);
-        return object;
+        return;
     }
 
     if (schema.type == JsonType::Array)
     {
         serializeArray(*object, schema);
-        return object;
+        return;
     }
 
     if (schema.type != JsonType::Object)
     {
-        return object;
+        return;
     }
 
     if (!schema.items.empty())
     {
         serializeMap(*object, schema);
-        return object;
+        return;
     }
 
     serializeObject(*object, schema);
 
-    return object;
+    return;
 }
 
-JsonSchema JsonReflector<JsonSchema>::deserialize(const JsonValue &)
+void JsonReflector<JsonSchema>::deserialize(const JsonValue &, JsonSchema &)
 {
     throw std::runtime_error("Not implemented");
 }

@@ -52,7 +52,7 @@ JsonRpcRequest parseTextJsonRpcRequest(const std::string &text)
         throw InvalidRequest("Invalid request schema", errors);
     }
 
-    return deserializeAs<JsonRpcRequest>(json);
+    return deserializeJsonAs<JsonRpcRequest>(json);
 }
 
 JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary)

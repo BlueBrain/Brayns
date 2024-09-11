@@ -51,18 +51,18 @@ struct JsonReflector<T>
         return {.oneOf = std::move(oneOf)};
     }
 
-    static JsonValue serialize(const T &value)
+    static void serialize(const T &value, JsonValue &json)
     {
-        return getEnumName(value);
+        json = getEnumName(value);
     }
 
-    static T deserialize(const JsonValue &json)
+    static void deserialize(const JsonValue &json, T &value)
     {
-        auto name = deserializeAs<std::string>(json);
+        auto name = deserializeJsonAs<std::string>(json);
 
         try
         {
-            return getEnumValue<T>(name);
+            value = getEnumValue<T>(name);
         }
         catch (const std::exception &e)
         {

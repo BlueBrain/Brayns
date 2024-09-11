@@ -34,27 +34,30 @@ struct JsonReflector<std::optional<T>>
     static JsonSchema getSchema()
     {
         return {
-            .required = false,
             .oneOf = {getJsonSchema<T>(), getJsonSchema<NullJson>()},
         };
     }
 
-    static JsonValue serialize(const std::optional<T> &value)
+    static void serialize(const std::optional<T> &value, JsonValue &json)
     {
         if (!value)
         {
-            return {};
+            json.clear();
+            return;
         }
-        return serializeToJson<T>(*value);
+
+        json = serializeToJson<T>(*value);
     }
 
-    static std::optional<T> deserialize(const JsonValue &json)
+    static void deserialize(const JsonValue &json, std::optional<T> &value)
     {
         if (json.isEmpty())
         {
-            return std::nullopt;
+            value = std::nullopt;
+            return;
         }
-        return deserializeAs<T>(json);
+
+        value = deserializeJsonAs<T>(json);
     }
 };
 
@@ -68,23 +71,23 @@ struct JsonReflector<std::variant<Ts...>>
         };
     }
 
-    static JsonValue serialize(const std::variant<Ts...> &value)
+    static void serialize(const std::variant<Ts...> &value, JsonValue &json)
     {
-        return std::visit([](const auto &item) { return serializeToJson(item); }, value);
+        std::visit([&](const auto &item) { serializeToJson(item, json); }, value);
     }
 
-    static std::variant<Ts...> deserialize(const JsonValue &json)
+    static void deserialize(const JsonValue &json, std::variant<Ts...> &value)
     {
-        return tryDeserialize<Ts...>(json);
+        tryDeserialize<Ts...>(json, value);
     }
 
 private:
     template<typename U, typename... Us>
-    static std::variant<Ts...> tryDeserialize(const JsonValue &json)
+    static void tryDeserialize(const JsonValue &json, std::variant<Ts...> &value)
     {
         try
         {
-            return deserializeAs<U>(json);
+            value = deserializeJsonAs<U>(json);
         }
         catch (...)
         {
@@ -94,7 +97,7 @@ private:
             }
             else
             {
-                return tryDeserialize<Us...>(json);
+                return tryDeserialize<Us...>(json, value);
             }
         }
     }

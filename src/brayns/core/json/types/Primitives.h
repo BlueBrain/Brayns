@@ -49,33 +49,33 @@ struct JsonReflector<T>
         return schema;
     }
 
-    static JsonValue serialize(const T &value)
+    static void serialize(const T &value, JsonValue &json)
     {
         if constexpr (std::is_same_v<T, NullJson>)
         {
-            return {};
+            json.clear();
         }
         else
         {
-            return value;
+            json = value;
         }
     }
 
-    static T deserialize(const JsonValue &json)
+    static void deserialize(const JsonValue &json, T &value)
     {
         throwIfNotCompatible<T>(json);
 
         if constexpr (std::is_same_v<T, JsonValue>)
         {
-            return json;
+            value = json;
         }
         else if constexpr (std::is_same_v<T, NullJson>)
         {
-            return {};
+            value = {};
         }
         else
         {
-            return json.convert<T>();
+            value = json.convert<T>();
         }
     }
 };
