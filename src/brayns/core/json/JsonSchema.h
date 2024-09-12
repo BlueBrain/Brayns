@@ -161,7 +161,7 @@ struct JsonSchema
 {
     std::string description = {};
     bool required = true;
-    JsonValue defaultValue = {};
+    std::optional<JsonValue> defaultValue = {};
     std::vector<JsonSchema> oneOf = {};
     JsonType type = JsonType::Undefined;
     JsonValue constant = {};

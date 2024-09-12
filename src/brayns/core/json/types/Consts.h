@@ -21,65 +21,64 @@
 
 #pragma once
 
-#include <set>
-#include <unordered_set>
+#include <concepts>
 
 #include "Primitives.h"
 
 namespace brayns
 {
 template<typename T>
-struct JsonSetReflector
+struct JsonConstReflector;
+
+template<typename T>
+concept ReflectedJsonConst = requires {
+    { JsonConstReflector<T>::reflect() } -> ReflectedJson;
+};
+
+template<ReflectedJsonConst T>
+auto getJsonConst()
 {
-    using ValueType = typename T::value_type;
+    return JsonConstReflector<T>::reflect();
+}
+
+template<ReflectedJsonConst T>
+struct JsonReflector<T>
+{
+    static inline const auto value = getJsonConst<T>();
 
     static JsonSchema getSchema()
     {
         return {
-            .type = JsonType::Array,
-            .items = {getJsonSchema<ValueType>()},
-            .uniqueItems = true,
+            .type = jsonTypeOf<decltype(value)>,
+            .constant = value,
         };
     }
 
-    static void serialize(const T &value, JsonValue &json)
+    static void serialize(const T &, JsonValue &json)
     {
-        auto array = createJsonArray();
-
-        for (const auto &item : value)
-        {
-            auto jsonItem = serializeToJson(item);
-            array->add(jsonItem);
-        }
-
-        json = array;
+        return serializeToJson(value, json);
     }
 
-    static void deserialize(const JsonValue &json, T &value)
+    static void deserialize(const JsonValue &json, T &)
     {
-        const auto &array = getArray(json);
-        value.clear();
-
-        for (const auto &jsonItem : array)
+        if (deserializeJsonAs<decltype(value)>(json) != value)
         {
-            auto item = deserializeJsonAs<ValueType>(jsonItem);
-            auto [i, inserted] = value.insert(std::move(item));
-
-            if (!inserted)
-            {
-                throw JsonException("Duplicated item in set");
-            }
+            throw JsonException("Invalid const");
         }
     }
 };
 
-template<typename T>
-struct JsonReflector<std::set<T>> : JsonSetReflector<std::set<T>>
+struct JsonFalse
 {
+    auto operator<=>(const JsonFalse &) const = default;
 };
 
-template<typename T>
-struct JsonReflector<std::unordered_set<T>> : JsonSetReflector<std::unordered_set<T>>
+template<>
+struct JsonConstReflector<JsonFalse>
 {
+    static bool reflect()
+    {
+        return false;
+    }
 };
 }

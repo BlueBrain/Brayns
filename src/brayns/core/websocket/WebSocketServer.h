@@ -49,7 +49,7 @@ struct WebSocketServerSettings
     std::size_t maxThreadCount = 1;
     std::size_t maxQueueSize = 64;
     std::size_t maxFrameSize = std::numeric_limits<int>::max();
-    std::optional<SslSettings> ssl = std::nullopt;
+    std::optional<SslSettings> ssl = {};
 };
 
 class WebSocketServer

@@ -37,7 +37,7 @@ struct Materials
 {
     std::variant<IndexInRenderer, Data<IndexInRenderer>> values;
     std::variant<std::monostate, Color4, Data<Color4>> colors = {};
-    std::optional<Data<std::uint8_t>> indices = std::nullopt;
+    std::optional<Data<std::uint8_t>> indices = {};
 };
 
 struct GeometricModelSettings

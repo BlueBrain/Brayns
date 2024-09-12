@@ -72,9 +72,9 @@ struct PerspectiveCameraSettings
 {
     float fovy = radians(60.0F);
     float aspect = 1.0F;
-    std::optional<DepthOfField> depthOfField = std::nullopt;
+    std::optional<DepthOfField> depthOfField = {};
     bool architectural = false;
-    std::optional<Stereo> stereo = std::nullopt;
+    std::optional<Stereo> stereo = {};
 };
 
 class PerspectiveCamera : public Camera

@@ -21,48 +21,33 @@
 
 #pragma once
 
-#include <concepts>
-
-#include "Primitives.h"
+#include "Objects.h"
 
 namespace brayns
 {
-struct JsonConstant
+template<ReflectedJsonObject T>
+struct JsonUpdate
 {
-    auto operator<=>(const JsonConstant &) const = default;
+    T value;
 };
 
-template<typename T>
-concept ValidJsonConstant = std::derived_from<T, JsonConstant> && JsonPrimitive<decltype(T::value)>;
-
-template<ValidJsonConstant T>
-struct JsonReflector<T>
+template<ReflectedJsonObject T>
+struct JsonObjectReflector<JsonUpdate<T>>
 {
-    using Type = decltype(T::value);
-
-    static JsonSchema getSchema()
+    static auto reflect()
     {
-        return {.type = jsonTypeOf<Type>, .constant = T::value};
-    }
+        auto builder = JsonBuilder<JsonUpdate<T>>();
+        builder.extend([](auto &object) { return &object.value; });
 
-    static JsonValue serialize(const T &)
-    {
-        return serializeToJson(T::value);
-    }
+        auto info = builder.build();
 
-    static T deserialize(const JsonValue &json)
-    {
-        if (json != T::value)
+        for (auto &field : info.fields)
         {
-            throw JsonException("Invalid const");
+            field.schema.required = false;
+            field.schema.defaultValue.reset();
         }
 
-        return {};
+        return info;
     }
-};
-
-struct JsonFalse : JsonConstant
-{
-    static constexpr auto value = false;
 };
 }

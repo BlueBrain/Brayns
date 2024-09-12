@@ -21,21 +21,49 @@
 
 #pragma once
 
-#include "JsonReflector.h"
-#include "JsonSchema.h"
-#include "JsonValidator.h"
-#include "JsonValue.h"
+#include <brayns/core/json/JsonReflector.h>
 
-#include "types/Arrays.h"
-#include "types/Buffer.h"
-#include "types/Consts.h"
-#include "types/Enums.h"
-#include "types/Maps.h"
-#include "types/Math.h"
-#include "types/Objects.h"
-#include "types/Primitives.h"
-#include "types/Schema.h"
-#include "types/Sets.h"
-#include "types/Update.h"
-#include "types/Variants.h"
-#include "types/Vectors.h"
+namespace brayns
+{
+template<ReflectedJson T>
+class JsonBuffer
+{
+public:
+    const JsonValue &get() const
+    {
+        return _json;
+    }
+
+    void store(const JsonValue &json)
+    {
+        _json = json;
+    }
+
+    void extract(T &value) const
+    {
+        deserializeJson(_json, value);
+    }
+
+private:
+    JsonValue _json;
+};
+
+template<ReflectedJson T>
+struct JsonReflector<JsonBuffer<T>>
+{
+    static JsonSchema getSchema()
+    {
+        return getJsonSchema<T>();
+    }
+
+    static void serialize(const JsonBuffer<T> &value, JsonValue &json)
+    {
+        json = value.get();
+    }
+
+    static void deserialize(const JsonValue &json, JsonBuffer<T> &value)
+    {
+        value.store(json);
+    }
+};
+}

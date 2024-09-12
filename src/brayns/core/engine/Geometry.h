@@ -40,9 +40,9 @@ public:
 struct MeshSettings
 {
     Data<Vector3> positions;
-    std::optional<Data<Vector3>> normals = std::nullopt;
-    std::optional<Data<Color4>> colors = std::nullopt;
-    std::optional<Data<Vector2>> uvs = std::nullopt;
+    std::optional<Data<Vector3>> normals = {};
+    std::optional<Data<Color4>> colors = {};
+    std::optional<Data<Vector2>> uvs = {};
 };
 
 class Mesh : public Geometry
@@ -56,7 +56,7 @@ public:
 struct TriangleMeshSettings
 {
     MeshSettings base;
-    std::optional<Data<Index3>> indices = std::nullopt;
+    std::optional<Data<Index3>> indices = {};
 };
 
 class TriangleMesh : public Mesh
@@ -70,7 +70,7 @@ TriangleMesh createTriangleMesh(Device &device, const TriangleMeshSettings &sett
 struct QuadMeshSettings
 {
     MeshSettings base;
-    std::optional<Data<Index4>> indices = std::nullopt;
+    std::optional<Data<Index4>> indices = {};
 };
 
 class QuadMesh : public Mesh
@@ -84,7 +84,7 @@ QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings);
 struct SphereSettings
 {
     Data<Vector4> spheres;
-    std::optional<Data<Vector2>> uvs = std::nullopt;
+    std::optional<Data<Vector2>> uvs = {};
 };
 
 class Spheres : public Geometry
@@ -98,8 +98,8 @@ Spheres createSpheres(Device &device, const SphereSettings &settings);
 struct DiscSettings
 {
     Data<Vector4> spheres;
-    std::optional<Data<Vector3>> normals = std::nullopt;
-    std::optional<Data<Vector2>> uvs = std::nullopt;
+    std::optional<Data<Vector3>> normals = {};
+    std::optional<Data<Vector2>> uvs = {};
 };
 
 class Discs : public Geometry
@@ -114,8 +114,8 @@ struct CylinderSettings
 {
     Data<Vector4> spheres;
     Data<std::uint32_t> indices;
-    std::optional<Data<Color4>> colors = std::nullopt;
-    std::optional<Data<Vector2>> uvs = std::nullopt;
+    std::optional<Data<Color4>> colors = {};
+    std::optional<Data<Vector2>> uvs = {};
 };
 
 class Cylinders : public Geometry
@@ -170,8 +170,8 @@ struct CurveSettings
 {
     Data<Vector4> spheres;
     Data<std::uint32_t> indices;
-    std::optional<Data<Color4>> colors = std::nullopt;
-    std::optional<Data<Vector2>> uvs = std::nullopt;
+    std::optional<Data<Color4>> colors = {};
+    std::optional<Data<Vector2>> uvs = {};
     CurveType type = RoundCurve();
     CurveBasis basis = LinearCurve();
 };
@@ -200,7 +200,7 @@ Boxes createBoxes(Device &device, const BoxSettings &settings);
 struct PlaneSettings
 {
     Data<Vector4> coefficients;
-    std::optional<Data<Box3>> bounds = std::nullopt;
+    std::optional<Data<Box3>> bounds = {};
 };
 
 class Planes : public Geometry

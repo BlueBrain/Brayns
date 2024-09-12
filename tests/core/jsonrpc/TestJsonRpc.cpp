@@ -26,80 +26,87 @@
 
 using namespace brayns;
 
-TEST_CASE("JsonRpcParser")
+auto json = std::string(R"({
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "test",
+    "params": 123
+})");
+
+TEST_CASE("Text")
 {
-    auto json = std::string(R"({
-        "jsonrpc": "2.0",
+    auto request = parseTextJsonRpcRequest(json);
+
+    CHECK(request.id);
+    CHECK_EQ(std::get<int>(*request.id), 1);
+    CHECK_EQ(request.method, "test");
+    CHECK_EQ(request.params.json, 123);
+    CHECK_EQ(request.params.binary, "");
+}
+
+TEST_CASE("Binary")
+{
+    auto jsonSize = static_cast<std::uint32_t>(json.size());
+    auto header = composeBytes(jsonSize, std::endian::little);
+    auto data = header + json + "binary";
+
+    auto request = parseBinaryJsonRpcRequest(data);
+
+    CHECK(request.id);
+    CHECK_EQ(std::get<int>(*request.id), 1);
+    CHECK_EQ(request.method, "test");
+    CHECK_EQ(request.params.json, 123);
+    CHECK_EQ(request.params.binary, "binary");
+}
+
+TEST_CASE("Invalid JSON")
+{
+    auto data = "{\"test";
+    CHECK_THROWS_AS(parseTextJsonRpcRequest(data), ParseError);
+}
+
+TEST_CASE("Invalid schema")
+{
+    auto data = R"({
         "id": 1,
         "method": "test",
         "params": 123
-    })");
+    })";
 
-    SUBCASE("Text")
-    {
-        auto request = parseTextJsonRpcRequest(json);
+    CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
+}
 
-        CHECK(request.id);
-        CHECK_EQ(std::get<int>(*request.id), 1);
-        CHECK_EQ(request.method, "test");
-        CHECK_EQ(request.params.json, 123);
-        CHECK_EQ(request.params.binary, "");
-    }
-    SUBCASE("Binary")
-    {
-        auto jsonSize = static_cast<std::uint32_t>(json.size());
-        auto header = composeBytes(jsonSize, std::endian::little);
-        auto data = header + json + "binary";
+TEST_CASE("Invalid JSON-RPC version")
+{
+    auto data = R"({
+        "jsonrpc": "1.0",
+        "id": 1,
+        "method": "test",
+        "params": 123
+    })";
 
-        auto request = parseBinaryJsonRpcRequest(data);
+    CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
+}
 
-        CHECK(request.id);
-        CHECK_EQ(std::get<int>(*request.id), 1);
-        CHECK_EQ(request.method, "test");
-        CHECK_EQ(request.params.json, 123);
-        CHECK_EQ(request.params.binary, "binary");
-    }
-    SUBCASE("Invalid JSON")
-    {
-        auto data = "{\"test";
-        CHECK_THROWS_AS(parseTextJsonRpcRequest(data), ParseError);
-    }
-    SUBCASE("Invalid schema")
-    {
-        auto data = R"({
-            "id": 1,
-            "method": "test",
-            "params": 123
-        })";
-        CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
-    }
-    SUBCASE("Invalid JSON-RPC version")
-    {
-        auto data = R"({
-            "jsonrpc": "1.0",
-            "id": 1,
-            "method": "test",
-            "params": 123
-        })";
-        CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
-    }
-    SUBCASE("No methods")
-    {
-        auto data = R"({
-            "jsonrpc": "2.0",
-            "id": 1,
-            "params": 123
-        })";
-        CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
-    }
-    SUBCASE("Binary without size")
-    {
-        auto data = "123";
-        CHECK_THROWS_AS(parseBinaryJsonRpcRequest(data), ParseError);
-    }
-    SUBCASE("Binary size bigger than frame size")
-    {
-        auto data = std::string("\x10\x00\x00\x00", 4) + "{}";
-        CHECK_THROWS_AS(parseBinaryJsonRpcRequest(data), ParseError);
-    }
+TEST_CASE("No methods")
+{
+    auto data = R"({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "params": 123
+    })";
+
+    CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
+}
+
+TEST_CASE("Binary without size")
+{
+    auto data = "123";
+    CHECK_THROWS_AS(parseBinaryJsonRpcRequest(data), ParseError);
+}
+
+TEST_CASE("Binary size bigger than frame size")
+{
+    auto data = std::string("\x10\x00\x00\x00", 4) + "{}";
+    CHECK_THROWS_AS(parseBinaryJsonRpcRequest(data), ParseError);
 }
