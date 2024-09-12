@@ -21,22 +21,33 @@
 
 #pragma once
 
-#include "JsonReflector.h"
-#include "JsonSchema.h"
-#include "JsonValidator.h"
-#include "JsonValue.h"
+#include "Objects.h"
 
-#include "types/Arrays.h"
-#include "types/Buffer.h"
-#include "types/Consts.h"
-#include "types/Enums.h"
-#include "types/Info.h"
-#include "types/Maps.h"
-#include "types/Math.h"
-#include "types/Objects.h"
-#include "types/Primitives.h"
-#include "types/Schema.h"
-#include "types/Sets.h"
-#include "types/Update.h"
-#include "types/Variants.h"
-#include "types/Vectors.h"
+namespace brayns
+{
+template<ReflectedJsonObject T>
+struct JsonInfo
+{
+    T value;
+};
+
+template<ReflectedJsonObject T>
+struct JsonObjectReflector<JsonInfo<T>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<JsonInfo<T>>();
+        builder.extend([](auto &object) { return &object.value; });
+
+        auto info = builder.build();
+
+        for (auto &field : info.fields)
+        {
+            field.schema.required = true;
+            field.schema.defaultValue.reset();
+        }
+
+        return info;
+    }
+};
+}

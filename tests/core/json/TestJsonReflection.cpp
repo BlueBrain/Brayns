@@ -411,6 +411,26 @@ TEST_CASE("Update")
     CHECK_EQ(update.value.test, 1);
 }
 
+TEST_CASE("Info")
+{
+    using T = JsonInfo<Update>;
+
+    auto schema = getJsonSchema<T>();
+
+    CHECK_EQ(schema.type, JsonType::Object);
+    CHECK_EQ(schema.properties.size(), 1);
+    CHECK_EQ(schema.properties.at("test"), getJsonSchema<int>());
+
+    auto json = R"({"test":1})";
+    auto info = parseJsonAs<JsonInfo<Update>>(json);
+
+    CHECK_EQ(info.value.test, 1);
+
+    CHECK_EQ(stringifyToJson(info), json);
+
+    CHECK_THROWS_AS(parseJsonAs<JsonInfo<Update>>("{}"), JsonException);
+}
+
 TEST_CASE("Extension")
 {
     auto schema = getJsonSchema<Extended>();
