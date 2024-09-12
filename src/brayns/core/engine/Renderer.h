@@ -51,7 +51,7 @@ struct RendererSettings
     float minContribution = 0.001F;
     float varianceThreshold = 0.0F;
     Background background = Color4(0.0F, 0.0F, 0.0F, 0.0F);
-    std::optional<Texture2D> maxDepth = std::nullopt;
+    std::optional<Texture2D> maxDepth = {};
     PixelFilter pixelFilter = PixelFilter::Gauss;
 };
 

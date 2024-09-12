@@ -92,26 +92,9 @@ struct JsonObjectReflector<SomeObject>
     }
 };
 
-struct Updatable
-{
-    int value;
-};
-
-template<>
-struct JsonObjectReflector<Updatable>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Updatable>();
-        builder.field("value", [](auto &object) { return &object.value; }).defaultValue(0);
-        builder.removeDefaultValues();
-        return builder.build();
-    }
-};
-
 struct Extended
 {
-    Updatable child;
+    Internal child;
     std::string additional;
 };
 
@@ -123,6 +106,22 @@ struct JsonObjectReflector<Extended>
         auto builder = JsonBuilder<Extended>();
         builder.extend([](auto &object) { return &object.child; });
         builder.field("additional", [](auto &object) { return &object.additional; });
+        return builder.build();
+    }
+};
+
+struct Update
+{
+    int test;
+};
+
+template<>
+struct JsonObjectReflector<Update>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Update>();
+        builder.field("test", [](auto &object) { return &object.test; }).defaultValue(2);
         return builder.build();
     }
 };
@@ -384,15 +383,32 @@ TEST_CASE("Object")
     CHECK_EQ(stringifyToJson(test), stringifyToJson(json));
 }
 
-TEST_CASE("Empty field")
+TEST_CASE("Update")
 {
-    auto object = Updatable{1};
+    using T = JsonUpdate<Update>;
+    using Buffer = JsonBuffer<T>;
 
-    auto json = JsonValue(createJsonObject());
+    auto schema = getJsonSchema<Buffer>();
+    auto child = getJsonSchema<int>();
+    child.required = false;
 
-    deserializeJson(json, object);
+    CHECK_EQ(schema.type, JsonType::Object);
+    CHECK_EQ(schema.properties.size(), 1);
+    CHECK_EQ(schema.properties.at("test"), child);
 
-    CHECK_EQ(object.value, 1);
+    auto json = R"({"test":1})";
+
+    auto buffer = parseJsonAs<Buffer>(json);
+    auto update = T{};
+
+    buffer.extract(update);
+    CHECK_EQ(update.value.test, 1);
+
+    CHECK_EQ(stringifyToJson(buffer), json);
+
+    buffer = parseJsonAs<Buffer>("{}");
+    buffer.extract(update);
+    CHECK_EQ(update.value.test, 1);
 }
 
 TEST_CASE("Extension")
@@ -400,4 +416,15 @@ TEST_CASE("Extension")
     auto schema = getJsonSchema<Extended>();
 
     CHECK_EQ(schema.properties.size(), 2);
+    CHECK_EQ(schema.properties.at("value"), getJsonSchema<int>());
+    CHECK_EQ(schema.properties.at("additional"), getJsonSchema<std::string>());
+
+    auto json = R"({"additional":"test","value":1})";
+
+    auto value = parseJsonAs<Extended>(json);
+
+    CHECK_EQ(value.child.value, 1);
+    CHECK_EQ(value.additional, "test");
+
+    CHECK_EQ(stringifyToJson(value), json);
 }

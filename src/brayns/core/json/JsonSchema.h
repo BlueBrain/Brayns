@@ -161,16 +161,16 @@ struct JsonSchema
 {
     std::string description = {};
     bool required = true;
-    std::optional<JsonValue> defaultValue = std::nullopt;
+    std::optional<JsonValue> defaultValue = {};
     std::vector<JsonSchema> oneOf = {};
     JsonType type = JsonType::Undefined;
     JsonValue constant = {};
-    std::optional<double> minimum = std::nullopt;
-    std::optional<double> maximum = std::nullopt;
+    std::optional<double> minimum = {};
+    std::optional<double> maximum = {};
     std::vector<JsonSchema> items = {};
     bool uniqueItems = false;
-    std::optional<std::size_t> minItems = std::nullopt;
-    std::optional<std::size_t> maxItems = std::nullopt;
+    std::optional<std::size_t> minItems = {};
+    std::optional<std::size_t> maxItems = {};
     std::map<std::string, JsonSchema> properties = {};
 
     bool operator==(const JsonSchema &) const = default;

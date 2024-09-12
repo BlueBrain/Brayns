@@ -217,15 +217,6 @@ JsonField<Parent> convertJsonField(const JsonField<Child> &child, JsonChildGette
     };
 }
 
-inline void removeJsonObjectDefaults(std::map<std::string, JsonSchema> &properties)
-{
-    for (auto &[key, field] : properties)
-    {
-        field.defaultValue = std::nullopt;
-        removeJsonObjectDefaults(field.properties);
-    }
-}
-
 class JsonFieldBuilder
 {
 public:
@@ -325,15 +316,6 @@ public:
         {
             auto parentField = convertJsonField<T>(field, std::move(getChildPtr));
             _info.fields.push_back(std::move(parentField));
-        }
-    }
-
-    void removeDefaultValues()
-    {
-        for (auto &field : _info.fields)
-        {
-            field.schema.defaultValue = std::nullopt;
-            removeJsonObjectDefaults(field.schema.properties);
         }
     }
 

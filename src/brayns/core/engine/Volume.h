@@ -56,7 +56,7 @@ struct RegularVolumeSettings
     Vector3 spacing = {1.0F, 1.0F, 1.0F};
     VolumeType type = VolumeType::VertexCentered;
     VolumeFilter filter = VolumeFilter::Linear;
-    std::optional<float> background = std::nullopt;
+    std::optional<float> background = {};
 };
 
 class RegularVolume : public Volume

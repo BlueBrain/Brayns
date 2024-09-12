@@ -32,10 +32,10 @@ namespace brayns
 {
 struct GroupSettings
 {
-    std::optional<Data<GeometricModel>> geometries = std::nullopt;
-    std::optional<Data<GeometricModel>> clippingGeometries = std::nullopt;
-    std::optional<Data<VolumetricModel>> volumes = std::nullopt;
-    std::optional<Data<Light>> lights = std::nullopt;
+    std::optional<Data<GeometricModel>> geometries = {};
+    std::optional<Data<GeometricModel>> clippingGeometries = {};
+    std::optional<Data<VolumetricModel>> volumes = {};
+    std::optional<Data<Light>> lights = {};
 };
 
 class Group : public Managed<OSPGroup>
@@ -67,7 +67,7 @@ Instance createInstance(Device &device, const InstanceSettings &settings);
 
 struct WorldSettings
 {
-    std::optional<Data<Instance>> instances = std::nullopt;
+    std::optional<Data<Instance>> instances = {};
 };
 
 class World : public Managed<OSPWorld>

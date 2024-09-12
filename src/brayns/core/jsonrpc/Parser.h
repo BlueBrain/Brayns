@@ -34,5 +34,5 @@ std::string composeAsText(const JsonRpcSuccessResponse &response);
 std::string composeAsText(const JsonRpcErrorResponse &response);
 std::string composeAsBinary(const JsonRpcSuccessResponse &response);
 JsonRpcError composeError(const JsonRpcException &e);
-JsonRpcErrorResponse composeErrorResponse(const JsonRpcException &e, std::optional<JsonRpcId> id = std::nullopt);
+JsonRpcErrorResponse composeErrorResponse(const JsonRpcException &e, std::optional<JsonRpcId> id = {});
 }

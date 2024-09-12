@@ -53,7 +53,7 @@ struct JsonReflector<std::optional<T>>
     {
         if (json.isEmpty())
         {
-            value = std::nullopt;
+            value.reset();
             return;
         }
 
