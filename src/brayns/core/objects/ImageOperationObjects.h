@@ -26,22 +26,18 @@
 #include <functional>
 
 #include <brayns/core/engine/ImageOperation.h>
-#include <brayns/core/manager/ObjectRegistry.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-template<ReflectedJson T>
-using ImageOperationParams = ComposedParams<NullJson, T>;
-
 struct UserImageOperation
 {
-    std::reference_wrapper<Device> device;
     std::any value;
     std::function<ImageOperation()> get;
 };
 
 template<ReflectedJson Settings, std::derived_from<ImageOperation> T>
-struct DerivedImageOperation
+struct UserImageOperationOf
 {
     Settings settings;
     T value;
@@ -53,37 +49,27 @@ struct JsonObjectReflector<ToneMapperSettings>
     static auto reflect()
     {
         auto builder = JsonBuilder<ToneMapperSettings>();
-        builder.field("exposure", [](auto &object) { return &object.exposure; })
-            .description("Amount of light per unit area")
-            .defaultValue(1.0F);
-        builder.field("contrast", [](auto &object) { return &object.contrast; })
-            .description("Constrast (toe of the curve)")
-            .defaultValue(1.6773F);
+        builder.field("exposure", [](auto &object) { return &object.exposure; }).description("Amount of light per unit area").defaultValue(1.0F);
+        builder.field("contrast", [](auto &object) { return &object.contrast; }).description("Constrast (toe of the curve)").defaultValue(1.6773F);
         builder.field("shoulder", [](auto &object) { return &object.shoulder; })
             .description("Highlight compression (shoulder of the curve)")
             .defaultValue(0.9714F);
-        builder.field("midIn", [](auto &object) { return &object.midIn; })
-            .description("Mid-level anchor input")
-            .defaultValue(0.18F);
-        builder.field("midOut", [](auto &object) { return &object.midOut; })
-            .description("Mid-level anchor output")
-            .defaultValue(0.18F);
+        builder.field("midIn", [](auto &object) { return &object.midIn; }).description("Mid-level anchor input").defaultValue(0.18F);
+        builder.field("midOut", [](auto &object) { return &object.midOut; }).description("Mid-level anchor output").defaultValue(0.18F);
         builder.field("hdrMax", [](auto &object) { return &object.hdrMax; })
             .description("Maximum HDR input that is not clipped")
             .defaultValue(11.0785F);
-        builder.field("acesColor", [](auto &object) { return &object.acesColor; })
-            .description("Apply the ACES color transforms")
-            .defaultValue(true);
+        builder.field("acesColor", [](auto &object) { return &object.acesColor; }).description("Apply the ACES color transforms").defaultValue(true);
         return builder.build();
     }
 };
 
-using ToneMapperParams = ImageOperationParams<ToneMapperSettings>;
-using ToneMapperInfo = ToneMapperSettings;
-using ToneMapperUpdate = UpdateParams<ToneMapperSettings>;
-using UserToneMapper = DerivedImageOperation<ToneMapperSettings, ToneMapper>;
+using CreateToneMapperParams = CreateParamsOf<ToneMapperSettings>;
+using GetToneMapperResult = GetResultOf<ToneMapperSettings>;
+using UpdateToneMapperParams = UpdateParamsOf<ToneMapperSettings>;
+using UserToneMapper = UserImageOperationOf<ToneMapperSettings, ToneMapper>;
 
-ObjectResult createToneMapper(ObjectRegistry &objects, Device &device, const ToneMapperParams &params);
-ToneMapperInfo getToneMapper(ObjectRegistry &objects, const ObjectParams &params);
-void updateToneMapper(ObjectRegistry &objects, const ToneMapperUpdate &params);
+CreateObjectResult createToneMapper(ObjectManager &objects, Device &device, const CreateToneMapperParams &params);
+GetToneMapperResult getToneMapper(ObjectManager &objects, const GetObjectParams &params);
+void updateToneMapper(ObjectManager &objects, Device &device, const UpdateToneMapperParams &params);
 }

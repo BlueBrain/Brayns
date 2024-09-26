@@ -25,41 +25,17 @@
 
 namespace brayns
 {
-ObjectResult createFramebuffer(ObjectManager &manager, Device &device, const FramebufferParams &params)
+void addFramebufferEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device)
 {
-    return manager.visit([&](ObjectRegistry &objects) { return createFramebuffer(objects, device, params); });
-}
-
-FramebufferInfo getFramebuffer(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { return getFramebuffer(objects, params); });
-}
-
-void updateFramebuffer(ObjectManager &manager, const FramebufferUpdate &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { updateFramebuffer(objects, params); });
-}
-
-void clearFramebuffer(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { clearFramebuffer(objects, params); });
-}
-
-void addFramebufferEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
-{
-    builder
-        .endpoint(
-            "createFramebuffer",
-            [&](FramebufferParams params) { return createFramebuffer(manager, device, params); })
+    builder.endpoint("createFramebuffer", [&](CreateFramebufferParams params) { return createFramebuffer(objects, device, params); })
         .description("Create a new framebuffer");
 
-    builder.endpoint("getFramebuffer", [&](ObjectParams params) { return getFramebuffer(manager, params); })
-        .description("Get framebuffer params");
+    builder.endpoint("getFramebuffer", [&](GetObjectParams params) { return getFramebuffer(objects, params); }).description("Get framebuffer params");
 
-    builder.endpoint("updateFramebuffer", [&](FramebufferUpdate params) { updateFramebuffer(manager, params); })
+    builder.endpoint("updateFramebuffer", [&](UpdateFramebufferParams params) { updateFramebuffer(objects, device, params); })
         .description("Update framebuffer params");
 
-    builder.endpoint("clearFramebuffer", [&](ObjectParams params) { clearFramebuffer(manager, params); })
+    builder.endpoint("clearFramebuffer", [&](GetObjectParams params) { clearFramebuffer(objects, params); })
         .description("Reset accumulating channels of the framebuffer");
 }
 }

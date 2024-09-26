@@ -24,126 +24,35 @@
 #include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/objects/CameraObjects.h>
 
-namespace
-{
-using namespace brayns;
-
-void validateCameraSettings(const CameraSettings &settings)
-{
-    auto &view = settings.view;
-    auto right = cross(view.direction, view.up);
-
-    if (right.x == 0.0F && right.y == 0.0F && right.z == 0.0F)
-    {
-        throw InvalidParams("Camera up and direction are colinear");
-    }
-}
-}
-
 namespace brayns
 {
-CameraInfo getCamera(ObjectManager &manager, const ObjectParams &params)
+void addCameraEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device)
 {
-    return manager.visit([&](ObjectRegistry &objects) { return getCamera(objects, params); });
-}
-
-void updateCamera(ObjectManager &manager, const CameraUpdate &params)
-{
-    validateCameraSettings(params.settings);
-    manager.visit([&](ObjectRegistry &objects) { updateCamera(objects, params); });
-}
-
-ObjectResult createPerspectiveCamera(ObjectManager &manager, Device &device, const PerspectiveCameraParams &params)
-{
-    validateCameraSettings(params.base);
-    return manager.visit([&](ObjectRegistry &objects) { return createPerspectiveCamera(objects, device, params); });
-}
-
-PerspectiveCameraInfo getPerspectiveCamera(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { return getPerspectiveCamera(objects, params); });
-}
-
-void updatePerspectiveCamera(ObjectManager &manager, const PerspectiveCameraUpdate &params)
-{
-    manager.visit([&](ObjectRegistry &objects) { return updatePerspectiveCamera(objects, params); });
-}
-
-ObjectResult createOrthographicCamera(ObjectManager &manager, Device &device, const OrthographicCameraParams &params)
-{
-    validateCameraSettings(params.base);
-    return manager.visit([&](ObjectRegistry &objects) { return createOrthographicCamera(objects, device, params); });
-}
-
-OrthographicCameraInfo getOrthographicCamera(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { return getOrthographicCamera(objects, params); });
-}
-
-void updateOrthographicCamera(ObjectManager &manager, const OrthographicCameraUpdate &params)
-{
-    manager.visit([&](ObjectRegistry &objects) { return updateOrthographicCamera(objects, params); });
-}
-
-ObjectResult createPanoramicCamera(ObjectManager &manager, Device &device, const PanoramicCameraParams &params)
-{
-    validateCameraSettings(params.base);
-    return manager.visit([&](ObjectRegistry &objects) { return createPanoramicCamera(objects, device, params); });
-}
-
-PanoramicCameraInfo getPanoramicCamera(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { return getPanoramicCamera(objects, params); });
-}
-
-void updatePanoramicCamera(ObjectManager &manager, const PanoramicCameraUpdate &params)
-{
-    manager.visit([&](ObjectRegistry &objects) { return updatePanoramicCamera(objects, params); });
-}
-
-void addCameraEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
-{
-    builder.endpoint("getCamera", [&](ObjectParams params) { return getCamera(manager, params); })
-        .description("Get a camera of any type");
-    builder.endpoint("updateCamera", [&](CameraUpdate params) { updateCamera(manager, params); })
+    builder.endpoint("getCamera", [&](GetObjectParams params) { return getCamera(objects, params); }).description("Get a camera of any type");
+    builder.endpoint("updateCamera", [&](UpdateCameraParams params) { updateCamera(objects, device, params); })
         .description("Update a camera of any type");
 
     builder
-        .endpoint(
-            "createPerspectiveCamera",
-            [&](PerspectiveCameraParams params) { return createPerspectiveCamera(manager, device, params); })
+        .endpoint("createPerspectiveCamera", [&](CreatePerspectiveCameraParams params) { return createPerspectiveCamera(objects, device, params); })
         .description("Create a new perspective camera");
-    builder.endpoint("getPerspectiveCamera", [&](ObjectParams params) { return getPerspectiveCamera(manager, params); })
+    builder.endpoint("getPerspectiveCamera", [&](GetObjectParams params) { return getPerspectiveCamera(objects, params); })
         .description("Get perspective camera specific params");
-    builder
-        .endpoint(
-            "updatePerspectiveCamera",
-            [&](PerspectiveCameraUpdate params) { updatePerspectiveCamera(manager, params); })
+    builder.endpoint("updatePerspectiveCamera", [&](UpdatePerspectiveCameraParams params) { updatePerspectiveCamera(objects, device, params); })
         .description("Update perspective camera specific params");
 
     builder
-        .endpoint(
-            "createOrthographicCamera",
-            [&](OrthographicCameraParams params) { return createOrthographicCamera(manager, device, params); })
+        .endpoint("createOrthographicCamera", [&](CreateOrthographicCameraParams params) { return createOrthographicCamera(objects, device, params); })
         .description("Create a new panoramic camera");
-    builder
-        .endpoint("getOrthographicCamera", [&](ObjectParams params) { return getOrthographicCamera(manager, params); })
+    builder.endpoint("getOrthographicCamera", [&](GetObjectParams params) { return getOrthographicCamera(objects, params); })
         .description("Get panoramic camera specific params");
-    builder
-        .endpoint(
-            "updateOrthographicCamera",
-            [&](OrthographicCameraUpdate params) { updateOrthographicCamera(manager, params); })
+    builder.endpoint("updateOrthographicCamera", [&](UpdateOrthographicCameraParams params) { updateOrthographicCamera(objects, device, params); })
         .description("Update panoramic camera specific params");
 
-    builder
-        .endpoint(
-            "createPanoramicCamera",
-            [&](PanoramicCameraParams params) { return createPanoramicCamera(manager, device, params); })
+    builder.endpoint("createPanoramicCamera", [&](CreatePanoramicCameraParams params) { return createPanoramicCamera(objects, device, params); })
         .description("Create a new panoramic camera");
-    builder.endpoint("getPanoramicCamera", [&](ObjectParams params) { return getPanoramicCamera(manager, params); })
+    builder.endpoint("getPanoramicCamera", [&](GetObjectParams params) { return getPanoramicCamera(objects, params); })
         .description("Get panoramic camera specific params");
-    builder
-        .endpoint("updatePanoramicCamera", [&](PanoramicCameraUpdate params) { updatePanoramicCamera(manager, params); })
+    builder.endpoint("updatePanoramicCamera", [&](UpdatePanoramicCameraParams params) { updatePanoramicCamera(objects, device, params); })
         .description("Update panoramic camera specific params");
 }
 }

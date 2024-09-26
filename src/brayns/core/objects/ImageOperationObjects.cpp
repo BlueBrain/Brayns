@@ -23,41 +23,41 @@
 
 namespace brayns
 {
-ObjectResult createToneMapper(ObjectRegistry &objects, Device &device, const ToneMapperParams &params)
+CreateObjectResult createToneMapper(ObjectManager &objects, Device &device, const CreateToneMapperParams &params)
 {
-    auto operation = createToneMapper(device, params.derived);
+    const auto &[base, derived] = params;
 
-    auto derived = UserToneMapper{params.derived, std::move(operation)};
-    auto ptr = std::make_shared<decltype(derived)>(std::move(derived));
+    auto operation = createToneMapper(device, derived);
+
+    auto ptr = toShared(UserToneMapper{derived, std::move(operation)});
 
     auto object = UserImageOperation{
-        .device = device,
         .value = ptr,
         .get = [=] { return ptr->value; },
     };
 
-    auto stored = objects.add(std::move(object), "ToneMapper");
+    auto stored = objects.add(std::move(object), {"ToneMapper"}, base);
 
-    return {stored.getId()};
+    return getResult(stored);
 }
 
-ToneMapperInfo getToneMapper(ObjectRegistry &objects, const ObjectParams &params)
+GetToneMapperResult getToneMapper(ObjectManager &objects, const GetObjectParams &params)
 {
-    auto stored = objects.getAsStored<UserImageOperation>(params.id);
-    auto &operation = castAs<UserToneMapper>(stored.get().value, stored.getInfo());
-    return operation.settings;
+    auto object = objects.getAsStored<UserImageOperation>(params.id);
+    auto &operation = *castAsShared<UserToneMapper>(object.get().value, object);
+    return getResult(operation.settings);
 }
 
-void updateToneMapper(ObjectRegistry &objects, const ToneMapperUpdate &params)
+void updateToneMapper(ObjectManager &objects, Device &device, const UpdateToneMapperParams &params)
 {
     auto stored = objects.getAsStored<UserImageOperation>(params.id);
-    auto &base = stored.get();
-    auto &derived = castAs<UserToneMapper>(base.value, stored.getInfo());
-    auto &device = base.device.get();
+    auto &operation = *castAsShared<UserToneMapper>(stored.get().value, stored);
 
-    derived.value.update(params.settings);
+    auto settings = getUpdatedParams(params, operation.settings);
+
+    operation.value.update(settings);
     device.throwIfError();
 
-    derived.settings = params.settings;
+    operation.settings = settings;
 }
 }

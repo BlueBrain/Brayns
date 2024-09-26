@@ -56,8 +56,7 @@ struct JsonObjectReflector<RawImageParams>
     static auto reflect()
     {
         auto builder = JsonBuilder<RawImageParams>();
-        builder.field("channel", [](auto &object) { return &object.channel; })
-            .description("Channel of the framebuffer to encode");
+        builder.field("channel", [](auto &object) { return &object.channel; }).description("Channel of the framebuffer to encode");
         return builder.build();
     }
 };
@@ -74,8 +73,7 @@ struct JsonObjectReflector<JpegImageParams>
     static auto reflect()
     {
         auto builder = JsonBuilder<JpegImageParams>();
-        builder.field("channel", [](auto &object) { return &object.channel; })
-            .description("Channel of the framebuffer to encode");
+        builder.field("channel", [](auto &object) { return &object.channel; }).description("Channel of the framebuffer to encode");
         builder.field("settings", [](auto &object) { return &object.settings; }).description("JPEG encoder settings");
         return builder.build();
     }
@@ -92,8 +90,7 @@ struct JsonObjectReflector<PngImageParams>
     static auto reflect()
     {
         auto builder = JsonBuilder<PngImageParams>();
-        builder.field("channel", [](auto &object) { return &object.channel; })
-            .description("Channel of the framebuffer to encode");
+        builder.field("channel", [](auto &object) { return &object.channel; }).description("Channel of the framebuffer to encode");
         return builder.build();
     }
 };
@@ -109,8 +106,7 @@ struct JsonObjectReflector<ExrImageParams>
     static auto reflect()
     {
         auto builder = JsonBuilder<ExrImageParams>();
-        builder.field("channels", [](auto &object) { return &object.channels; })
-            .description("Channels of the framebuffer to encode");
+        builder.field("channels", [](auto &object) { return &object.channels; }).description("Channels of the framebuffer to encode");
         return builder.build();
     }
 };
@@ -129,101 +125,72 @@ struct JsonObjectReflector<ImageParams<T>>
     {
         auto builder = JsonBuilder<ImageParams<T>>();
         builder.field("id", [](auto &object) { return &object.id; }).description("ID of the framebuffer to read");
-        builder.field("settings", [](auto &object) { return &object.settings; })
-            .description("Settings to encode the framebuffer content");
+        builder.field("settings", [](auto &object) { return &object.settings; }).description("Settings to encode the framebuffer content");
         return builder.build();
     }
 };
 
-Result<NullJson> readFramebuffer(ObjectManager &manager, const ImageParams<RawImageParams> &params)
+Result<NullJson> readFramebuffer(ObjectManager &objects, const ImageParams<RawImageParams> &params)
 {
-    return manager.visit(
-        [&](ObjectRegistry &objects)
-        {
-            auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
+    auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
 
-            checkChannelInFramebuffer(framebuffer, params.settings.channel);
+    checkChannelInFramebuffer(framebuffer, params.settings.channel);
 
-            auto data = readChannel(framebuffer, params.settings.channel);
+    auto data = readChannel(framebuffer, params.settings.channel);
 
-            return Result<NullJson>{{}, std::move(data)};
-        });
+    return Result<NullJson>{{}, std::move(data)};
 }
 
-Result<NullJson> readFramebufferAsJpeg(ObjectManager &manager, const ImageParams<JpegImageParams> &params)
+Result<NullJson> readFramebufferAsJpeg(ObjectManager &objects, const ImageParams<JpegImageParams> &params)
 {
-    return manager.visit(
-        [&](ObjectRegistry &objects)
-        {
-            auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
+    auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
 
-            auto channel = static_cast<FramebufferChannel>(params.settings.channel);
-            checkChannelInFramebuffer(framebuffer, channel);
+    auto channel = static_cast<FramebufferChannel>(params.settings.channel);
+    checkChannelInFramebuffer(framebuffer, channel);
 
-            auto data = readChannelAsJpeg(framebuffer, params.settings.channel, params.settings.settings);
+    auto data = readChannelAsJpeg(framebuffer, params.settings.channel, params.settings.settings);
 
-            return Result<NullJson>{{}, std::move(data)};
-        });
+    return Result<NullJson>{{}, std::move(data)};
 }
 
-Result<NullJson> readFramebufferAsPng(ObjectManager &manager, const ImageParams<PngImageParams> &params)
+Result<NullJson> readFramebufferAsPng(ObjectManager &objects, const ImageParams<PngImageParams> &params)
 {
-    return manager.visit(
-        [&](ObjectRegistry &objects)
-        {
-            auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
+    auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
 
-            auto channel = static_cast<FramebufferChannel>(params.settings.channel);
-            checkChannelInFramebuffer(framebuffer, channel);
+    auto channel = static_cast<FramebufferChannel>(params.settings.channel);
+    checkChannelInFramebuffer(framebuffer, channel);
 
-            auto data = readChannelAsPng(framebuffer, params.settings.channel);
+    auto data = readChannelAsPng(framebuffer, params.settings.channel);
 
-            return Result<NullJson>{{}, std::move(data)};
-        });
+    return Result<NullJson>{{}, std::move(data)};
 }
 
-Result<NullJson> readFramebufferAsExr(ObjectManager &manager, const ImageParams<ExrImageParams> &params)
+Result<NullJson> readFramebufferAsExr(ObjectManager &objects, const ImageParams<ExrImageParams> &params)
 {
-    return manager.visit(
-        [&](ObjectRegistry &objects)
-        {
-            auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
+    auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
 
-            for (auto channel : params.settings.channels)
-            {
-                checkChannelInFramebuffer(framebuffer, channel);
-            }
+    for (auto channel : params.settings.channels)
+    {
+        checkChannelInFramebuffer(framebuffer, channel);
+    }
 
-            auto data = readChannelsAsExr(framebuffer, params.settings.channels);
+    auto data = readChannelsAsExr(framebuffer, params.settings.channels);
 
-            return Result<NullJson>{{}, std::move(data)};
-        });
+    return Result<NullJson>{{}, std::move(data)};
 }
 
-void addImageEndpoints(ApiBuilder &builder, ObjectManager &manager)
+void addImageEndpoints(ApiBuilder &builder, ObjectManager &objects)
 {
-    builder
-        .endpoint(
-            "readFramebuffer",
-            [&](ImageParams<RawImageParams> params) { return readFramebuffer(manager, params); })
+    builder.endpoint("readFramebuffer", [&](ImageParams<RawImageParams> params) { return readFramebuffer(objects, params); })
         .description("Read a framebuffer channel and return it in the binary part of the message");
 
-    builder
-        .endpoint(
-            "readFramebufferAsJpeg",
-            [&](ImageParams<JpegImageParams> params) { return readFramebufferAsJpeg(manager, params); })
+    builder.endpoint("readFramebufferAsJpeg", [&](ImageParams<JpegImageParams> params) { return readFramebufferAsJpeg(objects, params); })
         .description("Read a framebuffer channel and return it encoded as JPEG in the binary part of the message");
 
-    builder
-        .endpoint(
-            "readFramebufferAsPng",
-            [&](ImageParams<PngImageParams> params) { return readFramebufferAsPng(manager, params); })
+    builder.endpoint("readFramebufferAsPng", [&](ImageParams<PngImageParams> params) { return readFramebufferAsPng(objects, params); })
         .description("Read a framebuffer channel and return it encoded as PNG in the binary part of the message");
 
-    builder
-        .endpoint(
-            "readFramebufferAsExr",
-            [&](ImageParams<ExrImageParams> params) { return readFramebufferAsExr(manager, params); })
+    builder.endpoint("readFramebufferAsExr", [&](ImageParams<ExrImageParams> params) { return readFramebufferAsExr(objects, params); })
         .description("Read framebuffer channels and return them encoded as EXR in the binary part of the message");
 }
 }

@@ -50,7 +50,7 @@ std::size_t getItemCountFromBinaryOf(std::string_view bytes)
 }
 
 template<typename T>
-void copyBinaryTo(std::string_view bytes, std::span<T> items)
+void copyLittleEndianBinaryTo(std::string_view bytes, std::span<T> items)
 {
     for (auto &item : items)
     {
@@ -70,18 +70,14 @@ Data3D<T> createData3DFromBinaryOf(Device &device, const Size3 &itemCount, std::
 
     if (reduceMultiply(itemCount) != totalItemCount)
     {
-        throw InvalidParams(
-            fmt::format(
-                "Item count in binary {} does not match given item count {}x{}x{}",
-                totalItemCount,
-                itemCount.x,
-                itemCount.y,
-                itemCount.z));
+        auto [x, y, z] = itemCount;
+
+        throw InvalidParams(fmt::format("{} items found in binary which does not match dimensions {}x{}x{}", totalItemCount, x, y, z));
     }
 
     auto data = allocateData3D<T>(device, itemCount);
 
-    copyBinaryTo(bytes, data.getItems());
+    copyLittleEndianBinaryTo(bytes, data.getItems());
 
     return data;
 }

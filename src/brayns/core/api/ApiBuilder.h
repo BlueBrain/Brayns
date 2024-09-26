@@ -37,13 +37,13 @@
 namespace brayns
 {
 template<typename T>
-using GetParams = std::decay_t<GetArgType<T, 0>>;
+using ParamsOf = std::decay_t<GetArgType<T, 0>>;
 
 template<typename T>
-using GetResult = std::decay_t<GetReturnType<T>>;
+using ResultOf = std::decay_t<GetReturnType<T>>;
 
 template<typename T>
-concept WithReflectedParams = getArgCount<T> == 1 && ReflectedPayload<GetParams<T>>;
+concept WithReflectedParams = getArgCount<T> == 1 && ReflectedPayload<ParamsOf<T>>;
 
 template<typename T>
 concept WithoutParams = getArgCount<T> == 0;
@@ -52,19 +52,19 @@ template<typename T>
 concept WithParams = WithReflectedParams<T> || WithoutParams<T>;
 
 template<typename T>
-concept WithReflectedResult = ReflectedPayload<GetResult<T>>;
+concept WithReflectedResult = ReflectedPayload<ResultOf<T>>;
 
 template<typename T>
-concept WithoutResult = std::is_void_v<GetResult<T>>;
+concept WithoutResult = std::is_void_v<ResultOf<T>>;
 
 template<typename T>
 concept WithResult = WithReflectedResult<T> || WithoutResult<T>;
 
 template<typename T>
-concept WithReflectedTaskResult = ReflectedPayload<GetTaskResult<GetResult<T>>>;
+concept WithReflectedTaskResult = ReflectedPayload<GetTaskResult<ResultOf<T>>>;
 
 template<typename T>
-concept WithoutTaskResult = std::is_void_v<GetTaskResult<GetResult<T>>>;
+concept WithoutTaskResult = std::is_void_v<GetTaskResult<ResultOf<T>>>;
 
 template<typename T>
 concept WithTaskResult = WithReflectedTaskResult<T> || WithoutTaskResult<T>;
@@ -98,7 +98,7 @@ auto ensureHasResult(WithReflectedResult auto handler)
 
 auto ensureHasResult(WithoutResult auto handler)
 {
-    using Params = GetParams<decltype(handler)>;
+    using Params = ParamsOf<decltype(handler)>;
 
     return [handler = std::move(handler)](Params params)
     {
@@ -114,7 +114,7 @@ auto ensureHasTaskResult(WithReflectedTaskResult auto handler)
 
 auto ensureHasTaskResult(WithoutTaskResult auto handler)
 {
-    using Params = GetParams<decltype(handler)>;
+    using Params = ParamsOf<decltype(handler)>;
 
     return [handler = std::move(handler)](Params params)
     {
@@ -151,7 +151,7 @@ TaskInterface addParsingToTask(Task<T> task)
 template<ReflectedAsyncHandler T>
 AsyncEndpointHandler addParsingToAsyncHandler(T handler)
 {
-    using ParamsReflector = PayloadReflector<GetParams<T>>;
+    using ParamsReflector = PayloadReflector<ParamsOf<T>>;
 
     return [handler = std::move(handler)](auto rawParams)
     {
@@ -164,8 +164,8 @@ AsyncEndpointHandler addParsingToAsyncHandler(T handler)
 template<ReflectedAsyncHandler T>
 EndpointSchema reflectAsyncEndpointSchema(std::string method)
 {
-    using ParamsReflector = PayloadReflector<GetParams<T>>;
-    using ResultReflector = PayloadReflector<GetTaskResult<GetResult<T>>>;
+    using ParamsReflector = PayloadReflector<ParamsOf<T>>;
+    using ResultReflector = PayloadReflector<GetTaskResult<ResultOf<T>>>;
 
     return {
         .method = std::move(method),
@@ -178,8 +178,8 @@ EndpointSchema reflectAsyncEndpointSchema(std::string method)
 template<ReflectedSyncHandler T>
 SyncEndpointHandler addParsingToSyncHandler(T handler)
 {
-    using ParamsReflector = PayloadReflector<GetParams<T>>;
-    using ResultReflector = PayloadReflector<GetResult<T>>;
+    using ParamsReflector = PayloadReflector<ParamsOf<T>>;
+    using ResultReflector = PayloadReflector<ResultOf<T>>;
 
     return [handler = std::move(handler)](auto rawParams)
     {
@@ -192,8 +192,8 @@ SyncEndpointHandler addParsingToSyncHandler(T handler)
 template<ReflectedSyncHandler T>
 EndpointSchema reflectSyncEndpointSchema(std::string method)
 {
-    using ParamsReflector = PayloadReflector<GetParams<T>>;
-    using ResultReflector = PayloadReflector<GetResult<T>>;
+    using ParamsReflector = PayloadReflector<ParamsOf<T>>;
+    using ResultReflector = PayloadReflector<ResultOf<T>>;
 
     return {
         .method = std::move(method),

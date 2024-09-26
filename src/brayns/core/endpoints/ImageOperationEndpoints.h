@@ -27,5 +27,5 @@
 
 namespace brayns
 {
-void addImageOperationEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
+void addImageOperationEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

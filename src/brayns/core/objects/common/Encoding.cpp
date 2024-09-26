@@ -51,8 +51,7 @@ std::string readChannelAs(UserFramebuffer &framebuffer, FramebufferChannel chann
 }
 
 template<typename T>
-concept Encoder =
-    std::invocable<T, const ImageView &> && std::same_as<std::string, std::invoke_result_t<T, const ImageView &>>;
+concept Encoder = std::invocable<T, const ImageView &> && std::same_as<std::string, std::invoke_result_t<T, const ImageView &>>;
 
 std::string encodeColorChannel(const FramebufferData &data, const Size2 &size, Encoder auto &&encoder)
 {
@@ -163,10 +162,7 @@ std::string getExrChannelName(const char *layer, const char *channel)
 }
 
 template<typename T, int S>
-std::vector<ExrChannel> splitExrChannels(
-    const Vector<T, S> *items,
-    const char *layer,
-    const std::array<const char *, std::size_t(S)> &channels)
+std::vector<ExrChannel> splitExrChannels(const Vector<T, S> *items, const char *layer, const std::array<const char *, std::size_t(S)> &channels)
 {
     constexpr auto dataType = ExrDataType::F32;
     constexpr auto stride = sizeof(Vector<T, S>);
@@ -207,9 +203,7 @@ std::vector<ExrChannel> createExrChannels(const void *data, FramebufferChannel c
     }
 }
 
-std::vector<ExrChannel> createExrChannels(
-    const std::vector<ExrMappedData> &datas,
-    const std::set<FramebufferChannel> &channels)
+std::vector<ExrChannel> createExrChannels(const std::vector<ExrMappedData> &datas, const std::set<FramebufferChannel> &channels)
 {
     assert(datas.size() == channels.size());
 

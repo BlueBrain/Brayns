@@ -27,7 +27,7 @@ namespace
 {
 using namespace brayns;
 
-RegularVolumeData createVolumeData(Device &device, const RegularVolumeInfo &params, std::string_view binary)
+RegularVolumeData createVolumeData(Device &device, const RegularVolumeParams &params, std::string_view binary)
 {
     switch (params.voxelType)
     {
@@ -47,44 +47,42 @@ RegularVolumeData createVolumeData(Device &device, const RegularVolumeInfo &para
 
 namespace brayns
 {
-ObjectResult createRegularVolume(ObjectRegistry &objects, Device &device, const RegularVolumeParams &params)
+CreateObjectResult createRegularVolume(ObjectManager &objects, Device &device, const CreateRegularVolumeParams &params)
 {
     const auto &[json, binary] = params;
 
     auto data = createVolumeData(device, json.derived, binary);
-    auto volume = createRegularVolume(device, data, json.derived.settings);
+    auto volume = createRegularVolume(device, data, json.derived.value);
 
-    auto derived = UserRegularVolume{json.derived, std::move(volume)};
-    auto ptr = std::make_shared<decltype(derived)>(std::move(derived));
+    auto ptr = toShared(UserRegularVolume{json.derived, std::move(volume)});
 
     auto object = UserVolume{
-        .device = device,
         .value = ptr,
         .get = [=] { return ptr->value; },
     };
 
-    auto stored = objects.add(std::move(object), "RegularVolume");
+    auto stored = objects.add(std::move(object), {"RegularVolume"}, json.base);
 
-    return {stored.getId()};
+    return getResult(stored);
 }
 
-RegularVolumeInfo getRegularVolume(ObjectRegistry &objects, const ObjectParams &params)
+GetRegularVolumeResult getRegularVolume(ObjectManager &objects, const GetObjectParams &params)
 {
     auto stored = objects.getAsStored<UserVolume>(params.id);
-    auto &operation = castAs<UserRegularVolume>(stored.get().value, stored.getInfo());
-    return operation.settings;
+    auto &operation = *castAsShared<UserRegularVolume>(stored.get().value, stored);
+    return getResult(operation.settings);
 }
 
-void updateRegularVolume(ObjectRegistry &objects, const RegularVolumeUpdate &params)
+void updateRegularVolume(ObjectManager &objects, Device &device, const UpdateRegularVolumeParams &params)
 {
     auto stored = objects.getAsStored<UserVolume>(params.id);
-    auto &base = stored.get();
-    auto &derived = castAs<UserRegularVolume>(base.value, stored.getInfo());
-    auto &device = base.device.get();
+    auto &volume = *castAsShared<UserRegularVolume>(stored.get().value, stored);
 
-    derived.value.update(params.settings);
+    auto settings = getUpdatedParams(params, volume.settings.value);
+
+    volume.value.update(settings);
     device.throwIfError();
 
-    derived.settings.settings = params.settings;
+    volume.settings.value = std::move(settings);
 }
 }

@@ -31,35 +31,31 @@
 
 namespace brayns
 {
-template<ReflectedJson T>
-using TransferFunctionParams = ComposedParams<NullJson, T>;
-
 struct UserTransferFunction
 {
-    std::reference_wrapper<Device> device;
     std::any value;
     std::function<TransferFunction()> get;
 };
 
 template<ReflectedJson Settings, std::derived_from<TransferFunction> T>
-struct DerivedTransferFunction
+struct UserTransferFunctionOf
 {
     Settings settings;
     T value;
 };
 
-struct LinearTransferFunctionInfo
+struct LinearTransferFunctionParams
 {
     Box1 scalarRange;
     std::vector<Color4> colors;
 };
 
 template<>
-struct JsonObjectReflector<LinearTransferFunctionInfo>
+struct JsonObjectReflector<LinearTransferFunctionParams>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<LinearTransferFunctionInfo>();
+        auto builder = JsonBuilder<LinearTransferFunctionParams>();
         builder.field("scalarRange", [](auto &object) { return &object.scalarRange; })
             .description("Range of the scalar values sampled from the volume that will be mapped to colors");
         builder.field("colors", [](auto &object) { return &object.colors; })
@@ -69,14 +65,12 @@ struct JsonObjectReflector<LinearTransferFunctionInfo>
     }
 };
 
-using LinearTransferFunctionParams = TransferFunctionParams<LinearTransferFunctionInfo>;
-using LinearTransferFunctionUpdate = UpdateParams<LinearTransferFunctionInfo>;
-using UserLinearTransferFunction = DerivedTransferFunction<LinearTransferFunctionInfo, LinearTransferFunction>;
+using CreateLinearTransferFunctionParams = CreateParamsOf<LinearTransferFunctionParams>;
+using GetLinearTransferFunctionResult = GetResultOf<LinearTransferFunctionParams>;
+using UpdateLinearTransferFunctionParams = UpdateParamsOf<LinearTransferFunctionParams>;
+using UserLinearTransferFunction = UserTransferFunctionOf<LinearTransferFunctionParams, LinearTransferFunction>;
 
-ObjectResult createLinearTransferFunction(
-    ObjectRegistry &objects,
-    Device &device,
-    const LinearTransferFunctionParams &params);
-LinearTransferFunctionInfo getLinearTransferFunction(ObjectRegistry &objects, const ObjectParams &params);
-void updateLinearTransferFunction(ObjectRegistry &objects, const LinearTransferFunctionUpdate &params);
+CreateObjectResult createLinearTransferFunction(ObjectManager &objects, Device &device, const CreateLinearTransferFunctionParams &params);
+GetLinearTransferFunctionResult getLinearTransferFunction(ObjectManager &objects, const GetObjectParams &params);
+void updateLinearTransferFunction(ObjectManager &objects, Device &device, const UpdateLinearTransferFunctionParams &params);
 }

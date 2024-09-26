@@ -95,12 +95,10 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     addServiceEndpoints(builder, api, token);
 
-    auto objects = ObjectRegistry();
-    auto locked = ObjectManager(std::move(objects), logger);
+    auto objects = ObjectManager();
 
-    addObjectEndpoints(builder, locked);
-
-    addDeviceEndpoints(builder, locked, device);
+    addObjectEndpoints(builder, objects);
+    addDeviceEndpoints(builder, objects, device);
 
     api = builder.build();
 

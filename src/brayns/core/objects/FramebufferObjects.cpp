@@ -25,7 +25,7 @@ namespace
 {
 using namespace brayns;
 
-std::vector<Stored<UserImageOperation>> getImageOperations(ObjectRegistry &objects, const std::vector<ObjectId> &ids)
+std::vector<Stored<UserImageOperation>> getImageOperations(ObjectManager &objects, const std::vector<ObjectId> &ids)
 {
     auto operations = std::vector<Stored<UserImageOperation>>();
     operations.reserve(ids.size());
@@ -52,9 +52,7 @@ std::vector<ObjectId> getImageOperationIds(const std::vector<Stored<UserImageOpe
     return ids;
 }
 
-std::optional<Data<ImageOperation>> createImageOperationData(
-    Device &device,
-    const std::vector<Stored<UserImageOperation>> &operations)
+std::optional<Data<ImageOperation>> createImageOperationData(Device &device, const std::vector<Stored<UserImageOperation>> &operations)
 {
     auto itemCount = operations.size();
 
@@ -74,58 +72,58 @@ std::optional<Data<ImageOperation>> createImageOperationData(
 
     return data;
 }
-}
 
-namespace brayns
+UserFramebuffer createUserFramebuffer(ObjectManager &objects, Device &device, const FramebufferParams &params)
 {
-ObjectResult createFramebuffer(ObjectRegistry &objects, Device &device, const FramebufferParams &params)
-{
-    auto settings = params.settings;
+    auto settings = params.value;
 
     auto operations = getImageOperations(objects, params.operations);
     settings.operations = createImageOperationData(device, operations);
 
     auto framebuffer = createFramebuffer(device, settings);
 
-    auto object = UserFramebuffer{
-        .device = device,
+    return UserFramebuffer{
         .settings = std::move(settings),
         .operations = std::move(operations),
         .value = std::move(framebuffer),
     };
-
-    auto stored = objects.add(std::move(object), "Framebuffer");
-
-    return {stored.getId()};
+}
 }
 
-FramebufferInfo getFramebuffer(ObjectRegistry &objects, const ObjectParams &params)
+namespace brayns
+{
+CreateObjectResult createFramebuffer(ObjectManager &objects, Device &device, const CreateFramebufferParams &params)
+{
+    auto object = createUserFramebuffer(objects, device, params.derived);
+
+    auto stored = objects.add(std::move(object), {"Framebuffer"}, params.base);
+
+    return getResult(stored);
+}
+
+GetFramebufferResult getFramebuffer(ObjectManager &objects, const GetObjectParams &params)
 {
     auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
 
     auto ids = getImageOperationIds(framebuffer.operations);
-    auto result = FramebufferParams{framebuffer.settings, std::move(ids)};
     auto variance = framebuffer.value.getVariance();
 
-    return {std::move(result), variance};
+    return getResult(FramebufferInfo{{framebuffer.settings, std::move(ids)}, variance});
 }
 
-void updateFramebuffer(ObjectRegistry &objects, const FramebufferUpdate &params)
+void updateFramebuffer(ObjectManager &objects, Device &device, const UpdateFramebufferParams &params)
 {
-    auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
-    auto &device = framebuffer.device.get();
+    auto &object = objects.getAs<UserFramebuffer>(params.id);
 
-    auto operations = getImageOperations(objects, params.settings.operations);
-    auto data = createImageOperationData(device, operations);
+    auto ids = getImageOperationIds(object.operations);
+    auto current = FramebufferParams{object.settings, std::move(ids)};
 
-    framebuffer.value.update(data);
-    device.throwIfError();
+    auto settings = getUpdatedParams(params, current);
 
-    framebuffer.operations = std::move(operations);
-    framebuffer.settings.operations = std::move(data);
+    object = createUserFramebuffer(objects, device, settings);
 }
 
-void clearFramebuffer(ObjectRegistry &objects, const ObjectParams &params)
+void clearFramebuffer(ObjectManager &objects, const GetObjectParams &params)
 {
     auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
     framebuffer.value.resetAccumulation();

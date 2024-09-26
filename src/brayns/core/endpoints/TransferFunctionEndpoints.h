@@ -27,5 +27,5 @@
 
 namespace brayns
 {
-void addTransferFunctionEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
+void addTransferFunctionEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

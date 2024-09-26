@@ -25,7 +25,7 @@ namespace
 {
 using namespace brayns;
 
-LinearTransferFunctionSettings extractSettings(Device &device, const LinearTransferFunctionInfo &params)
+LinearTransferFunctionSettings extractSettings(Device &device, const LinearTransferFunctionParams &params)
 {
     auto data = createData<Color4>(device, params.colors);
     return {params.scalarRange, std::move(data)};
@@ -34,47 +34,45 @@ LinearTransferFunctionSettings extractSettings(Device &device, const LinearTrans
 
 namespace brayns
 {
-ObjectResult createLinearTransferFunction(
-    ObjectRegistry &objects,
-    Device &device,
-    const LinearTransferFunctionParams &params)
+CreateObjectResult createLinearTransferFunction(ObjectManager &objects, Device &device, const CreateLinearTransferFunctionParams &params)
 {
-    auto settings = extractSettings(device, params.derived);
-    auto function = createLinearTransferFunction(device, settings);
+    const auto &[base, derived] = params;
 
-    auto derived = UserLinearTransferFunction{params.derived, std::move(function)};
-    auto ptr = std::make_shared<decltype(derived)>(std::move(derived));
+    auto settings = extractSettings(device, derived);
+
+    auto operation = createLinearTransferFunction(device, settings);
+
+    auto ptr = toShared(UserLinearTransferFunction{derived, std::move(operation)});
 
     auto object = UserTransferFunction{
-        .device = device,
         .value = ptr,
         .get = [=] { return ptr->value; },
     };
 
-    auto stored = objects.add(std::move(object), "LinearTransferFunction");
+    auto stored = objects.add(std::move(object), {"LinearTransferFunction"}, base);
 
-    return {stored.getId()};
+    return getResult(stored);
 }
 
-LinearTransferFunctionInfo getLinearTransferFunction(ObjectRegistry &objects, const ObjectParams &params)
+GetLinearTransferFunctionResult getLinearTransferFunction(ObjectManager &objects, const GetObjectParams &params)
 {
-    auto stored = objects.getAsStored<UserTransferFunction>(params.id);
-    auto &operation = castAs<UserLinearTransferFunction>(stored.get().value, stored.getInfo());
-    return operation.settings;
+    auto object = objects.getAsStored<UserTransferFunction>(params.id);
+    auto &operation = *castAsShared<UserLinearTransferFunction>(object.get().value, object);
+    return getResult(operation.settings);
 }
 
-void updateLinearTransferFunction(ObjectRegistry &objects, const LinearTransferFunctionUpdate &params)
+void updateLinearTransferFunction(ObjectManager &objects, Device &device, const UpdateLinearTransferFunctionParams &params)
 {
     auto stored = objects.getAsStored<UserTransferFunction>(params.id);
-    auto &base = stored.get();
-    auto &derived = castAs<UserLinearTransferFunction>(base.value, stored.getInfo());
-    auto &device = base.device.get();
+    auto &operation = *castAsShared<UserLinearTransferFunction>(stored.get().value, stored);
 
-    auto settings = extractSettings(device, params.settings);
+    auto message = getUpdatedParams(params, operation.settings);
 
-    derived.value.update(settings);
+    auto settings = extractSettings(device, message);
+
+    operation.value.update(settings);
     device.throwIfError();
 
-    derived.settings = params.settings;
+    operation.settings = std::move(message);
 }
 }

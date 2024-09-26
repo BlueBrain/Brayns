@@ -25,33 +25,15 @@
 
 namespace brayns
 {
-ObjectResult createRegularVolume(ObjectManager &manager, Device &device, const RegularVolumeParams &params)
+void addVolumeEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device)
 {
-    return manager.visit([&](ObjectRegistry &objects) { return createRegularVolume(objects, device, params); });
-}
-
-RegularVolumeInfo getRegularVolume(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { return getRegularVolume(objects, params); });
-}
-
-void updateRegularVolume(ObjectManager &manager, const RegularVolumeUpdate &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { updateRegularVolume(objects, params); });
-}
-
-void addVolumeEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
-{
-    builder
-        .endpoint(
-            "createRegularVolume",
-            [&](RegularVolumeParams params) { return createRegularVolume(manager, device, params); })
+    builder.endpoint("createRegularVolume", [&](CreateRegularVolumeParams params) { return createRegularVolume(objects, device, params); })
         .description("Create a regular volume");
 
-    builder.endpoint("getRegularVolume", [&](ObjectParams params) { return getRegularVolume(manager, params); })
+    builder.endpoint("getRegularVolume", [&](GetObjectParams params) { return getRegularVolume(objects, params); })
         .description("Get regular volume specific params");
 
-    builder.endpoint("updateRegularVolume", [&](RegularVolumeUpdate params) { updateRegularVolume(manager, params); })
+    builder.endpoint("updateRegularVolume", [&](UpdateRegularVolumeParams params) { updateRegularVolume(objects, device, params); })
         .description("Update regular volume specific params");
 }
 }

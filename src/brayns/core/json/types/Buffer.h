@@ -39,9 +39,9 @@ public:
         _json = json;
     }
 
-    void extract(T &value) const
+    void extract(T &currentValue) const
     {
-        deserializeJson(_json, value);
+        deserializeJson(_json, currentValue);
     }
 
 private:

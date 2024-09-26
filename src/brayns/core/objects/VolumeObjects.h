@@ -22,27 +22,23 @@
 #pragma once
 
 #include <any>
+#include <concepts>
 #include <functional>
-#include <string_view>
 
-#include <brayns/core/api/ApiBuilder.h>
 #include <brayns/core/engine/Volume.h>
+#include <brayns/core/jsonrpc/PayloadReflector.h>
 #include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-template<ReflectedJson T>
-using VolumeParams = ComposedParams<NullJson, T>;
-
 struct UserVolume
 {
-    std::reference_wrapper<Device> device;
     std::any value;
     std::function<Volume()> get;
 };
 
 template<ReflectedJson Settings, std::derived_from<Volume> T>
-struct DerivedVolume
+struct UserVolumeOf
 {
     Settings settings;
     T value;
@@ -65,7 +61,7 @@ struct EnumReflector<VoxelType>
         builder.field("U8", VoxelType::U8).description("8 bit unsigned int");
         builder.field("U16", VoxelType::U16).description("16 bit unsigned int");
         builder.field("F32", VoxelType::F32).description("32 bit float");
-        builder.field("F64", VoxelType::F64).description("32 bit float");
+        builder.field("F64", VoxelType::F64).description("64 bit float");
         return builder.build();
     }
 };
@@ -76,9 +72,9 @@ struct EnumReflector<VolumeFilter>
     static auto reflect()
     {
         auto builder = EnumBuilder<VolumeFilter>();
-        builder.field("Nearest", VolumeFilter::Nearest).description("Voxel sampling does no interpolations");
-        builder.field("Linear", VolumeFilter::Linear).description("Voxel sampling does linear interpolation");
-        builder.field("Cubic", VolumeFilter::Cubic).description("Voxel sampling does cubic interpolation");
+        builder.field("Nearest", VolumeFilter::Nearest).description("Sample volume to nearest voxel");
+        builder.field("Linear", VolumeFilter::Linear).description("Interpolate voxels linearly");
+        builder.field("Cubic", VolumeFilter::Cubic).description("Interpolate voxels with cubic function");
         return builder.build();
     }
 };
@@ -105,8 +101,8 @@ struct JsonObjectReflector<RegularVolumeSettings>
             .description("Position of the volume origin")
             .defaultValue(Vector3(0, 0, 0));
         builder.field("spacing", [](auto &object) { return &object.spacing; })
-            .description("Size of the volume cells")
-            .defaultValue(Vector3(0, 0, 0));
+            .description("Size of the volume cells in world space")
+            .defaultValue(Vector3(1, 1, 1));
         builder.field("type", [](auto &object) { return &object.type; })
             .description("Wether the data is provided per vertex or per cell")
             .defaultValue(VolumeType::VertexCentered);
@@ -114,39 +110,38 @@ struct JsonObjectReflector<RegularVolumeSettings>
             .description("How to interpolate sampled voxels")
             .defaultValue(VolumeFilter::Linear);
         builder.field("background", [](auto &object) { return &object.background; })
-            .description("Value used when sampling an undefined region outside the volume (null to use NaN)");
+            .description("Value used when sampling an undefined region outside the volume (null to use NaN)")
+            .defaultValue(NullJson());
         return builder.build();
     }
 };
 
-struct RegularVolumeInfo
+struct RegularVolumeParams
 {
     VoxelType voxelType;
     Size3 voxelCount;
-    RegularVolumeSettings settings;
+    RegularVolumeSettings value;
 };
 
 template<>
-struct JsonObjectReflector<RegularVolumeInfo>
+struct JsonObjectReflector<RegularVolumeParams>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<RegularVolumeInfo>();
-        builder.field("voxelType", [](auto &object) { return &object.voxelType; })
-            .description("Type of the provided voxels");
-        builder.field("voxelCount", [](auto &object) { return &object.voxelCount; })
-            .description("Volume dimensions XYZ");
-        builder.field("settings", [](auto &object) { return &object.settings; })
-            .description("Additional settings that can be updated");
+        auto builder = JsonBuilder<RegularVolumeParams>();
+        builder.field("voxelType", [](auto &object) { return &object.voxelType; }).description("Type of the provided voxels");
+        builder.field("voxelCount", [](auto &object) { return &object.voxelCount; }).description("Volume dimensions XYZ");
+        builder.extend([](auto &object) { return &object.value; });
         return builder.build();
     }
 };
 
-using RegularVolumeParams = Params<VolumeParams<RegularVolumeInfo>>;
-using RegularVolumeUpdate = UpdateParams<RegularVolumeSettings>;
-using UserRegularVolume = DerivedVolume<RegularVolumeInfo, RegularVolume>;
+using CreateRegularVolumeParams = Params<CreateParamsOf<RegularVolumeParams>>;
+using GetRegularVolumeResult = GetResultOf<RegularVolumeParams>;
+using UpdateRegularVolumeParams = UpdateParamsOf<RegularVolumeSettings>;
+using UserRegularVolume = UserVolumeOf<RegularVolumeParams, RegularVolume>;
 
-ObjectResult createRegularVolume(ObjectRegistry &objects, Device &device, const RegularVolumeParams &params);
-RegularVolumeInfo getRegularVolume(ObjectRegistry &objects, const ObjectParams &params);
-void updateRegularVolume(ObjectRegistry &objects, const RegularVolumeUpdate &params);
+CreateObjectResult createRegularVolume(ObjectManager &objects, Device &device, const CreateRegularVolumeParams &params);
+GetRegularVolumeResult getRegularVolume(ObjectManager &objects, const GetObjectParams &params);
+void updateRegularVolume(ObjectManager &objects, Device &device, const UpdateRegularVolumeParams &params);
 }

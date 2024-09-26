@@ -25,43 +25,21 @@
 
 namespace brayns
 {
-ObjectResult createLinearTransferFunction(
-    ObjectManager &manager,
-    Device &device,
-    const LinearTransferFunctionParams &params)
-{
-    return manager.visit(
-        [&](ObjectRegistry &objects) { return createLinearTransferFunction(objects, device, params); });
-}
-
-LinearTransferFunctionInfo getLinearTransferFunction(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { return getLinearTransferFunction(objects, params); });
-}
-
-void updateLinearTransferFunction(ObjectManager &manager, const LinearTransferFunctionUpdate &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { updateLinearTransferFunction(objects, params); });
-}
-
-void addTransferFunctionEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
+void addTransferFunctionEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device)
 {
     builder
         .endpoint(
             "createLinearTransferFunction",
-            [&](LinearTransferFunctionParams params) { return createLinearTransferFunction(manager, device, params); })
+            [&](CreateLinearTransferFunctionParams params) { return createLinearTransferFunction(objects, device, params); })
         .description("Create a linear transfer function that can be attached to a volume");
 
-    builder
-        .endpoint(
-            "getLinearTransferFunction",
-            [&](ObjectParams params) { return getLinearTransferFunction(manager, params); })
+    builder.endpoint("getLinearTransferFunction", [&](GetObjectParams params) { return getLinearTransferFunction(objects, params); })
         .description("Get linear transfer function specific params");
 
     builder
         .endpoint(
             "updateLinearTransferFunction",
-            [&](LinearTransferFunctionUpdate params) { updateLinearTransferFunction(manager, params); })
+            [&](UpdateLinearTransferFunctionParams params) { updateLinearTransferFunction(objects, device, params); })
         .description("Update linear transfer function specific params");
 }
 }
