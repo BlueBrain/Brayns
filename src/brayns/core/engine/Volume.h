@@ -67,8 +67,5 @@ public:
     void update(const RegularVolumeSettings &settings);
 };
 
-RegularVolume createRegularVolume(
-    Device &device,
-    const RegularVolumeData &data,
-    const RegularVolumeSettings &settings = {});
+RegularVolume createRegularVolume(Device &device, const RegularVolumeData &data, const RegularVolumeSettings &settings = {});
 }

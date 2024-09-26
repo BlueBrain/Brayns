@@ -40,18 +40,10 @@ struct ArgvSettingsReflector<SomeSettings>
     {
         auto builder = ArgvBuilder<SomeSettings>();
         builder.description("This is a test");
-        builder.option("some-bool", [](auto &settings) { return &settings.someBool; })
-            .description("Test 1")
-            .defaultValue(true);
-        builder.option("some-int", [](auto &settings) { return &settings.someInt; })
-            .description("Test 2")
-            .defaultValue(1);
-        builder.option("some-float", [](auto &settings) { return &settings.someFloat; })
-            .description("Test 3")
-            .defaultValue(2.0F);
-        builder.option("some-string", [](auto &settings) { return &settings.someString; })
-            .description("Test 4")
-            .defaultValue("123");
+        builder.option("some-bool", [](auto &settings) { return &settings.someBool; }).description("Test 1").defaultValue(true);
+        builder.option("some-int", [](auto &settings) { return &settings.someInt; }).description("Test 2").defaultValue(1);
+        builder.option("some-float", [](auto &settings) { return &settings.someFloat; }).description("Test 3").defaultValue(2.0F);
+        builder.option("some-string", [](auto &settings) { return &settings.someString; }).description("Test 4").defaultValue("123");
         return builder.build();
     }
 };

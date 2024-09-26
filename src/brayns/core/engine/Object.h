@@ -181,8 +181,7 @@ template<typename T>
 struct ObjectParamReflector;
 
 template<typename T>
-concept ObjectParam =
-    std::is_void_v<decltype(ObjectParamReflector<T>::set(OSPObject(), "", std::declval<const T &>()))>;
+concept ObjectParam = std::is_void_v<decltype(ObjectParamReflector<T>::set(OSPObject(), "", std::declval<const T &>()))>;
 
 template<ObjectParam T>
 void setObjectParam(OSPObject handle, const char *id, const T &value)

@@ -48,12 +48,9 @@ struct JsonObjectReflector<EndpointSchema>
         auto builder = JsonBuilder<EndpointSchema>();
         builder.field("method", [](auto &object) { return &object.method; })
             .description("JSON-RPC method that has to be specified to reach the endpoint");
-        builder.field("description", [](auto &object) { return &object.description; })
-            .description("Short description of what the method does");
-        builder.field("params", [](auto &object) { return &object.params; })
-            .description("JSON schema of the method params");
-        builder.field("result", [](auto &object) { return &object.result; })
-            .description("JSON schema of the method result");
+        builder.field("description", [](auto &object) { return &object.description; }).description("Short description of what the method does");
+        builder.field("params", [](auto &object) { return &object.params; }).description("JSON schema of the method params");
+        builder.field("result", [](auto &object) { return &object.result; }).description("JSON schema of the method result");
         builder.field("async", [](auto &object) { return &object.async; })
             .description(
                 "If true, the endpoint does not return its result directly but instead an object {\"task_id\": <id>}. "

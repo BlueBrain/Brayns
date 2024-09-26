@@ -43,12 +43,9 @@ struct JsonObjectReflector<TaskOperation>
     static auto reflect()
     {
         auto builder = JsonBuilder<TaskOperation>();
-        builder.field("description", [](auto &object) { return &object.description; })
-            .description("Operation description");
-        builder.field("completion", [](auto &object) { return &object.completion; })
-            .description("Operation completion between 0 and 1");
-        builder.field("index", [](auto &object) { return &object.index; })
-            .description("Operation index between 0 and operation_count");
+        builder.field("description", [](auto &object) { return &object.description; }).description("Operation description");
+        builder.field("completion", [](auto &object) { return &object.completion; }).description("Operation completion between 0 and 1");
+        builder.field("index", [](auto &object) { return &object.index; }).description("Operation index between 0 and operation_count");
         return builder.build();
     }
 };

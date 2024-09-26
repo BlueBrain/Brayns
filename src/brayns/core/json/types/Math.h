@@ -62,9 +62,7 @@ struct JsonObjectReflector<Transform>
         builder.field("rotation", [](auto &object) { return &object.rotation; })
             .description("Rotation quaternion XYZW")
             .defaultValue(Quaternion(1.0F, 0.0F, 0.0F, 0.0F));
-        builder.field("scale", [](auto &object) { return &object.scale; })
-            .description("Scale XYZ")
-            .defaultValue(Vector3(1.0F, 1.0F, 1.0F));
+        builder.field("scale", [](auto &object) { return &object.scale; }).description("Scale XYZ").defaultValue(Vector3(1.0F, 1.0F, 1.0F));
         return builder.build();
     }
 };

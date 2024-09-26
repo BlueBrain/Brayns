@@ -55,8 +55,7 @@ struct JsonObjectReflector<TaskResult>
     static auto reflect()
     {
         auto builder = JsonBuilder<TaskResult>();
-        builder.field("taskId", [](auto &object) { return &object.taskId; })
-            .description("ID of the task started by the method");
+        builder.field("taskId", [](auto &object) { return &object.taskId; }).description("ID of the task started by the method");
         return builder.build();
     }
 };
@@ -75,10 +74,8 @@ struct JsonObjectReflector<TaskInfo>
     {
         auto builder = JsonBuilder<TaskInfo>();
         builder.field("id", [](auto &object) { return &object.id; }).description("Task ID");
-        builder.field("operationCount", [](auto &object) { return &object.operationCount; })
-            .description("Number of operations the task will perform");
-        builder.field("currentOperation", [](auto &object) { return &object.currentOperation; })
-            .description("Current task operation");
+        builder.field("operationCount", [](auto &object) { return &object.operationCount; }).description("Number of operations the task will perform");
+        builder.field("currentOperation", [](auto &object) { return &object.currentOperation; }).description("Current task operation");
         return builder.build();
     }
 };
@@ -108,10 +105,7 @@ template<ReflectedTask T>
 using GetTaskResult = typename TaskReflector<T>::Result;
 
 template<ReflectedPayload ParamsType, std::invocable<Progress, ParamsType> Handler>
-Task<std::invoke_result_t<Handler, Progress, ParamsType>> startTask(
-    Handler handler,
-    ParamsType params,
-    std::size_t operationCount)
+Task<std::invoke_result_t<Handler, Progress, ParamsType>> startTask(Handler handler, ParamsType params, std::size_t operationCount)
 {
     auto monitor = std::make_shared<TaskMonitor>(operationCount);
 
