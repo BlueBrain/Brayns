@@ -271,6 +271,10 @@ TEST_CASE("Math")
 
     CHECK_THROWS_AS(parseJsonAs<Vector3>("[1,2]"), JsonException);
     CHECK_THROWS_AS(parseJsonAs<Quaternion>("[1,2]"), JsonException);
+
+    CHECK_EQ(parseJsonAs<Box2>("[[1,2], [3,4]]"), Box2{{1, 2}, {3, 4}});
+    CHECK_THROWS_AS(parseJsonAs<Box2>("[[1,2,3], [3,4]]"), JsonException);
+    CHECK_EQ(stringifyToJson(Box1{1, 2}), "[1,2]");
 }
 
 TEST_CASE("Map")
