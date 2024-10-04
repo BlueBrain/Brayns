@@ -30,6 +30,8 @@ TEST_CASE("Basic")
     auto offset = 1;
 
     auto builder = ApiBuilder();
+    auto monitor = std::make_shared<TaskMonitor>(1);
+    auto progress = Progress(monitor);
 
     builder.endpoint("test", [&](int value) { return float(offset + value); }).description("Test");
 
@@ -46,11 +48,10 @@ TEST_CASE("Basic")
     CHECK_EQ(schema.description, "Test");
     CHECK_EQ(schema.params, getJsonSchema<int>());
     CHECK_EQ(schema.result, getJsonSchema<float>());
-    CHECK_FALSE(schema.asynchronous);
 
     auto params = Payload{2};
 
-    auto result = api.execute("test", params);
+    auto result = api.execute("test", params, progress);
 
     CHECK_EQ(result.json.extract<float>(), 3.0f);
     CHECK_EQ(result.binary, "");
@@ -59,6 +60,8 @@ TEST_CASE("Basic")
 TEST_CASE("With binary")
 {
     auto builder = ApiBuilder();
+    auto monitor = std::make_shared<TaskMonitor>(1);
+    auto progress = Progress(monitor);
 
     auto value = 0;
     auto buffer = std::string();
@@ -77,9 +80,9 @@ TEST_CASE("With binary")
 
     auto params = Payload{1, "123"};
 
-    CHECK_THROWS_AS(api.execute("test1", params), InvalidParams);
+    CHECK_THROWS_AS(api.execute("test1", params, progress), InvalidParams);
 
-    auto result = api.execute("test2", params);
+    auto result = api.execute("test2", params, progress);
 
     CHECK_EQ(value, 1);
     CHECK_EQ(buffer, "123");
@@ -91,6 +94,8 @@ TEST_CASE("With binary")
 TEST_CASE("No params or result")
 {
     auto builder = ApiBuilder();
+    auto monitor = std::make_shared<TaskMonitor>(1);
+    auto progress = Progress(monitor);
 
     builder.endpoint("test1", [] { return 0; });
     builder.endpoint("test2", [](int) {});
@@ -105,9 +110,9 @@ TEST_CASE("No params or result")
     CHECK_EQ(api.getSchema("test3").params, getJsonSchema<NullJson>());
     CHECK_EQ(api.getSchema("test3").result, getJsonSchema<NullJson>());
 
-    CHECK_EQ(api.execute("test1", Payload()).json, serializeToJson(0));
-    CHECK_EQ(api.execute("test2", Payload(0)).json, serializeToJson(NullJson()));
-    CHECK_EQ(api.execute("test3", Payload()).json, serializeToJson(NullJson()));
+    CHECK_EQ(api.execute("test1", Payload(), progress).json, serializeToJson(0));
+    CHECK_EQ(api.execute("test2", Payload(0), progress).json, serializeToJson(NullJson()));
+    CHECK_EQ(api.execute("test3", Payload(), progress).json, serializeToJson(NullJson()));
 }
 
 struct NonCopyable
@@ -138,6 +143,8 @@ struct JsonObjectReflector<NonCopyable>
 TEST_CASE("Copy")
 {
     auto builder = ApiBuilder();
+    auto monitor = std::make_shared<TaskMonitor>(1);
+    auto progress = Progress(monitor);
 
     builder.endpoint("test", [](NonCopyable) { return NonCopyable(); });
 
@@ -145,7 +152,7 @@ TEST_CASE("Copy")
 
     auto params = Payload{createJsonObject()};
 
-    auto result = api.execute("test", params);
+    auto result = api.execute("test", params, progress);
 
     CHECK(getObject(result.json).size() == 0);
     CHECK(result.binary.empty());
@@ -159,60 +166,4 @@ TEST_CASE("Duplication")
 
     builder.endpoint("test", handler);
     CHECK_THROWS_AS(builder.endpoint("test", handler), std::invalid_argument);
-}
-
-TEST_CASE("Task")
-{
-    auto builder = ApiBuilder();
-
-    auto offset = 1;
-
-    auto worker = [&](Progress progress, int value)
-    {
-        progress.nextOperation("1");
-        progress.update(0.5F);
-        return value + offset;
-    };
-
-    builder.task("test", [=](int value) { return startTask(worker, value, 2); });
-
-    auto api = builder.build();
-
-    auto params = Payload{2};
-
-    auto [json, binary] = api.execute("test", params);
-
-    CHECK(binary.empty());
-
-    auto object = getObject(json);
-    auto taskId = object.get("taskId").extract<TaskId>();
-
-    CHECK_EQ(taskId, 0);
-
-    auto tasks = api.getTasks();
-
-    CHECK_EQ(tasks.size(), 1);
-
-    while (true)
-    {
-        auto info = api.getTask(taskId);
-
-        if (info.currentOperation.completion != 0.0F)
-        {
-            CHECK_EQ(info.currentOperation.description, "1");
-            CHECK_EQ(info.currentOperation.completion, 0.5F);
-            break;
-        }
-    }
-
-    auto result = api.waitForTaskResult(taskId);
-
-    CHECK_EQ(result.json.extract<int>(), 3);
-    CHECK(result.binary.empty());
-
-    CHECK_THROWS_AS(api.cancelTask(taskId), InvalidParams);
-    CHECK_THROWS_AS(api.waitForTaskResult(taskId), InvalidParams);
-    CHECK_THROWS_AS(api.getTask(taskId), InvalidParams);
-
-    CHECK(api.getTasks().empty());
 }

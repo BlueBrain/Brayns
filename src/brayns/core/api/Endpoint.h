@@ -23,11 +23,11 @@
 
 #include <functional>
 #include <string>
-#include <variant>
 
 #include <brayns/core/json/Json.h>
+#include <brayns/core/jsonrpc/Messages.h>
 
-#include "Task.h"
+#include "Progress.h"
 
 namespace brayns
 {
@@ -37,7 +37,6 @@ struct EndpointSchema
     std::string description = {};
     JsonSchema params;
     JsonSchema result;
-    bool asynchronous = false;
 };
 
 template<>
@@ -51,17 +50,11 @@ struct JsonObjectReflector<EndpointSchema>
         builder.field("description", [](auto &object) { return &object.description; }).description("Short description of what the method does");
         builder.field("params", [](auto &object) { return &object.params; }).description("JSON schema of the method params");
         builder.field("result", [](auto &object) { return &object.result; }).description("JSON schema of the method result");
-        builder.field("asynchronous", [](auto &object) { return &object.asynchronous; })
-            .description(
-                "If true, the endpoint does not return its result directly but instead an object {\"task_id\": <id>}. "
-                "This ID can be used to get the task result, cancel it or get its progress");
         return builder.build();
     }
 };
 
-using SyncEndpointHandler = std::function<Payload(Payload)>;
-using AsyncEndpointHandler = std::function<TaskInterface(Payload)>;
-using EndpointHandler = std::variant<SyncEndpointHandler, AsyncEndpointHandler>;
+using EndpointHandler = std::function<Payload(Payload, Progress)>;
 
 struct Endpoint
 {

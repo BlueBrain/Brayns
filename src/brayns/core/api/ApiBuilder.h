@@ -43,13 +43,19 @@ template<typename T>
 using ResultOf = std::decay_t<GetReturnType<T>>;
 
 template<typename T>
+concept WithReflectedParamsAndProgress = getArgCount<T> == 2 && ReflectedPayload<ParamsOf<T>> && std::same_as<Progress, GetArgType<T, 1>>;
+
+template<typename T>
+concept WithProgress = getArgCount<T> == 1 && std::same_as<Progress, GetArgType<T, 0>>;
+
+template<typename T>
 concept WithReflectedParams = getArgCount<T> == 1 && ReflectedPayload<ParamsOf<T>>;
 
 template<typename T>
 concept WithoutParams = getArgCount<T> == 0;
 
 template<typename T>
-concept WithParams = WithReflectedParams<T> || WithoutParams<T>;
+concept WithParams = WithReflectedParamsAndProgress<T> || WithProgress<T> || WithReflectedParams<T> || WithoutParams<T>;
 
 template<typename T>
 concept WithReflectedResult = ReflectedPayload<ResultOf<T>>;
@@ -61,34 +67,29 @@ template<typename T>
 concept WithResult = WithReflectedResult<T> || WithoutResult<T>;
 
 template<typename T>
-concept WithReflectedTaskResult = ReflectedPayload<GetTaskResult<ResultOf<T>>>;
+concept ReflectableHandler = WithParams<T> && WithResult<T>;
 
 template<typename T>
-concept WithoutTaskResult = std::is_void_v<GetTaskResult<ResultOf<T>>>;
+concept ReflectedHandler = WithReflectedParamsAndProgress<T> && WithReflectedResult<T>;
 
-template<typename T>
-concept WithTaskResult = WithReflectedTaskResult<T> || WithoutTaskResult<T>;
-
-template<typename T>
-concept ReflectedAsyncHandler = WithReflectedParams<T> && WithReflectedTaskResult<T>;
-
-template<typename T>
-concept AsyncHandler = WithParams<T> && WithTaskResult<T>;
-
-template<typename T>
-concept ReflectedSyncHandler = WithReflectedParams<T> && WithReflectedResult<T>;
-
-template<typename T>
-concept SyncHandler = WithParams<T> && WithResult<T>;
-
-auto ensureHasParams(WithReflectedParams auto handler)
+auto ensureHasParams(WithReflectedParamsAndProgress auto handler)
 {
     return handler;
 }
 
+auto ensureHasParams(WithProgress auto handler)
+{
+    return [handler = std::move(handler)](NullJson, Progress progress) { return handler(progress); };
+}
+
+auto ensureHasParams(WithReflectedParams auto handler)
+{
+    return [handler = std::move(handler)](ParamsOf<decltype(handler)> params, Progress) { return handler(std::move(params)); };
+}
+
 auto ensureHasParams(WithoutParams auto handler)
 {
-    return [handler = std::move(handler)](NullJson) { return handler(); };
+    return [handler = std::move(handler)](NullJson, Progress) { return handler(); };
 }
 
 auto ensureHasResult(WithReflectedResult auto handler)
@@ -98,107 +99,31 @@ auto ensureHasResult(WithReflectedResult auto handler)
 
 auto ensureHasResult(WithoutResult auto handler)
 {
-    using Params = ParamsOf<decltype(handler)>;
-
-    return [handler = std::move(handler)](Params params)
+    return [handler = std::move(handler)](ParamsOf<decltype(handler)> params, Progress progress)
     {
-        handler(std::move(params));
+        handler(std::move(params), progress);
         return NullJson();
     };
 }
 
-auto ensureHasTaskResult(WithReflectedTaskResult auto handler)
+template<ReflectedHandler T>
+EndpointHandler addParsingToHandler(T handler)
 {
-    return handler;
-}
-
-auto ensureHasTaskResult(WithoutTaskResult auto handler)
-{
-    using Params = ParamsOf<decltype(handler)>;
-
-    return [handler = std::move(handler)](Params params)
+    return [handler = std::move(handler)](auto rawParams, auto progress)
     {
-        auto task = handler(std::move(params));
-
-        auto waitAndReturnNull = [wait = std::move(task.wait)]
-        {
-            wait();
-            return NullJson();
-        };
-
-        return Task<NullJson>{
-            .operationCount = task.operationCount,
-            .getCurrentOperation = std::move(task.getCurrentOperation),
-            .wait = std::move(waitAndReturnNull),
-            .cancel = std::move(task.cancel),
-        };
+        auto params = PayloadReflector<ParamsOf<T>>::deserialize(std::move(rawParams));
+        auto result = handler(std::move(params), progress);
+        return PayloadReflector<ResultOf<T>>::serialize(std::move(result));
     };
 }
 
-template<ReflectedPayload T>
-TaskInterface addParsingToTask(Task<T> task)
+template<ReflectedHandler T>
+EndpointSchema reflectEndpointSchema(std::string method)
 {
-    using ResultReflector = PayloadReflector<T>;
-
-    return {
-        .operationCount = task.operationCount,
-        .getCurrentOperation = std::move(task.getCurrentOperation),
-        .wait = [wait = std::move(task.wait)] { return ResultReflector::serialize(wait()); },
-        .cancel = std::move(task.cancel),
-    };
-}
-
-template<ReflectedAsyncHandler T>
-AsyncEndpointHandler addParsingToAsyncHandler(T handler)
-{
-    using ParamsReflector = PayloadReflector<ParamsOf<T>>;
-
-    return [handler = std::move(handler)](auto rawParams)
-    {
-        auto params = ParamsReflector::deserialize(std::move(rawParams));
-        auto task = handler(std::move(params));
-        return addParsingToTask(std::move(task));
-    };
-}
-
-template<ReflectedAsyncHandler T>
-EndpointSchema reflectAsyncEndpointSchema(std::string method)
-{
-    using ParamsReflector = PayloadReflector<ParamsOf<T>>;
-    using ResultReflector = PayloadReflector<GetTaskResult<ResultOf<T>>>;
-
     return {
         .method = std::move(method),
-        .params = ParamsReflector::getSchema(),
-        .result = ResultReflector::getSchema(),
-        .asynchronous = true,
-    };
-}
-
-template<ReflectedSyncHandler T>
-SyncEndpointHandler addParsingToSyncHandler(T handler)
-{
-    using ParamsReflector = PayloadReflector<ParamsOf<T>>;
-    using ResultReflector = PayloadReflector<ResultOf<T>>;
-
-    return [handler = std::move(handler)](auto rawParams)
-    {
-        auto params = ParamsReflector::deserialize(std::move(rawParams));
-        auto result = handler(std::move(params));
-        return ResultReflector::serialize(std::move(result));
-    };
-}
-
-template<ReflectedSyncHandler T>
-EndpointSchema reflectSyncEndpointSchema(std::string method)
-{
-    using ParamsReflector = PayloadReflector<ParamsOf<T>>;
-    using ResultReflector = PayloadReflector<ResultOf<T>>;
-
-    return {
-        .method = std::move(method),
-        .params = ParamsReflector::getSchema(),
-        .result = ResultReflector::getSchema(),
+        .params = PayloadReflector<ParamsOf<T>>::getSchema(),
+        .result = PayloadReflector<ResultOf<T>>::getSchema(),
     };
 }
 
@@ -223,20 +148,12 @@ private:
 class ApiBuilder
 {
 public:
-    EndpointBuilder task(std::string method, AsyncHandler auto handler)
-    {
-        auto reflected = ensureHasTaskResult(ensureHasParams(std::move(handler)));
-        auto schema = reflectAsyncEndpointSchema<decltype(reflected)>(std::move(method));
-        auto startTask = addParsingToAsyncHandler(std::move(reflected));
-        return add({std::move(schema), std::move(startTask)});
-    }
-
-    EndpointBuilder endpoint(std::string method, SyncHandler auto handler)
+    EndpointBuilder endpoint(std::string method, ReflectableHandler auto handler)
     {
         auto reflected = ensureHasResult(ensureHasParams(std::move(handler)));
-        auto schema = reflectSyncEndpointSchema<decltype(reflected)>(std::move(method));
-        auto runTask = addParsingToSyncHandler(std::move(reflected));
-        return add({std::move(schema), std::move(runTask)});
+        auto schema = reflectEndpointSchema<decltype(reflected)>(std::move(method));
+        auto run = addParsingToHandler(std::move(reflected));
+        return add({std::move(schema), std::move(run)});
     }
 
     Api build()

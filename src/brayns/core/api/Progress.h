@@ -32,7 +32,7 @@ namespace brayns
 {
 struct TaskOperation
 {
-    std::string description = "Task startup";
+    std::string description = "Not started yet";
     float completion = 0.0F;
     std::size_t index = 0;
 };

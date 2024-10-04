@@ -56,10 +56,14 @@ Message composeResponse(const JsonRpcErrorResponse &response)
 
 std::optional<JsonRpcResponse> execute(JsonRpcRequest request, Api &api, Logger &logger)
 {
+    // TODO remove
+    auto monitor = std::make_shared<TaskMonitor>(1);
+    auto progress = Progress(monitor);
+
     try
     {
         logger.info("Calling endpoint for request {}", toString(request.id));
-        auto result = api.execute(request.method, std::move(request.params));
+        auto result = api.execute(request.method, std::move(request.params), progress);
         logger.info("Successfully called endpoint");
 
         if (!request.id)

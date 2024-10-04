@@ -50,7 +50,6 @@ class Endpoint:
     description: str
     params: dict[str, Any]
     result: dict[str, Any]
-    asynchronous: bool
 
 
 async def get_endpoint(connection: Connection, method: str) -> Endpoint:

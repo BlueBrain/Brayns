@@ -23,10 +23,7 @@
 
 #include <map>
 
-#include <brayns/core/utils/IdGenerator.h>
-
 #include "Endpoint.h"
-#include "Task.h"
 
 namespace brayns
 {
@@ -34,25 +31,12 @@ class Api
 {
 public:
     explicit Api(std::map<std::string, Endpoint> endpoints = {});
-    ~Api();
-
-    Api(const Api &) = delete;
-    Api(Api &&) = default;
-    Api &operator=(const Api &) = delete;
-    Api &operator=(Api &&) = default;
 
     std::vector<std::string> getMethods() const;
     const EndpointSchema &getSchema(const std::string &method) const;
-    Payload execute(const std::string &method, Payload params);
-    std::vector<TaskInfo> getTasks() const;
-    TaskInfo getTask(TaskId id) const;
-    Payload waitForTaskResult(TaskId id);
-    void cancelTask(TaskId id);
-    void cancelAllTasks();
+    Payload execute(const std::string &method, Payload params, Progress progress);
 
 private:
     std::map<std::string, Endpoint> _endpoints;
-    std::map<TaskId, TaskInterface> _tasks;
-    IdGenerator<TaskId> _ids;
 };
 }

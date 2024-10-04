@@ -33,6 +33,7 @@ TaskCancelledException::TaskCancelledException():
 TaskMonitor::TaskMonitor(std::size_t operationCount):
     _operationCount(operationCount)
 {
+    assert(operationCount > 0);
 }
 
 std::size_t TaskMonitor::getOperationCount() const
