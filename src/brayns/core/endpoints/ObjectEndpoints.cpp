@@ -23,22 +23,6 @@
 
 namespace brayns
 {
-struct GetAllObjectsResult
-{
-    std::vector<ObjectSummary> objects;
-};
-
-template<>
-struct JsonObjectReflector<GetAllObjectsResult>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<GetAllObjectsResult>();
-        builder.field("objects", [](auto &object) { return &object.objects; }).description("List of object info");
-        return builder.build();
-    }
-};
-
 struct RemoveObjectsParams
 {
     std::vector<ObjectId> ids;
@@ -75,7 +59,7 @@ CreateObjectResult createEmptyObject(ObjectManager &objects, CreateObjectParams 
 
 void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects)
 {
-    builder.endpoint("getAllObjects", [&] { return GetAllObjectsResult{objects.getAll()}; })
+    builder.endpoint("getAllObjects", [&] { return objects.getAll(); })
         .description("Get summary all objects in registry, use get-{type} to get details about a specific object");
 
     builder.endpoint("getObject", [&](GetObjectParams params) { return objects.get(params.id); })

@@ -41,7 +41,7 @@ async def get_version(connection: Connection) -> Version:
 
 async def get_methods(connection: Connection) -> list[str]:
     result = await connection.get_result("getMethods")
-    return deserialize(result["methods"], list[str])
+    return deserialize(result, list[str])
 
 
 @dataclass

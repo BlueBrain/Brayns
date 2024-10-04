@@ -36,7 +36,7 @@ class ObjectSummary:
 
 async def get_all_objects(connection: Connection) -> list[ObjectSummary]:
     result = await connection.get_result("getAllObjects")
-    return deserialize(result["objects"], list[ObjectSummary])
+    return deserialize(result, list[ObjectSummary])
 
 
 @dataclass

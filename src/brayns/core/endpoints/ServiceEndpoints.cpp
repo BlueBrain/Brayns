@@ -49,22 +49,6 @@ struct JsonObjectReflector<VersionResult>
     }
 };
 
-struct MethodsResult
-{
-    std::vector<std::string> methods;
-};
-
-template<>
-struct JsonObjectReflector<MethodsResult>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<MethodsResult>();
-        builder.field("methods", [](auto &object) { return &object.methods; }).description("Available JSON-RPC methods to reach endpoints");
-        return builder.build();
-    }
-};
-
 struct SchemaParams
 {
     std::string method;
@@ -81,58 +65,14 @@ struct JsonObjectReflector<SchemaParams>
     }
 };
 
-struct TasksResult
-{
-    std::vector<TaskInfo> tasks;
-};
-
-template<>
-struct JsonObjectReflector<TasksResult>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<TasksResult>();
-        builder.field("tasks", [](auto &object) { return &object.tasks; }).description("List of running tasks with their current progress");
-        return builder.build();
-    }
-};
-
-struct TaskParams
-{
-    TaskId taskId;
-};
-
-template<>
-struct JsonObjectReflector<TaskParams>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<TaskParams>();
-        builder.field("taskId", [](auto &object) { return &object.taskId; }).description("ID of the requested task");
-        return builder.build();
-    }
-};
-
 void addServiceEndpoints(ApiBuilder &builder, Api &api, StopToken &token)
 {
     builder.endpoint("getVersion", [] { return VersionResult(); }).description("Get the build version of the service currently running");
 
-    builder.endpoint("getMethods", [&] { return MethodsResult{api.getMethods()}; }).description("Get available JSON-RPC methods");
+    builder.endpoint("getMethods", [&] { return api.getMethods(); }).description("Get available JSON-RPC methods");
 
     builder.endpoint("getSchema", [&](SchemaParams params) { return api.getSchema(params.method); })
         .description("Get the schema of the given JSON-RPC method");
-
-    builder.endpoint("getTasks", [&] { return TasksResult{api.getTasks()}; })
-        .description("Get tasks which result has not been retreived with wait-for-task-result");
-
-    builder.endpoint("getTask", [&](TaskParams params) { return api.getTask(params.taskId); }).description("Get current state of the given task");
-
-    builder.endpoint("cancelTask", [&](TaskParams params) { api.cancelTask(params.taskId); }).description("Cancel given task");
-
-    builder.endpoint("cancelAllTasks", [&] { api.cancelAllTasks(); }).description("Cancel all tasks");
-
-    builder.endpoint("getTaskResult", [&](TaskParams params) { return api.waitForTaskResult(params.taskId); })
-        .description("Wait for given task to finish and return its result");
 
     builder.endpoint("stop", [&] { token.stop(); }).description("Cancel all running tasks, close all connections and stop the service");
 }
