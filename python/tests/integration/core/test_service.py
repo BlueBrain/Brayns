@@ -23,14 +23,8 @@ import pytest
 from brayns import (
     VERSION,
     Connection,
-    JsonRpcError,
-    Task,
-    cancel_task,
     get_endpoint,
     get_methods,
-    get_task,
-    get_task_result,
-    get_tasks,
     get_version,
 )
 
@@ -55,21 +49,5 @@ async def test_schema(connection: Connection) -> None:
     endpoint = await get_endpoint(connection, "getVersion")
     assert endpoint.method == "getVersion"
     assert isinstance(endpoint.description, str)
-    assert isinstance(endpoint.params_schema, dict)
-    assert isinstance(endpoint.result_schema, dict)
-
-
-@pytest.mark.integration_test
-@pytest.mark.asyncio
-async def test_tasks(connection: Connection) -> None:
-    tasks = await get_tasks(connection)
-    assert not tasks
-
-    with pytest.raises(JsonRpcError):
-        await get_task(connection, Task(0))
-
-    with pytest.raises(JsonRpcError):
-        await cancel_task(connection, Task(0))
-
-    with pytest.raises(JsonRpcError):
-        await get_task_result(connection, Task(0))
+    assert isinstance(endpoint.params, dict)
+    assert isinstance(endpoint.result, dict)

@@ -23,7 +23,6 @@ import pytest
 from brayns import (
     Box1,
     Connection,
-    LinearTransferFunctionSettings,
     create_linear_transfer_function,
     get_linear_transfer_function,
     update_linear_transfer_function,
@@ -33,12 +32,11 @@ from brayns import (
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_linear_transfer_function(connection: Connection) -> None:
-    settings = LinearTransferFunctionSettings()
-    function = await create_linear_transfer_function(connection, settings)
+    function = await create_linear_transfer_function(connection)
 
-    assert settings == await get_linear_transfer_function(connection, function)
+    settings = await get_linear_transfer_function(connection, function)
 
     settings.scalar_range = Box1(-1, 2)
-    await update_linear_transfer_function(connection, function, settings)
+    await update_linear_transfer_function(connection, function, scalar_range=settings.scalar_range)
 
     assert settings == await get_linear_transfer_function(connection, function)

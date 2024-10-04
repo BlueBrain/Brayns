@@ -26,7 +26,7 @@ def create_logger(level: int | str = INFO) -> Logger:
     logger = Logger("Brayns", level)
 
     format = "[%(asctime)s][%(name)s][%(levelname)s] %(message)s"
-    formatter = Formatter(format)
+    formatter = Formatter(format, "%Y-%m-%d %H:%M:%S")
 
     handler = StreamHandler(sys.stdout)
     handler.setFormatter(formatter)

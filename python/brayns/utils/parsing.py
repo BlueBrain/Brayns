@@ -18,118 +18,191 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from types import UnionType
-from typing import Any, TypeVar, cast, get_args, get_origin
+import json
+from dataclasses import MISSING, fields, is_dataclass
+from enum import Enum
+from inspect import get_annotations
+from types import NoneType, UnionType
+from typing import Any, TypeVar, get_args, get_origin, is_typeddict, overload
 
-from .box import Box, Box1, Box2, Box3
-from .quaternion import Quaternion
-from .vector import Vector2, Vector3, Vector4
+from .composing import Object, camel_case
 
 
-def has_type(value: Any, t: Any) -> bool:
-    if t is Any:
-        return True
+def parse_text(data: str) -> Any:
+    return json.loads(data)
 
-    if t is None:
-        return value is None
 
-    if t is float and isinstance(value, int):
-        return True
+def parse_binary(data: bytes) -> tuple[Any, bytes]:
+    size = len(data)
+
+    if size < 4:
+        raise ValueError("Invalid binary frame with header < 4 bytes")
+
+    header = data[:4]
+
+    json_size = int.from_bytes(header, byteorder="little", signed=False)
+
+    if json_size > size - 4:
+        raise ValueError(f"Invalid JSON size: {json_size} > {size - 4}")
+
+    json_part = data[4 : 4 + json_size].decode("utf-8")
+    message = parse_text(json_part)
+
+    binary_part = data[4 + json_size :]
+
+    return message, binary_part
+
+
+def parse(data: bytes | str) -> tuple[Any, bytes]:
+    if isinstance(data, str):
+        return (parse_text(data), b"")
+
+    return parse_binary(data)
+
+
+T = TypeVar("T")
+
+
+@overload
+def deserialize(value: Any, t: type[T]) -> T: ...
+
+
+@overload
+def deserialize(value: Any, t: Any) -> Any: ...
+
+
+def deserialize(value: Any, t: Any) -> Any:
+    if t in (Any, None, NoneType, bool, int, float, str):
+        return _ensure(value, t)
+
+    if isinstance(t, UnionType):
+        return _deserialize_union(value, t)
+
+    if is_typeddict(t):
+        return _deserialize_typeddict(value, t)
+
+    if issubclass(t, Object):
+        return t(deserialize(value, int))
+
+    if issubclass(t, Enum):
+        return _deserialize_enum(value, t)
+
+    if is_dataclass(t):
+        return _deserialize_dataclass(value, t)
 
     origin = get_origin(t)
 
-    if origin is UnionType:
-        args = get_args(t)
-        return any(has_type(value, arg) for arg in args)
-
-    if origin is None:
-        origin = t
-
-    if not isinstance(value, origin):
-        return False
-
-    if origin is list:
-        items = cast(list, value)
-        (arg,) = get_args(t)
-        return all(has_type(item, arg) for item in items)
-
     if origin is dict:
-        object = cast(dict, value)
-        keytype, valuetype = get_args(t)
-        return all(has_type(key, keytype) and has_type(item, valuetype) for key, item in object.items())
+        return _deserialize_dict(value, t)
 
-    return True
+    if origin in (list, set):
+        return _deserialize_array(value, t)
+
+    if origin is tuple:
+        return _deserialize_tuple(value, t)
+
+    raise TypeError("Unsupported JSON type (internal error)")
 
 
-def check_type(value: Any, t: Any) -> None:
-    if not has_type(value, t):
-        raise TypeError("Invalid type in JSON-RPC message")
-
-
-def try_get(message: dict[str, Any], key: str, t: Any, default: Any = None) -> Any:
-    value = message.get(key, default)
-
-    if value is default:
+def _ensure(value: Any, t: Any) -> Any:
+    if t is Any:
         return value
 
-    check_type(value, t)
+    if t is None:
+        t = NoneType
 
-    return value
+    if t is float and isinstance(value, int):
+        return float(value)
 
+    if isinstance(value, t):
+        return value
 
-def get(message: dict[str, Any], key: str, t: Any) -> Any:
-    if key not in message:
-        raise KeyError(f"Missing mandatory key in JSON-RPC message: '{key}'")
-
-    value = message[key]
-    check_type(value, t)
-
-    return value
+    raise TypeError("Invalid type in JSON response")
 
 
-def get_tuple(message: dict[str, Any], key: str, t: Any, item_count: int) -> Any:
-    value = get(message, key, list[t])
+def _deserialize_union(value: Any, t: Any) -> Any:
+    for arg in get_args(t):
+        try:
+            return deserialize(value, arg)
+        except TypeError:
+            continue
 
-    if len(value) != item_count:
-        raise ValueError(f"Expected {item_count} items for '{key}'")
-
-    return value
-
-
-T = TypeVar("T", Vector2, Vector3, Vector4, Quaternion)
+    raise TypeError("Invalid union type in JSON response")
 
 
-def deserialize_vector(message: dict[str, Any], key: str, t: type[T]) -> T:
-    value = get_tuple(message, key, float, t.component_count())
-    return t(*value)
+def _deserialize_typeddict(value: Any, t: Any) -> Any:
+    _ensure(value, dict)
+    assert isinstance(value, dict)
+
+    result = dict[str, Any]()
+
+    for field_name, field_type in get_annotations(t).items():
+        key = camel_case(field_name)
+
+        missing = key not in value
+        required = key in t.__required_keys__
+
+        if missing and required:
+            raise TypeError("Missing required key in JSON response")
+
+        if not missing:
+            result[field_name] = deserialize(value[key], field_type)
 
 
-def serialize_box(value: Box2 | Box3) -> dict[str, Any]:
-    return {
-        "min": value.min,
-        "max": value.max,
-    }
+def _deserialize_enum(value: Any, t: Any) -> Any:
+    _ensure(value, str)
+    return t(value)
 
 
-U = TypeVar("U", bound=Box)
+def _deserialize_dataclass(value: Any, t: Any) -> Any:
+    _ensure(value, dict)
+    assert isinstance(value, dict)
+
+    kwargs = dict[str, Any]()
+
+    for field in fields(t):
+        key = camel_case(field.name)
+
+        missing = key not in value
+        required = field.default is MISSING and field.default_factory is MISSING
+
+        if missing and required:
+            raise TypeError("Missing required field in JSON response")
+
+        if not missing:
+            kwargs[field.name] = deserialize(value[key], field.type)
+
+    return t(**kwargs)
 
 
-def deserialize_box(message: dict[str, Any], t: type[U]) -> U:
-    return t(
-        min=deserialize_vector(message, "min", t.vector_type()),
-        max=deserialize_vector(message, "max", t.vector_type()),
-    )
+def _deserialize_dict(value: Any, t: Any) -> Any:
+    _ensure(value, dict)
+    assert isinstance(value, dict)
+
+    key_type, value_type = get_args(t)
+
+    if key_type is not str:
+        raise TypeError("Invalid key type (internal error)")
+
+    return {_ensure(key, str): deserialize(item, value_type) for key, item in value.items()}
 
 
-def serialize_box1(value: Box1) -> dict[str, Any]:
-    return {
-        "min": value.min,
-        "max": value.max,
-    }
+def _deserialize_array(value: Any, t: Any) -> Any:
+    _ensure(value, list)
+    assert isinstance(value, list)
+
+    (item_type,) = get_args(t)
+
+    return t(deserialize(item, item_type) for item in value)
 
 
-def deserialize_box1(message: dict[str, Any]) -> Box1:
-    return Box1(
-        min=get(message, "min", float),
-        max=get(message, "max", float),
-    )
+def _deserialize_tuple(value: Any, t: Any) -> Any:
+    _ensure(value, list)
+    assert isinstance(value, list)
+
+    item_types = get_args(t)
+
+    if len(value) != len(item_types):
+        raise TypeError("Invalid item count")
+
+    return t(deserialize(item, item_type) for item, item_type in zip(value, item_types))

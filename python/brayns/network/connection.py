@@ -18,7 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import asyncio
 from logging import WARNING, Logger
 from ssl import SSLContext
 from typing import Any, NamedTuple, Self
@@ -35,7 +34,7 @@ from .json_rpc import (
     compose_request,
     parse_response,
 )
-from .websocket import ServiceUnavailable, WebSocket, connect_websocket
+from .websocket import WebSocket, connect_websocket
 
 
 class ResponseBuffer:
@@ -81,12 +80,6 @@ class ResponseBuffer:
             return None
 
         return self._responses.pop(request_id)
-
-
-class Request(NamedTuple):
-    method: str
-    params: Any = None
-    binary: bytes = b""
 
 
 class Response(NamedTuple):
@@ -145,20 +138,33 @@ class FutureResponse:
 
 
 class Connection:
-    def __init__(self, websocket: WebSocket) -> None:
+    def __init__(self, websocket: WebSocket, logger: Logger) -> None:
         self._websocket = websocket
+        self._logger = logger
         self._buffer = ResponseBuffer()
 
     async def __aenter__(self) -> Self:
         return self
 
-    async def __aexit__(self, *args) -> None:
+    async def __aexit__(self, *_) -> None:
         await self._websocket.close()
+
+    @property
+    def host(self) -> str:
+        return self._websocket.host
+
+    @property
+    def port(self) -> int:
+        return self._websocket.port
+
+    @property
+    def logger(self) -> Logger:
+        return self._logger
 
     async def close(self) -> None:
         await self._websocket.close()
 
-    async def send_json_rpc(self, request: JsonRpcRequest) -> FutureResponse:
+    async def send(self, request: JsonRpcRequest) -> FutureResponse:
         if request.id is not None and self._buffer.is_running(request.id):
             raise ValueError(f"A request with ID {request.id} is already running")
 
@@ -171,19 +177,14 @@ class Connection:
 
         return FutureResponse(request.id, self._websocket, self._buffer)
 
-    async def send(self, request: Request) -> FutureResponse:
+    async def task(self, method: str, params: Any = None, binary: bytes = b"") -> FutureResponse:
         request_id = 0
 
         while self._buffer.is_running(request_id):
             request_id += 1
 
-        method, params, binary = request
-        json_rpc_request = JsonRpcRequest(method, params, binary, request_id)
+        request = JsonRpcRequest(method, params, binary, request_id)
 
-        return await self.send_json_rpc(json_rpc_request)
-
-    async def task(self, method: str, params: Any = None, binary: bytes = b"") -> FutureResponse:
-        request = Request(method, params, binary)
         return await self.send(request)
 
     async def request(self, method: str, params: Any = None, binary: bytes = b"") -> Response:
@@ -204,8 +205,6 @@ async def connect(
     port: int = 5000,
     ssl: SSLContext | None = None,
     max_frame_size: int = 2**31,
-    max_attempts: int | None = 1,
-    sleep_between_attempts: float = 0.1,
     logger: Logger | None = None,
 ) -> Connection:
     if logger is None:
@@ -214,22 +213,6 @@ async def connect(
     protocol = "ws" if ssl is None else "wss"
     url = f"{protocol}://{host}:{port}"
 
-    attempt = 0
+    websocket = await connect_websocket(url, ssl, max_frame_size, logger)
 
-    while True:
-        try:
-            logger.info("Connection attempt %d", attempt)
-            websocket = await connect_websocket(url, ssl, max_frame_size, logger)
-            logger.info("Connection suceeded")
-
-            return Connection(websocket)
-        except ServiceUnavailable as e:
-            logger.warning("Connection attempt %d failed: %s", attempt, e)
-
-            attempt += 1
-
-            if max_attempts is not None and attempt >= max_attempts:
-                logger.warning("Max connection attempts reached, aborted")
-                raise
-
-        await asyncio.sleep(sleep_between_attempts)
+    return Connection(websocket, logger)

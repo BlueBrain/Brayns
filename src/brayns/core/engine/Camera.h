@@ -32,7 +32,7 @@ struct CameraSettings
     Vector3 direction = {0.0F, 0.0F, 1.0F};
     Vector3 up = {0.0F, 1.0F, 0.0F};
     float nearClip = 1.0e-6F;
-    Box2 imageRegion = {{0.0F, 0.0F}, {1.0F, 1.0F}};
+    Box2 region = {{0.0F, 0.0F}, {1.0F, 1.0F}};
 };
 
 class Camera : public Managed<OSPCamera>

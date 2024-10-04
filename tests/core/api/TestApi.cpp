@@ -46,7 +46,7 @@ TEST_CASE("Basic")
     CHECK_EQ(schema.description, "Test");
     CHECK_EQ(schema.params, getJsonSchema<int>());
     CHECK_EQ(schema.result, getJsonSchema<float>());
-    CHECK_FALSE(schema.async);
+    CHECK_FALSE(schema.asynchronous);
 
     auto params = Payload{2};
 

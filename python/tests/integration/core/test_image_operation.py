@@ -22,7 +22,6 @@ import pytest
 
 from brayns import (
     Connection,
-    ToneMapperSettings,
     create_tone_mapper,
     get_tone_mapper,
     update_tone_mapper,
@@ -32,12 +31,11 @@ from brayns import (
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_tone_mapper(connection: Connection) -> None:
-    settings = ToneMapperSettings()
-    tone_mapper = await create_tone_mapper(connection, settings)
+    tone_mapper = await create_tone_mapper(connection)
 
-    assert settings == await get_tone_mapper(connection, tone_mapper)
+    settings = await get_tone_mapper(connection, tone_mapper)
 
     settings.aces_color = False
-    await update_tone_mapper(connection, tone_mapper, settings)
+    await update_tone_mapper(connection, tone_mapper, aces_color=False)
 
     assert settings == await get_tone_mapper(connection, tone_mapper)

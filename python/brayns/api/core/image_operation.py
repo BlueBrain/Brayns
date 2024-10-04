@@ -19,71 +19,56 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TypedDict, Unpack
 
 from brayns.network.connection import Connection
-from brayns.utils.parsing import get
+from brayns.utils.composing import serialize
+from brayns.utils.parsing import deserialize
 
-from .objects import Object, create_composed_object, get_specific_object, update_specific_object
+from .objects import CreateObjectParams, Object, create_specific_object, get_specific_object, update_specific_object
 
 
 class ImageOperation(Object): ...
-
-
-async def create_image_operation(connection: Connection, typename: str, derived: dict[str, Any]) -> ImageOperation:
-    object = await create_composed_object(connection, typename, None, derived)
-    return ImageOperation(object.id)
 
 
 class ToneMapper(ImageOperation): ...
 
 
 @dataclass
-class ToneMapperSettings:
-    exposure: float = 1.0
-    contrast: float = 1.6773
-    shoulder: float = 0.9714
-    mid_in: float = 0.18
-    mid_out: float = 0.18
-    hdr_max: float = 11.0785
-    aces_color: bool = True
+class GetToneMapperResult:
+    exposure: float
+    contrast: float
+    shoulder: float
+    mid_in: float
+    mid_out: float
+    hdr_max: float
+    aces_color: bool
 
 
-def serialize_tone_mapper_settings(settings: ToneMapperSettings) -> dict[str, Any]:
-    return {
-        "exposure": settings.exposure,
-        "contrast": settings.contrast,
-        "shoulder": settings.shoulder,
-        "midIn": settings.mid_in,
-        "midOut": settings.mid_out,
-        "hdrMax": settings.hdr_max,
-        "acesColor": settings.aces_color,
-    }
+class UpdateToneMapperParams(TypedDict, total=False):
+    exposure: float
+    contrast: float
+    shoulder: float
+    mid_in: float
+    mid_out: float
+    hdr_max: float
+    aces_color: bool
 
 
-def deserialize_tone_mapper_settings(message: dict[str, Any]) -> ToneMapperSettings:
-    return ToneMapperSettings(
-        exposure=get(message, "exposure", float),
-        contrast=get(message, "contrast", float),
-        shoulder=get(message, "shoulder", float),
-        mid_in=get(message, "midIn", float),
-        mid_out=get(message, "midOut", float),
-        hdr_max=get(message, "hdrMax", float),
-        aces_color=get(message, "acesColor", float),
-    )
+class CreateToneMapperParams(CreateObjectParams, UpdateToneMapperParams): ...
 
 
-async def create_tone_mapper(connection: Connection, settings: ToneMapperSettings) -> ToneMapper:
-    derived = serialize_tone_mapper_settings(settings)
-    object = await create_image_operation(connection, "ToneMapper", derived)
+async def create_tone_mapper(connection: Connection, **settings: Unpack[CreateToneMapperParams]) -> ToneMapper:
+    object = await create_specific_object(connection, "ToneMapper", serialize(settings))
     return ToneMapper(object.id)
 
 
-async def get_tone_mapper(connection: Connection, tone_mapper: ToneMapper) -> ToneMapperSettings:
+async def get_tone_mapper(connection: Connection, tone_mapper: ToneMapper) -> GetToneMapperResult:
     result = await get_specific_object(connection, "ToneMapper", tone_mapper)
-    return deserialize_tone_mapper_settings(result)
+    return deserialize(result, GetToneMapperResult)
 
 
-async def update_tone_mapper(connection: Connection, tone_mapper: ToneMapper, settings: ToneMapperSettings) -> None:
-    params = serialize_tone_mapper_settings(settings)
-    await update_specific_object(connection, "ToneMapper", tone_mapper, params)
+async def update_tone_mapper(
+    connection: Connection, tone_mapper: ToneMapper, **settings: Unpack[UpdateToneMapperParams]
+) -> None:
+    await update_specific_object(connection, "ToneMapper", tone_mapper, serialize(settings))

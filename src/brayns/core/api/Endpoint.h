@@ -37,7 +37,7 @@ struct EndpointSchema
     std::string description = {};
     JsonSchema params;
     JsonSchema result;
-    bool async = false;
+    bool asynchronous = false;
 };
 
 template<>
@@ -51,7 +51,7 @@ struct JsonObjectReflector<EndpointSchema>
         builder.field("description", [](auto &object) { return &object.description; }).description("Short description of what the method does");
         builder.field("params", [](auto &object) { return &object.params; }).description("JSON schema of the method params");
         builder.field("result", [](auto &object) { return &object.result; }).description("JSON schema of the method result");
-        builder.field("async", [](auto &object) { return &object.async; })
+        builder.field("asynchronous", [](auto &object) { return &object.asynchronous; })
             .description(
                 "If true, the endpoint does not return its result directly but instead an object {\"task_id\": <id>}. "
                 "This ID can be used to get the task result, cancel it or get its progress");

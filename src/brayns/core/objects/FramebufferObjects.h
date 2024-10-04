@@ -65,19 +65,6 @@ struct EnumReflector<FramebufferFormat>
     }
 };
 
-template<>
-struct JsonObjectReflector<Accumulation>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Accumulation>();
-        builder.field("variance", [](auto &object) { return &object.variance; })
-            .description("Wether to store per-pixel variance in a channel")
-            .defaultValue(false);
-        return builder.build();
-    }
-};
-
 struct FramebufferParams
 {
     FramebufferSettings value;
@@ -92,6 +79,7 @@ struct JsonObjectReflector<FramebufferParams>
         auto builder = JsonBuilder<FramebufferParams>();
         builder.field("resolution", [](auto &object) { return &object.value.resolution; })
             .description("Framebuffer resolution in pixel")
+            .defaultValue(Size2(1'920, 1'080))
             .items()
             .minimum(64)
             .maximum(20'000);
@@ -102,7 +90,11 @@ struct JsonObjectReflector<FramebufferParams>
             .description("Framebuffer channels that can be accessed by user")
             .defaultValue(std::set<FramebufferChannel>{FramebufferChannel::Color});
         builder.field("accumulation", [](auto &object) { return &object.value.accumulation; })
-            .description("If not null, the framebuffer will use accumulation with given settings");
+            .description("Wether to use an accumulation channel (progressive rendering)")
+            .defaultValue(false);
+        builder.field("variance", [](auto &object) { return &object.value.variance; })
+            .description("Wether to use a variance channel if accumulation is enabled (to have an estimate)")
+            .defaultValue(false);
         builder.field("operations", [](auto &object) { return &object.operations; })
             .description("List of image operation IDs that will be applied on the framebuffer")
             .defaultValue(std::vector<ObjectId>())
@@ -124,8 +116,8 @@ struct JsonObjectReflector<FramebufferInfo>
     {
         auto builder = JsonBuilder<FramebufferInfo>();
         builder.extend([](auto &object) { return &object.settings; });
-        builder.field("variance", [](auto &object) { return &object.variance; })
-            .description("Variance of the framebuffer (null if no estimate is available)");
+        builder.field("varianceEstimate", [](auto &object) { return &object.variance; })
+            .description("Variance of the framebuffer (null if no variance or nothing has been rendered yet)");
         return builder.build();
     }
 };

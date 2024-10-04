@@ -73,33 +73,24 @@ std::optional<float> Framebuffer::getVariance()
     return std::nullopt;
 }
 
-void Framebuffer::update(const std::optional<Data<ImageOperation>> &operations)
-{
-    auto handle = getHandle();
-    setObjectParam(handle, "imageOperation", operations);
-    commitObject(handle);
-}
-
 Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings)
 {
     auto width = static_cast<int>(settings.resolution[0]);
     auto height = static_cast<int>(settings.resolution[1]);
     auto format = static_cast<OSPFrameBufferFormat>(settings.format);
     auto channels = static_cast<std::uint32_t>(OSP_FB_NONE);
-    auto accumulation = settings.accumulation.has_value();
-    auto variance = settings.accumulation && settings.accumulation->variance;
 
     for (auto channel : settings.channels)
     {
         channels |= static_cast<OSPFrameBufferChannel>(channel);
     }
 
-    if (accumulation)
+    if (settings.accumulation)
     {
         channels |= OSP_FB_ACCUM;
     }
 
-    if (variance)
+    if (settings.accumulation && settings.variance)
     {
         channels |= OSP_FB_VARIANCE;
     }

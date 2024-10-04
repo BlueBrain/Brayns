@@ -171,7 +171,7 @@ EndpointSchema reflectAsyncEndpointSchema(std::string method)
         .method = std::move(method),
         .params = ParamsReflector::getSchema(),
         .result = ResultReflector::getSchema(),
-        .async = true,
+        .asynchronous = true,
     };
 }
 

@@ -57,10 +57,12 @@ struct JsonObjectReflector<LinearTransferFunctionParams>
     {
         auto builder = JsonBuilder<LinearTransferFunctionParams>();
         builder.field("scalarRange", [](auto &object) { return &object.scalarRange; })
-            .description("Range of the scalar values sampled from the volume that will be mapped to colors");
+            .description("Range of the scalar values sampled from the volume that will be mapped to colors")
+            .defaultValue(Box1(0, 1));
         builder.field("colors", [](auto &object) { return &object.colors; })
             .description("Colors to map the values sampled from the volume")
-            .minItems(1);
+            .minItems(1)
+            .defaultValue(std::vector<Color4>{Color4(0, 0, 0, 1), Color4(1, 1, 1, 1)});
         return builder.build();
     }
 };

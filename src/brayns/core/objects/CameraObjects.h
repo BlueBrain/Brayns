@@ -54,8 +54,8 @@ struct JsonObjectReflector<CameraSettings>
             .description("Distance to clip objects that are too close to the camera")
             .defaultValue(0.0F)
             .minimum(0.0F);
-        builder.field("imageRegion", [](auto &object) { return &object.imageRegion; })
-            .description("Normalized region of the camera viewport to be rendered")
+        builder.field("region", [](auto &object) { return &object.region; })
+            .description("Normalized region of the camera to be rendered")
             .defaultValue(Box2{{0.0F, 0.0F}, {1.0F, 1.0F}});
         return builder.build();
     }
@@ -113,11 +113,9 @@ struct JsonObjectReflector<PerspectiveCameraSettings>
         builder.field("architectural", [](auto &object) { return &object.architectural; })
             .description("Vertical edges are projected to be parallel")
             .defaultValue(false);
-        builder.field("stereo", [](auto &object) { return &object.stereo; })
-            .description("How to render images for each eye")
-            .defaultValue(Stereo::None);
+        builder.field("stereo", [](auto &object) { return &object.stereo; }).description("Stereo mode").defaultValue(Stereo::None);
         builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
-            .description("Distance between observer eyes")
+            .description("Distance between observer eyes when stereo is enabled")
             .defaultValue(0.0635F);
         return builder.build();
     }
@@ -163,7 +161,10 @@ struct JsonObjectReflector<PanoramicCameraSettings>
     static auto reflect()
     {
         auto builder = JsonBuilder<PanoramicCameraSettings>();
-        builder.field("stereo", [](auto &object) { return &object.stereo; }).description("Stereo settings, set to null to disable it");
+        builder.field("stereo", [](auto &object) { return &object.stereo; }).description("Stereo mode").defaultValue(Stereo::None);
+        builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
+            .description("Distance between observer eyes when stereo is enabled")
+            .defaultValue(0.0635F);
         return builder.build();
     }
 };

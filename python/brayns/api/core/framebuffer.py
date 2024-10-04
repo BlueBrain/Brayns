@@ -18,24 +18,25 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from collections.abc import Iterable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, NamedTuple
+from typing import TypedDict, Unpack
 
 from brayns.network.connection import Connection
-from brayns.utils.parsing import get, get_tuple, try_get
+from brayns.utils.composing import serialize
+from brayns.utils.parsing import deserialize
 
 from .image_operation import ImageOperation
-from .objects import Object, create_specific_object, get_specific_object, update_specific_object
+from .objects import (
+    CreateObjectParams,
+    Object,
+    create_specific_object,
+    get_specific_object,
+    update_specific_object,
+)
 
 
 class Framebuffer(Object): ...
-
-
-class Size2(NamedTuple):
-    width: int
-    height: int
 
 
 class FramebufferFormat(Enum):
@@ -55,71 +56,43 @@ class FramebufferChannel(Enum):
 
 
 @dataclass
-class Accumulation:
-    variance: bool = False
+class GetFramebufferResult:
+    resolution: tuple[int, int]
+    format: FramebufferFormat
+    channels: set[FramebufferChannel]
+    accumulation: bool
+    variance: bool
+    operations: list[ImageOperation]
+    variance_estimate: float | None
 
 
-@dataclass
-class FramebufferSettings:
-    resolution: Size2 = Size2(1920, 1080)
-    format: FramebufferFormat = FramebufferFormat.SRGBA8
-    channels: set[FramebufferChannel] = field(default_factory=lambda: {FramebufferChannel.COLOR})
-    accumulation: Accumulation | None = None
-    operations: list[ImageOperation] = field(default_factory=list)
+class UpdateFramebufferParams(TypedDict, total=False):
+    resolution: tuple[int, int]
+    format: FramebufferFormat
+    channels: set[FramebufferChannel]
+    accumulation: bool
+    variance: bool
+    operations: list[ImageOperation]
 
 
-def serialize_framebuffer_settings(settings: FramebufferSettings) -> dict[str, Any]:
-    accumulation = settings.accumulation
-    accumulation = None if accumulation is None else {"variance": accumulation.variance}
-
-    return {
-        "resolution": list(settings.resolution),
-        "format": settings.format.value,
-        "channels": [channel.value for channel in settings.channels],
-        "accumulation": accumulation,
-        "operations": [operation.id for operation in settings.operations],
-    }
+class CreateFramebufferParams(CreateObjectParams, UpdateFramebufferParams): ...
 
 
-def deserialize_framebuffer_settings(message: dict[str, Any]) -> FramebufferSettings:
-    accumulation = try_get(message, "accumulation", dict[str, Any])
-    accumulation = None if accumulation is None else Accumulation(get(accumulation, "variance", bool))
-
-    return FramebufferSettings(
-        resolution=Size2(*get_tuple(message, "resolution", int, 2)),
-        format=FramebufferFormat(get(message, "format", str)),
-        channels={FramebufferChannel(value) for value in get(message, "channels", list[str])},
-        accumulation=accumulation,
-        operations=[ImageOperation(id) for id in get(message, "operations", list[int])],
-    )
-
-
-@dataclass
-class FramebufferInfo:
-    settings: FramebufferSettings
-    variance: float | None = None
-
-
-def deserialize_framebuffer_info(message: dict[str, Any]) -> FramebufferInfo:
-    return FramebufferInfo(
-        settings=deserialize_framebuffer_settings(get(message, "params", dict[str, Any])),
-        variance=try_get(message, "variance", float),
-    )
-
-
-async def create_framebuffer(connection: Connection, settings: FramebufferSettings) -> Framebuffer:
-    params = serialize_framebuffer_settings(settings)
-    object = await create_specific_object(connection, "Framebuffer", params)
+async def create_framebuffer(connection: Connection, **settings: Unpack[CreateFramebufferParams]) -> Framebuffer:
+    object = await create_specific_object(connection, "Framebuffer", serialize(settings))
     return Framebuffer(object.id)
 
 
-async def get_framebuffer(connection: Connection, framebuffer: Framebuffer) -> FramebufferInfo:
+async def get_framebuffer(connection: Connection, framebuffer: Framebuffer) -> GetFramebufferResult:
     result = await get_specific_object(connection, "Framebuffer", framebuffer)
-    return deserialize_framebuffer_info(result)
+    return deserialize(result, GetFramebufferResult)
 
 
 async def update_framebuffer(
-    connection: Connection, framebuffer: Framebuffer, operations: Iterable[ImageOperation]
+    connection: Connection, framebuffer: Framebuffer, **settings: Unpack[UpdateFramebufferParams]
 ) -> None:
-    properties = {"operations": [operation.id for operation in operations]}
-    await update_specific_object(connection, "Framebuffer", framebuffer, properties)
+    await update_specific_object(connection, "Framebuffer", framebuffer, serialize(settings))
+
+
+async def clear_framebuffer(connection: Connection, framebuffer: Framebuffer) -> None:
+    await connection.get_result("clearFramebuffer", {"id": framebuffer.id})

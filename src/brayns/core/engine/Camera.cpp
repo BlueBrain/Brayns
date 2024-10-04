@@ -31,8 +31,8 @@ void setCameraParams(OSPCamera handle, const CameraSettings &settings)
     setObjectParam(handle, "direction", settings.direction);
     setObjectParam(handle, "up", settings.up);
     setObjectParam(handle, "nearClip", settings.nearClip);
-    setObjectParam(handle, "imageStart", settings.imageRegion.lower);
-    setObjectParam(handle, "imageEnd", settings.imageRegion.upper);
+    setObjectParam(handle, "imageStart", settings.region.lower);
+    setObjectParam(handle, "imageEnd", settings.region.upper);
 }
 
 void setPerspectiveParams(OSPCamera handle, const PerspectiveCameraSettings &settings)

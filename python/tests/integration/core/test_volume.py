@@ -22,8 +22,6 @@ import pytest
 
 from brayns import (
     Connection,
-    RegularVolumeSettings,
-    Size3,
     VolumeFilter,
     VoxelType,
     create_regular_volume,
@@ -37,16 +35,11 @@ from brayns import (
 async def test_regular_volume(connection: Connection) -> None:
     data = 8 * b"\1"
 
-    settings = RegularVolumeSettings(
-        voxel_type=VoxelType.U8,
-        voxel_count=Size3(2, 2, 2),
-    )
+    volume = await create_regular_volume(connection, data, voxel_type=VoxelType.U8, voxel_count=(2, 2, 2))
 
-    function = await create_regular_volume(connection, settings, data)
+    settings = await get_regular_volume(connection, volume)
 
-    assert settings == await get_regular_volume(connection, function)
+    settings.filter = VolumeFilter.CUBIC
+    await update_regular_volume(connection, volume, filter=settings.filter)
 
-    settings.update.filter = VolumeFilter.CUBIC
-    await update_regular_volume(connection, function, settings.update)
-
-    assert settings == await get_regular_volume(connection, function)
+    assert settings == await get_regular_volume(connection, volume)

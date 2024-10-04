@@ -18,65 +18,53 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
+from typing import TypedDict, Unpack
 
 from brayns.network.connection import Connection
-from brayns.utils.box import Box1
-from brayns.utils.color import Color4
-from brayns.utils.parsing import deserialize_box1, get, serialize_box1
+from brayns.utils.composing import serialize
+from brayns.utils.parsing import deserialize
 
-from .objects import Object, create_composed_object, get_specific_object, update_specific_object
+from .objects import CreateObjectParams, Object, create_specific_object, get_specific_object, update_specific_object
 
 
 class TransferFunction(Object): ...
-
-
-async def create_transfer_function(connection: Connection, typename: str, derived: dict[str, Any]) -> TransferFunction:
-    object = await create_composed_object(connection, typename, None, derived)
-    return TransferFunction(object.id)
 
 
 class LinearTransferFunction(TransferFunction): ...
 
 
 @dataclass
-class LinearTransferFunctionSettings:
-    scalar_range: Box1 = Box1(0, 1)
-    colors: list[Color4] = field(default_factory=lambda: [Color4(0, 0, 0), Color4(1, 1, 1)])
+class GetLinearTransferFunctionResult:
+    scalar_range: tuple[float, float]
+    colors: list[tuple[float, float, float, float]]
 
 
-def serialize_linear_transfer_function_settings(settings: LinearTransferFunctionSettings) -> dict[str, Any]:
-    return {
-        "scalarRange": serialize_box1(settings.scalar_range),
-        "colors": [list(color) for color in settings.colors],
-    }
+class UpdateLinearTransferFunctionParams(TypedDict, total=False):
+    scalar_range: tuple[float, float]
+    colors: list[tuple[float, float, float, float]]
 
 
-def deserialize_linear_transfer_function_settings(message: dict[str, Any]) -> LinearTransferFunctionSettings:
-    return LinearTransferFunctionSettings(
-        scalar_range=deserialize_box1(get(message, "scalarRange", dict[str, Any])),
-        colors=[Color4(*color) for color in get(message, "colors", list[list[float]])],
-    )
+class CreateLinearTransferFunctionParams(CreateObjectParams, UpdateLinearTransferFunctionParams): ...
 
 
 async def create_linear_transfer_function(
-    connection: Connection, settings: LinearTransferFunctionSettings
+    connection: Connection, **settings: Unpack[CreateLinearTransferFunctionParams]
 ) -> LinearTransferFunction:
-    derived = serialize_linear_transfer_function_settings(settings)
-    object = await create_transfer_function(connection, "LinearTransferFunction", derived)
+    object = await create_specific_object(connection, "LinearTransferFunction", serialize(settings))
     return LinearTransferFunction(object.id)
 
 
 async def get_linear_transfer_function(
     connection: Connection, transfer_function: LinearTransferFunction
-) -> LinearTransferFunctionSettings:
+) -> GetLinearTransferFunctionResult:
     result = await get_specific_object(connection, "LinearTransferFunction", transfer_function)
-    return deserialize_linear_transfer_function_settings(result)
+    return deserialize(result, GetLinearTransferFunctionResult)
 
 
 async def update_linear_transfer_function(
-    connection: Connection, transfer_function: LinearTransferFunction, settings: LinearTransferFunctionSettings
+    connection: Connection,
+    transfer_function: LinearTransferFunction,
+    **settings: Unpack[UpdateLinearTransferFunctionParams],
 ) -> None:
-    params = serialize_linear_transfer_function_settings(settings)
-    await update_specific_object(connection, "LinearTransferFunction", transfer_function, params)
+    await update_specific_object(connection, "LinearTransferFunction", transfer_function, serialize(settings))

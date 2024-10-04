@@ -50,17 +50,13 @@ enum class FramebufferChannel
     InstanceId = OSP_FB_ID_INSTANCE,
 };
 
-struct Accumulation
-{
-    bool variance = true;
-};
-
 struct FramebufferSettings
 {
     Size2 resolution;
     FramebufferFormat format = FramebufferFormat::Srgba8;
     std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
-    std::optional<Accumulation> accumulation = {};
+    bool accumulation = false;
+    bool variance = false;
     std::optional<Data<ImageOperation>> operations = {};
 };
 
@@ -96,7 +92,6 @@ public:
     FramebufferData map(FramebufferChannel channel);
     void resetAccumulation();
     std::optional<float> getVariance();
-    void update(const std::optional<Data<ImageOperation>> &operations);
 };
 
 Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings);

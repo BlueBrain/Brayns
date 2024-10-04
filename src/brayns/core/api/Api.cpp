@@ -116,7 +116,7 @@ Payload Api::execute(const std::string &method, Payload params)
         throw InvalidParams("Invalid params schema", errors);
     }
 
-    if (endpoint.schema.async)
+    if (endpoint.schema.asynchronous)
     {
         const auto &handler = std::get<AsyncEndpointHandler>(endpoint.handler);
 

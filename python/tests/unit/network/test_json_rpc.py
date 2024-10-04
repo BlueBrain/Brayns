@@ -18,6 +18,8 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
+import json
+
 from brayns.network.json_rpc import (
     JsonRpcError,
     JsonRpcErrorResponse,
@@ -25,7 +27,6 @@ from brayns.network.json_rpc import (
     JsonRpcSuccessResponse,
     compose_request,
     parse_response,
-    serialize_request,
 )
 
 
@@ -54,7 +55,13 @@ def test_compose_request() -> None:
 def test_no_id() -> None:
     request = JsonRpcRequest("test")
 
-    message = serialize_request(request)
+    data = compose_request(request)
+
+    assert isinstance(data, str)
+
+    message = json.loads(data)
+
+    assert isinstance(message, dict)
 
     assert "id" not in message
 
