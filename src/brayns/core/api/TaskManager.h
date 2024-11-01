@@ -21,39 +21,56 @@
 
 #pragma once
 
-#include <condition_variable>
 #include <functional>
+#include <memory>
 #include <mutex>
-#include <vector>
+#include <optional>
+
+#include <brayns/core/json/Json.h>
+#include <brayns/core/jsonrpc/Messages.h>
+#include <brayns/core/utils/Threading.h>
+
+#include "Task.h"
 
 namespace brayns
 {
-using ClientId = std::uint32_t;
-
-struct Message
+struct ManagedTask
 {
-    std::string data;
-    bool binary = false;
+    std::optional<JsonRpcId> id;
+    bool priority;
+    std::function<void()> run;
+    std::function<TaskOperation()> getCurrentOperation;
+    std::function<void()> cancel;
 };
 
-using ResponseHandler = std::function<void(const Message &)>;
-
-struct Request
-{
-    ClientId clientId;
-    Message message;
-    ResponseHandler respond;
-};
-
-class RequestQueue
+class TaskQueue
 {
 public:
-    void push(Request request);
-    std::vector<Request> wait();
+    std::vector<JsonRpcId> getAll();
+    TaskOperation getCurrentOperation(const JsonRpcId &id);
+    void cancel(const JsonRpcId &id);
+    void add(ManagedTask task);
+    void runNext();
 
 private:
     std::mutex _mutex;
-    std::condition_variable _condition;
-    std::vector<Request> _requests;
+    std::deque<ManagedTask> _tasks;
 };
+
+class TaskManager
+{
+public:
+    explicit TaskManager(std::unique_ptr<TaskQueue> tasks, Worker worker);
+
+    std::vector<JsonRpcId> getAll();
+    void add(ManagedTask task);
+    TaskOperation getCurrentOperation(const JsonRpcId &id);
+    void cancel(const JsonRpcId &id);
+
+private:
+    std::unique_ptr<TaskQueue> _tasks;
+    Worker _worker;
+};
+
+TaskManager createTaskManager();
 }

@@ -19,29 +19,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RequestQueue.h"
+#pragma once
 
-#include <utility>
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <vector>
+
+#include <brayns/core/utils/Threading.h>
 
 namespace brayns
 {
-void RequestQueue::push(Request request)
+using ClientId = std::uint32_t;
+
+struct Message
 {
-    auto lock = std::lock_guard(_mutex);
+    std::string data;
+    bool binary = false;
+};
 
-    _requests.push_back(std::move(request));
-    _condition.notify_all();
-}
+using ResponseHandler = std::function<void(const Message &)>;
 
-std::vector<Request> RequestQueue::wait()
+struct Request
 {
-    auto lock = std::unique_lock(_mutex);
+    ClientId client;
+    Message message;
+    ResponseHandler respond;
+};
 
-    if (_requests.empty())
-    {
-        _condition.wait(lock);
-    }
-
-    return std::exchange(_requests, {});
-}
+using RequestQueue = Queue<Request>;
 }

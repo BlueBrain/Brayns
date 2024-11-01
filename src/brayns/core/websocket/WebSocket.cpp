@@ -22,9 +22,6 @@
 #include "WebSocket.h"
 
 #include <limits>
-#include <optional>
-
-#include <fmt/format.h>
 
 #include <Poco/Buffer.h>
 #include <Poco/Net/NetException.h>
@@ -102,14 +99,14 @@ WebSocketStatus WebSocketException::getStatus() const
     return _status;
 }
 
-WebSocket::WebSocket(const Poco::Net::WebSocket &websocket):
-    _websocket(websocket)
+WebSocket::WebSocket(std::unique_ptr<Poco::Net::WebSocket> websocket):
+    _websocket(std::move(websocket))
 {
 }
 
 std::size_t WebSocket::getMaxFrameSize() const
 {
-    auto size = _websocket.getMaxPayloadSize();
+    auto size = _websocket->getMaxPayloadSize();
     return static_cast<std::size_t>(size);
 }
 
@@ -117,7 +114,7 @@ WebSocketFrame WebSocket::receive()
 {
     try
     {
-        return receiveFrame(_websocket);
+        return receiveFrame(*_websocket);
     }
     catch (const Poco::Exception &e)
     {
@@ -140,7 +137,7 @@ void WebSocket::send(const WebSocketFrameView &frame)
 
     try
     {
-        _websocket.sendFrame(data.data(), size, flags);
+        _websocket->sendFrame(data.data(), size, flags);
     }
     catch (const Poco::Exception &e)
     {
@@ -152,7 +149,7 @@ void WebSocket::close(WebSocketStatus status, std::string_view message)
 {
     try
     {
-        _websocket.shutdown(static_cast<Poco::UInt16>(status), std::string(message));
+        _websocket->shutdown(static_cast<Poco::UInt16>(status), std::string(message));
     }
     catch (...)
     {

@@ -25,6 +25,7 @@
 
 #include <brayns/core/json/Json.h>
 #include <brayns/core/jsonrpc/Messages.h>
+#include <brayns/core/jsonrpc/PayloadReflector.h>
 
 #include "Progress.h"
 
@@ -32,27 +33,61 @@ namespace brayns
 {
 struct Task
 {
-    std::size_t operationCount;
+    std::function<Payload(Payload)> run;
     std::function<TaskOperation()> getCurrentOperation;
-    std::function<Payload()> wait;
     std::function<void()> cancel;
 };
 
-struct TaskInfo
+template<ReflectedPayload Params, ReflectedPayload Result>
+struct TaskOf
 {
-    std::size_t operationCount;
-    TaskOperation currentOperation;
+    std::function<Result(Params)> run;
+    std::function<TaskOperation()> getCurrentOperation;
+    std::function<void()> cancel;
 };
 
-template<>
-struct JsonObjectReflector<TaskInfo>
+template<ReflectedPayload Params, ReflectedPayload Result>
+Task addParsingToTask(TaskOf<Params, Result> task)
 {
-    static auto reflect()
+    auto run = [run = std::move(task.run)](auto payload)
     {
-        auto builder = JsonBuilder<TaskInfo>();
-        builder.field("operationCount", [](auto &object) { return &object.operationCount; }).description("Number of operations the task will perform");
-        builder.field("currentOperation", [](auto &object) { return &object.currentOperation; }).description("Current task operation");
-        return builder.build();
-    }
+        auto params = PayloadReflector<Params>::deserialize(std::move(payload));
+        auto result = run(std::move(params));
+        return PayloadReflector<Result>::serialize(std::move(result));
+    };
+
+    return {
+        .run = std::move(run),
+        .getCurrentOperation = std::move(task.getCurrentOperation),
+        .cancel = std::move(task.cancel),
+    };
+}
+
+template<ReflectedPayload Params, ReflectedPayload Result>
+TaskOf<Params, Result> createTaskWithoutProgress(std::function<Result(Params)> run)
+{
+    return {
+        .run = std::move(run),
+        .getCurrentOperation = [] { return notStartedYet(); },
+        .cancel = [] {},
+    };
+}
+
+template<typename T>
+struct TaskReflector
+{
 };
+
+template<ReflectedPayload T, ReflectedPayload U>
+struct TaskReflector<TaskOf<T, U>>
+{
+    using Params = T;
+    using Result = U;
+};
+
+template<typename T>
+using TaskParamsOf = typename TaskReflector<T>::Params;
+
+template<typename T>
+using TaskResultOf = typename TaskReflector<T>::Result;
 }

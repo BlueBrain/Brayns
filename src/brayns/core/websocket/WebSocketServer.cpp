@@ -83,7 +83,7 @@ public:
 
             _logger->info("Upgrade complete, host {} is now connected", request.getHost());
 
-            handle(websocket);
+            handle(std::move(websocket));
         }
         catch (const Poco::Net::WebSocketException &e)
         {
@@ -110,16 +110,16 @@ private:
 
     WebSocket upgrade(Poco::Net::HTTPServerRequest &request, Poco::Net::HTTPServerResponse &response)
     {
-        auto webocket = Poco::Net::WebSocket(request, response);
-        webocket.setMaxPayloadSize(static_cast<int>(_maxFrameSize));
-        return WebSocket(webocket);
+        auto websocket = std::make_unique<Poco::Net::WebSocket>(request, response);
+        websocket->setMaxPayloadSize(static_cast<int>(_maxFrameSize));
+        return WebSocket(std::move(websocket));
     }
 
-    void handle(WebSocket &websocket)
+    void handle(WebSocket websocket)
     {
         try
         {
-            _handler->handle(websocket);
+            _handler->handle(std::move(websocket));
         }
         catch (...)
         {
@@ -132,8 +132,8 @@ private:
 class RequestHandlerFactory : public Poco::Net::HTTPRequestHandlerFactory
 {
 public:
-    explicit RequestHandlerFactory(std::unique_ptr<WebSocketHandler> handler, std::size_t maxFrameSize, Logger &logger):
-        _handler(std::move(handler)),
+    explicit RequestHandlerFactory(WebSocketHandler &handler, std::size_t maxFrameSize, Logger &logger):
+        _handler(&handler),
         _maxFrameSize(maxFrameSize),
         _logger(&logger)
     {
@@ -162,7 +162,7 @@ public:
     }
 
 private:
-    std::unique_ptr<WebSocketHandler> _handler;
+    WebSocketHandler *_handler;
     std::size_t _maxFrameSize;
     Logger *_logger;
 };
@@ -224,9 +224,9 @@ Poco::Net::HTTPServerParams::Ptr extractServerParams(const WebSocketServerSettin
 
 namespace brayns
 {
-WebSocketServer::WebSocketServer(std::unique_ptr<Poco::Net::HTTPServer> server, std::unique_ptr<RequestQueue> requests):
-    _server(std::move(server)),
-    _requests(std::move(requests))
+WebSocketServer::WebSocketServer(std::unique_ptr<WebSocketHandler> handler, std::unique_ptr<Poco::Net::HTTPServer> server):
+    _handler(std::move(handler)),
+    _server(std::move(server))
 {
 }
 
@@ -238,9 +238,9 @@ WebSocketServer::~WebSocketServer()
     }
 }
 
-std::vector<Request> WebSocketServer::waitForRequests()
+Request WebSocketServer::wait()
 {
-    return _requests->wait();
+    return _handler->wait();
 }
 
 WebSocketServer startServer(const WebSocketServerSettings &settings, Logger &logger)
@@ -252,16 +252,15 @@ WebSocketServer startServer(const WebSocketServerSettings &settings, Logger &log
 
     try
     {
-        auto requests = std::make_unique<RequestQueue>();
-        auto handler = std::make_unique<WebSocketHandler>(*requests, logger);
-        auto factory = Poco::makeShared<RequestHandlerFactory>(std::move(handler), settings.maxFrameSize, logger);
+        auto handler = std::make_unique<WebSocketHandler>(logger);
+        auto factory = Poco::makeShared<RequestHandlerFactory>(*handler, settings.maxFrameSize, logger);
         auto socket = createServerSocket(settings);
         auto params = extractServerParams(settings);
         auto server = std::make_unique<Poco::Net::HTTPServer>(factory, socket, params);
 
         server->start();
 
-        return WebSocketServer(std::move(server), std::move(requests));
+        return WebSocketServer(std::move(handler), std::move(server));
     }
     catch (const Poco::Exception &e)
     {

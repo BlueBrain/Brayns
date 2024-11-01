@@ -65,13 +65,13 @@ struct JsonObjectReflector<SchemaParams>
     }
 };
 
-void addServiceEndpoints(ApiBuilder &builder, Api &api, StopToken &token)
+void addServiceEndpoints(ApiBuilder &builder, const EndpointRegistry &endpoints, StopToken &token)
 {
     builder.endpoint("getVersion", [] { return VersionResult(); }).description("Get the build version of the service currently running");
 
-    builder.endpoint("getMethods", [&] { return api.getMethods(); }).description("Get available JSON-RPC methods");
+    builder.endpoint("getMethods", [&] { return endpoints.getMethods(); }).description("Get available JSON-RPC methods");
 
-    builder.endpoint("getSchema", [&](SchemaParams params) { return api.getSchema(params.method); })
+    builder.endpoint("getSchema", [&](SchemaParams params) { return endpoints.getSchema(params.method); })
         .description("Get the schema of the given JSON-RPC method");
 
     builder.endpoint("stop", [&] { token.stop(); }).description("Cancel all running tasks, close all connections and stop the service");

@@ -22,12 +22,13 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <string>
 
 #include <brayns/core/json/Json.h>
 #include <brayns/core/jsonrpc/Messages.h>
 
-#include "Progress.h"
+#include "Task.h"
 
 namespace brayns
 {
@@ -45,8 +46,7 @@ struct JsonObjectReflector<EndpointSchema>
     static auto reflect()
     {
         auto builder = JsonBuilder<EndpointSchema>();
-        builder.field("method", [](auto &object) { return &object.method; })
-            .description("JSON-RPC method that has to be specified to reach the endpoint");
+        builder.field("method", [](auto &object) { return &object.method; }).description("JSON-RPC method to call the endpoint");
         builder.field("description", [](auto &object) { return &object.description; }).description("Short description of what the method does");
         builder.field("params", [](auto &object) { return &object.params; }).description("JSON schema of the method params");
         builder.field("result", [](auto &object) { return &object.result; }).description("JSON schema of the method result");
@@ -54,11 +54,38 @@ struct JsonObjectReflector<EndpointSchema>
     }
 };
 
-using EndpointHandler = std::function<Payload(Payload, Progress)>;
-
 struct Endpoint
 {
     EndpointSchema schema;
-    EndpointHandler handler;
+    std::function<Task()> start;
+    bool priority = false;
+};
+
+class EndpointTask
+{
+public:
+    explicit EndpointTask(Payload params, Task task, bool priority);
+
+    bool hasPriority() const;
+    Payload run();
+    TaskOperation getCurrentOperation() const;
+    void cancel();
+
+private:
+    Payload _params;
+    Task _task;
+    bool _priority;
+};
+
+class EndpointRegistry
+{
+public:
+    std::vector<std::string> getMethods() const;
+    const EndpointSchema &getSchema(const std::string &method) const;
+    EndpointTask start(const std::string &method, Payload params) const;
+    Endpoint &add(Endpoint endpoint);
+
+private:
+    std::map<std::string, Endpoint> _endpoints;
 };
 }

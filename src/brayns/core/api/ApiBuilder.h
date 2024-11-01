@@ -30,7 +30,6 @@
 #include <brayns/core/jsonrpc/PayloadReflector.h>
 #include <brayns/core/utils/FunctorReflector.h>
 
-#include "Api.h"
 #include "Endpoint.h"
 #include "Task.h"
 
@@ -43,19 +42,13 @@ template<typename T>
 using ResultOf = std::decay_t<GetReturnType<T>>;
 
 template<typename T>
-concept WithReflectedParamsAndProgress = getArgCount<T> == 2 && ReflectedPayload<ParamsOf<T>> && std::same_as<Progress, GetArgType<T, 1>>;
-
-template<typename T>
-concept WithProgress = getArgCount<T> == 1 && std::same_as<Progress, GetArgType<T, 0>>;
-
-template<typename T>
 concept WithReflectedParams = getArgCount<T> == 1 && ReflectedPayload<ParamsOf<T>>;
 
 template<typename T>
 concept WithoutParams = getArgCount<T> == 0;
 
 template<typename T>
-concept WithParams = WithReflectedParamsAndProgress<T> || WithProgress<T> || WithReflectedParams<T> || WithoutParams<T>;
+concept WithReflectableParams = WithReflectedParams<T> || WithoutParams<T>;
 
 template<typename T>
 concept WithReflectedResult = ReflectedPayload<ResultOf<T>>;
@@ -64,66 +57,66 @@ template<typename T>
 concept WithoutResult = std::is_void_v<ResultOf<T>>;
 
 template<typename T>
-concept WithResult = WithReflectedResult<T> || WithoutResult<T>;
+concept WithReflectableResult = WithReflectedResult<T> || WithoutResult<T>;
 
 template<typename T>
-concept ReflectableHandler = WithParams<T> && WithResult<T>;
+concept WithReflectedTaskParams = ReflectedPayload<TaskParamsOf<ResultOf<T>>>;
 
 template<typename T>
-concept ReflectedHandler = WithReflectedParamsAndProgress<T> && WithReflectedResult<T>;
+concept WithReflectedTaskResult = ReflectedPayload<TaskResultOf<ResultOf<T>>>;
 
-auto ensureHasParams(WithReflectedParamsAndProgress auto handler)
+template<typename T>
+concept ReflectableTaskRunner = WithReflectableParams<T> && WithReflectableResult<T>;
+
+template<typename T>
+concept TaskRunner = WithReflectedParams<T> && WithReflectedResult<T>;
+
+template<typename T>
+concept TaskFactory = WithReflectedTaskParams<T> && WithReflectedTaskResult<T>;
+
+auto ensureHasParams(WithReflectedParams auto run)
 {
-    return handler;
+    return run;
 }
 
-auto ensureHasParams(WithProgress auto handler)
+auto ensureHasParams(WithoutParams auto run)
 {
-    return [handler = std::move(handler)](NullJson, Progress progress) { return handler(progress); };
+    return [run = std::move(run)](NullJson) { return run(); };
 }
 
-auto ensureHasParams(WithReflectedParams auto handler)
+auto ensureHasResult(WithReflectedResult auto run)
 {
-    return [handler = std::move(handler)](ParamsOf<decltype(handler)> params, Progress) { return handler(std::move(params)); };
+    return run;
 }
 
-auto ensureHasParams(WithoutParams auto handler)
+auto ensureHasResult(WithoutResult auto run)
 {
-    return [handler = std::move(handler)](NullJson, Progress) { return handler(); };
-}
-
-auto ensureHasResult(WithReflectedResult auto handler)
-{
-    return handler;
-}
-
-auto ensureHasResult(WithoutResult auto handler)
-{
-    return [handler = std::move(handler)](ParamsOf<decltype(handler)> params, Progress progress)
+    return [run = std::move(run)](ParamsOf<decltype(run)> params)
     {
-        handler(std::move(params), progress);
+        run(std::move(params));
         return NullJson();
     };
 }
 
-template<ReflectedHandler T>
-EndpointHandler addParsingToHandler(T handler)
+template<TaskRunner T>
+auto wrapAsTaskFactory(T run)
 {
-    return [handler = std::move(handler)](auto rawParams, auto progress)
-    {
-        auto params = PayloadReflector<ParamsOf<T>>::deserialize(std::move(rawParams));
-        auto result = handler(std::move(params), progress);
-        return PayloadReflector<ResultOf<T>>::serialize(std::move(result));
-    };
+    return [run = std::move(run)] { return createTaskWithoutProgress<ParamsOf<T>, ResultOf<T>>(run); };
 }
 
-template<ReflectedHandler T>
+template<TaskFactory T>
+auto addParsingToTaskFactory(T start)
+{
+    return [start = std::move(start)] { return addParsingToTask(start()); };
+}
+
+template<TaskFactory T>
 EndpointSchema reflectEndpointSchema(std::string method)
 {
     return {
         .method = std::move(method),
-        .params = PayloadReflector<ParamsOf<T>>::getSchema(),
-        .result = PayloadReflector<ResultOf<T>>::getSchema(),
+        .params = PayloadReflector<TaskParamsOf<ResultOf<T>>>::getSchema(),
+        .result = PayloadReflector<TaskResultOf<ResultOf<T>>>::getSchema(),
     };
 }
 
@@ -141,6 +134,12 @@ public:
         return *this;
     }
 
+    EndpointBuilder priority(bool value)
+    {
+        _endpoint->priority = value;
+        return *this;
+    }
+
 private:
     Endpoint *_endpoint;
 };
@@ -148,34 +147,28 @@ private:
 class ApiBuilder
 {
 public:
-    EndpointBuilder endpoint(std::string method, ReflectableHandler auto handler)
+    explicit ApiBuilder(EndpointRegistry &endpoints):
+        _endpoints(&endpoints)
     {
-        auto reflected = ensureHasResult(ensureHasParams(std::move(handler)));
-        auto schema = reflectEndpointSchema<decltype(reflected)>(std::move(method));
-        auto run = addParsingToHandler(std::move(reflected));
-        return add({std::move(schema), std::move(run)});
     }
 
-    Api build()
+    EndpointBuilder endpoint(std::string method, ReflectableTaskRunner auto run)
     {
-        return Api(std::exchange(_endpoints, {}));
+        auto withParams = ensureHasParams(std::move(run));
+        auto withResult = ensureHasResult(std::move(withParams));
+        auto start = wrapAsTaskFactory(std::move(withResult));
+        return task(std::move(method), std::move(start));
+    }
+
+    EndpointBuilder task(std::string method, TaskFactory auto start)
+    {
+        auto schema = reflectEndpointSchema<decltype(start)>(std::move(method));
+        auto withParsing = addParsingToTaskFactory(std::move(start));
+        auto &current = _endpoints->add(Endpoint{std::move(schema), std::move(withParsing)});
+        return EndpointBuilder(current);
     }
 
 private:
-    std::map<std::string, Endpoint> _endpoints;
-
-    EndpointBuilder add(Endpoint endpoint)
-    {
-        const auto &method = endpoint.schema.method;
-
-        if (_endpoints.contains(method))
-        {
-            throw std::invalid_argument("Duplicated endpoint method");
-        }
-
-        auto &emplaced = _endpoints[method] = std::move(endpoint);
-
-        return EndpointBuilder(emplaced);
-    }
+    EndpointRegistry *_endpoints;
 };
 }

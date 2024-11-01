@@ -21,6 +21,7 @@
 
 #include "WebSocketHandler.h"
 
+#include <mutex>
 #include <string>
 #include <utility>
 
@@ -87,18 +88,67 @@ void onPong(Logger &logger)
     logger.info("Pong frame received, ignoring");
 }
 
-void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const Message &response)
+std::optional<Message> receiveRequest(Logger &logger, ClientId client, WebSocket &websocket)
 {
-    auto data = std::string_view(response.data);
+    auto buffer = Message();
 
-    logger.info("Sending response of {} bytes to client {}", data.size(), clientId);
+    while (true)
+    {
+        auto frame = websocket.receive();
 
-    if (!response.binary)
+        switch (frame.opcode)
+        {
+        case WebSocketOpcode::Continuation:
+            onContinuation(frame, buffer, logger);
+            break;
+        case WebSocketOpcode::Text:
+            onText(frame, buffer, logger);
+            break;
+        case WebSocketOpcode::Binary:
+            onBinary(frame, buffer, logger);
+            break;
+        case WebSocketOpcode::Close:
+            onClose(websocket, logger);
+            return std::nullopt;
+        case WebSocketOpcode::Ping:
+            onPing(frame, websocket, logger);
+            continue;
+        case WebSocketOpcode::Pong:
+            onPong(logger);
+            continue;
+        default:
+            logger.error("Unexpected invalid opcode: {}", static_cast<int>(frame.opcode));
+            throw WebSocketException(WebSocketStatus::UnexpectedCondition, "Unexpected invalid opcode");
+        }
+
+        if (!frame.finalFrame)
+        {
+            continue;
+        }
+
+        logger.info("Received request of {} bytes from client {}", buffer.data.size(), client);
+
+        if (!buffer.binary)
+        {
+            logger.debug("Text request data: {}", buffer.data);
+        }
+
+        return buffer;
+    }
+}
+
+void sendResponse(Logger &logger, ClientId client, WebSocket &websocket, const Message &message)
+{
+    auto data = std::string_view(message.data);
+
+    logger.info("Sending response of {} bytes to client {}", data.size(), client);
+
+    if (!message.binary)
     {
         logger.debug("Text response data: {}", data);
     }
 
-    auto opcode = response.binary ? WebSocketOpcode::Binary : WebSocketOpcode::Text;
+    auto opcode = message.binary ? WebSocketOpcode::Binary : WebSocketOpcode::Text;
 
     auto maxFrameSize = websocket.getMaxFrameSize();
 
@@ -133,90 +183,88 @@ void respond(ClientId clientId, WebSocket &websocket, Logger &logger, const Mess
     }
 }
 
-void runClientLoop(ClientId clientId, WebSocket &websocket, RequestQueue &requests, Logger &logger)
+class WebSocketWrapper
 {
-    auto buffer = Message();
+public:
+    explicit WebSocketWrapper(Logger &logger, ClientId client, WebSocket websocket):
+        _logger(&logger),
+        _client(client),
+        _websocket(std::move(websocket))
+    {
+    }
 
+    void close(WebSocketStatus status, std::string_view message = {})
+    {
+        _websocket.close(status, message);
+    }
+
+    ClientId getClient() const
+    {
+        return _client;
+    }
+
+    std::optional<Message> receive()
+    {
+        return receiveRequest(*_logger, _client, _websocket);
+    }
+
+    void send(const Message &message)
+    {
+        auto lock = std::lock_guard(_mutex);
+        sendResponse(*_logger, _client, _websocket, message);
+    }
+
+private:
+    std::mutex _mutex;
+    Logger *_logger;
+    ClientId _client;
+    WebSocket _websocket;
+};
+
+void runClientLoop(RequestQueue &requests, std::shared_ptr<WebSocketWrapper> websocket)
+{
     while (true)
     {
-        auto frame = websocket.receive();
+        auto message = websocket->receive();
 
-        switch (frame.opcode)
+        if (!message)
         {
-        case WebSocketOpcode::Continuation:
-            onContinuation(frame, buffer, logger);
-            break;
-        case WebSocketOpcode::Text:
-            onText(frame, buffer, logger);
-            break;
-        case WebSocketOpcode::Binary:
-            onBinary(frame, buffer, logger);
-            break;
-        case WebSocketOpcode::Close:
-            onClose(websocket, logger);
             return;
-        case WebSocketOpcode::Ping:
-            onPing(frame, websocket, logger);
-            continue;
-        case WebSocketOpcode::Pong:
-            onPong(logger);
-            continue;
-        default:
-            logger.error("Unexpected invalid opcode: {}", static_cast<int>(frame.opcode));
-            throw WebSocketException(WebSocketStatus::UnexpectedCondition, "Unexpected invalid opcode");
-        }
-
-        if (!frame.finalFrame)
-        {
-            continue;
-        }
-
-        logger.info("Received request of {} bytes from client {}", buffer.data.size(), clientId);
-
-        if (!buffer.binary)
-        {
-            logger.debug("Text request data: {}", buffer.data);
         }
 
         auto request = Request{
-            .clientId = clientId,
-            .message = std::exchange(buffer, {}),
-            .respond = [=, &logger](const auto &response) mutable { respond(clientId, websocket, logger, response); },
+            .client = websocket->getClient(),
+            .message = std::move(*message),
+            .respond = [=](const auto &message) { websocket->send(message); },
         };
 
         requests.push(std::move(request));
     }
 }
-
-ClientId generateClientId(std::mutex &mutex, IdGenerator<ClientId> &ids)
-{
-    auto lock = std::lock_guard(mutex);
-    return ids.next();
-}
-
-void recycleClientId(std::mutex &mutex, IdGenerator<ClientId> &ids, ClientId id)
-{
-    auto lock = std::lock_guard(mutex);
-    return ids.recycle(id);
-}
 }
 
 namespace brayns
 {
-WebSocketHandler::WebSocketHandler(RequestQueue &requests, Logger &logger):
-    _requests(&requests),
+WebSocketHandler::WebSocketHandler(Logger &logger):
     _logger(&logger)
 {
 }
 
-void WebSocketHandler::handle(WebSocket &websocket)
+Request WebSocketHandler::wait()
 {
-    auto clientId = generateClientId(_mutex, _ids);
+    return _requests.wait();
+}
+
+void WebSocketHandler::handle(WebSocket websocket)
+{
+    auto client = _ids.next();
+
+    auto ptr = std::make_shared<WebSocketWrapper>(*_logger, client, std::move(websocket));
 
     try
     {
-        _logger->info("New client connected with ID {}", clientId);
-        runClientLoop(clientId, websocket, *_requests, *_logger);
+        _logger->info("New client connected with ID {}", client);
+        runClientLoop(_requests, ptr);
     }
     catch (const WebSocketClosed &e)
     {
@@ -225,16 +273,16 @@ void WebSocketHandler::handle(WebSocket &websocket)
     catch (const WebSocketException &e)
     {
         _logger->warn("Error while processing websocket: '{}'", e.what());
-        websocket.close(e.getStatus(), e.what());
+        ptr->close(e.getStatus(), e.what());
     }
     catch (...)
     {
         _logger->error("Unknown error in websocket handler");
-        websocket.close(WebSocketStatus::UnexpectedCondition, "Internal error");
+        ptr->close(WebSocketStatus::UnexpectedCondition, "Internal error");
     }
 
-    recycleClientId(_mutex, _ids, clientId);
+    _ids.recycle(client);
 
-    _logger->info("Client {} disconnected", clientId);
+    _logger->info("Client {} disconnected", client);
 }
 }

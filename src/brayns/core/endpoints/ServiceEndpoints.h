@@ -26,5 +26,5 @@
 
 namespace brayns
 {
-void addServiceEndpoints(ApiBuilder &builder, Api &api, StopToken &token);
+void addServiceEndpoints(ApiBuilder &builder, const EndpointRegistry &endpoints, StopToken &token);
 }

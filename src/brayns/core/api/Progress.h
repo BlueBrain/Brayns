@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <memory>
+#include <functional>
 #include <mutex>
 #include <string>
 
@@ -32,10 +32,14 @@ namespace brayns
 {
 struct TaskOperation
 {
-    std::string description = "Not started yet";
-    float completion = 0.0F;
-    std::size_t index = 0;
+    std::string description;
+    float completion;
 };
+
+inline TaskOperation notStartedYet()
+{
+    return {"Not started yet", 0.0F};
+}
 
 template<>
 struct JsonObjectReflector<TaskOperation>
@@ -45,7 +49,6 @@ struct JsonObjectReflector<TaskOperation>
         auto builder = JsonBuilder<TaskOperation>();
         builder.field("description", [](auto &object) { return &object.description; }).description("Operation description");
         builder.field("completion", [](auto &object) { return &object.completion; }).description("Operation completion between 0 and 1");
-        builder.field("index", [](auto &object) { return &object.index; }).description("Operation index between 0 and operation_count");
         return builder.build();
     }
 };
@@ -56,12 +59,9 @@ public:
     explicit TaskCancelledException();
 };
 
-class TaskMonitor
+class Progress
 {
 public:
-    explicit TaskMonitor(std::size_t operationCount);
-
-    std::size_t getOperationCount() const;
     TaskOperation getCurrentOperation();
     void update(float completion);
     void nextOperation(std::string description);
@@ -69,20 +69,9 @@ public:
 
 private:
     std::mutex _mutex;
-    std::size_t _operationCount;
-    TaskOperation _currentOperation;
+    TaskOperation _currentOperation = notStartedYet();
     bool _cancelled = false;
-};
 
-class Progress
-{
-public:
-    explicit Progress(std::shared_ptr<TaskMonitor> monitor);
-
-    void update(float completion);
-    void nextOperation(std::string description);
-
-private:
-    std::shared_ptr<TaskMonitor> _monitor;
+    void checkCancellation();
 };
 }

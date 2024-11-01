@@ -23,20 +23,26 @@
 
 #include <map>
 
+#include <brayns/core/jsonrpc/Messages.h>
+#include <brayns/core/utils/Logger.h>
+#include <brayns/core/websocket/Request.h>
+
 #include "Endpoint.h"
+#include "Task.h"
+#include "TaskManager.h"
 
 namespace brayns
 {
 class Api
 {
 public:
-    explicit Api(std::map<std::string, Endpoint> endpoints = {});
+    explicit Api(Logger &logger, TaskManager &tasks, const EndpointRegistry &endpoints);
 
-    std::vector<std::string> getMethods() const;
-    const EndpointSchema &getSchema(const std::string &method) const;
-    Payload execute(const std::string &method, Payload params, Progress progress);
+    void execute(const Request &request);
 
 private:
-    std::map<std::string, Endpoint> _endpoints;
+    Logger *_logger;
+    TaskManager *_tasks;
+    const EndpointRegistry *_endpoints;
 };
 }

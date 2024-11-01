@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -81,7 +82,7 @@ struct WebSocketFrameView
 class WebSocket
 {
 public:
-    explicit WebSocket(const Poco::Net::WebSocket &websocket);
+    explicit WebSocket(std::unique_ptr<Poco::Net::WebSocket> websocket);
 
     std::size_t getMaxFrameSize() const;
     WebSocketFrame receive();
@@ -89,6 +90,6 @@ public:
     void close(WebSocketStatus status, std::string_view message = {});
 
 private:
-    Poco::Net::WebSocket _websocket;
+    std::unique_ptr<Poco::Net::WebSocket> _websocket;
 };
 }
