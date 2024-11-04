@@ -21,10 +21,9 @@
 
 #pragma once
 
-#include <optional>
 #include <variant>
+#include <vector>
 
-#include "Data.h"
 #include "Device.h"
 #include "Object.h"
 #include "Volume.h"
@@ -39,24 +38,16 @@ public:
 
 struct MeshSettings
 {
-    Data<Vector3> positions;
-    std::optional<Data<Vector3>> normals = {};
-    std::optional<Data<Color4>> colors = {};
-    std::optional<Data<Vector2>> uvs = {};
+    std::vector<Vector3> positions;
+    std::vector<Vector3> normals = {};
+    std::vector<Color4> colors = {};
+    std::vector<Vector2> uvs = {};
 };
 
 class Mesh : public Geometry
 {
 public:
     using Geometry::Geometry;
-
-    void setColors(const Data<Color4> &colors);
-};
-
-struct TriangleMeshSettings
-{
-    MeshSettings base;
-    std::optional<Data<Index3>> indices = {};
 };
 
 class TriangleMesh : public Mesh
@@ -65,13 +56,7 @@ public:
     using Mesh::Mesh;
 };
 
-TriangleMesh createTriangleMesh(Device &device, const TriangleMeshSettings &settings);
-
-struct QuadMeshSettings
-{
-    MeshSettings base;
-    std::optional<Data<Index4>> indices = {};
-};
+TriangleMesh createTriangleMesh(Device &device, const MeshSettings &settings, const std::vector<Index3> &indices = {});
 
 class QuadMesh : public Mesh
 {
@@ -79,12 +64,12 @@ public:
     using Mesh::Mesh;
 };
 
-QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings);
+QuadMesh createQuadMesh(Device &device, const MeshSettings &settings, const std::vector<Index4> &indices = {});
 
 struct SphereSettings
 {
-    Data<Vector4> spheres;
-    std::optional<Data<Vector2>> uvs = {};
+    std::vector<Vector4> spheres;
+    std::vector<Vector2> uvs = {};
 };
 
 class Spheres : public Geometry
@@ -97,9 +82,9 @@ Spheres createSpheres(Device &device, const SphereSettings &settings);
 
 struct DiscSettings
 {
-    Data<Vector4> spheres;
-    std::optional<Data<Vector3>> normals = {};
-    std::optional<Data<Vector2>> uvs = {};
+    std::vector<Vector4> spheres;
+    std::vector<Vector3> normals = {};
+    std::vector<Vector2> uvs = {};
 };
 
 class Discs : public Geometry
@@ -112,18 +97,16 @@ Discs createDiscs(Device &device, const DiscSettings &settings);
 
 struct CylinderSettings
 {
-    Data<Vector4> spheres;
-    Data<std::uint32_t> indices;
-    std::optional<Data<Color4>> colors = {};
-    std::optional<Data<Vector2>> uvs = {};
+    std::vector<Vector4> spheres;
+    std::vector<std::uint32_t> indices;
+    std::vector<Color4> colors = {};
+    std::vector<Vector2> uvs = {};
 };
 
 class Cylinders : public Geometry
 {
 public:
     using Geometry::Geometry;
-
-    void setColors(const Data<Color4> &colors);
 };
 
 Cylinders createCylinders(Device &device, const CylinderSettings &settings);
@@ -138,7 +121,7 @@ struct RoundCurve
 
 struct RibbonCurve
 {
-    Data<Vector3> normals;
+    std::vector<Vector3> normals;
 };
 
 using CurveType = std::variant<FlatCurve, RoundCurve, RibbonCurve>;
@@ -157,7 +140,7 @@ struct BsplineCurve
 
 struct HermiteCurve
 {
-    Data<Vector4> tangents;
+    std::vector<Vector4> tangents;
 };
 
 struct CatmullRomCurve
@@ -168,10 +151,10 @@ using CurveBasis = std::variant<LinearCurve, BezierCurve, BsplineCurve, HermiteC
 
 struct CurveSettings
 {
-    Data<Vector4> spheres;
-    Data<std::uint32_t> indices;
-    std::optional<Data<Color4>> colors = {};
-    std::optional<Data<Vector2>> uvs = {};
+    std::vector<Vector4> spheres;
+    std::vector<std::uint32_t> indices;
+    std::vector<Color4> colors = {};
+    std::vector<Vector2> uvs = {};
     CurveType type = RoundCurve();
     CurveBasis basis = LinearCurve();
 };
@@ -186,7 +169,7 @@ Curve createCurve(Device &device, const CurveSettings &settings);
 
 struct BoxSettings
 {
-    Data<Box3> boxes;
+    std::vector<Box3> boxes;
 };
 
 class Boxes : public Geometry
@@ -199,8 +182,8 @@ Boxes createBoxes(Device &device, const BoxSettings &settings);
 
 struct PlaneSettings
 {
-    Data<Vector4> coefficients;
-    std::optional<Data<Box3>> bounds = {};
+    std::vector<Vector4> coefficients;
+    std::vector<Box3> bounds = {};
 };
 
 class Planes : public Geometry
@@ -214,7 +197,7 @@ Planes createPlanes(Device &device, const PlaneSettings &settings);
 struct IsosurfaceSettings
 {
     Volume volume;
-    Data<float> isovalues;
+    std::vector<float> isovalues;
 };
 
 class Isosurfaces : public Geometry

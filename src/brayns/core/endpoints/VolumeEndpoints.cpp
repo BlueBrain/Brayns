@@ -27,7 +27,7 @@ namespace brayns
 {
 void addVolumeEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device)
 {
-    builder.endpoint("createRegularVolume", [&](CreateRegularVolumeParams params) { return createRegularVolume(objects, device, params); })
+    builder.endpoint("createRegularVolume", [&](CreateRegularVolumeParams params) { return createRegularVolume(objects, device, std::move(params)); })
         .description("Create a regular volume");
 
     builder.endpoint("getRegularVolume", [&](GetObjectParams params) { return getRegularVolume(objects, params); })

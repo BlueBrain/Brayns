@@ -27,18 +27,14 @@
 
 #include <fmt/format.h>
 
-#include <brayns/core/engine/Data.h>
-#include <brayns/core/json/Json.h>
 #include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/utils/Binary.h>
 
 namespace brayns
 {
-template<typename T>
-std::size_t getItemCountFromBinaryOf(std::string_view bytes)
+inline void sanitizeBinary(std::span<char> bytes, std::size_t itemSize)
 {
     auto bytesSize = bytes.size();
-    auto itemSize = getBinarySize<T>();
     auto itemCount = bytesSize / itemSize;
 
     if (itemCount * itemSize != bytesSize)
@@ -46,56 +42,14 @@ std::size_t getItemCountFromBinaryOf(std::string_view bytes)
         throw InvalidParams(fmt::format("Binary size {} is not a multiple of item size {}", bytesSize, itemSize));
     }
 
-    return itemCount;
-}
-
-template<typename T>
-void copyLittleEndianBinaryTo(std::string_view bytes, std::span<T> items)
-{
-    for (auto &item : items)
+    if constexpr (std::endian::native != std::endian::little)
     {
-        extractBytesTo(bytes, std::endian::little, item);
+        for (auto i = std::size_t(0); i < itemCount; ++i)
+        {
+            auto item = bytes.subspan(i * itemSize, (i + 1) * itemSize);
+            std::ranges::reverse(item);
+        }
     }
-}
-
-template<typename T>
-Data3D<T> createData3DFromBinaryOf(Device &device, const Size3 &itemCount, std::string_view bytes)
-{
-    auto totalItemCount = getItemCountFromBinaryOf<T>(bytes);
-
-    if (totalItemCount == 0)
-    {
-        throw InvalidParams("Empty data is not supported by OSPRay");
-    }
-
-    if (reduceMultiply(itemCount) != totalItemCount)
-    {
-        auto [x, y, z] = itemCount;
-
-        throw InvalidParams(fmt::format("{} items found in binary which does not match dimensions {}x{}x{}", totalItemCount, x, y, z));
-    }
-
-    auto data = allocateData3D<T>(device, itemCount);
-
-    copyLittleEndianBinaryTo(bytes, data.getItems());
-
-    return data;
-}
-
-template<typename T>
-Data2D<T> createData2DFromBinaryOf(Device &device, const Size2 &itemCount, std::string_view bytes)
-{
-    auto size3 = Size3(itemCount, 1);
-    auto data3 = createData3DFromBinaryOf<T>(device, size3, bytes);
-    return Data2D<T>(std::move(data3));
-}
-
-template<typename T>
-Data<T> createDataFromBinaryOf(Device &device, std::size_t itemCount, std::string_view bytes)
-{
-    auto size3 = Size3(itemCount, 1, 1);
-    auto data3 = createData3DFromBinaryOf<T>(device, size3, bytes);
-    return Data<T>(std::move(data3));
 }
 
 template<std::ranges::range T>

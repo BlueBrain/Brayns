@@ -97,8 +97,7 @@ struct JsonObjectReflector<FramebufferParams>
             .defaultValue(false);
         builder.field("operations", [](auto &object) { return &object.operations; })
             .description("List of image operation IDs that will be applied on the framebuffer")
-            .defaultValue(std::vector<ObjectId>())
-            .uniqueItems(true);
+            .defaultValue(std::vector<ObjectId>());
         return builder.build();
     }
 };

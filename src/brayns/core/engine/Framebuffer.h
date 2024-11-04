@@ -57,7 +57,7 @@ struct FramebufferSettings
     std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
     bool accumulation = false;
     bool variance = false;
-    std::optional<Data<ImageOperation>> operations = {};
+    std::vector<ImageOperation> operations = {};
 };
 
 class FramebufferData

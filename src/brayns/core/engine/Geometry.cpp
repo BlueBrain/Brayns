@@ -36,17 +36,18 @@ void setMeshParams(OSPGeometry handle, const MeshSettings &settings)
 }
 
 // TODO remove when OSPRay exposes sphere.position_radius to match embree internal layout
-void setInterleavedSpheresParams(OSPGeometry handle, const Data<Vector4> &spheres)
+void setInterleavedSpheresParams(OSPGeometry handle, const std::vector<Vector4> &spheres)
 {
-    constexpr auto stride = static_cast<std::ptrdiff_t>(sizeof(Vector4));
+    auto data = spheres.data();
+    auto itemCount = Size3(spheres.size(), 1, 1);
+    auto stride = Stride3(static_cast<std::ptrdiff_t>(sizeof(Vector4)), 0, 0);
 
-    auto itemCount = spheres.getTotalItemCount();
-
-    auto positionData = createDataView<Vector3>(spheres, {itemCount, stride});
+    auto positionData = createData(data, OSP_VEC3F, itemCount, stride);
     setObjectParam(handle, "sphere.position", positionData);
 
     auto offset = sizeof(Vector3);
-    auto radiusData = createDataView<float>(spheres, {itemCount, stride, offset});
+
+    auto radiusData = createData(data + offset, OSP_FLOAT, itemCount, stride);
     setObjectParam(handle, "sphere.radius", radiusData);
 }
 
@@ -95,45 +96,30 @@ void setCurveBasis(OSPGeometry handle, CatmullRomCurve)
 
 namespace brayns
 {
-void Mesh::setColors(const Data<Color4> &colors)
-{
-    auto handle = getHandle();
-    setObjectParam(handle, "vertex.color", colors);
-    commitObject(handle);
-}
-
-void Cylinders::setColors(const Data<Color4> &colors)
-{
-    auto handle = getHandle();
-    setObjectParam(handle, "vertex.color", colors);
-    commitObject(handle);
-}
-
-TriangleMesh createTriangleMesh(Device &device, const TriangleMeshSettings &settings)
+TriangleMesh createTriangleMesh(Device &device, const MeshSettings &settings, const std::vector<Index3> &indices)
 {
     auto handle = ospNewGeometry("mesh");
     auto mesh = wrapObjectHandleAs<TriangleMesh>(device, handle);
 
-    setMeshParams(handle, settings.base);
-    setObjectParam(handle, "index", settings.indices);
+    setMeshParams(handle, settings);
+
+    setObjectParam(handle, "index", indices);
 
     commitObject(device, handle);
 
     return mesh;
 }
 
-QuadMesh createQuadMesh(Device &device, const QuadMeshSettings &settings)
+QuadMesh createQuadMesh(Device &device, const MeshSettings &settings, const std::vector<Index4> &indices)
 {
     auto handle = ospNewGeometry("mesh");
     auto mesh = wrapObjectHandleAs<QuadMesh>(device, handle);
 
-    setMeshParams(handle, settings.base);
+    setMeshParams(handle, settings);
 
-    if (settings.indices)
-    {
-        setObjectParam(handle, "index", *settings.indices);
-    }
-    else
+    setObjectParam(handle, "index", indices);
+
+    if (indices.empty())
     {
         setObjectParam(handle, "quadSoup", true);
     }
@@ -165,14 +151,15 @@ Discs createDiscs(Device &device, const DiscSettings &settings)
     setInterleavedSpheresParams(handle, settings.spheres);
     setObjectParam(handle, "sphere.texcoord", settings.uvs);
 
-    if (settings.normals)
+    setObjectParam(handle, "sphere.normal", settings.normals);
+
+    if (settings.normals.empty())
     {
-        setObjectParam(handle, "type", OSP_ORIENTED_DISC);
-        setObjectParam(handle, "sphere.normal", *settings.normals);
+        setObjectParam(handle, "type", OSP_DISC);
     }
     else
     {
-        setObjectParam(handle, "type", OSP_DISC);
+        setObjectParam(handle, "type", OSP_ORIENTED_DISC);
     }
 
     commitObject(device, handle);

@@ -21,26 +21,13 @@
 
 #include "TransferFunctionObjects.h"
 
-namespace
-{
-using namespace brayns;
-
-LinearTransferFunctionSettings extractSettings(Device &device, const LinearTransferFunctionParams &params)
-{
-    auto data = createData<Color4>(device, params.colors);
-    return {params.scalarRange, std::move(data)};
-}
-}
-
 namespace brayns
 {
 CreateObjectResult createLinearTransferFunction(ObjectManager &objects, Device &device, const CreateLinearTransferFunctionParams &params)
 {
     const auto &[base, derived] = params;
 
-    auto settings = extractSettings(device, derived);
-
-    auto operation = createLinearTransferFunction(device, settings);
+    auto operation = createLinearTransferFunction(device, derived);
 
     auto ptr = toShared(UserLinearTransferFunction{derived, std::move(operation)});
 
@@ -66,13 +53,11 @@ void updateLinearTransferFunction(ObjectManager &objects, Device &device, const 
     auto stored = objects.getAsStored<UserTransferFunction>(params.id);
     auto &operation = *castAsShared<UserLinearTransferFunction>(stored.get().value, stored);
 
-    auto message = getUpdatedParams(params, operation.settings);
-
-    auto settings = extractSettings(device, message);
+    auto settings = getUpdatedParams(params, operation.settings);
 
     operation.value.update(settings);
     device.throwIfError();
 
-    operation.settings = std::move(message);
+    operation.settings = std::move(settings);
 }
 }

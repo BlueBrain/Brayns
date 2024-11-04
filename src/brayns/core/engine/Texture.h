@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <string>
+
 #include "Data.h"
 #include "Device.h"
 #include "Object.h"
@@ -54,6 +56,9 @@ enum class TextureFormat
     R16 = OSP_TEXTURE_R16,
 };
 
+DataType getDataType(TextureFormat format);
+std::size_t getSize(TextureFormat format);
+
 enum class TextureFilter
 {
     Linear = OSP_TEXTURE_FILTER_LINEAR,
@@ -74,24 +79,15 @@ struct TextureTransform
     Vector2 translation = {0.0F, 0.0F};
 };
 
-using TextureData2D = std::variant<
-    Data2D<std::uint32_t>,
-    Data2D<Color4>,
-    Data2D<Vector<std::uint8_t, 3>>,
-    Data2D<Color3>,
-    Data2D<std::uint8_t>,
-    Data2D<Vector<std::uint16_t, 3>>,
-    Data2D<Vector<std::uint8_t, 2>>,
-    Data2D<float>,
-    Data2D<Vector<std::uint16_t, 4>>,
-    Data2D<Vector<std::uint16_t, 3>>,
-    Data2D<Vector<std::uint16_t, 2>>,
-    Data2D<std::uint16_t>>;
+struct TextureData2D
+{
+    std::string value;
+    TextureFormat format;
+    Size2 size;
+};
 
 struct Texture2DSettings
 {
-    TextureData2D data;
-    TextureFormat format;
     TextureFilter filter = TextureFilter::Linear;
     TextureWrap wrap = TextureWrap::Repeat;
 };
@@ -100,13 +96,14 @@ class Texture2D : public Texture
 {
 public:
     using Texture::Texture;
+
+    void update(const Texture2DSettings &settings);
 };
 
-Texture2D createTexture2D(Device &device, const Texture2DSettings &settings);
+Texture2D createTexture2D(Device &device, const TextureData2D &data, const Texture2DSettings &settings = {});
 
 struct VolumeTextureSettings
 {
-    Volume volume;
     TransferFunction transferFunction;
 };
 
@@ -114,7 +111,9 @@ class VolumeTexture : public Texture
 {
 public:
     using Texture::Texture;
+
+    void update(const VolumeTextureSettings &settings);
 };
 
-VolumeTexture createVolumeTexture(Device &device, const VolumeTextureSettings &settings);
+VolumeTexture createVolumeTexture(Device &device, const Volume &volume, const VolumeTextureSettings &settings = {});
 }

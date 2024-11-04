@@ -23,45 +23,26 @@
 
 #include "common/Binary.h"
 
-namespace
-{
-using namespace brayns;
-
-RegularVolumeData createVolumeData(Device &device, const RegularVolumeParams &params, std::string_view binary)
-{
-    switch (params.voxelType)
-    {
-    case VoxelType::U8:
-        return createData3DFromBinaryOf<std::uint8_t>(device, params.voxelCount, binary);
-    case VoxelType::U16:
-        return createData3DFromBinaryOf<std::uint16_t>(device, params.voxelCount, binary);
-    case VoxelType::F32:
-        return createData3DFromBinaryOf<float>(device, params.voxelCount, binary);
-    case VoxelType::F64:
-        return createData3DFromBinaryOf<double>(device, params.voxelCount, binary);
-    default:
-        throw std::invalid_argument("Invalid voxel data type");
-    }
-}
-}
-
 namespace brayns
 {
-CreateObjectResult createRegularVolume(ObjectManager &objects, Device &device, const CreateRegularVolumeParams &params)
+CreateObjectResult createRegularVolume(ObjectManager &objects, Device &device, CreateRegularVolumeParams params)
 {
-    const auto &[json, binary] = params;
+    auto &[json, binary] = params;
+    auto &[base, derived] = json;
 
-    auto data = createVolumeData(device, json.derived, binary);
-    auto volume = createRegularVolume(device, data, json.derived.value);
+    sanitizeBinary(binary, getSize(derived.voxelType));
+    auto data = RegularVolumeData{std::move(binary), derived.voxelType, derived.size};
 
-    auto ptr = toShared(UserRegularVolume{json.derived, std::move(volume)});
+    auto volume = createRegularVolume(device, data, derived.value);
+
+    auto ptr = toShared(UserRegularVolume{derived, std::move(volume)});
 
     auto object = UserVolume{
         .value = ptr,
         .get = [=] { return ptr->value; },
     };
 
-    auto stored = objects.add(std::move(object), {"RegularVolume"}, json.base);
+    auto stored = objects.add(std::move(object), {"RegularVolume"}, base);
 
     return getResult(stored);
 }

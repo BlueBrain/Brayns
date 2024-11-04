@@ -194,8 +194,7 @@ struct ObjectParamReflector<T>
 {
     static void set(OSPObject handle, const char *id, const T &value)
     {
-        constexpr auto type = dataTypeOf<T>;
-        ospSetParam(handle, id, type, &value);
+        ospSetParam(handle, id, dataTypeOf<T>, &value);
     }
 };
 

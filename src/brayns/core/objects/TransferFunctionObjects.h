@@ -44,18 +44,12 @@ struct UserTransferFunctionOf
     T value;
 };
 
-struct LinearTransferFunctionParams
-{
-    Box1 scalarRange;
-    std::vector<Color4> colors;
-};
-
 template<>
-struct JsonObjectReflector<LinearTransferFunctionParams>
+struct JsonObjectReflector<LinearTransferFunctionSettings>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<LinearTransferFunctionParams>();
+        auto builder = JsonBuilder<LinearTransferFunctionSettings>();
         builder.field("scalarRange", [](auto &object) { return &object.scalarRange; })
             .description("Range of the scalar values sampled from the volume that will be mapped to colors")
             .defaultValue(Box1(0, 1));
@@ -67,10 +61,10 @@ struct JsonObjectReflector<LinearTransferFunctionParams>
     }
 };
 
-using CreateLinearTransferFunctionParams = CreateParamsOf<LinearTransferFunctionParams>;
-using GetLinearTransferFunctionResult = GetResultOf<LinearTransferFunctionParams>;
-using UpdateLinearTransferFunctionParams = UpdateParamsOf<LinearTransferFunctionParams>;
-using UserLinearTransferFunction = UserTransferFunctionOf<LinearTransferFunctionParams, LinearTransferFunction>;
+using CreateLinearTransferFunctionParams = CreateParamsOf<LinearTransferFunctionSettings>;
+using GetLinearTransferFunctionResult = GetResultOf<LinearTransferFunctionSettings>;
+using UpdateLinearTransferFunctionParams = UpdateParamsOf<LinearTransferFunctionSettings>;
+using UserLinearTransferFunction = UserTransferFunctionOf<LinearTransferFunctionSettings, LinearTransferFunction>;
 
 CreateObjectResult createLinearTransferFunction(ObjectManager &objects, Device &device, const CreateLinearTransferFunctionParams &params);
 GetLinearTransferFunctionResult getLinearTransferFunction(ObjectManager &objects, const GetObjectParams &params);

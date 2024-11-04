@@ -48,18 +48,13 @@ class VolumeFilter(Enum):
     CUBIC = "Cubic"
 
 
-class VolumeType(Enum):
-    CELL_CENTERED = "CellCentered"
-    VERTEX_CENTERED = "VertexCentered"
-
-
 @dataclass
 class GetRegularVolumeResult:
     voxel_type: VoxelType
-    voxel_count: tuple[int, int, int]
+    size: tuple[int, int, int]
     origin: tuple[float, float, float]
     spacing: tuple[float, float, float]
-    type: VolumeType
+    cell_centered: bool
     filter: VolumeFilter
     background: float | None
 
@@ -67,14 +62,14 @@ class GetRegularVolumeResult:
 class UpdateRegularVolumeParams(TypedDict, total=False):
     origin: tuple[float, float, float]
     spacing: tuple[float, float, float]
-    type: VolumeType
+    cell_centered: bool
     filter: VolumeFilter
     background: float | None
 
 
 class CreateRegularVolumeParams(CreateObjectParams, UpdateRegularVolumeParams):
     voxel_type: VoxelType
-    voxel_count: tuple[int, int, int]
+    size: tuple[int, int, int]
 
 
 async def create_regular_volume(

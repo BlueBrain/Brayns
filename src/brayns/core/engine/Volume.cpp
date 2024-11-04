@@ -29,7 +29,7 @@ void setRegularVolumeParams(OSPVolume handle, const RegularVolumeSettings &setti
 {
     setObjectParam(handle, "gridOrigin", settings.origin);
     setObjectParam(handle, "gridSpacing", settings.spacing);
-    setObjectParam(handle, "cellCentered", settings.type == VolumeType::CellCentered);
+    setObjectParam(handle, "cellCentered", settings.cellCentered);
     setObjectParam(handle, "filter", static_cast<OSPVolumeFilter>(settings.filter));
     setObjectParam(handle, "background", settings.background);
 }
@@ -37,6 +37,23 @@ void setRegularVolumeParams(OSPVolume handle, const RegularVolumeSettings &setti
 
 namespace brayns
 {
+std::size_t getSize(VoxelType type)
+{
+    switch (type)
+    {
+    case VoxelType::U8:
+        return 1;
+    case VoxelType::U16:
+        return 2;
+    case VoxelType::F32:
+        return 4;
+    case VoxelType::F64:
+        return 8;
+    default:
+        throw std::invalid_argument("Invalid volume data type");
+    }
+}
+
 void RegularVolume::update(const RegularVolumeSettings &settings)
 {
     auto handle = getHandle();
@@ -49,7 +66,10 @@ RegularVolume createRegularVolume(Device &device, const RegularVolumeData &data,
     auto handle = ospNewVolume("structuredRegular");
     auto volume = wrapObjectHandleAs<RegularVolume>(device, handle);
 
-    setObjectParam(handle, "data", data);
+    auto wrapper = createData(data.value.data(), static_cast<DataType>(data.type), data.size);
+
+    setObjectParam(handle, "data", wrapper);
+
     setRegularVolumeParams(handle, settings);
 
     commitObject(device, handle);

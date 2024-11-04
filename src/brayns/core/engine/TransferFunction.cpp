@@ -29,20 +29,29 @@ void setLinearTransferFunctionParams(OSPTransferFunction handle, const LinearTra
 {
     setObjectParam(handle, "value", settings.scalarRange);
 
-    auto stride = static_cast<std::ptrdiff_t>(sizeof(Color4));
+    auto data = settings.colors.data();
+    auto itemCount = Size3(settings.colors.size(), 1, 1);
+    auto stride = Stride3(static_cast<std::ptrdiff_t>(sizeof(Color4)), 0, 0);
 
-    auto colorCount = settings.colors.getTotalItemCount();
-    auto colors = createDataView<Color3>(settings.colors, {colorCount, stride});
+    auto colors = createData(data, OSP_VEC3F, itemCount, stride);
     setObjectParam(handle, "color", colors);
 
     auto offset = sizeof(Color3);
-    auto opacities = createDataView<float>(settings.colors, {colorCount, stride, offset});
+
+    auto opacities = createData(data + offset, OSP_FLOAT, itemCount, stride);
     setObjectParam(handle, "opacity", opacities);
 }
 }
 
 namespace brayns
 {
+void LinearTransferFunction::update(const LinearTransferFunctionSettings &settings)
+{
+    auto handle = getHandle();
+    setLinearTransferFunctionParams(handle, settings);
+    commitObject(handle);
+}
+
 LinearTransferFunction createLinearTransferFunction(Device &device, const LinearTransferFunctionSettings &settings)
 {
     auto handle = ospNewTransferFunction("piecewiseLinear");
@@ -53,12 +62,5 @@ LinearTransferFunction createLinearTransferFunction(Device &device, const Linear
     commitObject(device, handle);
 
     return transferFunction;
-}
-
-void LinearTransferFunction::update(const LinearTransferFunctionSettings &settings)
-{
-    auto handle = getHandle();
-    setLinearTransferFunctionParams(handle, settings);
-    commitObject(handle);
 }
 }

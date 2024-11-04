@@ -21,64 +21,18 @@
 
 #include "FramebufferObjects.h"
 
+#include "common/Objects.h"
+
 namespace
 {
 using namespace brayns;
-
-std::vector<Stored<UserImageOperation>> getImageOperations(ObjectManager &objects, const std::vector<ObjectId> &ids)
-{
-    auto operations = std::vector<Stored<UserImageOperation>>();
-    operations.reserve(ids.size());
-
-    for (auto id : ids)
-    {
-        auto interface = objects.getAsStored<UserImageOperation>(id);
-        operations.push_back(std::move(interface));
-    }
-
-    return operations;
-}
-
-std::vector<ObjectId> getImageOperationIds(const std::vector<Stored<UserImageOperation>> &operations)
-{
-    auto ids = std::vector<ObjectId>();
-    ids.reserve(operations.size());
-
-    for (const auto &operation : operations)
-    {
-        ids.push_back(operation.getId());
-    }
-
-    return ids;
-}
-
-std::optional<Data<ImageOperation>> createImageOperationData(Device &device, const std::vector<Stored<UserImageOperation>> &operations)
-{
-    auto itemCount = operations.size();
-
-    if (itemCount == 0)
-    {
-        return std::nullopt;
-    }
-
-    auto data = allocateData<ImageOperation>(device, itemCount);
-    auto items = data.getItems();
-
-    for (auto i = std::size_t(0); i < itemCount; ++i)
-    {
-        const auto &interface = operations[i].get();
-        items[i] = interface.get();
-    }
-
-    return data;
-}
 
 UserFramebuffer createUserFramebuffer(ObjectManager &objects, Device &device, const FramebufferParams &params)
 {
     auto settings = params.value;
 
-    auto operations = getImageOperations(objects, params.operations);
-    settings.operations = createImageOperationData(device, operations);
+    auto operations = getStoredObjects<UserImageOperation>(objects, params.operations);
+    settings.operations = getObjectHandles(operations);
 
     auto framebuffer = createFramebuffer(device, settings);
 
@@ -105,7 +59,7 @@ GetFramebufferResult getFramebuffer(ObjectManager &objects, const GetObjectParam
 {
     auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
 
-    auto ids = getImageOperationIds(framebuffer.operations);
+    auto ids = getObjectIds(framebuffer.operations);
     auto variance = framebuffer.value.getVariance();
 
     return getResult(FramebufferInfo{{framebuffer.settings, std::move(ids)}, variance});
@@ -115,7 +69,7 @@ void updateFramebuffer(ObjectManager &objects, Device &device, const UpdateFrame
 {
     auto &object = objects.getAs<UserFramebuffer>(params.id);
 
-    auto ids = getImageOperationIds(object.operations);
+    auto ids = getObjectIds(object.operations);
     auto current = FramebufferParams{object.settings, std::move(ids)};
 
     auto settings = getUpdatedParams(params, current);

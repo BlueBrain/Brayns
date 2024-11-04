@@ -74,7 +74,7 @@ TEST_CASE("With binary")
 
     auto params = Payload{1, "123"};
 
-    auto result = endpoints.start("test", params).run();
+    auto result = endpoints.start("test2", params).run();
 
     CHECK_EQ(value, 1);
     CHECK_EQ(buffer, "123");

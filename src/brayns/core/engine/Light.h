@@ -42,7 +42,6 @@ public:
 
 struct DistantLightSettings
 {
-    LightSettings base = {};
     Vector3 direction = {0.0F, 0.0F, 1.0F};
     float angularDiameter = 0.0F;
 };
@@ -53,11 +52,10 @@ public:
     using Light::Light;
 };
 
-DistantLight createDistantLight(Device &device, const DistantLightSettings &settings);
+DistantLight createDistantLight(Device &device, const LightSettings &settings = {}, const DistantLightSettings &distant = {});
 
 struct SphereLightSettings
 {
-    LightSettings base = {};
     Vector3 position = {0.0F, 0.0F, 0.0F};
     float radius = 0.0F;
 };
@@ -68,11 +66,10 @@ public:
     using Light::Light;
 };
 
-SphereLight createSphereLight(Device &device, const SphereLightSettings &settings);
+SphereLight createSphereLight(Device &device, const LightSettings &settings = {}, const SphereLightSettings &sphere = {});
 
 struct SpotLightSettings
 {
-    LightSettings base = {};
     Vector3 position = {0.0F, 0.0F, 0.0F};
     Vector3 direction = {0.0F, 0.0F, 1.0F};
     float openingAngle = 180.0F;
@@ -87,11 +84,10 @@ public:
     using Light::Light;
 };
 
-SpotLight createSpotLight(Device &device, const SpotLightSettings &settings);
+SpotLight createSpotLight(Device &device, const LightSettings &settings = {}, const SpotLightSettings &spot = {});
 
 struct QuadLightSettings
 {
-    LightSettings base = {};
     Vector3 position = {0.0F, 0.0F, 0.0F};
     Vector3 edge1 = {1.0F, 0.0F, 0.0F};
     Vector3 edge2 = {0.0F, 1.0F, 0.0F};
@@ -103,11 +99,10 @@ public:
     using Light::Light;
 };
 
-QuadLight createQuadLight(Device &device, const QuadLightSettings &settings);
+QuadLight createQuadLight(Device &device, const LightSettings &settings = {}, const QuadLightSettings &quad = {});
 
 struct CylinderLightSettings
 {
-    LightSettings base = {};
     Vector3 start = {0.0F, 0.0F, 0.0F};
     Vector3 end = {0.0F, 0.0F, 1.0F};
     float radius = 1.0F;
@@ -119,12 +114,11 @@ public:
     using Light::Light;
 };
 
-CylinderLight createCylinderLight(Device &device, const CylinderLightSettings &settings);
+CylinderLight createCylinderLight(Device &device, const LightSettings &settings = {}, const CylinderLightSettings &cylinder = {});
 
 struct HdriLightSettings
 {
     Texture2D map;
-    LightSettings base = {};
     Vector3 up = {0.0F, 1.0F, 0.0F};
     Vector3 direction = {0.0F, 0.0F, 1.0F};
 };
@@ -135,12 +129,7 @@ public:
     using Light::Light;
 };
 
-HdriLight createHdriLight(Device &device, const HdriLightSettings &settings);
-
-struct AmbientLightSettings
-{
-    LightSettings base = {};
-};
+HdriLight createHdriLight(Device &device, const LightSettings &settings, const HdriLightSettings &hdri);
 
 class AmbientLight : public Light
 {
@@ -148,11 +137,10 @@ public:
     using Light::Light;
 };
 
-AmbientLight createAmbientLight(Device &device, const AmbientLightSettings &settings);
+AmbientLight createAmbientLight(Device &device, const LightSettings &settings = {});
 
 struct SunSkyLightSettings
 {
-    LightSettings base = {};
     Vector3 up = {0.0F, 1.0F, 0.0F};
     Vector3 direction = {0.0F, -1.0F, 0.0F};
     float turbidity = 3.0F;
@@ -166,5 +154,5 @@ public:
     using Light::Light;
 };
 
-SunSkyLight createSunSkyLight(Device &device, const SunSkyLightSettings &settings);
+SunSkyLight createSunSkyLight(Device &device, const LightSettings &settings = {}, const SunSkyLightSettings &sunsky = {});
 }

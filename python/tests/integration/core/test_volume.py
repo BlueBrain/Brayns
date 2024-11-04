@@ -35,7 +35,7 @@ from brayns import (
 async def test_regular_volume(connection: Connection) -> None:
     data = 8 * b"\1"
 
-    volume = await create_regular_volume(connection, data, voxel_type=VoxelType.U8, voxel_count=(2, 2, 2))
+    volume = await create_regular_volume(connection, data, voxel_type=VoxelType.U8, size=(2, 2, 2))
 
     settings = await get_regular_volume(connection, volume)
 

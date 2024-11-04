@@ -317,6 +317,7 @@ TEST_CASE("Variant")
     CHECK_EQ(
         getJsonSchema<std::optional<std::string>>(),
         JsonSchema{
+            .required = false,
             .oneOf = {JsonSchema{.type = JsonType::String}, JsonSchema{.type = JsonType::Null}},
         });
     CHECK_EQ(serializeToJson(std::optional<std::string>("test")), JsonValue("test"));

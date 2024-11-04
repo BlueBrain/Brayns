@@ -34,6 +34,7 @@ struct JsonReflector<std::optional<T>>
     static JsonSchema getSchema()
     {
         return {
+            .required = false,
             .oneOf = {getJsonSchema<T>(), getJsonSchema<NullJson>()},
         };
     }

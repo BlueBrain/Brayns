@@ -35,127 +35,127 @@ void setLightParams(OSPLight handle, const LightSettings &settings)
 
 namespace brayns
 {
-DistantLight createDistantLight(Device &device, const DistantLightSettings &settings)
+DistantLight createDistantLight(Device &device, const LightSettings &settings, const DistantLightSettings &distant)
 {
     auto handle = ospNewLight("distant");
     auto light = wrapObjectHandleAs<DistantLight>(device, handle);
 
-    setLightParams(handle, settings.base);
+    setLightParams(handle, settings);
 
-    setObjectParam(handle, "direction", settings.direction);
-    setObjectParam(handle, "angularDiameter", settings.angularDiameter);
+    setObjectParam(handle, "direction", distant.direction);
+    setObjectParam(handle, "angularDiameter", distant.angularDiameter);
 
     commitObject(device, handle);
 
     return light;
 }
 
-SphereLight createSphereLight(Device &device, const SphereLightSettings &settings)
+SphereLight createSphereLight(Device &device, const LightSettings &settings, const SphereLightSettings &sphere)
 {
     auto handle = ospNewLight("sphere");
     auto light = wrapObjectHandleAs<SphereLight>(device, handle);
 
-    setLightParams(handle, settings.base);
+    setLightParams(handle, settings);
 
-    setObjectParam(handle, "position", settings.position);
-    setObjectParam(handle, "radius", settings.radius);
+    setObjectParam(handle, "position", sphere.position);
+    setObjectParam(handle, "radius", sphere.radius);
 
     commitObject(device, handle);
 
     return light;
 }
 
-SpotLight createSpotLight(Device &device, const SpotLightSettings &settings)
+SpotLight createSpotLight(Device &device, const LightSettings &settings, const SpotLightSettings &spot)
 {
     auto handle = ospNewLight("spot");
     auto light = wrapObjectHandleAs<SpotLight>(device, handle);
 
-    setLightParams(handle, settings.base);
+    setLightParams(handle, settings);
 
-    setObjectParam(handle, "position", settings.position);
-    setObjectParam(handle, "direction", settings.direction);
-    setObjectParam(handle, "openingAngle", settings.openingAngle);
-    setObjectParam(handle, "penumbraAngle", settings.penumbraAngle);
-    setObjectParam(handle, "radius", settings.outerRadius);
-    setObjectParam(handle, "innerRadius", settings.innerRadius);
+    setObjectParam(handle, "position", spot.position);
+    setObjectParam(handle, "direction", spot.direction);
+    setObjectParam(handle, "openingAngle", spot.openingAngle);
+    setObjectParam(handle, "penumbraAngle", spot.penumbraAngle);
+    setObjectParam(handle, "radius", spot.outerRadius);
+    setObjectParam(handle, "innerRadius", spot.innerRadius);
 
     commitObject(device, handle);
 
     return light;
 }
 
-QuadLight createQuadLight(Device &device, const QuadLightSettings &settings)
+QuadLight createQuadLight(Device &device, const LightSettings &settings, const QuadLightSettings &quad)
 {
     auto handle = ospNewLight("quad");
     auto light = wrapObjectHandleAs<QuadLight>(device, handle);
 
-    setLightParams(handle, settings.base);
+    setLightParams(handle, settings);
 
-    setObjectParam(handle, "position", settings.position);
-    setObjectParam(handle, "edge1", settings.edge1);
-    setObjectParam(handle, "edge2", settings.edge2);
+    setObjectParam(handle, "position", quad.position);
+    setObjectParam(handle, "edge1", quad.edge1);
+    setObjectParam(handle, "edge2", quad.edge2);
 
     commitObject(device, handle);
 
     return light;
 }
 
-CylinderLight createCylinderLight(Device &device, const CylinderLightSettings &settings)
+CylinderLight createCylinderLight(Device &device, const LightSettings &settings, const CylinderLightSettings &cylinder)
 {
     auto handle = ospNewLight("cylinder");
     auto light = wrapObjectHandleAs<CylinderLight>(device, handle);
 
-    setLightParams(handle, settings.base);
+    setLightParams(handle, settings);
 
-    setObjectParam(handle, "position0", settings.start);
-    setObjectParam(handle, "position1", settings.end);
-    setObjectParam(handle, "radius", settings.radius);
+    setObjectParam(handle, "position0", cylinder.start);
+    setObjectParam(handle, "position1", cylinder.end);
+    setObjectParam(handle, "radius", cylinder.radius);
 
     commitObject(device, handle);
 
     return light;
 }
 
-HdriLight createHdriLight(Device &device, const HdriLightSettings &settings)
+HdriLight createHdriLight(Device &device, const LightSettings &settings, const HdriLightSettings &hdri)
 {
     auto handle = ospNewLight("hdri");
     auto light = wrapObjectHandleAs<HdriLight>(device, handle);
 
-    setLightParams(handle, settings.base);
+    setLightParams(handle, settings);
 
-    setObjectParam(handle, "up", settings.up);
-    setObjectParam(handle, "direction", settings.direction);
-    setObjectParam(handle, "map", settings.map);
+    setObjectParam(handle, "up", hdri.up);
+    setObjectParam(handle, "direction", hdri.direction);
+    setObjectParam(handle, "map", hdri.map);
 
     commitObject(device, handle);
 
     return light;
 }
 
-AmbientLight createAmbientLight(Device &device, const AmbientLightSettings &settings)
+AmbientLight createAmbientLight(Device &device, const LightSettings &settings)
 {
     auto handle = ospNewLight("ambient");
     auto light = wrapObjectHandleAs<AmbientLight>(device, handle);
 
-    setLightParams(handle, settings.base);
+    setLightParams(handle, settings);
 
     commitObject(device, handle);
 
     return light;
 }
 
-SunSkyLight createSunSkyLight(Device &device, const SunSkyLightSettings &settings)
+SunSkyLight createSunSkyLight(Device &device, const LightSettings &settings, const SunSkyLightSettings &sunsky)
 {
     auto handle = ospNewLight("sunSky");
     auto light = wrapObjectHandleAs<SunSkyLight>(device, handle);
 
-    setLightParams(handle, settings.base);
+    setLightParams(handle, settings);
 
-    setObjectParam(handle, "up", settings.up);
-    setObjectParam(handle, "direction", settings.direction);
-    setObjectParam(handle, "turbidity", settings.turbidity);
-    setObjectParam(handle, "albedo", settings.albedo);
-    setObjectParam(handle, "horizonExtension", settings.horizonExtension);
+    setObjectParam(handle, "up", sunsky.up);
+    setObjectParam(handle, "direction", sunsky.direction);
+    setObjectParam(handle, "turbidity", sunsky.turbidity);
+    setObjectParam(handle, "albedo", sunsky.albedo);
+    setObjectParam(handle, "horizonExtension", sunsky.horizonExtension);
 
     commitObject(device, handle);
 

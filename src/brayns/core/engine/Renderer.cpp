@@ -61,47 +61,47 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 
 namespace brayns
 {
-AoRenderer createAoRenderer(Device &device, const AoRendererSettings &settings)
+AoRenderer createAoRenderer(Device &device, const RendererSettings &settings, const AoRendererSettings &ao)
 {
     auto handle = ospNewRenderer("ao");
     auto renderer = wrapObjectHandleAs<AoRenderer>(device, handle);
 
-    setRendererParams(handle, settings.base);
+    setRendererParams(handle, settings);
 
-    setObjectParam(handle, "aoSamples", static_cast<int>(settings.aoSamples));
-    setObjectParam(handle, "aoDistance", settings.aoDistance);
-    setObjectParam(handle, "aoIntensity", settings.aoIntensity);
-    setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
+    setObjectParam(handle, "aoSamples", static_cast<int>(ao.aoSamples));
+    setObjectParam(handle, "aoDistance", ao.aoDistance);
+    setObjectParam(handle, "aoIntensity", ao.aoIntensity);
+    setObjectParam(handle, "volumeSamplingRate", ao.volumeSamplingRate);
 
     commitObject(device, handle);
 
     return renderer;
 }
 
-ScivisRenderer createScivisRenderer(Device &device, const ScivisRendererSettings &settings)
+ScivisRenderer createScivisRenderer(Device &device, const RendererSettings &settings, const ScivisRendererSettings &scivis)
 {
     auto handle = ospNewRenderer("scivis");
     auto renderer = wrapObjectHandleAs<ScivisRenderer>(device, handle);
 
-    setRendererParams(handle, settings.base);
+    setRendererParams(handle, settings);
 
-    setObjectParam(handle, "shadows", settings.shadows);
-    setObjectParam(handle, "aoSamples", static_cast<int>(settings.aoSamples));
-    setObjectParam(handle, "aoDistance", settings.aoDistance);
-    setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
-    setObjectParam(handle, "visibleLights", settings.showVisibleLights);
+    setObjectParam(handle, "shadows", scivis.shadows);
+    setObjectParam(handle, "aoSamples", static_cast<int>(scivis.aoSamples));
+    setObjectParam(handle, "aoDistance", scivis.aoDistance);
+    setObjectParam(handle, "volumeSamplingRate", scivis.volumeSamplingRate);
+    setObjectParam(handle, "visibleLights", scivis.showVisibleLights);
 
     commitObject(device, handle);
 
     return renderer;
 }
 
-PathTracer createPathTracer(Device &device, const PathTracerSettings &settings)
+PathTracer createPathTracer(Device &device, const RendererSettings &settings)
 {
     auto handle = ospNewRenderer("pathtracer");
     auto renderer = wrapObjectHandleAs<PathTracer>(device, handle);
 
-    setRendererParams(handle, settings.base);
+    setRendererParams(handle, settings);
 
     commitObject(device, handle);
 

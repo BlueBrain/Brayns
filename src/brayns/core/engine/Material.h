@@ -68,7 +68,7 @@ public:
     using Material::Material;
 };
 
-AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings);
+AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings = {});
 
 struct ScivisMaterialSettings
 {
@@ -85,7 +85,7 @@ public:
     using Material::Material;
 };
 
-ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings &settings);
+ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings &settings = {});
 
 struct PrincipledMaterialSettings
 {
@@ -128,5 +128,5 @@ public:
     using Material::Material;
 };
 
-PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMaterialSettings &settings);
+PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMaterialSettings &settings = {});
 }

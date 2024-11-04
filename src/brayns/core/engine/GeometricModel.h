@@ -35,9 +35,9 @@ using IndexInRenderer = std::uint32_t;
 
 struct Materials
 {
-    std::variant<IndexInRenderer, Data<IndexInRenderer>> values;
-    std::variant<std::monostate, Color4, Data<Color4>> colors = {};
-    std::optional<Data<std::uint8_t>> indices = {};
+    std::variant<IndexInRenderer, std::vector<IndexInRenderer>> values;
+    std::variant<std::monostate, Color4, std::vector<Color4>> colors = {};
+    std::vector<std::uint8_t> indices = {};
 };
 
 struct GeometricModelSettings

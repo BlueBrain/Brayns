@@ -52,72 +52,104 @@ TEST_CASE("Object creation")
 
     auto device = createDevice(logger);
 
-    createPerspectiveCamera(device, {});
-    createOrthographicCamera(device, {});
-    createPanoramicCamera(device, {});
+    createPerspectiveCamera(device);
+    createOrthographicCamera(device);
+    createPanoramicCamera(device);
 
-    createData<int>(device, {1, 2, 3});
-    allocateData2D<int>(device, {10, 10});
-    allocateData3D<int>(device, {10, 10, 10});
-
-    createToneMapper(device, {});
+    createToneMapper(device);
     createFramebuffer(device, {{100, 100}});
 
-    auto volumeData = allocateData3D<float>(device, {10, 10, 10});
-    std::ranges::fill(volumeData.getItems(), 1.0F);
-    auto volume = createRegularVolume(device, volumeData, {});
+    auto volumeData = RegularVolumeData{
+        .value = std::string(10 * 10 * 10 * sizeof(float), '\0'),
+        .type = VoxelType::F32,
+        .size = Size3{10, 10, 10},
+    };
+    auto volume = createRegularVolume(device, volumeData);
 
-    auto colors = createData<Color4>(device, {Color4{1, 0, 0, 1}, Color4{0, 0, 1, 1}});
-    auto transferFunction = createLinearTransferFunction(device, {{0, 1}, colors});
+    auto transferFunctionSettings = LinearTransferFunctionSettings{
+        .scalarRange = {0, 1},
+        .colors = {Color4{1, 0, 0, 1}, Color4{0, 0, 1, 1}},
+    };
+    auto transferFunction = createLinearTransferFunction(device, transferFunctionSettings);
 
     createVolumetricModel(device, {volume, transferFunction});
 
-    auto triangles = std::vector<Vector3>{{0, 0, 0}, {1, 1, 1}, {2, 2, 2}};
-    createTriangleMesh(device, {{createData<Vector3>(device, triangles)}});
+    auto triangleMeshSettings = MeshSettings{
+        .positions = {{0, 0, 0}, {1, 1, 1}, {2, 2, 2}},
+    };
 
-    auto quads = std::vector<Vector3>{{0, 0, 0}, {1, 1, 1}, {2, 2, 2}, {3, 3, 3}};
-    createQuadMesh(device, {{createData<Vector3>(device, quads)}});
+    createTriangleMesh(device, triangleMeshSettings);
+
+    auto quadMeshSettings = MeshSettings{
+        .positions = {{0, 0, 0}, {1, 1, 1}, {2, 2, 2}, {3, 3, 3}},
+    };
+    createQuadMesh(device, quadMeshSettings);
 
     auto spheres = std::vector<Vector4>{{0, 0, 0, 1}, {1, 1, 1, 1}};
-    auto geometry = createSpheres(device, {createData<Vector4>(device, spheres)});
-    createDiscs(device, {createData<Vector4>(device, spheres)});
 
-    createCylinders(device, {createData<Vector4>(device, spheres), createData<std::uint32_t>(device, {0})});
-    createCurve(device, {createData<Vector4>(device, spheres), createData<std::uint32_t>(device, {0})});
+    auto sphereSettings = SphereSettings{spheres};
+    auto geometry = createSpheres(device, sphereSettings);
 
-    auto boxes = std::vector<Box3>{{{0, 0, 0}, {1, 1, 1}}};
-    createBoxes(device, {createData<Box3>(device, boxes)});
+    auto discSettings = DiscSettings{spheres};
+    createDiscs(device, discSettings);
 
-    auto planes = std::vector<Vector4>{{1, 2, 3, 4}};
-    createPlanes(device, {createData<Vector4>(device, planes)});
+    auto cylinderSettings = CylinderSettings{spheres, {0}};
+    createCylinders(device, cylinderSettings);
 
-    createIsosurfaces(device, {volume, createData<float>(device, {1})});
+    auto curveSettings = CurveSettings{spheres, {0}};
+    createCurve(device, curveSettings);
 
-    auto textureData2D = allocateData2D<Color4>(device, {10, 10});
-    auto texture2D = createTexture2D(device, {textureData2D, TextureFormat::Rgba32F});
-    createVolumeTexture(device, {volume, transferFunction});
+    auto boxSettings = BoxSettings{{{{0, 0, 0}, {1, 1, 1}}}};
+    createBoxes(device, boxSettings);
 
-    createDistantLight(device, {});
-    createSphereLight(device, {});
-    createSpotLight(device, {});
-    createQuadLight(device, {});
-    createCylinderLight(device, {});
-    createHdriLight(device, {texture2D});
-    createAmbientLight(device, {});
-    createSunSkyLight(device, {});
+    auto planeSettings = PlaneSettings{{{1, 2, 3, 4}}};
+    createPlanes(device, planeSettings);
 
-    auto aoMaterial = createAoMaterial(device, {});
-    auto scivisMaterial = createScivisMaterial(device, {});
-    auto principled = createPrincipledMaterial(device, {});
+    auto isosurfaceSettings = IsosurfaceSettings{volume, {1}};
+    createIsosurfaces(device, isosurfaceSettings);
 
-    createAoRenderer(device, {{createData<Material>(device, {aoMaterial})}});
-    createScivisRenderer(device, {{createData<Material>(device, {scivisMaterial})}});
-    createPathTracer(device, {{createData<Material>(device, {principled})}});
+    auto textureData = TextureData2D{
+        .value = std::string(10 * 10 * sizeof(float), '\0'),
+        .format = TextureFormat::Rgba32F,
+        .size = {10, 10},
+    };
+    auto texture2D = createTexture2D(device, textureData);
 
-    auto model = createGeometricModel(device, {geometry, {IndexInRenderer(0)}});
-    auto group = createGroup(device, {createData<GeometricModel>(device, {model})});
-    auto instance = createInstance(device, {group});
-    createWorld(device, {createData<Instance>(device, {instance})});
+    createVolumeTexture(device, volume, {transferFunction});
+
+    createDistantLight(device);
+    createSphereLight(device);
+    createSpotLight(device);
+    createQuadLight(device);
+    createCylinderLight(device);
+    createHdriLight(device, {}, {texture2D});
+    createAmbientLight(device);
+    createSunSkyLight(device);
+
+    auto aoMaterial = createAoMaterial(device);
+    auto scivisMaterial = createScivisMaterial(device);
+    auto principled = createPrincipledMaterial(device);
+
+    auto aoSettings = RendererSettings{{aoMaterial}};
+    createAoRenderer(device, aoSettings);
+
+    auto scivisSettings = RendererSettings{{scivisMaterial}};
+    createScivisRenderer(device, scivisSettings);
+
+    auto pathTracerSettings = RendererSettings{{principled}};
+    createPathTracer(device, pathTracerSettings);
+
+    auto modelSettings = GeometricModelSettings{.geometry = geometry, .materials = {IndexInRenderer(0)}};
+    auto model = createGeometricModel(device, modelSettings);
+
+    auto groupSettings = GroupSettings{.geometries = {model}};
+    auto group = createGroup(device, groupSettings);
+
+    auto instanceSettings = InstanceSettings{.group = group};
+    auto instance = createInstance(device, instanceSettings);
+
+    auto worldSettings = WorldSettings{.instances = {instance}};
+    createWorld(device, worldSettings);
 
     CHECK(error.empty());
 }
@@ -135,52 +167,50 @@ TEST_CASE("Render")
     auto width = 480;
     auto height = 360;
 
-    auto toneMapper = createToneMapper(device, {});
+    auto toneMapper = createToneMapper(device);
 
-    auto framebuffer = createFramebuffer(
-        device,
-        {
-            .resolution = {std::size_t(width), std::size_t(height)},
-            .format = FramebufferFormat::Srgba8,
-            .channels = {FramebufferChannel::Color},
-            .operations = createData<ImageOperation>(device, {toneMapper}),
-        });
+    auto framebufferSettings = FramebufferSettings{
+        .resolution = {std::size_t(width), std::size_t(height)},
+        .format = FramebufferFormat::Srgba8,
+        .channels = {FramebufferChannel::Color},
+        .operations = {toneMapper},
+    };
+    auto framebuffer = createFramebuffer(device, framebufferSettings);
 
-    auto material = createScivisMaterial(device, {});
+    auto material = createScivisMaterial(device);
 
-    auto renderer = createScivisRenderer(device, {{.materials = createData<Material>(device, {material})}});
+    auto rendererSettings = RendererSettings{.materials = {material}};
+    auto renderer = createScivisRenderer(device, rendererSettings);
 
     auto camera = createPerspectiveCamera(device, {}, {.fovy = 45.0F, .aspect = float(width) / float(height)});
     // auto camera = createOrthographicCamera(device, {}, {.height = 3, .aspect = float(width) / float(height)});
 
-    auto sphereData = std::vector<Vector4>{{0, 0, 3, 0.25F}, {1, 0, 3, 0.25F}, {1, 1, 3, 0.25F}};
-    auto colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}};
+    auto sphereSettings = SphereSettings{{{0, 0, 3, 0.25F}, {1, 0, 3, 0.25F}, {1, 1, 3, 0.25F}}};
+    auto spheres = createSpheres(device, sphereSettings);
 
-    auto spheres = createSpheres(device, {createData<Vector4>(device, sphereData)});
+    auto modelSettings = GeometricModelSettings{
+        .geometry = spheres,
+        .materials =
+            {
+                .values = {IndexInRenderer(0)},
+                .colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}},
+            },
+    };
 
-    auto model = createGeometricModel(
-        device,
-        {
-            .geometry = spheres,
-            .materials = {IndexInRenderer(0), createData<Color4>(device, colors)},
-            .id = 0,
-        });
+    auto model = createGeometricModel(device, modelSettings);
 
-    auto light = createAmbientLight(device, {});
+    auto light = createAmbientLight(device);
 
-    auto models = std::vector<GeometricModel>{model};
-    auto lights = std::vector<Light>{light};
+    auto groupSettings = GroupSettings{
+        .geometries = {model},
+        .lights = {light},
+    };
+    auto group = createGroup(device, groupSettings);
 
-    auto group = createGroup(
-        device,
-        {
-            .geometries = createData<GeometricModel>(device, {model}),
-            .lights = createData<Light>(device, {light}),
-        });
+    auto instance = createInstance(device, {group});
 
-    auto instance = createInstance(device, {.group = group, .transform = {}, .id = 0});
-
-    auto world = createWorld(device, {createData<Instance>(device, {instance})});
+    auto worldSettings = WorldSettings{{instance}};
+    auto world = createWorld(device, worldSettings);
 
     CHECK_EQ(world.getBounds(), instance.getBounds());
     CHECK_EQ(world.getBounds(), group.getBounds());
