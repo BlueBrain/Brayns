@@ -90,14 +90,14 @@ TEST_CASE("Object creation")
     auto sphereSettings = SphereSettings{spheres};
     auto geometry = createSpheres(device, sphereSettings);
 
-    auto discSettings = DiscSettings{spheres};
-    createDiscs(device, discSettings);
-
-    auto cylinderSettings = CylinderSettings{spheres, {0}};
-    createCylinders(device, cylinderSettings);
+    createDiscs(device, sphereSettings);
 
     auto curveSettings = CurveSettings{spheres, {0}};
+    createCylinders(device, curveSettings);
     createCurve(device, curveSettings);
+
+    auto normals = std::vector<Vector3>{{1, 2, 3}, {4, 5, 6}};
+    createRibbon(device, curveSettings, normals);
 
     auto boxSettings = BoxSettings{{{{0, 0, 0}, {1, 1, 1}}}};
     createBoxes(device, boxSettings);

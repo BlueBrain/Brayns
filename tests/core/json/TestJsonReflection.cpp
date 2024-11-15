@@ -80,6 +80,7 @@ struct JsonObjectReflector<SomeObject>
     {
         auto builder = JsonBuilder<SomeObject>();
         builder.description("Test parent");
+        builder.constant("constant", "Test");
         builder.field("required", [](auto &object) { return &object.required; });
         builder.field("bounded", [](auto &object) { return &object.bounded; }).minimum(1).maximum(3);
         builder.field("description", [](auto &object) { return &object.description; }).description("Test");
@@ -336,6 +337,7 @@ TEST_CASE("Object")
 
     const auto &properties = schema.properties;
 
+    CHECK_EQ(properties.at("constant"), JsonSchema{.type = JsonType::String, .constant = "Test"});
     CHECK_EQ(properties.at("required"), getJsonSchema<bool>());
     CHECK_EQ(properties.at("bounded"), JsonSchema{.type = JsonType::Integer, .minimum = 1, .maximum = 3});
     CHECK_EQ(properties.at("description"), JsonSchema{.description = "Test", .type = JsonType::Boolean});
@@ -362,6 +364,7 @@ TEST_CASE("Object")
     internal->set("value", 2);
 
     auto object = createJsonObject();
+    object->set("constant", "Test");
     object->set("required", true);
     object->set("bounded", 2);
     object->set("description", true);

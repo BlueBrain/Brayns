@@ -68,7 +68,7 @@ QuadMesh createQuadMesh(Device &device, const MeshSettings &settings, const std:
 
 struct SphereSettings
 {
-    std::vector<Vector4> spheres;
+    std::vector<Vector4> positionsRadii;
     std::vector<Vector2> uvs = {};
 };
 
@@ -80,28 +80,51 @@ public:
 
 Spheres createSpheres(Device &device, const SphereSettings &settings);
 
-struct DiscSettings
-{
-    std::vector<Vector4> spheres;
-    std::vector<Vector3> normals = {};
-    std::vector<Vector2> uvs = {};
-};
-
 class Discs : public Geometry
 {
 public:
     using Geometry::Geometry;
 };
 
-Discs createDiscs(Device &device, const DiscSettings &settings);
+Discs createDiscs(Device &device, const SphereSettings &settings, const std::vector<Vector3> &normals = {});
 
-struct CylinderSettings
+struct CurveSettings
 {
-    std::vector<Vector4> spheres;
+    std::vector<Vector4> positionsRadii;
     std::vector<std::uint32_t> indices;
     std::vector<Color4> colors = {};
     std::vector<Vector2> uvs = {};
 };
+
+enum class CurveType
+{
+    Flat = OSP_FLAT,
+    Round = OSP_ROUND,
+};
+
+struct LinearBasis
+{
+};
+
+struct BezierBasis
+{
+};
+
+struct BsplineBasis
+{
+};
+
+struct HermiteBasis
+{
+    std::vector<Vector4> tangents;
+};
+
+struct CatmullRomBasis
+{
+};
+
+using CurveBasis = std::variant<LinearBasis, BezierBasis, BsplineBasis, HermiteBasis, CatmullRomBasis>;
+using RibbonBasis = std::variant<BezierBasis, BsplineBasis, HermiteBasis, CatmullRomBasis>;
 
 class Cylinders : public Geometry
 {
@@ -109,55 +132,7 @@ public:
     using Geometry::Geometry;
 };
 
-Cylinders createCylinders(Device &device, const CylinderSettings &settings);
-
-struct FlatCurve
-{
-};
-
-struct RoundCurve
-{
-};
-
-struct RibbonCurve
-{
-    std::vector<Vector3> normals;
-};
-
-using CurveType = std::variant<FlatCurve, RoundCurve, RibbonCurve>;
-
-struct LinearCurve
-{
-};
-
-struct BezierCurve
-{
-};
-
-struct BsplineCurve
-{
-};
-
-struct HermiteCurve
-{
-    std::vector<Vector4> tangents;
-};
-
-struct CatmullRomCurve
-{
-};
-
-using CurveBasis = std::variant<LinearCurve, BezierCurve, BsplineCurve, HermiteCurve, CatmullRomCurve>;
-
-struct CurveSettings
-{
-    std::vector<Vector4> spheres;
-    std::vector<std::uint32_t> indices;
-    std::vector<Color4> colors = {};
-    std::vector<Vector2> uvs = {};
-    CurveType type = RoundCurve();
-    CurveBasis basis = LinearCurve();
-};
+Cylinders createCylinders(Device &device, const CurveSettings &settings);
 
 class Curve : public Geometry
 {
@@ -165,7 +140,15 @@ public:
     using Geometry::Geometry;
 };
 
-Curve createCurve(Device &device, const CurveSettings &settings);
+Curve createCurve(Device &device, const CurveSettings &settings, CurveType type = CurveType::Flat, const CurveBasis &basis = LinearBasis());
+
+class Ribbon : public Geometry
+{
+public:
+    using Geometry::Geometry;
+};
+
+Ribbon createRibbon(Device &device, const CurveSettings &settings, const std::vector<Vector3> &normals, const RibbonBasis &basis = BezierBasis());
 
 struct BoxSettings
 {

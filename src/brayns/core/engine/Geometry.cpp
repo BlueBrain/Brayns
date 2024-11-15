@@ -51,46 +51,44 @@ void setInterleavedSpheresParams(OSPGeometry handle, const std::vector<Vector4> 
     setObjectParam(handle, "sphere.radius", radiusData);
 }
 
-void setCurveType(OSPGeometry handle, FlatCurve)
+void setSphereParams(OSPGeometry handle, const SphereSettings &settings)
 {
-    setObjectParam(handle, "type", OSP_FLAT);
+    setInterleavedSpheresParams(handle, settings.positionsRadii);
+    setObjectParam(handle, "sphere.texcoord", settings.uvs);
 }
 
-void setCurveType(OSPGeometry handle, RoundCurve)
-{
-    setObjectParam(handle, "type", OSP_ROUND);
-}
-
-void setCurveType(OSPGeometry handle, const RibbonCurve &curve)
-{
-    setObjectParam(handle, "type", OSP_RIBBON);
-    setObjectParam(handle, "vertex.normal", curve.normals);
-}
-
-void setCurveBasis(OSPGeometry handle, LinearCurve)
+void setCurveBasis(OSPGeometry handle, LinearBasis)
 {
     setObjectParam(handle, "basis", OSP_LINEAR);
 }
 
-void setCurveBasis(OSPGeometry handle, BezierCurve)
+void setCurveBasis(OSPGeometry handle, BezierBasis)
 {
     setObjectParam(handle, "basis", OSP_BEZIER);
 }
 
-void setCurveBasis(OSPGeometry handle, BsplineCurve)
+void setCurveBasis(OSPGeometry handle, BsplineBasis)
 {
     setObjectParam(handle, "basis", OSP_BSPLINE);
 }
 
-void setCurveBasis(OSPGeometry handle, const HermiteCurve &curve)
+void setCurveBasis(OSPGeometry handle, const HermiteBasis &curve)
 {
     setObjectParam(handle, "basis", OSP_HERMITE);
     setObjectParam(handle, "vertex.tangent", curve.tangents);
 }
 
-void setCurveBasis(OSPGeometry handle, CatmullRomCurve)
+void setCurveBasis(OSPGeometry handle, CatmullRomBasis)
 {
     setObjectParam(handle, "basis", OSP_CATMULL_ROM);
+}
+
+void setCurveParams(OSPGeometry handle, const CurveSettings &settings)
+{
+    setObjectParam(handle, "vertex.position_radius", settings.positionsRadii);
+    setObjectParam(handle, "vertex.texcoord", settings.uvs);
+    setObjectParam(handle, "vertex.color", settings.colors);
+    setObjectParam(handle, "index", settings.indices);
 }
 }
 
@@ -134,8 +132,8 @@ Spheres createSpheres(Device &device, const SphereSettings &settings)
     auto handle = ospNewGeometry("sphere");
     auto spheres = wrapObjectHandleAs<Spheres>(device, handle);
 
-    setInterleavedSpheresParams(handle, settings.spheres);
-    setObjectParam(handle, "sphere.texcoord", settings.uvs);
+    setSphereParams(handle, settings);
+
     setObjectParam(handle, "type", OSP_SPHERE);
 
     commitObject(device, handle);
@@ -143,17 +141,16 @@ Spheres createSpheres(Device &device, const SphereSettings &settings)
     return spheres;
 }
 
-Discs createDiscs(Device &device, const DiscSettings &settings)
+Discs createDiscs(Device &device, const SphereSettings &settings, const std::vector<Vector3> &normals)
 {
     auto handle = ospNewGeometry("sphere");
     auto discs = wrapObjectHandleAs<Discs>(device, handle);
 
-    setInterleavedSpheresParams(handle, settings.spheres);
-    setObjectParam(handle, "sphere.texcoord", settings.uvs);
+    setSphereParams(handle, settings);
 
-    setObjectParam(handle, "sphere.normal", settings.normals);
+    setObjectParam(handle, "sphere.normal", normals);
 
-    if (settings.normals.empty())
+    if (normals.empty())
     {
         setObjectParam(handle, "type", OSP_DISC);
     }
@@ -167,15 +164,12 @@ Discs createDiscs(Device &device, const DiscSettings &settings)
     return discs;
 }
 
-Cylinders createCylinders(Device &device, const CylinderSettings &settings)
+Cylinders createCylinders(Device &device, const CurveSettings &settings)
 {
     auto handle = ospNewGeometry("curve");
     auto cylinders = wrapObjectHandleAs<Cylinders>(device, handle);
 
-    setObjectParam(handle, "vertex.position_radius", settings.spheres);
-    setObjectParam(handle, "vertex.texcoord", settings.uvs);
-    setObjectParam(handle, "vertex.color", settings.colors);
-    setObjectParam(handle, "index", settings.indices);
+    setCurveParams(handle, settings);
 
     setObjectParam(handle, "type", OSP_DISJOINT);
     setObjectParam(handle, "basis", OSP_LINEAR);
@@ -185,23 +179,33 @@ Cylinders createCylinders(Device &device, const CylinderSettings &settings)
     return cylinders;
 }
 
-Curve createCurve(Device &device, const CurveSettings &settings)
+Curve createCurve(Device &device, const CurveSettings &settings, CurveType type, const CurveBasis &basis)
 {
-    if (std::holds_alternative<RibbonCurve>(settings.type) && std::holds_alternative<LinearCurve>(settings.basis))
-    {
-        throw std::invalid_argument("OSPRay does not support ribbon curve with linear basis");
-    }
-
     auto handle = ospNewGeometry("curve");
     auto curve = wrapObjectHandleAs<Curve>(device, handle);
 
-    setObjectParam(handle, "vertex.position_radius", settings.spheres);
-    setObjectParam(handle, "vertex.texcoord", settings.uvs);
-    setObjectParam(handle, "vertex.color", settings.colors);
-    setObjectParam(handle, "index", settings.indices);
+    setCurveParams(handle, settings);
 
-    std::visit([=](const auto &value) { setCurveType(handle, value); }, settings.type);
-    std::visit([=](const auto &value) { setCurveBasis(handle, value); }, settings.basis);
+    setObjectParam(handle, "type", static_cast<OSPCurveType>(type));
+
+    std::visit([&](const auto &value) { setCurveBasis(handle, value); }, basis);
+
+    commitObject(device, handle);
+
+    return curve;
+}
+
+Ribbon createRibbon(Device &device, const CurveSettings &settings, const std::vector<Vector3> &normals, const RibbonBasis &basis)
+{
+    auto handle = ospNewGeometry("curve");
+    auto curve = wrapObjectHandleAs<Ribbon>(device, handle);
+
+    setCurveParams(handle, settings);
+
+    setObjectParam(handle, "type", OSP_RIBBON);
+    setObjectParam(handle, "vertex.normal", normals);
+
+    std::visit([&](const auto &value) { setCurveBasis(handle, value); }, basis);
 
     commitObject(device, handle);
 

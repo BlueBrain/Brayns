@@ -1,0 +1,167 @@
+/* Copyright (c) 2015-2024 EPFL/Blue Brain Project
+ * All rights reserved. Do not distribute without permission.
+ *
+ * Responsible Author: adrien.fleury@epfl.ch
+ *
+ * This file is part of Brayns <https://github.com/BlueBrain/Brayns>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#pragma once
+
+#include <any>
+#include <concepts>
+#include <functional>
+
+#include <brayns/core/engine/Geometry.h>
+#include <brayns/core/jsonrpc/PayloadReflector.h>
+#include <brayns/core/manager/ObjectManager.h>
+
+namespace brayns
+{
+struct UserGeometry
+{
+    std::any value;
+    std::function<Geometry()> get;
+};
+
+template<ReflectedJson Settings, std::derived_from<Geometry> T>
+struct UserGeometryOf
+{
+    Settings settings;
+    T value;
+};
+
+template<int N>
+struct MeshParams
+{
+    MeshSettings value;
+    std::vector<Vector<std::uint32_t, N>> indices;
+};
+
+template<int N>
+struct JsonObjectReflector<MeshParams<N>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<MeshParams<N>>();
+        builder.field("positions", [](auto &object) { return &object.value.positions; }).description("Vertex positions XYZ").minItems(std::size_t(N));
+        builder.field("normals", [](auto &object) { return &object.value.normals; })
+            .description("Vertex normals XYZ")
+            .defaultValue(std::vector<Vector3>());
+        builder.field("colors", [](auto &object) { return &object.value.colors; })
+            .description("Vertex colors RGBA")
+            .defaultValue(std::vector<Color4>());
+        builder.field("uvs", [](auto &object) { return &object.value.uvs; })
+            .description("Vertex texture coordinates XY")
+            .defaultValue(std::vector<Vector2>());
+        builder.field("indices", [](auto &object) { return &object.indices; })
+            .description("Indices grouped per face")
+            .defaultValue(std::vector<Vector<std::uint32_t, N>>());
+        return builder.build();
+    }
+};
+
+using TriangleMeshParams = MeshParams<3>;
+using CreateTriangleMeshParams = CreateParamsOf<TriangleMeshParams>;
+using GetTriangleMeshResult = GetResultOf<TriangleMeshParams>;
+using UserTriangleMesh = UserGeometryOf<TriangleMeshParams, TriangleMesh>;
+
+CreateObjectResult createTriangleMesh(ObjectManager &objects, Device &device, CreateTriangleMeshParams params);
+GetTriangleMeshResult getTriangleMesh(ObjectManager &objects, const GetObjectParams &params);
+
+using QuadMeshParams = MeshParams<4>;
+using CreateQuadMeshParams = CreateParamsOf<QuadMeshParams>;
+using GetQuadMeshResult = GetResultOf<QuadMeshParams>;
+using UserQuadMesh = UserGeometryOf<QuadMeshParams, QuadMesh>;
+
+CreateObjectResult createQuadMesh(ObjectManager &objects, Device &device, CreateQuadMeshParams params);
+GetQuadMeshResult getQuadMesh(ObjectManager &objects, const GetObjectParams &params);
+
+template<>
+struct JsonObjectReflector<SphereSettings>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<SphereSettings>();
+        builder.field("positionsRadii", [](auto &object) { return &object.positionsRadii; }).description("Positions and radii XYZR").minItems(1);
+        builder.field("uvs", [](auto &object) { return &object.uvs; })
+            .description("Texture coordinates XY, constant per primitive")
+            .defaultValue(std::vector<Vector2>());
+        return builder.build();
+    }
+};
+
+using CreateSpheresParams = CreateParamsOf<SphereSettings>;
+using GetSpheresResult = GetResultOf<SphereSettings>;
+using UserSpheres = UserGeometryOf<SphereSettings, Spheres>;
+
+CreateObjectResult createSpheres(ObjectManager &objects, Device &device, CreateSpheresParams params);
+GetSpheresResult getSpheres(ObjectManager &objects, const GetObjectParams &params);
+
+struct DiscParams
+{
+    SphereSettings value;
+    std::vector<Vector3> normals;
+};
+
+template<>
+struct JsonObjectReflector<DiscParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<DiscParams>();
+        builder.extend([](auto &object) { return &object.value; });
+        builder.field("normals", [](auto &object) { return &object.normals; })
+            .description("Normals XYZ, the disc will always face the camera if empty")
+            .defaultValue(std::vector<Vector3>());
+        return builder.build();
+    }
+};
+
+using CreateDiscsParams = CreateParamsOf<DiscParams>;
+using GetDiscsResult = GetResultOf<DiscParams>;
+using UserDiscs = UserGeometryOf<DiscParams, Discs>;
+
+CreateObjectResult createDiscs(ObjectManager &objects, Device &device, CreateDiscsParams params);
+GetDiscsResult getDiscs(ObjectManager &objects, const GetObjectParams &params);
+
+template<>
+struct JsonObjectReflector<CurveSettings>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<CurveSettings>();
+        builder.field("positionsRadii", [](auto &object) { return &object.positionsRadii; })
+            .description("Vertex positions and radii XYZR")
+            .minItems(2);
+        builder.field("indices", [](auto &object) { return &object.indices; })
+            .description("Indices, each index points to the first vertex of a segment which size depends on the chosen basis")
+            .minItems(1);
+        builder.field("colors", [](auto &object) { return &object.colors; }).description("Vertex colors RGBA").defaultValue(std::vector<Color4>());
+        builder.field("uvs", [](auto &object) { return &object.uvs; })
+            .description("Vertex texture coordinates XY")
+            .defaultValue(std::vector<Vector2>());
+        return builder.build();
+    }
+};
+
+using CreateCylindersParams = CreateParamsOf<CurveSettings>;
+using GetCylindersResult = GetResultOf<CurveSettings>;
+using UserCylinders = UserGeometryOf<CurveSettings, Cylinders>;
+
+CreateObjectResult createCylinders(ObjectManager &objects, Device &device, CreateCylindersParams params);
+GetCylindersResult getCylinders(ObjectManager &objects, const GetObjectParams &params);
+}
