@@ -164,4 +164,131 @@ using UserCylinders = UserGeometryOf<CurveSettings, Cylinders>;
 
 CreateObjectResult createCylinders(ObjectManager &objects, Device &device, CreateCylindersParams params);
 GetCylindersResult getCylinders(ObjectManager &objects, const GetObjectParams &params);
+
+template<>
+struct EnumReflector<CurveType>
+{
+    static auto reflect()
+    {
+        auto builder = EnumBuilder<CurveType>();
+        builder.field("Flat", CurveType::Flat).description("Render the curve always facing camera (faster)");
+        builder.field("Round", CurveType::Round).description("Renders a sweep surface by sweeping a varying radius circle tangential along the curve");
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonObjectReflector<LinearBasis>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<LinearBasis>();
+        builder.description("Each segment is a line composed of 2 consecutive vertices");
+        builder.constant("type", "Linear");
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonObjectReflector<BezierBasis>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<BezierBasis>();
+        builder.description("Each segment is a Bezier interpolation of 4 consecutive vertices");
+        builder.constant("type", "Bezier");
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonObjectReflector<BsplineBasis>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<BsplineBasis>();
+        builder.description("Each segment is a B-Spline of 4 consecutive vertices (no interpolation)");
+        builder.constant("type", "Bspline");
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonObjectReflector<HermiteBasis>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<HermiteBasis>();
+        builder.description("Each segment is a Hermite interpolation of 2 consecutive vertices (requires tangents)");
+        builder.constant("type", "Hermite");
+        builder.field("tangents", [](auto &object) { return &object.tangents; }).description("Vertex trangents XYZW").minItems(2);
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonObjectReflector<CatmullRomBasis>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<CatmullRomBasis>();
+        builder.description("Each segment is a Catmull-Rom spline of 4 consecutive vertices (no interpolation)");
+        builder.constant("type", "CatmullRom");
+        return builder.build();
+    }
+};
+
+struct CurveParams
+{
+    CurveSettings value;
+    CurveType type;
+    CurveBasis basis;
+};
+
+template<>
+struct JsonObjectReflector<CurveParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<CurveParams>();
+        builder.extend([](auto &object) { return &object.value; });
+        builder.field("type", [](auto &object) { return &object.type; }).description("Curve type").defaultValue(CurveType::Round);
+        builder.field("basis", [](auto &object) { return &object.basis; }).description("Curve basis").defaultValue(LinearBasis());
+        return builder.build();
+    }
+};
+
+using CreateCurveParams = CreateParamsOf<CurveParams>;
+using GetCurveResult = GetResultOf<CurveParams>;
+using UserCurve = UserGeometryOf<CurveParams, Curve>;
+
+CreateObjectResult createCurve(ObjectManager &objects, Device &device, CreateCurveParams params);
+GetCurveResult getCurve(ObjectManager &objects, const GetObjectParams &params);
+
+struct RibbonParams
+{
+    CurveSettings value;
+    std::vector<Vector3> normals;
+    RibbonBasis basis;
+};
+
+template<>
+struct JsonObjectReflector<RibbonParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<RibbonParams>();
+        builder.extend([](auto &object) { return &object.value; });
+        builder.field("normals", [](auto &object) { return &object.normals; }).description("Vertex normals XYZ").minItems(2);
+        builder.field("basis", [](auto &object) { return &object.basis; }).description("Ribbon curve basis").defaultValue(BezierBasis());
+        return builder.build();
+    }
+};
+
+using CreateRibbonParams = CreateParamsOf<RibbonParams>;
+using GetRibbonResult = GetResultOf<RibbonParams>;
+using UserRibbon = UserGeometryOf<RibbonParams, Ribbon>;
+
+CreateObjectResult createRibbon(ObjectManager &objects, Device &device, CreateRibbonParams params);
+GetRibbonResult getRibbon(ObjectManager &objects, const GetObjectParams &params);
 }

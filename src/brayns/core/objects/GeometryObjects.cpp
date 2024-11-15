@@ -21,6 +21,8 @@
 
 #include "GeometryObjects.h"
 
+#include <cassert>
+
 #include <fmt/format.h>
 
 #include <brayns/core/jsonrpc/Errors.h>
@@ -41,6 +43,8 @@ bool sameSizeOrEmpty(const auto &left, const auto &right)
 
 bool allSameSizeOrEmpty(const auto &first, const auto &second, const auto &...rest)
 {
+    assert(!first.empty());
+
     if constexpr (sizeof...(rest) == 0)
     {
         return sameSizeOrEmpty(first, second);
@@ -53,16 +57,9 @@ bool allSameSizeOrEmpty(const auto &first, const auto &second, const auto &...re
 
 void checkAllSameSizeOrEmpty(const auto &...args)
 {
-    auto all = [](auto... values) { return (values && ...); };
-
-    if (all(args.empty()...))
-    {
-        throw InvalidParams("Empty geometry is not supported");
-    }
-
     if (!allSameSizeOrEmpty(args...))
     {
-        throw InvalidParams("All geometry attributes must have the same item count if not empty");
+        throw InvalidParams("All geometry attributes must have the same item count or be empty (if not required)");
     }
 }
 
@@ -110,53 +107,50 @@ void checkDiscParams(const DiscParams &settings)
     checkAllSameSizeOrEmpty(settings.value.positionsRadii, settings.normals);
 }
 
-void checkBasicCurveParams(const CurveSettings &settings, std::size_t segmentSize, const auto &...attributes)
+void checkCommonCurveParams(const CurveSettings &settings, std::size_t segmentSize, const auto &...attributes)
 {
     if (settings.positionsRadii.size() < segmentSize)
     {
-        throw InvalidParams(fmt::format("This curve basis requires {} vertices per segment", segmentSize));
+        throw InvalidParams(fmt::format("The specified curve basis requires {} vertices per segment", segmentSize));
     }
 
     checkAllSameSizeOrEmpty(settings.positionsRadii, settings.colors, settings.uvs, attributes...);
     checkIndices(settings.indices, settings.positionsRadii.size() - segmentSize);
 }
 
-// std::size_t getSegmentSize(const auto &)
-// {
-//     return 4;
-// }
-
-// std::size_t getSegmentSize(const LinearBasis &)
-// {
-//     return 2;
-// }
-
-// std::size_t getSegmentSize(const HermiteBasis &)
-// {
-//     return 2;
-// }
-
-// void checkCurveParams(const CurveSettings &settings, const auto &basis)
-// {
-//     auto segmentSize = getSegmentSize(basis);
-//     checkBasicCurveParams(settings, segmentSize);
-// }
-
-// void checkCurveParams(const CurveSettings &settings, const HermiteBasis &basis)
-// {
-//     auto segmentSize = getSegmentSize(basis);
-//     checkBasicCurveParams(settings, segmentSize, basis.tangents);
-
-//     if (basis.tangents.empty())
-//     {
-//         throw InvalidParams("Hermite curve requires tangents");
-//     }
-// }
-
-void checkRibbonParams(const CurveSettings &settings, const std::vector<Vector3> &normals, const auto &basis)
+std::size_t getSegmentSize(const auto &)
 {
-    auto segmentSize = getSegmentSize(basis);
-    checkBasicCurveParams(settings, segmentSize, normals);
+    return 4;
+}
+
+std::size_t getSegmentSize(const LinearBasis &)
+{
+    return 2;
+}
+
+void checkCylinderParams(const CurveSettings &settings)
+{
+    checkCommonCurveParams(settings, 2);
+}
+
+void checkCurveParams(const CurveSettings &settings, const auto &basis, const auto &...attributes)
+{
+    checkCommonCurveParams(settings, getSegmentSize(basis), attributes...);
+}
+
+void checkCurveParams(const CurveSettings &settings, const HermiteBasis &basis, const auto &...attributes)
+{
+    checkCommonCurveParams(settings, 2, basis.tangents, attributes...);
+}
+
+void checkCurveParams(const CurveParams &params)
+{
+    std::visit([&](const auto &basis) { checkCurveParams(params.value, basis); }, params.basis);
+}
+
+void checkRibbonParams(const RibbonParams &params)
+{
+    std::visit([&](const auto &basis) { checkCurveParams(params.value, basis, params.normals); }, params.basis);
 }
 
 CreateObjectResult createGeometry(ObjectManager &objects, Device &device, auto params, auto validate, auto create, const char *type)
@@ -240,7 +234,7 @@ GetDiscsResult getDiscs(ObjectManager &objects, const GetObjectParams &params)
 
 CreateObjectResult createCylinders(ObjectManager &objects, Device &device, CreateCylindersParams params)
 {
-    auto validate = [](const auto &settings) { checkBasicCurveParams(settings, 2); };
+    auto validate = [](const auto &settings) { checkCylinderParams(settings); };
     auto create = [](auto &device, const auto &settings) { return createCylinders(device, settings); };
     return createGeometry(objects, device, std::move(params), validate, create, "Cylinders");
 }
@@ -248,5 +242,29 @@ CreateObjectResult createCylinders(ObjectManager &objects, Device &device, Creat
 GetCylindersResult getCylinders(ObjectManager &objects, const GetObjectParams &params)
 {
     return getGeometryAs<UserCylinders>(objects, params);
+}
+
+CreateObjectResult createCurve(ObjectManager &objects, Device &device, CreateCurveParams params)
+{
+    auto validate = [](const auto &settings) { checkCurveParams(settings); };
+    auto create = [](auto &device, const auto &settings) { return createCurve(device, settings.value, settings.type, settings.basis); };
+    return createGeometry(objects, device, std::move(params), validate, create, "Curve");
+}
+
+GetCurveResult getCurve(ObjectManager &objects, const GetObjectParams &params)
+{
+    return getGeometryAs<UserCurve>(objects, params);
+}
+
+CreateObjectResult createRibbon(ObjectManager &objects, Device &device, CreateRibbonParams params)
+{
+    auto validate = [](const auto &settings) { checkRibbonParams(settings); };
+    auto create = [](auto &device, const auto &settings) { return createRibbon(device, settings.value, settings.normals, settings.basis); };
+    return createGeometry(objects, device, std::move(params), validate, create, "Ribbon");
+}
+
+GetRibbonResult getRibbon(ObjectManager &objects, const GetObjectParams &params)
+{
+    return getGeometryAs<UserRibbon>(objects, params);
 }
 }
