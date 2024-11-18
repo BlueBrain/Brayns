@@ -20,7 +20,7 @@
 
 import pytest
 
-from brayns import Connection, JsonRpcError, create_triangle_mesh, get_triangle_mesh
+from brayns import Connection, JsonRpcError, create_quad_mesh, create_triangle_mesh, get_quad_mesh, get_triangle_mesh
 
 
 @pytest.mark.integration_test
@@ -56,3 +56,23 @@ async def test_triangle_mesh(connection: Connection) -> None:
 
     with pytest.raises(JsonRpcError):
         await create_triangle_mesh(connection, positions=[(0, 1, 2), (4, 5, 6)], normals=[(0, 1, 2)])
+
+
+@pytest.mark.integration_test
+@pytest.mark.asyncio
+async def test_quad_mesh(connection: Connection) -> None:
+    mesh = await create_quad_mesh(
+        connection,
+        positions=[(0, 0, 0), (1, 1, 1), (1, 0, 1), (0, 0, 1)],
+        normals=[(0, 0, 0), (1, 1, 1), (1, 0, 1), (0, 0, 1)],
+        colors=[(1, 0, 0, 1), (0, 1, 0, 1), (0, 0, 1, 1), (0, 0, 1, 1)],
+        uvs=[(1, 0), (0, 1), (1, 1), (1, 0)],
+        indices=[(0, 1, 2, 3)],
+    )
+
+    settings = await get_quad_mesh(connection, mesh)
+    assert settings.positions
+    assert settings.normals
+    assert settings.colors
+    assert settings.uvs
+    assert settings.indices

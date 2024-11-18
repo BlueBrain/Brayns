@@ -66,3 +66,25 @@ async def create_triangle_mesh(connection: Connection, **settings: Unpack[Create
 async def get_triangle_mesh(connection: Connection, mesh: TriangleMesh) -> GetTriangleMeshResult:
     result = await get_specific_object(connection, "TriangleMesh", mesh)
     return deserialize(result, GetTriangleMeshResult)
+
+
+class QuadMesh(Geometry): ...
+
+
+@dataclass
+class GetQuadMeshResult(GetMeshResult):
+    indices: list[tuple[int, int, int, int]]
+
+
+class CreateQuadMeshParams(CreateObjectParams, CreateMeshParams, total=False):
+    indices: list[tuple[int, int, int, int]]
+
+
+async def create_quad_mesh(connection: Connection, **settings: Unpack[CreateQuadMeshParams]) -> QuadMesh:
+    object = await create_specific_object(connection, "QuadMesh", serialize(settings))
+    return QuadMesh(object.id)
+
+
+async def get_quad_mesh(connection: Connection, mesh: QuadMesh) -> GetQuadMeshResult:
+    result = await get_specific_object(connection, "QuadMesh", mesh)
+    return deserialize(result, GetQuadMeshResult)

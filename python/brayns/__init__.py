@@ -62,7 +62,14 @@ from .api.core.framebuffer import (
     get_framebuffer,
     update_framebuffer,
 )
-from .api.core.geometry import CreateTriangleMeshParams, GetTriangleMeshResult, create_triangle_mesh, get_triangle_mesh
+from .api.core.geometry import (
+    CreateTriangleMeshParams,
+    GetTriangleMeshResult,
+    create_quad_mesh,
+    create_triangle_mesh,
+    get_quad_mesh,
+    get_triangle_mesh,
+)
 from .api.core.image import (
     JpegChannel,
     PngChannel,
@@ -165,6 +172,7 @@ __all__ = [
     "create_orthographic_camera",
     "create_panoramic_camera",
     "create_perspective_camera",
+    "create_quad_mesh",
     "create_regular_volume",
     "create_tone_mapper",
     "create_triangle_mesh",
@@ -196,6 +204,7 @@ __all__ = [
     "get_panoramic_camera",
     "get_perspective_camera",
     "get_perspective_camera",
+    "get_quad_mesh",
     "get_regular_volume",
     "get_rotation_between",
     "get_tone_mapper",
