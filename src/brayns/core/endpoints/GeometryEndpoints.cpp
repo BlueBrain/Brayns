@@ -21,12 +21,50 @@
 
 #include "GeometryEndpoints.h"
 
+#include <brayns/core/objects/GeometryObjects.h>
+
 namespace brayns
 {
 void addGeometryEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device)
 {
-    (void)builder;
-    (void)objects;
-    (void)device;
+    builder.endpoint("createTriangleMesh", [&](CreateTriangleMeshParams params) { return createTriangleMesh(objects, device, std::move(params)); })
+        .description("Create a mesh with triangular faces");
+    builder.endpoint("getTriangleMesh", [&](GetObjectParams params) { return getTriangleMesh(objects, params); }).description("Get triangle mesh");
+
+    builder.endpoint("createQuadMesh", [&](CreateQuadMeshParams params) { return createQuadMesh(objects, device, std::move(params)); })
+        .description("Create a mesh with quad faces");
+    builder.endpoint("getQuadMesh", [&](GetObjectParams params) { return getQuadMesh(objects, params); }).description("Get quad mesh");
+
+    builder.endpoint("createSpheres", [&](CreateSpheresParams params) { return createSpheres(objects, device, std::move(params)); })
+        .description("Create a geometry made of spheres");
+    builder.endpoint("getSpheres", [&](GetObjectParams params) { return getSpheres(objects, params); }).description("Get spheres");
+
+    builder.endpoint("createDiscs", [&](CreateDiscsParams params) { return createDiscs(objects, device, std::move(params)); })
+        .description("Create a geometry made of discs");
+    builder.endpoint("getDiscs", [&](GetObjectParams params) { return getDiscs(objects, params); }).description("Get discs");
+
+    builder.endpoint("createCylinders", [&](CreateCylindersParams params) { return createCylinders(objects, device, std::move(params)); })
+        .description("Create a geometry made of cylinders");
+    builder.endpoint("getCylinders", [&](GetObjectParams params) { return getCylinders(objects, params); }).description("Get cylinders");
+
+    builder.endpoint("createCurve", [&](CreateCurveParams params) { return createCurve(objects, device, std::move(params)); })
+        .description("Create a curve");
+    builder.endpoint("getCurve", [&](GetObjectParams params) { return getCurve(objects, params); }).description("Get curve");
+
+    builder.endpoint("createRibbon", [&](CreateRibbonParams params) { return createRibbon(objects, device, std::move(params)); })
+        .description("Create a ribbon");
+    builder.endpoint("getRibbon", [&](GetObjectParams params) { return getRibbon(objects, params); }).description("Get ribbon");
+
+    builder.endpoint("createBoxes", [&](CreateBoxesParams params) { return createBoxes(objects, device, std::move(params)); })
+        .description("Create a geometry made of boxes");
+    builder.endpoint("getBoxes", [&](GetObjectParams params) { return getBoxes(objects, params); }).description("Get boxes");
+
+    builder.endpoint("createPlanes", [&](CreatePlanesParams params) { return createPlanes(objects, device, std::move(params)); })
+        .description("Create a geometry made of planes");
+    builder.endpoint("getPlanes", [&](GetObjectParams params) { return getPlanes(objects, params); }).description("Get planes");
+
+    builder.endpoint("createIsosurfaces", [&](CreateIsosurfacesParams params) { return createIsosurfaces(objects, device, std::move(params)); })
+        .description("Create a geometry made of isosurfaces from a volume");
+    builder.endpoint("getIsosurfaces", [&](GetObjectParams params) { return getIsosurfaces(objects, params); }).description("Get isosurfaces");
 }
 }
