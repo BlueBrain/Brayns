@@ -62,6 +62,7 @@ from .api.core.framebuffer import (
     get_framebuffer,
     update_framebuffer,
 )
+from .api.core.geometry import CreateTriangleMeshParams, GetTriangleMeshResult, create_triangle_mesh, get_triangle_mesh
 from .api.core.image import (
     JpegChannel,
     PngChannel,
@@ -166,11 +167,13 @@ __all__ = [
     "create_perspective_camera",
     "create_regular_volume",
     "create_tone_mapper",
+    "create_triangle_mesh",
     "CreateFramebufferParams",
     "CreateLinearTransferFunctionParams",
     "CreateObjectParams",
     "CreateRegularVolumeParams",
     "CreateToneMapperParams",
+    "CreateTriangleMeshParams",
     "EmptyObject",
     "Endpoint",
     "euler",
@@ -197,6 +200,7 @@ __all__ = [
     "get_rotation_between",
     "get_tone_mapper",
     "get_tone_mapper",
+    "get_triangle_mesh",
     "get_version",
     "GetCameraResult",
     "GetFramebufferResult",
@@ -207,6 +211,7 @@ __all__ = [
     "GetPerspectiveCameraResult",
     "GetRegularVolumeResult",
     "GetToneMapperResult",
+    "GetTriangleMeshResult",
     "ImageOperation",
     "JpegChannel",
     "JsonRpcError",

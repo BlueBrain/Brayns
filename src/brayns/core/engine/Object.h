@@ -41,7 +41,7 @@ class Object
 public:
     using Handle = OSPObject;
 
-    explicit Object(Handle handle = nullptr):
+    explicit Object(Handle handle):
         _handle(handle)
     {
     }
