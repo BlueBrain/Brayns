@@ -153,6 +153,13 @@ void checkRibbonParams(const RibbonParams &params)
     std::visit([&](const auto &basis) { checkCurveParams(params.value, basis, params.normals); }, params.basis);
 }
 
+void loadIsosurfaceVolume(ObjectManager &objects, IsosurfaceParams &params)
+{
+    auto stored = objects.getAsStored<UserVolume>(params.volumeId);
+    params.value.volume = stored.get().get();
+    params.volume = std::move(stored);
+}
+
 CreateObjectResult createGeometry(ObjectManager &objects, Device &device, auto params, auto validate, auto create, const char *type)
 {
     auto &[metadata, settings] = params;
@@ -266,5 +273,41 @@ CreateObjectResult createRibbon(ObjectManager &objects, Device &device, CreateRi
 GetRibbonResult getRibbon(ObjectManager &objects, const GetObjectParams &params)
 {
     return getGeometryAs<UserRibbon>(objects, params);
+}
+
+CreateObjectResult createBoxes(ObjectManager &objects, Device &device, CreateBoxesParams params)
+{
+    auto validate = [](const auto &settings) { (void)settings; };
+    auto create = [](auto &device, const auto &settings) { return createBoxes(device, settings); };
+    return createGeometry(objects, device, std::move(params), validate, create, "Boxes");
+}
+
+GetBoxesResult getBoxes(ObjectManager &objects, const GetObjectParams &params)
+{
+    return getGeometryAs<UserBoxes>(objects, params);
+}
+
+CreateObjectResult createPlanes(ObjectManager &objects, Device &device, CreatePlanesParams params)
+{
+    auto validate = [](const auto &settings) { (void)settings; };
+    auto create = [](auto &device, const auto &settings) { return createPlanes(device, settings); };
+    return createGeometry(objects, device, std::move(params), validate, create, "Planes");
+}
+
+GetPlanesResult getPlanes(ObjectManager &objects, const GetObjectParams &params)
+{
+    return getGeometryAs<UserPlanes>(objects, params);
+}
+
+CreateObjectResult createIsosurfaces(ObjectManager &objects, Device &device, CreateIsosurfacesParams params)
+{
+    auto validate = [&](auto &settings) { loadIsosurfaceVolume(objects, settings); };
+    auto create = [](auto &device, const auto &settings) { return createIsosurfaces(device, settings.value); };
+    return createGeometry(objects, device, std::move(params), validate, create, "Isosurfaces");
+}
+
+GetIsosurfacesResult getIsosurfaces(ObjectManager &objects, const GetObjectParams &params)
+{
+    return getGeometryAs<UserIsosurfaces>(objects, params);
 }
 }

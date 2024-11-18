@@ -24,10 +24,13 @@
 #include <any>
 #include <concepts>
 #include <functional>
+#include <optional>
 
 #include <brayns/core/engine/Geometry.h>
 #include <brayns/core/jsonrpc/PayloadReflector.h>
 #include <brayns/core/manager/ObjectManager.h>
+
+#include "VolumeObjects.h"
 
 namespace brayns
 {
@@ -291,4 +294,71 @@ using UserRibbon = UserGeometryOf<RibbonParams, Ribbon>;
 
 CreateObjectResult createRibbon(ObjectManager &objects, Device &device, CreateRibbonParams params);
 GetRibbonResult getRibbon(ObjectManager &objects, const GetObjectParams &params);
+
+template<>
+struct JsonObjectReflector<BoxSettings>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<BoxSettings>();
+        builder.field("boxes", [](auto &object) { return &object.boxes; }).description("Axis-aligned boxes min and max XYZ").minItems(1);
+        return builder.build();
+    }
+};
+
+using CreateBoxesParams = CreateParamsOf<BoxSettings>;
+using GetBoxesResult = GetResultOf<BoxSettings>;
+using UserBoxes = UserGeometryOf<BoxSettings, Boxes>;
+
+CreateObjectResult createBoxes(ObjectManager &objects, Device &device, CreateBoxesParams params);
+GetBoxesResult getBoxes(ObjectManager &objects, const GetObjectParams &params);
+
+template<>
+struct JsonObjectReflector<PlaneSettings>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<PlaneSettings>();
+        builder.field("coefficients", [](auto &object) { return &object.coefficients; })
+            .description("Plane equations ABCD such as Ax + By + Cz + D = 0")
+            .minItems(1);
+        builder.field("bounds", [](auto &object) { return &object.bounds; })
+            .description("Optional axis-aligned bounds per plane min and max XYZ")
+            .defaultValue(std::vector<Box3>());
+        return builder.build();
+    }
+};
+
+using CreatePlanesParams = CreateParamsOf<PlaneSettings>;
+using GetPlanesResult = GetResultOf<PlaneSettings>;
+using UserPlanes = UserGeometryOf<PlaneSettings, Planes>;
+
+CreateObjectResult createPlanes(ObjectManager &objects, Device &device, CreatePlanesParams params);
+GetPlanesResult getPlanes(ObjectManager &objects, const GetObjectParams &params);
+
+struct IsosurfaceParams
+{
+    IsosurfaceSettings value;
+    ObjectId volumeId;
+    std::optional<Stored<UserVolume>> volume;
+};
+
+template<>
+struct JsonObjectReflector<IsosurfaceParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<IsosurfaceParams>();
+        builder.field("isovalues", [](auto &object) { return &object.value.isovalues; }).description("List of isovalue per isosurface").minItems(1);
+        builder.field("volume", [](auto &object) { return &object.volumeId; }).description("ID of the volume to be isosurfaced");
+        return builder.build();
+    }
+};
+
+using CreateIsosurfacesParams = CreateParamsOf<IsosurfaceParams>;
+using GetIsosurfacesResult = GetResultOf<IsosurfaceParams>;
+using UserIsosurfaces = UserGeometryOf<IsosurfaceParams, Isosurfaces>;
+
+CreateObjectResult createIsosurfaces(ObjectManager &objects, Device &device, CreateIsosurfacesParams params);
+GetIsosurfacesResult getIsosurfaces(ObjectManager &objects, const GetObjectParams &params);
 }
