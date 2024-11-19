@@ -23,7 +23,7 @@ from dataclasses import MISSING, fields, is_dataclass
 from enum import Enum
 from inspect import get_annotations
 from types import NoneType, UnionType
-from typing import Any, TypeVar, get_args, get_origin, is_typeddict, overload
+from typing import Any, Literal, TypeVar, get_args, get_origin, is_typeddict, overload
 
 from .composing import Object, camel_case
 
@@ -72,6 +72,11 @@ def deserialize(value: Any, t: Any) -> Any: ...
 
 
 def deserialize(value: Any, t: Any) -> Any:
+    origin = get_origin(t)
+
+    if origin is Literal:
+        return _deserialize_literal(value, t)
+
     if t in (Any, None, NoneType, bool, int, float, str):
         return _ensure(value, t)
 
@@ -89,8 +94,6 @@ def deserialize(value: Any, t: Any) -> Any:
 
     if is_dataclass(t):
         return _deserialize_dataclass(value, t)
-
-    origin = get_origin(t)
 
     if origin is dict:
         return _deserialize_dict(value, t)
@@ -173,6 +176,15 @@ def _deserialize_dataclass(value: Any, t: Any) -> Any:
             kwargs[field.name] = deserialize(value[key], field.type)
 
     return t(**kwargs)
+
+
+def _deserialize_literal(value: Any, t: Any) -> Any:
+    (expected,) = get_args(t)
+
+    if value != expected:
+        raise TypeError("Invalid literal")
+
+    return value
 
 
 def _deserialize_dict(value: Any, t: Any) -> Any:

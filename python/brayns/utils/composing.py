@@ -19,7 +19,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import json
-from dataclasses import is_dataclass
+from dataclasses import asdict, is_dataclass
 from enum import Enum
 from itertools import chain, islice
 from types import NoneType
@@ -64,8 +64,8 @@ def serialize(value: Any) -> Any:
     if isinstance(value, Enum):
         return value.value
 
-    if is_dataclass(value):
-        return serialize(vars(value))
+    if is_dataclass(type(value)):
+        return serialize(asdict(value))
 
     if isinstance(value, dict):
         return {camel_case(key): serialize(item) for key, item in value.items()}

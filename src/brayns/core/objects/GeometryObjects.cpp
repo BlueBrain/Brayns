@@ -66,25 +66,31 @@ void checkAllSameSizeOrEmpty(const auto &...args)
 template<int N>
 void checkIndices(const std::vector<Vector<std::uint32_t, N>> &indices, std::size_t positionCount)
 {
+    auto maxIndex = positionCount - 1;
+
     for (const auto &face : indices)
     {
         for (auto i = 0; i < N; ++i)
         {
-            if (face[i] >= positionCount)
+            if (face[i] > maxIndex)
             {
-                throw InvalidParams(fmt::format("Invalid index: {}", face[i]));
+                throw InvalidParams(fmt::format("Invalid index: {} > {}", face[i], maxIndex));
             }
         }
     }
 }
 
-void checkIndices(const std::vector<std::uint32_t> &indices, std::size_t positionCount)
+void checkIndices(const std::vector<std::uint32_t> &indices, std::size_t positionCount, std::size_t segmentSize)
 {
+    assert(positionCount >= segmentSize);
+
+    auto maxIndex = positionCount - segmentSize;
+
     for (auto index : indices)
     {
-        if (index >= positionCount)
+        if (index > maxIndex)
         {
-            throw InvalidParams(fmt::format("Invalid index: {}", index));
+            throw InvalidParams(fmt::format("Invalid index: {} > {}", index, maxIndex));
         }
     }
 }
@@ -115,7 +121,7 @@ void checkCommonCurveParams(const CurveSettings &settings, std::size_t segmentSi
     }
 
     checkAllSameSizeOrEmpty(settings.positionsRadii, settings.colors, settings.uvs, attributes...);
-    checkIndices(settings.indices, settings.positionsRadii.size() - segmentSize);
+    checkIndices(settings.indices, settings.positionsRadii.size(), segmentSize);
 }
 
 std::size_t getSegmentSize(const auto &)
