@@ -57,6 +57,7 @@ void swapBytes(T &value)
 
 inline std::span<const char> extractBytes(std::span<const char> &bytes, std::size_t count)
 {
+    count = std::min(bytes.size(), count);
     auto extracted = bytes.subspan(0, count);
     bytes = bytes.subspan(extracted.size());
     return extracted;

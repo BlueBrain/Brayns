@@ -29,7 +29,7 @@ CreateObjectResult createLinearTransferFunction(ObjectManager &objects, Device &
 
     auto operation = createLinearTransferFunction(device, derived);
 
-    auto ptr = toShared(UserLinearTransferFunction{derived, std::move(operation)});
+    auto ptr = toShared(UserLinearTransferFunction{std::move(derived), std::move(operation)});
 
     auto object = UserTransferFunction{
         .value = ptr,
