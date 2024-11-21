@@ -37,10 +37,10 @@ struct UserVolume
     std::function<Volume()> get;
 };
 
-template<ReflectedJson Settings, std::derived_from<Volume> T>
+template<typename Storage, std::derived_from<Volume> T>
 struct UserVolumeOf
 {
-    Settings settings;
+    Storage storage;
     T value;
 };
 
@@ -116,10 +116,16 @@ struct JsonObjectReflector<RegularVolumeParams>
     }
 };
 
+struct RegularVolumeStorage
+{
+    RegularVolumeData data;
+    RegularVolumeSettings settings;
+};
+
 using CreateRegularVolumeParams = Params<CreateParamsOf<RegularVolumeParams>>;
 using GetRegularVolumeResult = GetResultOf<RegularVolumeParams>;
 using UpdateRegularVolumeParams = UpdateParamsOf<RegularVolumeSettings>;
-using UserRegularVolume = UserVolumeOf<RegularVolumeParams, RegularVolume>;
+using UserRegularVolume = UserVolumeOf<RegularVolumeStorage, RegularVolume>;
 
 CreateObjectResult createRegularVolume(ObjectManager &objects, Device &device, CreateRegularVolumeParams params);
 GetRegularVolumeResult getRegularVolume(ObjectManager &objects, const GetObjectParams &params);

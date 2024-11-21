@@ -72,13 +72,6 @@ enum class TextureWrap
     ClampToEdge = OSP_TEXTURE_WRAP_CLAMP_TO_EDGE,
 };
 
-struct TextureTransform
-{
-    float rotation = 0.0F;
-    Vector2 scale = {1.0F, 1.0F};
-    Vector2 translation = {0.0F, 0.0F};
-};
-
 struct TextureData2D
 {
     std::string value;
@@ -104,6 +97,7 @@ Texture2D createTexture2D(Device &device, const TextureData2D &data, const Textu
 
 struct VolumeTextureSettings
 {
+    Volume volume;
     TransferFunction transferFunction;
 };
 
@@ -115,5 +109,5 @@ public:
     void update(const VolumeTextureSettings &settings);
 };
 
-VolumeTexture createVolumeTexture(Device &device, const Volume &volume, const VolumeTextureSettings &settings = {});
+VolumeTexture createVolumeTexture(Device &device, const VolumeTextureSettings &settings);
 }

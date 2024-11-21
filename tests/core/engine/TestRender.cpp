@@ -115,7 +115,7 @@ TEST_CASE("Object creation")
     };
     auto texture2D = createTexture2D(device, textureData);
 
-    createVolumeTexture(device, volume, {transferFunction});
+    createVolumeTexture(device, {volume, transferFunction});
 
     createDistantLight(device);
     createSphereLight(device);

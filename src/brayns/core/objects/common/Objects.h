@@ -64,8 +64,14 @@ std::vector<ObjectId> getObjectIds(const std::vector<Stored<T>> &objects)
 }
 
 template<typename T>
+auto getObjectHandle(const Stored<T> &object)
+{
+    return object.get().get();
+}
+
+template<typename T>
 auto getObjectHandles(const std::vector<Stored<T>> &objects)
 {
-    return mapObjects(objects, [](const auto &object) { return object.get().get(); });
+    return mapObjects(objects, [](const auto &object) { return getObjectHandle(object); });
 }
 }

@@ -33,6 +33,7 @@ void setTexture2DParams(OSPTexture handle, const Texture2DSettings &settings)
 
 void setVolumeTextureParams(OSPTexture handle, const VolumeTextureSettings &settings)
 {
+    setObjectParam(handle, "volume", settings.volume);
     setObjectParam(handle, "transferFunction", settings.transferFunction);
 }
 }
@@ -149,12 +150,10 @@ void VolumeTexture::update(const VolumeTextureSettings &settings)
     commitObject(handle);
 }
 
-VolumeTexture createVolumeTexture(Device &device, const Volume &volume, const VolumeTextureSettings &settings)
+VolumeTexture createVolumeTexture(Device &device, const VolumeTextureSettings &settings)
 {
     auto handle = ospNewTexture("volume");
     auto texture = wrapObjectHandleAs<VolumeTexture>(device, handle);
-
-    setObjectParam(handle, "volume", volume);
 
     setVolumeTextureParams(handle, settings);
 

@@ -30,12 +30,17 @@ CreateObjectResult createRegularVolume(ObjectManager &objects, Device &device, C
     auto &[json, binary] = params;
     auto &[base, derived] = json;
 
-    sanitizeBinary(binary, getSize(derived.voxelType));
-    auto data = RegularVolumeData{std::move(binary), derived.voxelType, derived.size};
+    auto voxelSize = getSize(derived.voxelType);
+    auto voxelCount = reduceMultiply(derived.size);
 
+    sanitizeBinary(binary, {voxelSize, voxelCount});
+
+    auto data = RegularVolumeData{std::move(binary), derived.voxelType, derived.size};
     auto volume = createRegularVolume(device, data, derived.value);
 
-    auto ptr = toShared(UserRegularVolume{derived, std::move(volume)});
+    auto storage = RegularVolumeStorage{std::move(data), std::move(derived.value)};
+
+    auto ptr = toShared(UserRegularVolume{{std::move(storage)}, std::move(volume)});
 
     auto object = UserVolume{
         .value = ptr,
@@ -50,8 +55,12 @@ CreateObjectResult createRegularVolume(ObjectManager &objects, Device &device, C
 GetRegularVolumeResult getRegularVolume(ObjectManager &objects, const GetObjectParams &params)
 {
     auto stored = objects.getAsStored<UserVolume>(params.id);
-    auto &operation = *castAsShared<UserRegularVolume>(stored.get().value, stored);
-    return getResult(operation.settings);
+    auto &volume = *castAsShared<UserRegularVolume>(stored.get().value, stored);
+    auto &storage = volume.storage;
+
+    auto result = RegularVolumeParams{storage.data.type, storage.data.size, storage.settings};
+
+    return getResult(result);
 }
 
 void updateRegularVolume(ObjectManager &objects, Device &device, const UpdateRegularVolumeParams &params)
@@ -59,11 +68,11 @@ void updateRegularVolume(ObjectManager &objects, Device &device, const UpdateReg
     auto stored = objects.getAsStored<UserVolume>(params.id);
     auto &volume = *castAsShared<UserRegularVolume>(stored.get().value, stored);
 
-    auto settings = getUpdatedParams(params, volume.settings.value);
+    auto settings = getUpdatedParams(params, volume.storage.settings);
 
     volume.value.update(settings);
     device.throwIfError();
 
-    volume.settings.value = std::move(settings);
+    volume.storage.settings = std::move(settings);
 }
 }

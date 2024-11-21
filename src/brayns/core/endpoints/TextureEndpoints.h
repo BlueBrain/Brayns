@@ -21,45 +21,11 @@
 
 #pragma once
 
-#include "Device.h"
-#include "Object.h"
-
-#include <vector>
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/engine/Device.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-class Data : public Managed<OSPData>
-{
-public:
-    using Managed::Managed;
-};
-
-inline Data createData(const void *ptr, DataType type, const Size3 &size, const Stride3 &stride = {0, 0, 0})
-{
-    auto *handle = ospNewSharedData(ptr, type, size.x, stride.x, size.y, stride.y, size.z, stride.z);
-
-    if (handle == nullptr)
-    {
-        throw DeviceException(OSP_UNKNOWN_ERROR, "Failed to allocate OSPRay data wrapper");
-    }
-
-    return Data(handle);
-}
-
-template<OsprayDataType T>
-struct ObjectParamReflector<std::vector<T>>
-{
-    static void set(OSPObject handle, const char *id, const std::vector<T> &items)
-    {
-        if (items.empty())
-        {
-            removeObjectParam(handle, id);
-            return;
-        }
-
-        auto data = createData(items.data(), dataTypeOf<T>, {items.size(), 1, 1});
-
-        setObjectParam(handle, id, data);
-    }
-};
+void addTextureEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

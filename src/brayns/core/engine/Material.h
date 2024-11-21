@@ -32,7 +32,7 @@ namespace brayns
 struct MaterialTexture2D
 {
     Texture2D value;
-    TextureTransform transform = {};
+    Transform2D transform = {};
 };
 
 struct MaterialVolumeTexture

@@ -26,6 +26,7 @@
 #include "GeometryEndpoints.h"
 #include "ImageEndpoints.h"
 #include "ImageOperationEndpoints.h"
+#include "TextureEndpoints.h"
 #include "TransferFunctionEndpoints.h"
 #include "VolumeEndpoints.h"
 
@@ -40,5 +41,6 @@ void addDeviceEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &dev
     addTransferFunctionEndpoints(builder, objects, device);
     addVolumeEndpoints(builder, objects, device);
     addGeometryEndpoints(builder, objects, device);
+    addTextureEndpoints(builder, objects, device);
 }
 }

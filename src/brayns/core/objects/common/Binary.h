@@ -32,14 +32,22 @@
 
 namespace brayns
 {
-inline void sanitizeBinary(std::span<char> bytes, std::size_t itemSize)
+struct BinaryLayout
 {
-    auto bytesSize = bytes.size();
-    auto itemCount = bytesSize / itemSize;
+    std::size_t itemSize;
+    std::size_t itemCount;
+};
 
-    if (itemCount * itemSize != bytesSize)
+inline void sanitizeBinary(std::span<char> bytes, const BinaryLayout &layout)
+{
+    auto [itemSize, itemCount] = layout;
+
+    auto size = bytes.size();
+    auto expectedSize = itemSize * itemCount;
+
+    if (size != expectedSize)
     {
-        throw InvalidParams(fmt::format("Binary size {} is not a multiple of item size {}", bytesSize, itemSize));
+        throw InvalidParams(fmt::format("Invalid binary size, expected {}, got {}", expectedSize, size));
     }
 
     if constexpr (std::endian::native != std::endian::little)

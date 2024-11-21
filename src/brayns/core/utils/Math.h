@@ -119,4 +119,11 @@ inline Affine3 toAffine(const Transform &transform)
     auto scale = rkcommon::math::LinearSpace3f::scale(transform.scale);
     return Affine3(rotation * scale, translation);
 }
+
+struct Transform2D
+{
+    Vector2 translation = {0.0F, 0.0F};
+    float rotation = 0.0F;
+    Vector2 scale = {1.0F, 1.0F};
+};
 }

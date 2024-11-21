@@ -36,14 +36,14 @@ void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTe
 {
     setObjectParam(handle, id.c_str(), texture.value);
 
+    auto translation = id + ".translation";
+    setObjectParam(handle, translation.c_str(), texture.transform.translation);
+
     auto rotation = id + ".rotation";
-    setObjectParam(handle, rotation.c_str(), texture.transform.rotation);
+    setObjectParam(handle, rotation.c_str(), degrees(texture.transform.rotation));
 
     auto scale = id + ".scale";
     setObjectParam(handle, scale.c_str(), texture.transform.scale);
-
-    auto translation = id + ".translation";
-    setObjectParam(handle, translation.c_str(), texture.transform.translation);
 }
 
 void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialVolumeTexture &texture)

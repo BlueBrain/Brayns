@@ -93,4 +93,17 @@ struct JsonObjectReflector<Transform>
         return builder.build();
     }
 };
+
+template<>
+struct JsonObjectReflector<Transform2D>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Transform2D>();
+        builder.field("translation", [](auto &object) { return &object.translation; }).description("Translation XY").defaultValue(Vector2(0.0F, 0.0F));
+        builder.field("rotation", [](auto &object) { return &object.rotation; }).description("Rotation angle in radians").defaultValue(0.0F);
+        builder.field("scale", [](auto &object) { return &object.scale; }).description("Scale XY").defaultValue(Vector2(1.0F, 1.0F));
+        return builder.build();
+    }
+};
 }
