@@ -22,6 +22,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -68,14 +69,14 @@ enum class WebSocketOpcode
 struct WebSocketFrame
 {
     WebSocketOpcode opcode;
-    std::string data;
+    Poco::Buffer<char> data;
     bool finalFrame;
 };
 
 struct WebSocketFrameView
 {
     WebSocketOpcode opcode;
-    std::string_view data = {};
+    std::span<const char> data = {};
     bool finalFrame = true;
 };
 

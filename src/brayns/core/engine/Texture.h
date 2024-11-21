@@ -74,7 +74,7 @@ enum class TextureWrap
 
 struct TextureData2D
 {
-    std::string value;
+    std::vector<char> value;
     TextureFormat format;
     Size2 size;
 };

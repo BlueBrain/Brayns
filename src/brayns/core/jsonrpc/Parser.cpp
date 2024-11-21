@@ -30,7 +30,7 @@
 
 namespace brayns
 {
-JsonRpcRequest parseTextJsonRpcRequest(const std::string &text)
+JsonRpcRequest parseJsonRpcRequest(const std::string &text)
 {
     auto json = JsonValue();
 
@@ -55,9 +55,9 @@ JsonRpcRequest parseTextJsonRpcRequest(const std::string &text)
     return deserializeJsonAs<JsonRpcRequest>(json);
 }
 
-JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary)
+JsonRpcRequest parseJsonRpcRequest(const std::vector<char> &binary)
 {
-    auto data = std::string_view(binary);
+    auto data = std::span<const char>(binary);
 
     if (data.size() < 4)
     {
@@ -73,9 +73,9 @@ JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary)
 
     auto text = extractBytes(data, textSize);
 
-    auto request = parseTextJsonRpcRequest(std::string(text));
+    auto request = parseJsonRpcRequest(std::string(text.data(), text.size()));
 
-    request.params.binary = binary.substr(4 + textSize);
+    request.params.binary = std::vector<char>(data.begin(), data.end());
 
     return request;
 }
@@ -90,7 +90,7 @@ std::string composeAsText(const JsonRpcErrorResponse &response)
     return stringifyToJson(response);
 }
 
-std::string composeAsBinary(const JsonRpcSuccessResponse &response)
+std::vector<char> composeAsBinary(const JsonRpcSuccessResponse &response)
 {
     auto text = composeAsText(response);
 
@@ -101,9 +101,17 @@ std::string composeAsBinary(const JsonRpcSuccessResponse &response)
         throw InternalError("Text size does not fit in 4 bytes");
     }
 
-    auto header = composeBytes(static_cast<std::uint32_t>(textSize), std::endian::little);
+    const auto &binary = response.result.binary;
 
-    return header + text + response.result.binary;
+    auto result = std::vector<char>();
+    result.reserve(sizeof(std::uint32_t) + text.size() + binary.size());
+
+    composeBytesTo(static_cast<std::uint32_t>(textSize), std::endian::little, result);
+
+    result.insert(result.end(), text.begin(), text.end());
+    result.insert(result.end(), binary.begin(), binary.end());
+
+    return result;
 }
 
 JsonRpcError composeError(const JsonRpcException &e)

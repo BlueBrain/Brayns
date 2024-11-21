@@ -55,7 +55,7 @@ std::size_t getSize(VoxelType type);
 
 struct RegularVolumeData
 {
-    std::string value;
+    std::vector<char> value;
     VoxelType type;
     Size3 size;
 };

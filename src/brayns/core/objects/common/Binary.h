@@ -61,9 +61,9 @@ inline void sanitizeBinary(std::span<char> bytes, const BinaryLayout &layout)
 }
 
 template<std::ranges::range T>
-std::string composeRangeToBinary(T items)
+std::vector<char> composeRangeToBinary(T items)
 {
-    auto output = std::string();
+    auto output = std::vector<char>();
     output.reserve(items.size() + getBinarySize<std::ranges::range_value_t<T>>());
 
     for (const auto &item : items)

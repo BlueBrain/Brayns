@@ -79,12 +79,13 @@ TEST_CASE("Compose")
 {
     for (auto endian : {std::endian::little, std::endian::big})
     {
-        auto buffer = std::string();
+        auto buffer = std::vector<char>();
+
         composeBytesTo(std::uint32_t(1), endian, buffer);
         composeBytesTo(2.0F, endian, buffer);
         composeBytesTo(3.0, endian, buffer);
 
-        auto data = std::string_view(buffer);
+        auto data = std::span<const char>(buffer);
 
         CHECK_EQ(extractBytesAs<std::uint32_t>(data, endian), 1);
         CHECK_EQ(extractBytesAs<float>(data, endian), 2.0F);

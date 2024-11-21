@@ -73,7 +73,7 @@ void setParam(tjhandle handle, TJPARAM param, int value)
 
 namespace brayns
 {
-std::string encodeJpeg(const ImageView &image, const JpegSettings &settings)
+std::vector<char> encodeJpeg(const ImageView &image, const JpegSettings &settings)
 {
     auto *compressor = tjInitCompress();
 
@@ -102,7 +102,7 @@ std::string encodeJpeg(const ImageView &image, const JpegSettings &settings)
 
     auto bufferSize = tj3JPEGBufSize(width, height, subsampling);
 
-    auto buffer = std::string(bufferSize, '\0');
+    auto buffer = std::vector<char>(bufferSize, '\0');
     auto *bufferPtr = reinterpret_cast<unsigned char *>(buffer.data());
 
     auto **output = &bufferPtr;

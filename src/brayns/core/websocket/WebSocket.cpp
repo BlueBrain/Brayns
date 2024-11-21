@@ -48,7 +48,7 @@ WebSocketFrame receiveFrame(Poco::Net::WebSocket &websocket)
 
     return {
         .opcode = static_cast<WebSocketOpcode>(opcode),
-        .data = {buffer.begin(), buffer.size()},
+        .data = std::move(buffer),
         .finalFrame = static_cast<bool>(finalFrame),
     };
 }

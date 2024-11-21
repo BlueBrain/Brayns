@@ -32,22 +32,17 @@ using namespace brayns;
 
 JsonRpcRequest parseRequest(const Message &message)
 {
-    if (message.binary)
-    {
-        return parseBinaryJsonRpcRequest(message.data);
-    }
-
-    return parseTextJsonRpcRequest(message.data);
+    return std::visit([](const auto &data) { return parseJsonRpcRequest(data); }, message);
 }
 
 Message composeSuccessResponse(const JsonRpcSuccessResponse &response)
 {
     if (response.result.binary.empty())
     {
-        return {.data = composeAsText(response), .binary = false};
+        return composeAsText(response);
     }
 
-    return {.data = composeAsBinary(response), .binary = true};
+    return composeAsBinary(response);
 }
 
 void sendSuccessResponse(Payload result, const ResponseHandler &handler, JsonRpcId id)
@@ -65,15 +60,10 @@ void sendSuccessResponseIfNeeded(Payload result, const ResponseHandler &handler,
     }
 }
 
-Message composeErrorResponse(const JsonRpcErrorResponse &response)
-{
-    return {.data = composeAsText(response), .binary = false};
-}
-
 void sendErrorResponse(const JsonRpcException &e, const ResponseHandler &handler, std::optional<JsonRpcId> id = {})
 {
     auto response = JsonRpcErrorResponse{composeError(e), std::move(*id)};
-    auto message = composeErrorResponse(response);
+    auto message = composeAsText(response);
     handler(message);
 }
 

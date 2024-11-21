@@ -60,7 +60,7 @@ TEST_CASE("Object creation")
     createFramebuffer(device, {{100, 100}});
 
     auto volumeData = RegularVolumeData{
-        .value = std::string(10 * 10 * 10 * sizeof(float), '\0'),
+        .value = std::vector<char>(10 * 10 * 10 * sizeof(float), '\0'),
         .type = VoxelType::F32,
         .size = Size3{10, 10, 10},
     };
@@ -109,7 +109,7 @@ TEST_CASE("Object creation")
     createIsosurfaces(device, isosurfaceSettings);
 
     auto textureData = TextureData2D{
-        .value = std::string(10 * 10 * sizeof(float), '\0'),
+        .value = std::vector<char>(10 * 10 * sizeof(float), '\0'),
         .format = TextureFormat::Rgba32F,
         .size = {10, 10},
     };

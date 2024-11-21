@@ -21,9 +21,9 @@
 
 #pragma once
 
-#include <condition_variable>
 #include <functional>
-#include <mutex>
+#include <string>
+#include <variant>
 #include <vector>
 
 #include <brayns/core/utils/Threading.h>
@@ -32,11 +32,7 @@ namespace brayns
 {
 using ClientId = std::uint32_t;
 
-struct Message
-{
-    std::string data;
-    bool binary = false;
-};
+using Message = std::variant<std::string, std::vector<char>>;
 
 using ResponseHandler = std::function<void(const Message &)>;
 

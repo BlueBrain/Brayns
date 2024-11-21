@@ -38,7 +38,7 @@ namespace
 using namespace brayns;
 
 template<typename T>
-std::string readChannelAs(UserFramebuffer &framebuffer, FramebufferChannel channel)
+std::vector<char> readChannelAs(UserFramebuffer &framebuffer, FramebufferChannel channel)
 {
     const auto &size = framebuffer.settings.resolution;
 
@@ -51,15 +51,15 @@ std::string readChannelAs(UserFramebuffer &framebuffer, FramebufferChannel chann
 }
 
 template<typename T>
-concept Encoder = std::invocable<T, const ImageView &> && std::same_as<std::string, std::invoke_result_t<T, const ImageView &>>;
+concept Encoder = std::invocable<T, const ImageView &> && std::same_as<std::vector<char>, std::invoke_result_t<T, const ImageView &>>;
 
-std::string encodeColorChannel(const FramebufferData &data, const Size2 &size, Encoder auto &&encoder)
+std::vector<char> encodeColorChannel(const FramebufferData &data, const Size2 &size, Encoder auto &&encoder)
 {
     auto format = ImageFormat::Rgba8;
     return encoder(ImageView{data.get(), size, format});
 }
 
-std::string convertAndEncodeColorChannel(const FramebufferData &data, const Size2 &size, Encoder auto &&encoder)
+std::vector<char> convertAndEncodeColorChannel(const FramebufferData &data, const Size2 &size, Encoder auto &&encoder)
 {
     const auto *items = data.as<Color4>();
     auto itemCount = reduceMultiply(size);
@@ -69,7 +69,7 @@ std::string convertAndEncodeColorChannel(const FramebufferData &data, const Size
     return encoder(ImageView{converted.data(), size, format});
 }
 
-std::string convertAndEncodeAlbedoChannel(const FramebufferData &data, const Size2 &size, Encoder auto &&encoder)
+std::vector<char> convertAndEncodeAlbedoChannel(const FramebufferData &data, const Size2 &size, Encoder auto &&encoder)
 {
     const auto *items = data.as<Color3>();
     auto itemCount = reduceMultiply(size);
@@ -79,7 +79,7 @@ std::string convertAndEncodeAlbedoChannel(const FramebufferData &data, const Siz
     return encoder(ImageView{converted.data(), size, format});
 }
 
-std::string encodeChannelToJpegOrPng(UserFramebuffer &framebuffer, JpegChannel channel, Encoder auto &&encoder)
+std::vector<char> encodeChannelToJpegOrPng(UserFramebuffer &framebuffer, JpegChannel channel, Encoder auto &&encoder)
 {
     const auto &size = framebuffer.settings.resolution;
     auto format = framebuffer.settings.format;
@@ -230,7 +230,7 @@ std::vector<ExrChannel> createExrChannels(const std::vector<ExrMappedData> &data
 
 namespace brayns
 {
-std::string readChannel(UserFramebuffer &framebuffer, FramebufferChannel channel)
+std::vector<char> readChannel(UserFramebuffer &framebuffer, FramebufferChannel channel)
 {
     switch (channel)
     {
@@ -253,19 +253,19 @@ std::string readChannel(UserFramebuffer &framebuffer, FramebufferChannel channel
     };
 }
 
-std::string readChannelAsJpeg(UserFramebuffer &framebuffer, JpegChannel channel, const JpegSettings &settings)
+std::vector<char> readChannelAsJpeg(UserFramebuffer &framebuffer, JpegChannel channel, const JpegSettings &settings)
 {
     auto encoder = [&](const auto &image) { return encodeJpeg(image, settings); };
     return encodeChannelToJpegOrPng(framebuffer, channel, encoder);
 }
 
-std::string readChannelAsPng(UserFramebuffer &framebuffer, PngChannel channel)
+std::vector<char> readChannelAsPng(UserFramebuffer &framebuffer, PngChannel channel)
 {
     auto encoder = [&](const auto &image) { return encodePng(image); };
     return encodeChannelToJpegOrPng(framebuffer, channel, encoder);
 }
 
-std::string readChannelsAsExr(UserFramebuffer &framebuffer, const std::set<FramebufferChannel> &channels)
+std::vector<char> readChannelsAsExr(UserFramebuffer &framebuffer, const std::set<FramebufferChannel> &channels)
 {
     const auto &size = framebuffer.settings.resolution;
     auto format = framebuffer.settings.format;

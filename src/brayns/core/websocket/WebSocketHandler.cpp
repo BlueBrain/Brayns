@@ -31,42 +31,50 @@ namespace
 {
 using namespace brayns;
 
+bool isEmpty(const Message &message)
+{
+    return std::visit([](const auto &value) { return value.empty(); }, message);
+}
+
+void append(Message &message, const Poco::Buffer<char> &data)
+{
+    std::visit([&](auto &value) { value.insert(value.end(), data.begin(), data.end()); }, message);
+}
+
 void onContinuation(const WebSocketFrame &frame, Message &buffer, Logger &logger)
 {
-    logger.info("Continuation frame received (binary = {})", buffer.binary);
+    logger.info("Continuation frame received");
 
-    if (buffer.data.empty())
+    if (isEmpty(buffer))
     {
         throw WebSocketException(WebSocketStatus::PayloadNotAcceptable, "Continuation frame outside fragmented message");
     }
 
-    buffer.data.append(frame.data);
+    append(buffer, frame.data);
 }
 
 void onText(const WebSocketFrame &frame, Message &buffer, Logger &logger)
 {
     logger.info("Text frame received");
 
-    if (!buffer.data.empty())
+    if (!isEmpty(buffer))
     {
         throw WebSocketException(WebSocketStatus::PayloadNotAcceptable, "Incomplete text frame");
     }
 
-    buffer.data.append(frame.data);
-    buffer.binary = false;
+    buffer = std::string(frame.data.begin(), frame.data.end());
 }
 
 void onBinary(const WebSocketFrame &frame, Message &buffer, Logger &logger)
 {
     logger.info("Binary frame received");
 
-    if (!buffer.data.empty())
+    if (!isEmpty(buffer))
     {
         throw WebSocketException(WebSocketStatus::PayloadNotAcceptable, "Incomplete binary frame");
     }
 
-    buffer.data.append(frame.data);
-    buffer.binary = true;
+    buffer = std::vector<char>(frame.data.begin(), frame.data.end());
 }
 
 void onClose(WebSocket &websocket, Logger &logger)
@@ -88,9 +96,31 @@ void onPong(Logger &logger)
     logger.info("Pong frame received, ignoring");
 }
 
+void logRequestMessage(Logger &logger, ClientId client, const std::string &data)
+{
+    logger.info("Received text request of {} bytes from client {}", data.size(), client);
+    logger.debug("Text request data: {}", data);
+}
+
+void logRequestMessage(Logger &logger, ClientId client, const std::vector<char> &data)
+{
+    logger.info("Received binary request of {} bytes from client {}", data.size(), client);
+}
+
+void logResponseMessage(Logger &logger, ClientId client, const std::string &data)
+{
+    logger.info("Sending text response of {} bytes to client {}", data.size(), client);
+    logger.debug("Text response data: {}", data);
+}
+
+void logResponseMessage(Logger &logger, ClientId client, const std::vector<char> &data)
+{
+    logger.info("Sending binary response of {} bytes to client {}", data.size(), client);
+}
+
 std::optional<Message> receiveRequest(Logger &logger, ClientId client, WebSocket &websocket)
 {
-    auto buffer = Message();
+    auto buffer = Message(std::string());
 
     while (true)
     {
@@ -126,12 +156,7 @@ std::optional<Message> receiveRequest(Logger &logger, ClientId client, WebSocket
             continue;
         }
 
-        logger.info("Received request of {} bytes from client {}", buffer.data.size(), client);
-
-        if (!buffer.binary)
-        {
-            logger.debug("Text request data: {}", buffer.data);
-        }
+        std::visit([&](const auto &data) { logRequestMessage(logger, client, data); }, buffer);
 
         return buffer;
     }
@@ -139,16 +164,11 @@ std::optional<Message> receiveRequest(Logger &logger, ClientId client, WebSocket
 
 void sendResponse(Logger &logger, ClientId client, WebSocket &websocket, const Message &message)
 {
-    auto data = std::string_view(message.data);
+    std::visit([&](const auto &data) { logResponseMessage(logger, client, data); }, message);
 
-    logger.info("Sending response of {} bytes to client {}", data.size(), client);
+    auto data = std::visit([](const auto &data) { return std::span<const char>(data); }, message);
 
-    if (!message.binary)
-    {
-        logger.debug("Text response data: {}", data);
-    }
-
-    auto opcode = message.binary ? WebSocketOpcode::Binary : WebSocketOpcode::Text;
+    auto opcode = std::holds_alternative<std::string>(message) ? WebSocketOpcode::Text : WebSocketOpcode::Binary;
 
     auto maxFrameSize = websocket.getMaxFrameSize();
 

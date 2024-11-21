@@ -51,7 +51,7 @@ TEST_CASE("Basic")
     auto result = endpoints.start("test", params).run();
 
     CHECK_EQ(result.json.extract<float>(), 3.0f);
-    CHECK_EQ(result.binary, "");
+    CHECK(result.binary.empty());
 }
 
 TEST_CASE("With binary")
@@ -60,7 +60,7 @@ TEST_CASE("With binary")
     auto builder = ApiBuilder(endpoints);
 
     auto value = 0;
-    auto buffer = std::string();
+    auto buffer = std::vector<char>();
 
     builder.endpoint("test1", [](int) { return NullJson(); });
     builder.endpoint(
@@ -69,18 +69,18 @@ TEST_CASE("With binary")
         {
             value = params.value;
             buffer = params.binary;
-            return Result<int>{2, "1234"};
+            return Result<int>{2, {1, 2, 3, 4}};
         });
 
-    auto params = Payload{1, "123"};
+    auto params = Payload{1, {1, 2, 3}};
 
     auto result = endpoints.start("test2", params).run();
 
     CHECK_EQ(value, 1);
-    CHECK_EQ(buffer, "123");
+    CHECK_EQ(buffer, std::vector<char>{1, 2, 3});
 
     CHECK_EQ(result.json, 2);
-    CHECK_EQ(result.binary, "1234");
+    CHECK_EQ(result.binary, std::vector<char>{1, 2, 3, 4});
 }
 
 TEST_CASE("No params or result")

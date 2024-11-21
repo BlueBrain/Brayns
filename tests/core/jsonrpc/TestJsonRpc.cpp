@@ -26,43 +26,56 @@
 
 using namespace brayns;
 
-auto json = std::string(R"({
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "test",
-    "params": 123
-})");
+std::string mockJson()
+{
+    return R"({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "test",
+        "params": 123
+    })";
+}
 
 TEST_CASE("Text")
 {
-    auto request = parseTextJsonRpcRequest(json);
+    auto json = mockJson();
+
+    auto request = parseJsonRpcRequest(json);
 
     CHECK(request.id);
     CHECK_EQ(std::get<int>(*request.id), 1);
     CHECK_EQ(request.method, "test");
     CHECK_EQ(request.params.json, 123);
-    CHECK_EQ(request.params.binary, "");
+    CHECK(request.params.binary.empty());
 }
 
 TEST_CASE("Binary")
 {
-    auto jsonSize = static_cast<std::uint32_t>(json.size());
-    auto header = composeBytes(jsonSize, std::endian::little);
-    auto data = header + json + "binary";
+    auto json = mockJson();
 
-    auto request = parseBinaryJsonRpcRequest(data);
+    auto data = std::vector<char>();
+
+    auto jsonSize = static_cast<std::uint32_t>(json.size());
+    composeBytesTo(jsonSize, std::endian::little, data);
+
+    data.insert(data.end(), json.begin(), json.end());
+
+    auto binary = std::string("binary");
+    data.insert(data.end(), binary.begin(), binary.end());
+
+    auto request = parseJsonRpcRequest(data);
 
     CHECK(request.id);
     CHECK_EQ(std::get<int>(*request.id), 1);
     CHECK_EQ(request.method, "test");
     CHECK_EQ(request.params.json, 123);
-    CHECK_EQ(request.params.binary, "binary");
+    CHECK_EQ(request.params.binary, std::vector<char>{binary.begin(), binary.end()});
 }
 
 TEST_CASE("Invalid JSON")
 {
     auto data = "{\"test";
-    CHECK_THROWS_AS(parseTextJsonRpcRequest(data), ParseError);
+    CHECK_THROWS_AS(parseJsonRpcRequest(data), ParseError);
 }
 
 TEST_CASE("Invalid schema")
@@ -73,7 +86,7 @@ TEST_CASE("Invalid schema")
         "params": 123
     })";
 
-    CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
+    CHECK_THROWS_AS(parseJsonRpcRequest(data), InvalidRequest);
 }
 
 TEST_CASE("Invalid JSON-RPC version")
@@ -85,7 +98,7 @@ TEST_CASE("Invalid JSON-RPC version")
         "params": 123
     })";
 
-    CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
+    CHECK_THROWS_AS(parseJsonRpcRequest(data), InvalidRequest);
 }
 
 TEST_CASE("No methods")
@@ -96,17 +109,18 @@ TEST_CASE("No methods")
         "params": 123
     })";
 
-    CHECK_THROWS_AS(parseTextJsonRpcRequest(data), InvalidRequest);
+    CHECK_THROWS_AS(parseJsonRpcRequest(data), InvalidRequest);
 }
 
 TEST_CASE("Binary without size")
 {
-    auto data = "123";
-    CHECK_THROWS_AS(parseBinaryJsonRpcRequest(data), ParseError);
+    auto data = std::vector<char>{'1', '2', '3'};
+    CHECK_THROWS_AS(parseJsonRpcRequest(data), ParseError);
 }
 
 TEST_CASE("Binary size bigger than frame size")
 {
-    auto data = std::string("\x10\x00\x00\x00", 4) + "{}";
-    CHECK_THROWS_AS(parseBinaryJsonRpcRequest(data), ParseError);
+    auto text = std::string("\x10\x00\x00\x00", 4) + "{}";
+    auto data = std::vector<char>(text.begin(), text.end());
+    CHECK_THROWS_AS(parseJsonRpcRequest(data), ParseError);
 }
