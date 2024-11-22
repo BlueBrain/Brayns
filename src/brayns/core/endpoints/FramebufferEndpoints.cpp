@@ -32,9 +32,6 @@ void addFramebufferEndpoints(ApiBuilder &builder, ObjectManager &objects, Device
 
     builder.endpoint("getFramebuffer", [&](GetObjectParams params) { return getFramebuffer(objects, params); }).description("Get framebuffer params");
 
-    builder.endpoint("updateFramebuffer", [&](UpdateFramebufferParams params) { updateFramebuffer(objects, device, params); })
-        .description("Update framebuffer params");
-
     builder.endpoint("clearFramebuffer", [&](GetObjectParams params) { clearFramebuffer(objects, params); })
         .description("Reset accumulating channels of the framebuffer");
 }

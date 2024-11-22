@@ -116,17 +116,15 @@ struct JsonObjectReflector<FramebufferInfo>
         auto builder = JsonBuilder<FramebufferInfo>();
         builder.extend([](auto &object) { return &object.settings; });
         builder.field("varianceEstimate", [](auto &object) { return &object.variance; })
-            .description("Variance of the framebuffer (null if no variance or nothing has been rendered yet)");
+            .description("Variance of the framebuffer (null if no variance channels or nothing has been rendered yet)");
         return builder.build();
     }
 };
 
 using CreateFramebufferParams = CreateParamsOf<FramebufferParams>;
 using GetFramebufferResult = GetResultOf<FramebufferInfo>;
-using UpdateFramebufferParams = UpdateParamsOf<FramebufferParams>;
 
 CreateObjectResult createFramebuffer(ObjectManager &objects, Device &device, const CreateFramebufferParams &params);
 GetFramebufferResult getFramebuffer(ObjectManager &objects, const GetObjectParams &params);
-void updateFramebuffer(ObjectManager &objects, Device &device, const UpdateFramebufferParams &params);
 void clearFramebuffer(ObjectManager &objects, const GetObjectParams &params);
 }

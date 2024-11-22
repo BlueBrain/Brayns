@@ -23,34 +23,26 @@
 
 #include "common/Objects.h"
 
-namespace
-{
-using namespace brayns;
-
-UserFramebuffer createUserFramebuffer(ObjectManager &objects, Device &device, const FramebufferParams &params)
-{
-    auto settings = params.value;
-
-    auto operations = getStoredObjects<UserImageOperation>(objects, params.operations);
-    settings.operations = getObjectHandles(operations);
-
-    auto framebuffer = createFramebuffer(device, settings);
-
-    return UserFramebuffer{
-        .settings = std::move(settings),
-        .operations = std::move(operations),
-        .value = std::move(framebuffer),
-    };
-}
-}
-
 namespace brayns
 {
 CreateObjectResult createFramebuffer(ObjectManager &objects, Device &device, const CreateFramebufferParams &params)
 {
-    auto object = createUserFramebuffer(objects, device, params.derived);
+    const auto &[base, derived] = params;
 
-    auto stored = objects.add(std::move(object), {"Framebuffer"}, params.base);
+    auto settings = derived.value;
+
+    auto operations = getStoredObjects<UserImageOperation>(objects, derived.operations);
+    settings.operations = getObjectHandles(operations);
+
+    auto framebuffer = createFramebuffer(device, settings);
+
+    auto object = UserFramebuffer{
+        .settings = std::move(settings),
+        .operations = std::move(operations),
+        .value = std::move(framebuffer),
+    };
+
+    auto stored = objects.add(std::move(object), {"Framebuffer"}, base);
 
     return getResult(stored);
 }
@@ -63,18 +55,6 @@ GetFramebufferResult getFramebuffer(ObjectManager &objects, const GetObjectParam
     auto variance = framebuffer.value.getVariance();
 
     return getResult(FramebufferInfo{{framebuffer.settings, std::move(ids)}, variance});
-}
-
-void updateFramebuffer(ObjectManager &objects, Device &device, const UpdateFramebufferParams &params)
-{
-    auto &object = objects.getAs<UserFramebuffer>(params.id);
-
-    auto ids = getObjectIds(object.operations);
-    auto current = FramebufferParams{object.settings, std::move(ids)};
-
-    auto settings = getUpdatedParams(params, current);
-
-    object = createUserFramebuffer(objects, device, settings);
 }
 
 void clearFramebuffer(ObjectManager &objects, const GetObjectParams &params)

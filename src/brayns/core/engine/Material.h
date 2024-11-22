@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <optional>
 #include <variant>
 
 #include "Device.h"
@@ -41,13 +42,13 @@ struct MaterialVolumeTexture
     Transform transform = {};
 };
 
-using MaterialTexture = std::variant<std::monostate, MaterialTexture2D, MaterialVolumeTexture>;
+using MaterialTexture = std::variant<MaterialTexture2D, MaterialVolumeTexture>;
 
-template<typename T>
+template<OsprayDataType T>
 struct MaterialField
 {
     T factor;
-    MaterialTexture texture = {};
+    std::optional<MaterialTexture> texture = {};
 };
 
 class Material : public Managed<OSPMaterial>
@@ -66,6 +67,8 @@ class AoMaterial : public Material
 {
 public:
     using Material::Material;
+
+    void update(const AoMaterialSettings &settings);
 };
 
 AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings = {});
@@ -75,7 +78,7 @@ struct ScivisMaterialSettings
     MaterialField<Color3> diffuse = {{0.8F, 0.8F, 0.8F}};
     MaterialField<float> opacity = {1.0F};
     MaterialField<Color3> specular = {{0.0F, 0.0F, 0.0F}};
-    MaterialField<float> shininess = {10.0F};
+    MaterialField<float> shininess{10.0F};
     Color3 transparencyFilter = {0.0F, 0.0F, 0.0F};
 };
 
@@ -83,6 +86,8 @@ class ScivisMaterial : public Material
 {
 public:
     using Material::Material;
+
+    void update(const ScivisMaterialSettings &settings);
 };
 
 ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings &settings = {});
@@ -90,7 +95,6 @@ ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings
 struct PrincipledMaterialSettings
 {
     MaterialField<Color3> baseColor = {{0.8F, 0.8F, 0.8F}};
-    MaterialField<MaterialTexture> baseColorMap = {{}};
     MaterialField<Color3> edgeColor = {{1.0F, 1.0F, 1.0F}};
     MaterialField<float> metallic = {0.0F};
     MaterialField<float> diffuse = {1.0F};
@@ -103,9 +107,8 @@ struct PrincipledMaterialSettings
     MaterialField<float> anisotropy = {0.0F};
     MaterialField<float> rotation = {0.0F};
     MaterialField<float> normal = {1.0F};
-    MaterialField<MaterialTexture> normalMap = {{}};
     MaterialField<float> baseNormal = {1.0F};
-    MaterialField<bool> thin = {false};
+    bool thin = false;
     MaterialField<float> thickness = {1.0F};
     MaterialField<float> backlight = {0.0F};
     MaterialField<float> coat = {0.0F};
@@ -126,6 +129,8 @@ class PrincipledMaterial : public Material
 {
 public:
     using Material::Material;
+
+    void update(const PrincipledMaterialSettings &settings);
 };
 
 PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMaterialSettings &settings = {});

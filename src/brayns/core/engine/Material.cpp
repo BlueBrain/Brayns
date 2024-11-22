@@ -27,11 +27,6 @@ namespace
 {
 using namespace brayns;
 
-void setTextureParam(OSPMaterial handle, const std::string &id, std::monostate)
-{
-    removeObjectParam(handle, id.c_str());
-}
-
 void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTexture2D &texture)
 {
     setObjectParam(handle, id.c_str(), texture.value);
@@ -64,47 +59,30 @@ void setMaterialParam(OSPMaterial handle, const char *id, const MaterialField<T>
 {
     setObjectParam(handle, id, param.factor);
 
-    auto textureId = std::string("map_") + id;
-    setTextureParam(handle, textureId, param.texture);
-}
+    if (param.texture)
+    {
+        auto textureId = std::string("map_") + id;
+        setTextureParam(handle, textureId, *param.texture);
+    }
 }
 
-namespace brayns
+void setAoMaterialParams(OSPMaterial handle, const AoMaterialSettings &settings)
 {
-AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings)
-{
-    auto handle = ospNewMaterial("obj");
-    auto material = wrapObjectHandleAs<AoMaterial>(device, handle);
-
     setMaterialParam(handle, "kd", settings.diffuse);
     setMaterialParam(handle, "d", settings.opacity);
-
-    commitObject(device, handle);
-
-    return material;
 }
 
-ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings &settings)
+void setScivisMaterialParams(OSPMaterial handle, const ScivisMaterialSettings &settings)
 {
-    auto handle = ospNewMaterial("obj");
-    auto material = wrapObjectHandleAs<ScivisMaterial>(device, handle);
-
     setMaterialParam(handle, "kd", settings.diffuse);
     setMaterialParam(handle, "d", settings.opacity);
     setMaterialParam(handle, "ks", settings.specular);
     setMaterialParam(handle, "ns", settings.shininess);
     setObjectParam(handle, "tf", settings.transparencyFilter);
-
-    commitObject(device, handle);
-
-    return material;
 }
 
-PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMaterialSettings &settings)
+void setPrincipledMaterialParams(OSPMaterial handle, const PrincipledMaterialSettings &settings)
 {
-    auto handle = ospNewMaterial("principled");
-    auto material = wrapObjectHandleAs<PrincipledMaterial>(device, handle);
-
     setMaterialParam(handle, "baseColor", settings.baseColor);
     setMaterialParam(handle, "edgeColor", settings.edgeColor);
     setMaterialParam(handle, "metallic", settings.metallic);
@@ -119,7 +97,7 @@ PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMate
     setMaterialParam(handle, "rotation", settings.rotation);
     setMaterialParam(handle, "normal", settings.normal);
     setMaterialParam(handle, "baseNormal", settings.baseNormal);
-    setMaterialParam(handle, "thin", settings.thin);
+    setObjectParam(handle, "thin", settings.thin);
     setMaterialParam(handle, "thickness", settings.thickness);
     setMaterialParam(handle, "backlight", settings.backlight);
     setMaterialParam(handle, "coat", settings.coat);
@@ -134,6 +112,62 @@ PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMate
     setMaterialParam(handle, "sheenRoughness", settings.sheenRoughness);
     setMaterialParam(handle, "opacity", settings.opacity);
     setMaterialParam(handle, "emissiveColor", settings.emissiveColor);
+}
+}
+
+namespace brayns
+{
+void AoMaterial::update(const AoMaterialSettings &settings)
+{
+    auto handle = getHandle();
+    setAoMaterialParams(handle, settings);
+    commitObject(handle);
+}
+
+AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings)
+{
+    auto handle = ospNewMaterial("obj");
+    auto material = wrapObjectHandleAs<AoMaterial>(device, handle);
+
+    setAoMaterialParams(handle, settings);
+
+    commitObject(device, handle);
+
+    return material;
+}
+
+void ScivisMaterial::update(const ScivisMaterialSettings &settings)
+{
+    auto handle = getHandle();
+    setScivisMaterialParams(handle, settings);
+    commitObject(handle);
+}
+
+ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings &settings)
+{
+    auto handle = ospNewMaterial("obj");
+    auto material = wrapObjectHandleAs<ScivisMaterial>(device, handle);
+
+    setScivisMaterialParams(handle, settings);
+
+    commitObject(device, handle);
+
+    return material;
+}
+
+void PrincipledMaterial::update(const PrincipledMaterialSettings &settings)
+{
+    auto handle = getHandle();
+    setPrincipledMaterialParams(handle, settings);
+    commitObject(handle);
+}
+
+PrincipledMaterial createPrincipledMaterial(Device &device, const PrincipledMaterialSettings &settings)
+{
+    auto handle = ospNewMaterial("principled");
+    auto material = wrapObjectHandleAs<PrincipledMaterial>(device, handle);
+
+    setPrincipledMaterialParams(handle, settings);
 
     commitObject(device, handle);
 
