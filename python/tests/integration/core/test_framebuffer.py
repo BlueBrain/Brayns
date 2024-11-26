@@ -28,13 +28,14 @@ from brayns import (
     create_tone_mapper,
     get_framebuffer,
     remove_objects,
-    update_framebuffer,
 )
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_framebuffer(connection: Connection) -> None:
+    tone_mapper = await create_tone_mapper(connection)
+
     framebuffer = await create_framebuffer(
         connection,
         resolution=(1920, 1080),
@@ -42,15 +43,18 @@ async def test_framebuffer(connection: Connection) -> None:
         channels=set(FramebufferChannel),
         accumulation=True,
         variance=True,
+        operations=[tone_mapper],
     )
 
     settings = await get_framebuffer(connection, framebuffer)
-    tone_mapper = await create_tone_mapper(connection)
 
-    settings.operations = [tone_mapper]
-    await update_framebuffer(connection, framebuffer, operations=[tone_mapper])
-
-    assert settings == await get_framebuffer(connection, framebuffer)
+    assert settings.resolution == (1920, 1080)
+    assert settings.format == FramebufferFormat.RGBA32F
+    assert settings.channels == set(FramebufferChannel)
+    assert settings.accumulation
+    assert settings.variance
+    assert settings.operations == [tone_mapper]
+    assert settings.variance_estimate is None
 
 
 @pytest.mark.integration_test

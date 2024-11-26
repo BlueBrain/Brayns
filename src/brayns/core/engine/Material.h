@@ -30,6 +30,13 @@
 
 namespace brayns
 {
+template<typename T, OsprayDataType U>
+struct MaterialTexture
+{
+    T value;
+    std::optional<U> factor = std::nullopt;
+};
+
 struct MaterialTexture2D
 {
     Texture2D value;
@@ -42,14 +49,8 @@ struct MaterialVolumeTexture
     Transform transform = {};
 };
 
-using MaterialTexture = std::variant<MaterialTexture2D, MaterialVolumeTexture>;
-
 template<OsprayDataType T>
-struct MaterialField
-{
-    T factor;
-    std::optional<MaterialTexture> texture = {};
-};
+using MaterialField = std::variant<T, MaterialTexture<MaterialTexture2D, T>, MaterialTexture<MaterialVolumeTexture, T>>;
 
 class Material : public Managed<OSPMaterial>
 {
@@ -59,8 +60,8 @@ public:
 
 struct AoMaterialSettings
 {
-    MaterialField<Color3> diffuse = {{0.8F, 0.8F, 0.8F}};
-    MaterialField<float> opacity = {1.0F};
+    MaterialField<Color3> diffuse = Color3{0.8F, 0.8F, 0.8F};
+    MaterialField<float> opacity = 1.0F;
 };
 
 class AoMaterial : public Material
@@ -75,10 +76,10 @@ AoMaterial createAoMaterial(Device &device, const AoMaterialSettings &settings =
 
 struct ScivisMaterialSettings
 {
-    MaterialField<Color3> diffuse = {{0.8F, 0.8F, 0.8F}};
-    MaterialField<float> opacity = {1.0F};
-    MaterialField<Color3> specular = {{0.0F, 0.0F, 0.0F}};
-    MaterialField<float> shininess{10.0F};
+    MaterialField<Color3> diffuse = Color3{0.8F, 0.8F, 0.8F};
+    MaterialField<float> opacity = 1.0F;
+    MaterialField<Color3> specular = Color3{0.0F, 0.0F, 0.0F};
+    MaterialField<float> shininess = 10.0F;
     Color3 transparencyFilter = {0.0F, 0.0F, 0.0F};
 };
 
@@ -94,35 +95,35 @@ ScivisMaterial createScivisMaterial(Device &device, const ScivisMaterialSettings
 
 struct PrincipledMaterialSettings
 {
-    MaterialField<Color3> baseColor = {{0.8F, 0.8F, 0.8F}};
-    MaterialField<Color3> edgeColor = {{1.0F, 1.0F, 1.0F}};
-    MaterialField<float> metallic = {0.0F};
-    MaterialField<float> diffuse = {1.0F};
-    MaterialField<float> specular = {1.0F};
-    MaterialField<float> ior = {1.0F};
-    MaterialField<float> transmission = {0.0F};
-    MaterialField<Color3> transmissionColor = {{1.0F, 1.0F, 1.0F}};
-    MaterialField<float> transmissionDepth = {1.0F};
-    MaterialField<float> roughness = {0.0F};
-    MaterialField<float> anisotropy = {0.0F};
-    MaterialField<float> rotation = {0.0F};
-    MaterialField<float> normal = {1.0F};
-    MaterialField<float> baseNormal = {1.0F};
+    MaterialField<Color3> baseColor = Color3{0.8F, 0.8F, 0.8F};
+    MaterialField<Color3> edgeColor = Color3{1.0F, 1.0F, 1.0F};
+    MaterialField<float> metallic = 0.0F;
+    MaterialField<float> diffuse = 1.0F;
+    MaterialField<float> specular = 1.0F;
+    MaterialField<float> ior = 1.0F;
+    MaterialField<float> transmission = 0.0F;
+    MaterialField<Color3> transmissionColor = Color3{1.0F, 1.0F, 1.0F};
+    MaterialField<float> transmissionDepth = 1.0F;
+    MaterialField<float> roughness = 0.0F;
+    MaterialField<float> anisotropy = 0.0F;
+    MaterialField<float> rotation = 0.0F;
+    MaterialField<float> normal = 1.0F;
+    MaterialField<float> baseNormal = 1.0F;
     bool thin = false;
-    MaterialField<float> thickness = {1.0F};
-    MaterialField<float> backlight = {0.0F};
-    MaterialField<float> coat = {0.0F};
-    MaterialField<float> coatIor = {1.5F};
-    MaterialField<Color3> coatColor = {{1.0F, 1.0F, 1.0F}};
-    MaterialField<float> coatThickness = {1.0F};
-    MaterialField<float> coatRoughness = {0.0F};
-    MaterialField<float> coatNormal = {1.0F};
-    MaterialField<float> sheen = {0.0F};
-    MaterialField<Color3> sheenColor = {{1.0F, 1.0F, 1.0F}};
-    MaterialField<float> sheenTint = {0.0F};
-    MaterialField<float> sheenRoughness = {0.2F};
-    MaterialField<float> opacity = {1.0F};
-    MaterialField<Color3> emissiveColor = {{0.0F, 0.0F, 0.0F}};
+    MaterialField<float> thickness = 1.0F;
+    MaterialField<float> backlight = 0.0F;
+    MaterialField<float> coat = 0.0F;
+    MaterialField<float> coatIor = 1.5F;
+    MaterialField<Color3> coatColor = Color3{1.0F, 1.0F, 1.0F};
+    MaterialField<float> coatThickness = 1.0F;
+    MaterialField<float> coatRoughness = 0.0F;
+    MaterialField<float> coatNormal = 1.0F;
+    MaterialField<float> sheen = 0.0F;
+    MaterialField<Color3> sheenColor = Color3{1.0F, 1.0F, 1.0F};
+    MaterialField<float> sheenTint = 0.0F;
+    MaterialField<float> sheenRoughness = 0.2F;
+    MaterialField<float> opacity = 1.0F;
+    MaterialField<Color3> emissiveColor = Color3{0.0F, 0.0F, 0.0F};
 };
 
 class PrincipledMaterial : public Material

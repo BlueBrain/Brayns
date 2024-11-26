@@ -27,7 +27,7 @@ namespace
 {
 using namespace brayns;
 
-void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTexture2D &texture)
+void setTextureParams(OSPMaterial handle, const std::string &id, const MaterialTexture2D &texture)
 {
     setObjectParam(handle, id.c_str(), texture.value);
 
@@ -41,7 +41,7 @@ void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTe
     setObjectParam(handle, scale.c_str(), texture.transform.scale);
 }
 
-void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialVolumeTexture &texture)
+void setTextureParams(OSPMaterial handle, const std::string &id, const MaterialVolumeTexture &texture)
 {
     setObjectParam(handle, id.c_str(), texture.value);
 
@@ -49,21 +49,25 @@ void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialVo
     setObjectParam(handle, transform.c_str(), toAffine(texture.transform));
 }
 
-void setTextureParam(OSPMaterial handle, const std::string &id, const MaterialTexture &texture)
+template<typename T, OsprayDataType U>
+void setMaterialParam(OSPMaterial handle, const char *id, const MaterialTexture<T, U> &texture)
 {
-    std::visit([&](const auto &value) { setTextureParam(handle, id, value); }, texture);
+    auto textureId = std::string("map_") + id;
+    setTextureParams(handle, textureId, texture.value);
+
+    setObjectParam(handle, id, texture.factor);
+}
+
+template<OsprayDataType T>
+void setMaterialParam(OSPMaterial handle, const char *id, const T &factor)
+{
+    setObjectParam(handle, id, factor);
 }
 
 template<typename T>
-void setMaterialParam(OSPMaterial handle, const char *id, const MaterialField<T> &param)
+void setMaterialParam(OSPMaterial handle, const char *id, const MaterialField<T> &field)
 {
-    setObjectParam(handle, id, param.factor);
-
-    if (param.texture)
-    {
-        auto textureId = std::string("map_") + id;
-        setTextureParam(handle, textureId, *param.texture);
-    }
+    std::visit([&](const auto &value) { setMaterialParam(handle, id, value); }, field);
 }
 
 void setAoMaterialParams(OSPMaterial handle, const AoMaterialSettings &settings)

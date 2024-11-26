@@ -46,10 +46,29 @@ struct UserMaterialOf
     std::vector<Stored<UserTexture>> textures;
 };
 
+template<ReflectedJsonObject T, OsprayDataType U>
+struct MaterialTextureParams
+{
+    T texture;
+    std::optional<U> factor;
+};
+
+template<ReflectedJsonObject T, OsprayDataType U>
+struct JsonObjectReflector<MaterialTextureParams<T, U>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<MaterialTextureParams<T, U>>();
+        builder.extend([](auto &object) { return &object.texture; });
+        builder.field("factor", [](auto &object) { return &object.factor; }).description("Multiply texture sampled value by this factor if not null");
+        return builder.build();
+    }
+};
+
 struct MaterialTexture2DParams
 {
     ObjectId texture2d;
-    Transform2D transform;
+    Transform2D transform = {};
 };
 
 template<>
@@ -67,7 +86,7 @@ struct JsonObjectReflector<MaterialTexture2DParams>
 struct MaterialVolumeTextureParams
 {
     ObjectId volumeTexture;
-    Transform transform;
+    Transform transform = {};
 };
 
 template<>
@@ -83,31 +102,8 @@ struct JsonObjectReflector<MaterialVolumeTextureParams>
     }
 };
 
-using MaterialTextureParams = std::variant<MaterialTexture2DParams, MaterialVolumeTextureParams>;
-
 template<OsprayDataType T>
-struct TexturedMaterialParams
-{
-    T factor;
-    std::optional<MaterialTextureParams> texture;
-};
-
-template<OsprayDataType T>
-struct JsonObjectReflector<TexturedMaterialParams<T>>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<TexturedMaterialParams<T>>();
-        builder.field("factor", [](auto &object) { return &object.factor; })
-            .description("Material field value or factor depending if a texture is applied");
-        builder.field("texture", [](auto &object) { return &object.texture; })
-            .description("Optional material field texture, pre-multiplied by factor");
-        return builder.build();
-    }
-};
-
-template<OsprayDataType T>
-using MaterialParams = std::variant<T, TexturedMaterialParams<T>>;
+using MaterialParams = std::variant<T, MaterialTextureParams<MaterialTexture2DParams, T>, MaterialTextureParams<MaterialVolumeTextureParams, T>>;
 
 struct AoMaterialParams
 {

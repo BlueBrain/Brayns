@@ -23,7 +23,7 @@ from dataclasses import MISSING, fields, is_dataclass
 from enum import Enum
 from inspect import get_annotations
 from types import NoneType, UnionType
-from typing import Any, Literal, TypeVar, get_args, get_origin, is_typeddict, overload
+from typing import Any, Literal, Optional, TypeVar, Union, get_args, get_origin, is_typeddict, overload
 
 from .composing import Object, camel_case
 
@@ -73,36 +73,43 @@ def deserialize(value: Any, t: Any) -> Any: ...
 
 def deserialize(value: Any, t: Any) -> Any:
     origin = get_origin(t)
+    args = get_args(t)
+
+    if origin is None:
+        origin = t
 
     if origin is Literal:
-        return _deserialize_literal(value, t)
+        return _deserialize_literal(value, args)
 
-    if t in (Any, None, NoneType, bool, int, float, str):
-        return _ensure(value, t)
+    if isinstance(origin, TypeVar):
+        return value
 
-    if isinstance(t, UnionType):
-        return _deserialize_union(value, t)
+    if origin in (Any, None, NoneType, bool, int, float, str):
+        return _ensure(value, origin)
 
-    if is_typeddict(t):
-        return _deserialize_typeddict(value, t)
+    if isinstance(t, UnionType) or origin is Union or origin is Optional:
+        return _deserialize_union(value, args)
 
-    if issubclass(t, Object):
-        return t(deserialize(value, int))
+    if is_typeddict(origin):
+        return _deserialize_typeddict(value, origin)
 
-    if issubclass(t, Enum):
-        return _deserialize_enum(value, t)
-
-    if is_dataclass(t):
-        return _deserialize_dataclass(value, t)
+    if is_dataclass(origin):
+        return _deserialize_dataclass(value, origin)
 
     if origin is dict:
-        return _deserialize_dict(value, t)
+        return _deserialize_dict(value, args)
 
     if origin in (list, set):
-        return _deserialize_array(value, t)
+        return _deserialize_array(value, origin, args)
 
     if origin is tuple:
-        return _deserialize_tuple(value, t)
+        return _deserialize_tuple(value, origin, args)
+
+    if issubclass(origin, Object):
+        return origin(deserialize(value, int))
+
+    if issubclass(origin, Enum):
+        return _deserialize_enum(value, origin)
 
     raise TypeError("Unsupported JSON type (internal error)")
 
@@ -123,8 +130,8 @@ def _ensure(value: Any, t: Any) -> Any:
     raise TypeError("Invalid type in JSON response")
 
 
-def _deserialize_union(value: Any, t: Any) -> Any:
-    for arg in get_args(t):
+def _deserialize_union(value: Any, args: tuple[Any, ...]) -> Any:
+    for arg in args:
         try:
             return deserialize(value, arg)
         except TypeError:
@@ -133,17 +140,17 @@ def _deserialize_union(value: Any, t: Any) -> Any:
     raise TypeError("Invalid union type in JSON response")
 
 
-def _deserialize_typeddict(value: Any, t: Any) -> Any:
+def _deserialize_typeddict(value: Any, origin: Any) -> Any:
     _ensure(value, dict)
     assert isinstance(value, dict)
 
     result = dict[str, Any]()
 
-    for field_name, field_type in get_annotations(t).items():
+    for field_name, field_type in get_annotations(origin).items():
         key = camel_case(field_name)
 
         missing = key not in value
-        required = key in t.__required_keys__
+        required = key in origin.__required_keys__
 
         if missing and required:
             raise TypeError("Missing required key in JSON response")
@@ -157,13 +164,13 @@ def _deserialize_enum(value: Any, t: Any) -> Any:
     return t(value)
 
 
-def _deserialize_dataclass(value: Any, t: Any) -> Any:
+def _deserialize_dataclass(value: Any, origin: Any) -> Any:
     _ensure(value, dict)
     assert isinstance(value, dict)
 
     kwargs = dict[str, Any]()
 
-    for field in fields(t):
+    for field in fields(origin):
         key = camel_case(field.name)
 
         missing = key not in value
@@ -175,11 +182,11 @@ def _deserialize_dataclass(value: Any, t: Any) -> Any:
         if not missing:
             kwargs[field.name] = deserialize(value[key], field.type)
 
-    return t(**kwargs)
+    return origin(**kwargs)
 
 
-def _deserialize_literal(value: Any, t: Any) -> Any:
-    (expected,) = get_args(t)
+def _deserialize_literal(value: Any, args: tuple[Any, ...]) -> Any:
+    (expected,) = args
 
     if value != expected:
         raise TypeError("Invalid literal")
@@ -187,34 +194,33 @@ def _deserialize_literal(value: Any, t: Any) -> Any:
     return value
 
 
-def _deserialize_dict(value: Any, t: Any) -> Any:
+def _deserialize_dict(value: Any, args: tuple[Any, ...]) -> Any:
     _ensure(value, dict)
     assert isinstance(value, dict)
 
-    key_type, value_type = get_args(t)
+    key_type, value_type = args
 
-    if key_type is not str:
-        raise TypeError("Invalid key type (internal error)")
+    assert key_type is str
 
     return {_ensure(key, str): deserialize(item, value_type) for key, item in value.items()}
 
 
-def _deserialize_array(value: Any, t: Any) -> Any:
+def _deserialize_array(value: Any, origin: Any, args: tuple[Any, ...]) -> Any:
     _ensure(value, list)
     assert isinstance(value, list)
 
-    (item_type,) = get_args(t)
+    (item_type,) = args
 
-    return t(deserialize(item, item_type) for item in value)
+    return origin(deserialize(item, item_type) for item in value)
 
 
-def _deserialize_tuple(value: Any, t: Any) -> Any:
+def _deserialize_tuple(value: Any, origin: Any, args: tuple[Any, ...]) -> Any:
     _ensure(value, list)
     assert isinstance(value, list)
 
-    item_types = get_args(t)
+    item_types = args
 
     if len(value) != len(item_types):
         raise TypeError("Invalid item count")
 
-    return t(deserialize(item, item_type) for item, item_type in zip(value, item_types))
+    return origin(deserialize(item, item_type) for item, item_type in zip(value, item_types))

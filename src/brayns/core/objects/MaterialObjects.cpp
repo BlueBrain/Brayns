@@ -25,42 +25,35 @@ namespace
 {
 using namespace brayns;
 
-MaterialTexture retreiveTexture(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const MaterialTexture2DParams &params)
+template<typename T>
+T &retreiveTextureAs(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, ObjectId id)
 {
-    auto object = objects.getAsStored<UserTexture>(params.texture2d);
-    auto &texture = *castAsShared<UserTexture2D>(object.get().value, object);
+    auto object = objects.getAsStored<UserTexture>(id);
+    auto &texture = *castAsShared<T>(object.get().value, object);
 
     textures.push_back(std::move(object));
 
-    return MaterialTexture2D{texture.value, params.transform};
-}
-
-MaterialTexture retreiveTexture(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const MaterialVolumeTextureParams &params)
-{
-    auto object = objects.getAsStored<UserTexture>(params.volumeTexture);
-    auto &texture = *castAsShared<UserVolumeTexture>(object.get().value, object);
-
-    textures.push_back(std::move(object));
-
-    return MaterialVolumeTexture{texture.value, params.transform};
-}
-
-MaterialTexture retreiveTexture(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const MaterialTextureParams &params)
-{
-    return std::visit([&](const auto &value) { return retreiveTexture(objects, textures, value); }, params);
+    return texture;
 }
 
 template<OsprayDataType T>
-MaterialField<T> storeAndGet(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const TexturedMaterialParams<T> &params)
+MaterialField<T> storeAndGet(
+    ObjectManager &objects,
+    std::vector<Stored<UserTexture>> &textures,
+    const MaterialTextureParams<MaterialVolumeTextureParams, T> &params)
 {
-    if (!params.texture)
-    {
-        return {params.factor};
-    }
+    auto &texture = retreiveTextureAs<UserVolumeTexture>(objects, textures, params.texture.volumeTexture);
+    return MaterialTexture<MaterialVolumeTexture, T>{{texture.value, params.texture.transform}, params.factor};
+}
 
-    auto texture = retreiveTexture(objects, textures, *params.texture);
-
-    return {params.factor, std::move(texture)};
+template<OsprayDataType T>
+MaterialField<T> storeAndGet(
+    ObjectManager &objects,
+    std::vector<Stored<UserTexture>> &textures,
+    const MaterialTextureParams<MaterialTexture2DParams, T> &params)
+{
+    auto &texture = retreiveTextureAs<UserTexture2D>(objects, textures, params.texture.texture2d);
+    return MaterialTexture<MaterialTexture2D, T>{{texture.value, params.texture.transform}, params.factor};
 }
 
 template<OsprayDataType T>
@@ -68,7 +61,7 @@ MaterialField<T> storeAndGet(ObjectManager &objects, std::vector<Stored<UserText
 {
     (void)objects;
     (void)textures;
-    return {params};
+    return params;
 }
 
 template<OsprayDataType T>
