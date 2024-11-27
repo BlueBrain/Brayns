@@ -24,7 +24,6 @@
 #include <any>
 #include <concepts>
 #include <functional>
-#include <optional>
 
 #include <brayns/core/engine/Geometry.h>
 #include <brayns/core/jsonrpc/PayloadReflector.h>
@@ -40,10 +39,10 @@ struct UserGeometry
     std::function<Geometry()> get;
 };
 
-template<ReflectedJson Settings, std::derived_from<Geometry> T>
+template<typename Storage, std::derived_from<Geometry> T>
 struct UserGeometryOf
 {
-    Settings settings;
+    Storage storage;
     T value;
 };
 
@@ -339,8 +338,7 @@ GetPlanesResult getPlanes(ObjectManager &objects, const GetObjectParams &params)
 struct IsosurfaceParams
 {
     IsosurfaceSettings value;
-    ObjectId volumeId;
-    std::optional<Stored<UserVolume>> volume;
+    ObjectId volume;
 };
 
 template<>
@@ -350,14 +348,20 @@ struct JsonObjectReflector<IsosurfaceParams>
     {
         auto builder = JsonBuilder<IsosurfaceParams>();
         builder.field("isovalues", [](auto &object) { return &object.value.isovalues; }).description("List of isovalue per isosurface").minItems(1);
-        builder.field("volume", [](auto &object) { return &object.volumeId; }).description("ID of the volume to be isosurfaced");
+        builder.field("volume", [](auto &object) { return &object.volume; }).description("ID of the volume to be isosurfaced");
         return builder.build();
     }
 };
 
+struct IsosurfaceStorage
+{
+    IsosurfaceSettings settings;
+    Stored<UserVolume> volume;
+};
+
 using CreateIsosurfacesParams = CreateParamsOf<IsosurfaceParams>;
 using GetIsosurfacesResult = GetResultOf<IsosurfaceParams>;
-using UserIsosurfaces = UserGeometryOf<IsosurfaceParams, Isosurfaces>;
+using UserIsosurfaces = UserGeometryOf<IsosurfaceStorage, Isosurfaces>;
 
 CreateObjectResult createIsosurfaces(ObjectManager &objects, Device &device, CreateIsosurfacesParams params);
 GetIsosurfacesResult getIsosurfaces(ObjectManager &objects, const GetObjectParams &params);

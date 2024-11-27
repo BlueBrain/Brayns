@@ -237,12 +237,12 @@ Planes createPlanes(Device &device, const PlaneSettings &settings)
     return planes;
 }
 
-Isosurfaces createIsosurfaces(Device &device, const IsosurfaceSettings &settings)
+Isosurfaces createIsosurfaces(Device &device, const Volume &volume, const IsosurfaceSettings &settings)
 {
     auto handle = ospNewGeometry("isosurface");
     auto isosurfaces = wrapObjectHandleAs<Isosurfaces>(device, handle);
 
-    setObjectParam(handle, "volume", settings.volume);
+    setObjectParam(handle, "volume", volume);
     setObjectParam(handle, "isovalue", settings.isovalues);
 
     commitObject(device, handle);

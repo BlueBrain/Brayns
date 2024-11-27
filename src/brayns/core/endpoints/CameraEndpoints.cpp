@@ -21,7 +21,6 @@
 
 #include "CameraEndpoints.h"
 
-#include <brayns/core/jsonrpc/Errors.h>
 #include <brayns/core/objects/CameraObjects.h>
 
 namespace brayns

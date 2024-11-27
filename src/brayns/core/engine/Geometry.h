@@ -179,7 +179,6 @@ Planes createPlanes(Device &device, const PlaneSettings &settings);
 
 struct IsosurfaceSettings
 {
-    Volume volume;
     std::vector<float> isovalues;
 };
 
@@ -189,5 +188,5 @@ public:
     using Geometry::Geometry;
 };
 
-Isosurfaces createIsosurfaces(Device &device, const IsosurfaceSettings &settings);
+Isosurfaces createIsosurfaces(Device &device, const Volume &volume, const IsosurfaceSettings &settings);
 }

@@ -32,13 +32,14 @@ CreateObjectResult createFramebuffer(ObjectManager &objects, Device &device, con
     auto settings = derived.value;
 
     auto operations = getStoredObjects<UserImageOperation>(objects, derived.operations);
-    settings.operations = getObjectHandles(operations);
+    auto handles = getObjectHandles(operations);
 
-    auto framebuffer = createFramebuffer(device, settings);
+    auto framebuffer = createFramebuffer(device, settings, handles);
 
     auto object = UserFramebuffer{
         .settings = std::move(settings),
         .operations = std::move(operations),
+        .handles = std::move(handles),
         .value = std::move(framebuffer),
     };
 
@@ -54,7 +55,9 @@ GetFramebufferResult getFramebuffer(ObjectManager &objects, const GetObjectParam
     auto ids = getObjectIds(framebuffer.operations);
     auto variance = framebuffer.value.getVariance();
 
-    return getResult(FramebufferInfo{{framebuffer.settings, std::move(ids)}, variance});
+    auto info = FramebufferInfo{{framebuffer.settings, std::move(ids)}, variance};
+
+    return getResult(std::move(info));
 }
 
 void clearFramebuffer(ObjectManager &objects, const GetObjectParams &params)

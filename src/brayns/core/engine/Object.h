@@ -119,7 +119,7 @@ class Managed : public Object
 public:
     using Handle = HandleType;
 
-    explicit Managed(Handle handle = nullptr):
+    explicit Managed(Handle handle):
         Object(handle)
     {
     }

@@ -32,6 +32,7 @@ struct UserFramebuffer
 {
     FramebufferSettings settings;
     std::vector<Stored<UserImageOperation>> operations;
+    std::vector<ImageOperation> handles;
     Framebuffer value;
 };
 

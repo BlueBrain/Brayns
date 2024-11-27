@@ -105,8 +105,8 @@ TEST_CASE("Object creation")
     auto planeSettings = PlaneSettings{{{1, 2, 3, 4}}};
     createPlanes(device, planeSettings);
 
-    auto isosurfaceSettings = IsosurfaceSettings{volume, {1}};
-    createIsosurfaces(device, isosurfaceSettings);
+    auto isosurfaceSettings = IsosurfaceSettings{{1}};
+    createIsosurfaces(device, volume, isosurfaceSettings);
 
     auto textureData = TextureData2D{
         .value = std::vector<char>(10 * 10 * sizeof(float), '\0'),
@@ -122,7 +122,7 @@ TEST_CASE("Object creation")
     createSpotLight(device);
     createQuadLight(device);
     createCylinderLight(device);
-    createHdriLight(device, {}, {texture2D});
+    createHdriLight(device, texture2D);
     createAmbientLight(device);
     createSunSkyLight(device);
 
@@ -173,9 +173,9 @@ TEST_CASE("Render")
         .resolution = {std::size_t(width), std::size_t(height)},
         .format = FramebufferFormat::Srgba8,
         .channels = {FramebufferChannel::Color},
-        .operations = {toneMapper},
     };
-    auto framebuffer = createFramebuffer(device, framebufferSettings);
+    auto operations = std::vector<ImageOperation>{toneMapper};
+    auto framebuffer = createFramebuffer(device, framebufferSettings, operations);
 
     auto material = createScivisMaterial(device);
 

@@ -27,6 +27,8 @@
 
 #include <brayns/core/jsonrpc/Errors.h>
 
+#include "common/Objects.h"
+
 namespace
 {
 using namespace brayns;
@@ -159,13 +161,6 @@ void checkRibbonParams(const RibbonParams &params)
     std::visit([&](const auto &basis) { checkCurveParams(params.value, basis, params.normals); }, params.basis);
 }
 
-void loadIsosurfaceVolume(ObjectManager &objects, IsosurfaceParams &params)
-{
-    auto stored = objects.getAsStored<UserVolume>(params.volumeId);
-    params.value.volume = stored.get().get();
-    params.volume = std::move(stored);
-}
-
 CreateObjectResult createGeometry(ObjectManager &objects, Device &device, auto params, auto validate, auto create, const char *type)
 {
     auto &[metadata, settings] = params;
@@ -191,7 +186,7 @@ auto getGeometryAs(ObjectManager &objects, const GetObjectParams &params)
 {
     auto stored = objects.getAsStored<UserGeometry>(params.id);
     auto &geometry = *castAsShared<T>(stored.get().value, stored);
-    return getResult(geometry.settings);
+    return getResult(geometry.storage);
 }
 }
 
@@ -307,13 +302,32 @@ GetPlanesResult getPlanes(ObjectManager &objects, const GetObjectParams &params)
 
 CreateObjectResult createIsosurfaces(ObjectManager &objects, Device &device, CreateIsosurfacesParams params)
 {
-    auto validate = [&](auto &settings) { loadIsosurfaceVolume(objects, settings); };
-    auto create = [](auto &device, const auto &settings) { return createIsosurfaces(device, settings.value); };
-    return createGeometry(objects, device, std::move(params), validate, create, "Isosurfaces");
+    auto &[metadata, settings] = params;
+
+    auto volume = objects.getAsStored<UserVolume>(settings.volume);
+    auto handle = getObjectHandle(volume);
+
+    auto isosurfaces = createIsosurfaces(device, handle, settings.value);
+
+    auto storage = IsosurfaceStorage{std::move(settings.value), std::move(volume)};
+
+    auto ptr = toShared(UserIsosurfaces{std::move(storage), std::move(isosurfaces)});
+
+    auto object = UserGeometry{
+        .value = ptr,
+        .get = [=] { return ptr->value; },
+    };
+
+    auto stored = objects.add(std::move(object), {"Isosurfaces"}, std::move(metadata));
+
+    return getResult(stored);
 }
 
 GetIsosurfacesResult getIsosurfaces(ObjectManager &objects, const GetObjectParams &params)
 {
-    return getGeometryAs<UserIsosurfaces>(objects, params);
+    auto stored = objects.getAsStored<UserGeometry>(params.id);
+    auto &geometry = *castAsShared<UserIsosurfaces>(stored.get().value, stored);
+    auto settings = IsosurfaceParams{geometry.storage.settings, geometry.storage.volume.getId()};
+    return getResult(std::move(settings));
 }
 }

@@ -57,7 +57,6 @@ struct FramebufferSettings
     std::set<FramebufferChannel> channels = {FramebufferChannel::Color};
     bool accumulation = false;
     bool variance = false;
-    std::vector<ImageOperation> operations = {};
 };
 
 class FramebufferData
@@ -94,5 +93,5 @@ public:
     std::optional<float> getVariance();
 };
 
-Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings);
+Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings, const std::vector<ImageOperation> &operations = {});
 }
