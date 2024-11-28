@@ -174,28 +174,28 @@ class CurveType(Enum):
     ROUND = "Round"
 
 
-@dataclass(frozen=True)
+@dataclass
 class LinearBasis:
     type: Literal["Linear"] = "Linear"
 
 
-@dataclass(frozen=True)
+@dataclass
 class BezierBasis:
     type: Literal["Bezier"] = "Bezier"
 
 
-@dataclass(frozen=True)
+@dataclass
 class BsplineBasis:
     type: Literal["Bspline"] = "Bspline"
 
 
-@dataclass(frozen=True)
+@dataclass
 class HermiteBasis:
     tangents: list[tuple[float, float, float, float]]
     type: Literal["Hermite"] = "Hermite"
 
 
-@dataclass(frozen=True)
+@dataclass
 class CatmullRomBasis:
     type: Literal["CatmullRom"] = "CatmullRom"
 

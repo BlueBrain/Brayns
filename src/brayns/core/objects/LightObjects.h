@@ -127,7 +127,7 @@ struct JsonObjectReflector<DistantLightSettings>
             .description("Light emission direction XYZ")
             .defaultValue(Vector3{0.0F, 0.0F, -1.0F});
         builder.field("angularDiameter", [](auto &object) { return &object.angularDiameter; })
-            .description("Apparent size (angle in degrees) of the light")
+            .description("Apparent size (angle in radians) of the light")
             .defaultValue(0.0F);
         builder.field("intensity", [](auto &object) { return &object.intensity; }).description("Light intensity").defaultValue(Irradiance{});
         return builder.build();
@@ -335,6 +335,9 @@ struct JsonObjectReflector<SunSkyLightSettings>
             .defaultValue(0.01F)
             .minimum(0.0F)
             .maximum(1.0F);
+        builder.field("intensityScale", [](auto &object) { return &object.intensityScale; })
+            .description("Scale sun light intensity by this factor")
+            .defaultValue(1.0F);
         return builder.build();
     }
 };
