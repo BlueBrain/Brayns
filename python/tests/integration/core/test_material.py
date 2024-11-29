@@ -37,6 +37,7 @@ from brayns import (
     get_ao_material,
     get_principled_material,
     get_scivis_material,
+    remove_objects,
     update_ao_material,
     update_principled_material,
     update_scivis_material,
@@ -159,6 +160,16 @@ async def test_texture2d(connection: Connection) -> None:
     assert settings.diffuse == MaterialTexture2D(texture)
     assert settings.opacity == MaterialTexture2D(texture, factor=2)
 
+    await remove_objects(connection, [texture])
+
+    settings = await get_scivis_material(connection, material)
+
+    assert isinstance(settings.diffuse, MaterialTexture2D)
+    assert settings.diffuse.texture2d.id == 0
+
+    assert isinstance(settings.opacity, MaterialTexture2D)
+    assert settings.opacity.texture2d.id == 0
+
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
@@ -189,3 +200,13 @@ async def test_volume_texture(connection: Connection) -> None:
     settings = await get_scivis_material(connection, material)
     assert settings.diffuse == MaterialVolumeTexture(texture)
     assert settings.opacity == MaterialVolumeTexture(texture, factor=2)
+
+    await remove_objects(connection, [texture, volume])
+
+    settings = await get_scivis_material(connection, material)
+
+    assert isinstance(settings.diffuse, MaterialVolumeTexture)
+    assert settings.diffuse.volume_texture.id == 0
+
+    assert isinstance(settings.opacity, MaterialVolumeTexture)
+    assert settings.opacity.volume_texture.id == 0

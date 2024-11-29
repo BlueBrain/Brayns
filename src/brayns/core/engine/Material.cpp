@@ -27,47 +27,46 @@ namespace
 {
 using namespace brayns;
 
-void setTextureParams(OSPMaterial handle, const std::string &id, const MaterialTexture2D &texture)
+template<OsprayDataType T>
+void setTextureParams(OSPMaterial handle, const char *id, const MaterialTexture2D<T> &texture)
 {
-    setObjectParam(handle, id.c_str(), texture.value);
+    setObjectParam(handle, id, texture.factor);
 
-    auto translation = id + ".translation";
+    auto textureId = std::string("map_") + id;
+    setObjectParam(handle, textureId.c_str(), texture.value);
+
+    auto translation = textureId + ".translation";
     setObjectParam(handle, translation.c_str(), texture.transform.translation);
 
-    auto rotation = id + ".rotation";
+    auto rotation = textureId + ".rotation";
     setObjectParam(handle, rotation.c_str(), degrees(texture.transform.rotation));
 
-    auto scale = id + ".scale";
+    auto scale = textureId + ".scale";
     setObjectParam(handle, scale.c_str(), texture.transform.scale);
 }
 
-void setTextureParams(OSPMaterial handle, const std::string &id, const MaterialVolumeTexture &texture)
+template<OsprayDataType T>
+void setTextureParams(OSPMaterial handle, const char *id, const MaterialVolumeTexture<T> &texture)
 {
-    setObjectParam(handle, id.c_str(), texture.value);
+    setObjectParam(handle, id, texture.factor);
 
-    auto transform = id + ".transform";
+    auto textureId = std::string("map_") + id;
+    setObjectParam(handle, textureId.c_str(), texture.value);
+
+    auto transform = textureId + ".transform";
     setObjectParam(handle, transform.c_str(), toAffine(texture.transform));
 }
 
-template<typename T, OsprayDataType U>
-void setMaterialParam(OSPMaterial handle, const char *id, const MaterialTexture<T, U> &texture)
-{
-    auto textureId = std::string("map_") + id;
-    setTextureParams(handle, textureId, texture.value);
-
-    setObjectParam(handle, id, texture.factor);
-}
-
 template<OsprayDataType T>
-void setMaterialParam(OSPMaterial handle, const char *id, const T &factor)
+void setTextureParams(OSPMaterial handle, const char *id, const T &factor)
 {
     setObjectParam(handle, id, factor);
 }
 
-template<typename T>
+template<OsprayDataType T>
 void setMaterialParam(OSPMaterial handle, const char *id, const MaterialField<T> &field)
 {
-    std::visit([&](const auto &value) { setMaterialParam(handle, id, value); }, field);
+    std::visit([=](const auto &value) { setTextureParams(handle, id, value); }, field);
 }
 
 void setAoMaterialParams(OSPMaterial handle, const AoMaterialSettings &settings)

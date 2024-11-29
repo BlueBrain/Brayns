@@ -51,6 +51,7 @@ from brayns import (
     get_ribbon,
     get_spheres,
     get_triangle_mesh,
+    remove_objects,
 )
 
 
@@ -260,3 +261,7 @@ async def test_isosurfaces(connection: Connection) -> None:
     settings = await get_isosurfaces(connection, isosurfaces)
     assert settings.volume == volume
     assert settings.isovalues
+
+    await remove_objects(connection, [volume])
+    settings = await get_isosurfaces(connection, isosurfaces)
+    assert settings.volume.id == 0

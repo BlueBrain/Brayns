@@ -38,78 +38,60 @@ struct UserMaterial
     std::function<Material()> get;
 };
 
-template<ReflectedJsonObject Settings, std::derived_from<Material> T>
+template<typename Storage, std::derived_from<Material> T>
 struct UserMaterialOf
 {
-    Settings settings;
+    Storage storage;
     T value;
-    std::vector<Stored<UserTexture>> textures;
 };
 
-template<ReflectedJsonObject T, OsprayDataType U>
-struct MaterialTextureParams
-{
-    T texture;
-    std::optional<U> factor;
-};
+template<OsprayDataType T>
+using MaterialParams = MaterialFieldOf<T, ObjectId>;
 
-template<ReflectedJsonObject T, OsprayDataType U>
-struct JsonObjectReflector<MaterialTextureParams<T, U>>
+template<OsprayDataType T>
+using MaterialStorage = MaterialFieldOf<T, Stored<UserTexture>>;
+
+template<OsprayDataType T>
+using MaterialTexture2DParams = MaterialTexture2DOf<ObjectId, T>;
+
+template<OsprayDataType T>
+using MaterialTexture2DStorage = MaterialTexture2DOf<Stored<UserTexture>, T>;
+
+template<OsprayDataType T>
+struct JsonObjectReflector<MaterialTexture2DParams<T>>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<MaterialTextureParams<T, U>>();
-        builder.extend([](auto &object) { return &object.texture; });
+        auto builder = JsonBuilder<MaterialTexture2DParams<T>>();
+        builder.field("texture2d", [](auto &object) { return &object.value; }).description("ID of the texture 2D to use for the material field");
+        builder.extend([](auto &object) { return &object.transform; });
         builder.field("factor", [](auto &object) { return &object.factor; }).description("Multiply texture sampled value by this factor if not null");
         return builder.build();
     }
 };
 
-struct MaterialTexture2DParams
-{
-    ObjectId texture2d;
-    Transform2D transform = {};
-};
-
-template<>
-struct JsonObjectReflector<MaterialTexture2DParams>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<MaterialTexture2DParams>();
-        builder.field("texture2d", [](auto &object) { return &object.texture2d; }).description("ID of the texture 2D to use for the material field");
-        builder.extend([](auto &object) { return &object.transform; });
-        return builder.build();
-    }
-};
-
-struct MaterialVolumeTextureParams
-{
-    ObjectId volumeTexture;
-    Transform transform = {};
-};
-
-template<>
-struct JsonObjectReflector<MaterialVolumeTextureParams>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<MaterialVolumeTextureParams>();
-        builder.field("volumeTexture", [](auto &object) { return &object.volumeTexture; })
-            .description("ID of the volume texture to use for the material field");
-        builder.extend([](auto &object) { return &object.transform; });
-        return builder.build();
-    }
-};
+template<OsprayDataType T>
+using MaterialVolumeTextureParams = MaterialVolumeTextureOf<ObjectId, T>;
 
 template<OsprayDataType T>
-using MaterialParams = std::variant<T, MaterialTextureParams<MaterialTexture2DParams, T>, MaterialTextureParams<MaterialVolumeTextureParams, T>>;
+using MaterialVolumeTextureStorage = MaterialVolumeTextureOf<Stored<UserTexture>, T>;
 
-struct AoMaterialParams
+template<OsprayDataType T>
+struct JsonObjectReflector<MaterialVolumeTextureParams<T>>
 {
-    MaterialParams<Color3> diffuse;
-    MaterialParams<float> opacity;
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<MaterialVolumeTextureParams<T>>();
+        builder.field("volumeTexture", [](auto &object) { return &object.value; })
+            .description("ID of the volume texture to use for the material field");
+        builder.extend([](auto &object) { return &object.transform; });
+        builder.field("factor", [](auto &object) { return &object.factor; }).description("Multiply texture sampled value by this factor if not null");
+        return builder.build();
+    }
 };
+
+using AoMaterialParams = AoMaterialSettingsOf<MaterialParams>;
+using AoMaterialStorage = AoMaterialSettingsOf<MaterialStorage>;
 
 template<>
 struct JsonObjectReflector<AoMaterialParams>
@@ -126,20 +108,14 @@ struct JsonObjectReflector<AoMaterialParams>
 using CreateAoMaterialParams = CreateParamsOf<AoMaterialParams>;
 using GetAoMaterialResult = GetResultOf<AoMaterialParams>;
 using UpdateAoMaterialParams = UpdateParamsOf<AoMaterialParams>;
-using UserAoMaterial = UserMaterialOf<AoMaterialParams, AoMaterial>;
+using UserAoMaterial = UserMaterialOf<AoMaterialStorage, AoMaterial>;
 
 CreateObjectResult createAoMaterial(ObjectManager &objects, Device &device, const CreateAoMaterialParams &params);
 GetAoMaterialResult getAoMaterial(ObjectManager &objects, const GetObjectParams &params);
 void updateAoMaterial(ObjectManager &objects, Device &device, const UpdateAoMaterialParams &params);
 
-struct ScivisMaterialParams
-{
-    MaterialParams<Color3> diffuse;
-    MaterialParams<float> opacity;
-    MaterialParams<Color3> specular;
-    MaterialParams<float> shininess;
-    Color3 transparencyFilter;
-};
+using ScivisMaterialParams = ScivisMaterialSettingsOf<MaterialParams>;
+using ScivisMaterialStorage = ScivisMaterialSettingsOf<MaterialStorage>;
 
 template<>
 struct JsonObjectReflector<ScivisMaterialParams>
@@ -161,44 +137,14 @@ struct JsonObjectReflector<ScivisMaterialParams>
 using CreateScivisMaterialParams = CreateParamsOf<ScivisMaterialParams>;
 using GetScivisMaterialResult = GetResultOf<ScivisMaterialParams>;
 using UpdateScivisMaterialParams = UpdateParamsOf<ScivisMaterialParams>;
-using UserScivisMaterial = UserMaterialOf<ScivisMaterialParams, ScivisMaterial>;
+using UserScivisMaterial = UserMaterialOf<ScivisMaterialStorage, ScivisMaterial>;
 
 CreateObjectResult createScivisMaterial(ObjectManager &objects, Device &device, const CreateScivisMaterialParams &params);
 GetScivisMaterialResult getScivisMaterial(ObjectManager &objects, const GetObjectParams &params);
 void updateScivisMaterial(ObjectManager &objects, Device &device, const UpdateScivisMaterialParams &params);
 
-struct PrincipledMaterialParams
-{
-    MaterialParams<Color3> baseColor;
-    MaterialParams<Color3> edgeColor;
-    MaterialParams<float> metallic;
-    MaterialParams<float> diffuse;
-    MaterialParams<float> specular;
-    MaterialParams<float> ior;
-    MaterialParams<float> transmission;
-    MaterialParams<Color3> transmissionColor;
-    MaterialParams<float> transmissionDepth;
-    MaterialParams<float> roughness;
-    MaterialParams<float> anisotropy;
-    MaterialParams<float> rotation;
-    MaterialParams<float> normal;
-    MaterialParams<float> baseNormal;
-    bool thin;
-    MaterialParams<float> thickness;
-    MaterialParams<float> backlight;
-    MaterialParams<float> coat;
-    MaterialParams<float> coatIor;
-    MaterialParams<Color3> coatColor;
-    MaterialParams<float> coatThickness;
-    MaterialParams<float> coatRoughness;
-    MaterialParams<float> coatNormal;
-    MaterialParams<float> sheen;
-    MaterialParams<Color3> sheenColor;
-    MaterialParams<float> sheenTint;
-    MaterialParams<float> sheenRoughness;
-    MaterialParams<float> opacity;
-    MaterialParams<Color3> emissiveColor;
-};
+using PrincipledMaterialParams = PrincipledMaterialSettingsOf<MaterialParams>;
+using PrincipledMaterialStorage = PrincipledMaterialSettingsOf<MaterialStorage>;
 
 template<>
 struct JsonObjectReflector<PrincipledMaterialParams>
@@ -269,7 +215,7 @@ struct JsonObjectReflector<PrincipledMaterialParams>
 using CreatePrincipledMaterialParams = CreateParamsOf<PrincipledMaterialParams>;
 using GetPrincipledMaterialResult = GetResultOf<PrincipledMaterialParams>;
 using UpdatePrincipledMaterialParams = UpdateParamsOf<PrincipledMaterialParams>;
-using UserPrincipledMaterial = UserMaterialOf<PrincipledMaterialParams, PrincipledMaterial>;
+using UserPrincipledMaterial = UserMaterialOf<PrincipledMaterialStorage, PrincipledMaterial>;
 
 CreateObjectResult createPrincipledMaterial(ObjectManager &objects, Device &device, const CreatePrincipledMaterialParams &params);
 GetPrincipledMaterialResult getPrincipledMaterial(ObjectManager &objects, const GetObjectParams &params);

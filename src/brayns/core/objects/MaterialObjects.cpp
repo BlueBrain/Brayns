@@ -21,121 +21,118 @@
 
 #include "MaterialObjects.h"
 
+#include "common/Objects.h"
+
 namespace
 {
 using namespace brayns;
 
-template<typename T>
-T &retreiveTextureAs(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, ObjectId id)
+template<OsprayDataType T>
+MaterialStorage<T> toMaterialStorage(ObjectManager &objects, const MaterialTexture2DParams<T> &params)
 {
-    auto object = objects.getAsStored<UserTexture>(id);
-    auto &texture = *castAsShared<T>(object.get().value, object);
-
-    textures.push_back(std::move(object));
-
-    return texture;
+    auto object = objects.getAsStored<UserTexture>(params.value);
+    return MaterialTexture2DStorage<T>{std::move(object), params.transform, params.factor};
 }
 
 template<OsprayDataType T>
-MaterialField<T> storeAndGet(
-    ObjectManager &objects,
-    std::vector<Stored<UserTexture>> &textures,
-    const MaterialTextureParams<MaterialVolumeTextureParams, T> &params)
+MaterialStorage<T> toMaterialStorage(ObjectManager &objects, const MaterialVolumeTextureParams<T> &params)
 {
-    auto &texture = retreiveTextureAs<UserVolumeTexture>(objects, textures, params.texture.volumeTexture);
-    return MaterialTexture<MaterialVolumeTexture, T>{{texture.value, params.texture.transform}, params.factor};
+    auto object = objects.getAsStored<UserTexture>(params.value);
+    return MaterialVolumeTextureStorage<T>{std::move(object), params.transform, params.factor};
 }
 
 template<OsprayDataType T>
-MaterialField<T> storeAndGet(
-    ObjectManager &objects,
-    std::vector<Stored<UserTexture>> &textures,
-    const MaterialTextureParams<MaterialTexture2DParams, T> &params)
-{
-    auto &texture = retreiveTextureAs<UserTexture2D>(objects, textures, params.texture.texture2d);
-    return MaterialTexture<MaterialTexture2D, T>{{texture.value, params.texture.transform}, params.factor};
-}
-
-template<OsprayDataType T>
-MaterialField<T> storeAndGet(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const T &params)
+MaterialStorage<T> toMaterialStorage(ObjectManager &objects, const T &params)
 {
     (void)objects;
-    (void)textures;
     return params;
 }
 
 template<OsprayDataType T>
-MaterialField<T> storeAndGet(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const MaterialParams<T> &params)
+MaterialStorage<T> toMaterialStorage(ObjectManager &objects, const MaterialParams<T> &params)
 {
-    return std::visit([&](const auto &value) { return storeAndGet(objects, textures, value); }, params);
+    return std::visit([&](const auto &value) { return toMaterialStorage(objects, value); }, params);
 }
 
-AoMaterialSettings parseSettings(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const AoMaterialParams &params)
+template<template<template<typename> typename> typename T>
+T<MaterialStorage> prepareStorage(ObjectManager &objects, const T<MaterialParams> &params)
 {
-    return {
-        .diffuse = storeAndGet(objects, textures, params.diffuse),
-        .opacity = storeAndGet(objects, textures, params.opacity),
-    };
+    return converMaterialSettingsTo<T<MaterialStorage>>(params, [&](const auto &value) { return toMaterialStorage(objects, value); });
 }
 
-ScivisMaterialSettings parseSettings(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const ScivisMaterialParams &params)
+template<OsprayDataType T>
+MaterialField<T> toMaterialField(const MaterialTexture2DStorage<T> &params)
 {
-    return {
-        .diffuse = storeAndGet(objects, textures, params.diffuse),
-        .opacity = storeAndGet(objects, textures, params.opacity),
-        .specular = storeAndGet(objects, textures, params.specular),
-        .shininess = storeAndGet(objects, textures, params.shininess),
-        .transparencyFilter = params.transparencyFilter,
-    };
+    auto &texture = *castAsShared<UserTexture2D>(params.value.get().value, params.value);
+    return MaterialTexture2D<T>{texture.value, params.transform, params.factor};
 }
 
-PrincipledMaterialSettings parseSettings(ObjectManager &objects, std::vector<Stored<UserTexture>> &textures, const PrincipledMaterialParams &params)
+template<OsprayDataType T>
+MaterialField<T> toMaterialField(const MaterialVolumeTextureStorage<T> &params)
 {
-    return {
-        .baseColor = storeAndGet(objects, textures, params.baseColor),
-        .edgeColor = storeAndGet(objects, textures, params.edgeColor),
-        .metallic = storeAndGet(objects, textures, params.metallic),
-        .diffuse = storeAndGet(objects, textures, params.diffuse),
-        .specular = storeAndGet(objects, textures, params.specular),
-        .ior = storeAndGet(objects, textures, params.ior),
-        .transmission = storeAndGet(objects, textures, params.transmission),
-        .transmissionColor = storeAndGet(objects, textures, params.transmissionColor),
-        .transmissionDepth = storeAndGet(objects, textures, params.transmissionDepth),
-        .roughness = storeAndGet(objects, textures, params.roughness),
-        .anisotropy = storeAndGet(objects, textures, params.anisotropy),
-        .rotation = storeAndGet(objects, textures, params.rotation),
-        .normal = storeAndGet(objects, textures, params.normal),
-        .baseNormal = storeAndGet(objects, textures, params.baseNormal),
-        .thin = params.thin,
-        .thickness = storeAndGet(objects, textures, params.thickness),
-        .backlight = storeAndGet(objects, textures, params.backlight),
-        .coat = storeAndGet(objects, textures, params.coat),
-        .coatIor = storeAndGet(objects, textures, params.coatIor),
-        .coatColor = storeAndGet(objects, textures, params.coatColor),
-        .coatThickness = storeAndGet(objects, textures, params.coatThickness),
-        .coatRoughness = storeAndGet(objects, textures, params.coatRoughness),
-        .coatNormal = storeAndGet(objects, textures, params.coatNormal),
-        .sheen = storeAndGet(objects, textures, params.sheen),
-        .sheenColor = storeAndGet(objects, textures, params.sheenColor),
-        .sheenTint = storeAndGet(objects, textures, params.sheenTint),
-        .sheenRoughness = storeAndGet(objects, textures, params.sheenRoughness),
-        .opacity = storeAndGet(objects, textures, params.opacity),
-        .emissiveColor = storeAndGet(objects, textures, params.emissiveColor),
-    };
+    auto &texture = *castAsShared<UserVolumeTexture>(params.value.get().value, params.value);
+    return MaterialVolumeTexture<T>{texture.value, params.transform, params.factor};
+}
+
+template<OsprayDataType T>
+MaterialField<T> toMaterialField(const T &params)
+{
+    return params;
+}
+
+template<OsprayDataType T>
+MaterialField<T> toMaterialField(const MaterialStorage<T> &params)
+{
+    return std::visit([&](const auto &value) { return toMaterialField(value); }, params);
+}
+
+template<template<template<typename> typename> typename T>
+T<MaterialField> prepareSettings(const T<MaterialStorage> &storage)
+{
+    return converMaterialSettingsTo<T<MaterialField>>(storage, [](const auto &value) { return toMaterialField(value); });
+}
+
+template<OsprayDataType T>
+MaterialParams<T> toMaterialParams(const MaterialTexture2DStorage<T> &params)
+{
+    return MaterialTexture2DParams<T>{params.value.getId(), params.transform, params.factor};
+}
+
+template<OsprayDataType T>
+MaterialParams<T> toMaterialParams(const MaterialVolumeTextureStorage<T> &params)
+{
+    return MaterialVolumeTextureParams<T>{params.value.getId(), params.transform, params.factor};
+}
+
+template<OsprayDataType T>
+MaterialParams<T> toMaterialParams(const T &params)
+{
+    return params;
+}
+
+template<OsprayDataType T>
+MaterialParams<T> toMaterialParams(const MaterialStorage<T> &params)
+{
+    return std::visit([&](const auto &value) { return toMaterialParams(value); }, params);
+}
+
+template<template<template<typename> typename> typename T>
+T<MaterialParams> prepareParams(const T<MaterialStorage> &storage)
+{
+    return converMaterialSettingsTo<T<MaterialParams>>(storage, [](const auto &value) { return toMaterialParams(value); });
 }
 
 template<typename T>
-CreateObjectResult createMaterialAs(ObjectManager &objects, Device &device, const auto &params, auto create, std::string name)
+CreateObjectResult createMaterialAs(ObjectManager &objects, Device &device, const auto &params, auto &&create, std::string name)
 {
     const auto &[base, derived] = params;
 
-    auto textures = std::vector<Stored<UserTexture>>();
-
-    auto settings = parseSettings(objects, textures, derived);
+    auto storage = prepareStorage(objects, derived);
+    auto settings = prepareSettings(storage);
 
     auto material = create(device, settings);
 
-    auto ptr = toShared(T{derived, std::move(material), std::move(textures)});
+    auto ptr = toShared(T{std::move(storage), std::move(material)});
 
     auto object = UserMaterial{
         .value = ptr,
@@ -152,7 +149,10 @@ auto getMaterialAs(ObjectManager &objects, const GetObjectParams &params)
 {
     auto stored = objects.getAsStored<UserMaterial>(params.id);
     auto &material = *castAsShared<T>(stored.get().value, stored);
-    return getResult(material.settings);
+
+    auto result = prepareParams(material.storage);
+
+    return getResult(std::move(result));
 }
 
 template<typename T>
@@ -161,16 +161,16 @@ void updateMaterialAs(ObjectManager &objects, Device &device, const auto &params
     auto stored = objects.getAsStored<UserMaterial>(params.id);
     auto &material = *castAsShared<T>(stored.get().value, stored);
 
-    auto updated = getUpdatedParams(params, material.settings);
+    auto current = prepareParams(material.storage);
+    auto updated = getUpdatedParams(params, current);
 
-    auto textures = std::vector<Stored<UserTexture>>();
-
-    auto settings = parseSettings(objects, textures, updated);
+    auto storage = prepareStorage(objects, updated);
+    auto settings = prepareSettings(storage);
 
     material.value.update(settings);
     device.throwIfError();
 
-    material.settings = std::move(updated);
+    material.storage = std::move(storage);
 }
 }
 
