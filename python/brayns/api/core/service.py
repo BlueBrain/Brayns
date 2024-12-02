@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from brayns.network.connection import Connection
+from brayns.network.json_rpc import JsonRpcId
 from brayns.utils.parsing import deserialize
 
 
@@ -37,6 +38,26 @@ class Version:
 async def get_version(connection: Connection) -> Version:
     result = await connection.get_result("getVersion")
     return deserialize(result, Version)
+
+
+async def get_tasks(connection: Connection) -> list[JsonRpcId]:
+    result = await connection.get_result("getTasks")
+    return deserialize(result, list[JsonRpcId])
+
+
+@dataclass
+class TaskOperation:
+    description: str
+    completion: float
+
+
+async def get_task(connection: Connection, task_id: JsonRpcId) -> TaskOperation:
+    result = await connection.get_result("getTask", {"task": task_id})
+    return deserialize(result, TaskOperation)
+
+
+async def cancel_task(connection: Connection, task_id: JsonRpcId) -> None:
+    await connection.get_result("cancelTask", {"task": task_id})
 
 
 async def get_methods(connection: Connection) -> list[str]:

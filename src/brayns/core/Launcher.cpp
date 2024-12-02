@@ -94,7 +94,7 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
     auto endpoints = EndpointRegistry();
     auto builder = ApiBuilder(endpoints);
 
-    addServiceEndpoints(builder, endpoints, token);
+    addServiceEndpoints(builder, tasks, endpoints, token);
 
     auto objects = ObjectManager();
 

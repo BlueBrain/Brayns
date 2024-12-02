@@ -25,7 +25,7 @@
 
 namespace brayns
 {
-struct VersionResult
+struct GetVersionResult
 {
     int major = BRAYNS_VERSION_MAJOR;
     int minor = BRAYNS_VERSION_MINOR;
@@ -35,11 +35,11 @@ struct VersionResult
 };
 
 template<>
-struct JsonObjectReflector<VersionResult>
+struct JsonObjectReflector<GetVersionResult>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<VersionResult>();
+        auto builder = JsonBuilder<GetVersionResult>();
         builder.field("major", [](auto &object) { return &object.major; }).description("Major version");
         builder.field("minor", [](auto &object) { return &object.minor; }).description("Minor version");
         builder.field("patch", [](auto &object) { return &object.patch; }).description("Patch version");
@@ -49,29 +49,52 @@ struct JsonObjectReflector<VersionResult>
     }
 };
 
-struct SchemaParams
+struct GetSchemaParams
 {
     std::string method;
 };
 
 template<>
-struct JsonObjectReflector<SchemaParams>
+struct JsonObjectReflector<GetSchemaParams>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<SchemaParams>();
+        auto builder = JsonBuilder<GetSchemaParams>();
         builder.field("method", [](auto &object) { return &object.method; }).description("Method of the endpoint whose schema is requested");
         return builder.build();
     }
 };
 
-void addServiceEndpoints(ApiBuilder &builder, const EndpointRegistry &endpoints, StopToken &token)
+struct GetTaskParams
 {
-    builder.endpoint("getVersion", [] { return VersionResult(); }).description("Get the build version of the service currently running");
+    JsonRpcId task;
+};
+
+template<>
+struct JsonObjectReflector<GetTaskParams>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<GetTaskParams>();
+        builder.field("task", [](auto &object) { return &object.task; }).description("Task ID");
+        return builder.build();
+    }
+};
+
+void addServiceEndpoints(ApiBuilder &builder, TaskManager &tasks, const EndpointRegistry &endpoints, StopToken &token)
+{
+    builder.endpoint("getVersion", [] { return GetVersionResult(); })
+        .description("Get the build version of the service currently running")
+        .priority(true);
+
+    builder.endpoint("getTasks", [&] { return tasks.getAll(); }).description("Get IDs of all tasks that are not completed yet");
+    builder.endpoint("getTask", [&](const GetTaskParams &params) { return tasks.getCurrentOperation(params.task); })
+        .description("Get current status of given task");
+    builder.endpoint("cancelTask", [&](const GetTaskParams &params) { tasks.cancel(params.task); }).description("Cancel given task").priority(true);
 
     builder.endpoint("getMethods", [&] { return endpoints.getMethods(); }).description("Get available JSON-RPC methods");
 
-    builder.endpoint("getSchema", [&](SchemaParams params) { return endpoints.getSchema(params.method); })
+    builder.endpoint("getSchema", [&](GetSchemaParams params) { return endpoints.getSchema(params.method); })
         .description("Get the schema of the given JSON-RPC method");
 
     builder.endpoint("stop", [&] { token.stop(); }).description("Cancel all running tasks, close all connections and stop the service");
