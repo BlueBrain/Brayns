@@ -160,7 +160,7 @@ struct JsonObjectReflector<AoRendererSettings>
         builder.field("volumeSamplingRate", [](auto &object) { return &object.volumeSamplingRate; })
             .description("Sampling rate for volumes")
             .defaultValue(1)
-            .minimum(1);
+            .minimum(0);
         return builder.build();
     }
 };
@@ -189,7 +189,7 @@ struct JsonObjectReflector<ScivisRendererSettings>
         builder.field("volumeSamplingRate", [](auto &object) { return &object.volumeSamplingRate; })
             .description("Sampling rate for volumes")
             .defaultValue(1)
-            .minimum(1);
+            .minimum(0);
         builder.field("showVisibleLights", [](auto &object) { return &object.showVisibleLights; })
             .description("Wether to render lights when their visible flag is true")
             .defaultValue(false);
