@@ -112,7 +112,7 @@ void checkAllMaterialsAre(const std::vector<Stored<UserMaterial>> &materials)
 {
     for (const auto &material : materials)
     {
-        if (material.get().value.type() != typeid(T))
+        if (material.get().value.type() != typeid(std::shared_ptr<T>))
         {
             throw InvalidParams(fmt::format("Material type '{}' is not supported by this renderer type", material.getType()));
         }

@@ -100,7 +100,7 @@ struct JsonObjectReflector<RendererParams>
         auto builder = JsonBuilder<RendererParams>();
         builder.field("materials", [](auto &object) { return &object.materials; })
             .description("Materials that can be used by the renderer and indexed in the scene")
-            .minItems(1);
+            .defaultValue(std::vector<ObjectId>());
         builder.field("samples", [](auto &object) { return &object.value.samples; })
             .description("Number of rays per pixel")
             .defaultValue(1)
