@@ -23,9 +23,12 @@ import pytest
 
 from brayns import (
     Connection,
+    JsonRpcError,
     create_ao_material,
     create_ao_renderer,
     create_path_tracer,
+    create_principled_material,
+    create_scivis_material,
     create_scivis_renderer,
     get_ao_renderer,
     get_path_tracer,
@@ -126,3 +129,19 @@ async def test_materials(connection: Connection) -> None:
 
     settings = await get_renderer(connection, renderer)
     assert settings.materials[0].id == 0
+
+
+@pytest.mark.integration_test
+@pytest.mark.asyncio
+async def test_incompatible_materials(connection: Connection) -> None:
+    with pytest.raises(JsonRpcError):
+        material = await create_scivis_material(connection)
+        await create_ao_renderer(connection, materials=[material])
+
+    with pytest.raises(JsonRpcError):
+        material = await create_principled_material(connection)
+        await create_scivis_renderer(connection, materials=[material])
+
+    with pytest.raises(JsonRpcError):
+        material = await create_ao_material(connection)
+        await create_path_tracer(connection, materials=[material])

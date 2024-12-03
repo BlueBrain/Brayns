@@ -107,14 +107,15 @@ RendererStorage getRendererStorage(ObjectManager &objects, const RendererParams 
     };
 }
 
-template<typename T>
-void checkAllMaterialsAre(const std::vector<Stored<UserMaterial>> &materials)
+void validateMaterials(const RendererStorage &storage, auto &&validate)
 {
-    for (const auto &material : materials)
+    for (const auto &material : storage.materials)
     {
-        if (material.get().value.type() != typeid(std::shared_ptr<T>))
+        const auto &type = material.getType();
+
+        if (!validate(type))
         {
-            throw InvalidParams(fmt::format("Material type '{}' is not supported by this renderer type", material.getType()));
+            throw InvalidParams(fmt::format("Material type '{}' is not supported by this renderer type", type));
         }
     }
 }
@@ -127,7 +128,7 @@ auto createRendererAs(ObjectManager &objects, const auto &params, std::string ty
 
     auto storage = getRendererStorage(objects, base);
 
-    validate(storage);
+    validateMaterials(storage, validate);
 
     auto renderer = create(storage.settings, derived);
 
@@ -137,6 +138,7 @@ auto createRendererAs(ObjectManager &objects, const auto &params, std::string ty
         .storage = std::move(storage),
         .value = ptr,
         .get = [=] { return ptr->value; },
+        .validateMaterial = std::move(validate),
     };
 
     auto stored = objects.add(std::move(object), {std::move(type)}, objectParams);
@@ -185,6 +187,8 @@ void updateRenderer(ObjectManager &objects, Device &device, const UpdateRenderer
 
     auto storage = getRendererStorage(objects, updated);
 
+    validateMaterials(storage, renderer.validateMaterial);
+
     renderer.get().update(storage.settings);
     device.throwIfError();
 
@@ -193,7 +197,7 @@ void updateRenderer(ObjectManager &objects, Device &device, const UpdateRenderer
 
 CreateObjectResult createAoRenderer(ObjectManager &objects, Device &device, const CreateAoRendererParams &params)
 {
-    auto validate = [](const auto &storage) { checkAllMaterialsAre<UserAoMaterial>(storage.materials); };
+    auto validate = [](auto material) { return material == "AoMaterial"; };
     auto create = [&](const auto &base, const auto &derived) { return createAoRenderer(device, base, derived); };
     return createRendererAs<UserAoRenderer>(objects, params, "AoRenderer", validate, create);
 }
@@ -210,7 +214,7 @@ void updateAoRenderer(ObjectManager &objects, Device &device, const UpdateAoRend
 
 CreateObjectResult createScivisRenderer(ObjectManager &objects, Device &device, const CreateScivisRendererParams &params)
 {
-    auto validate = [](const auto &storage) { checkAllMaterialsAre<UserScivisMaterial>(storage.materials); };
+    auto validate = [](auto material) { return material == "ScivisMaterial"; };
     auto create = [&](const auto &base, const auto &derived) { return createScivisRenderer(device, base, derived); };
     return createRendererAs<UserScivisRenderer>(objects, params, "ScivisRenderer", validate, create);
 }
@@ -227,7 +231,7 @@ void updateScivisRenderer(ObjectManager &objects, Device &device, const UpdateSc
 
 CreateObjectResult createPathTracer(ObjectManager &objects, Device &device, const CreatePathTracerParams &params)
 {
-    auto validate = [](const auto &storage) { checkAllMaterialsAre<PrincipledMaterial>(storage.materials); };
+    auto validate = [](auto material) { return material == "PrincipledMaterial"; };
     auto create = [&](const auto &base, const auto &derived) { return createPathTracer(device, base, derived); };
     return createRendererAs<UserPathTracer>(objects, params, "PathTracer", validate, create);
 }

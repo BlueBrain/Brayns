@@ -49,6 +49,7 @@ struct UserRenderer
     RendererStorage storage;
     std::any value;
     std::function<Renderer()> get;
+    std::function<bool(std::string_view)> validateMaterial;
 };
 
 struct BackgroundTexture
