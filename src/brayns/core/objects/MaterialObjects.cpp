@@ -63,14 +63,14 @@ T<MaterialStorage> prepareStorage(ObjectManager &objects, const T<MaterialParams
 template<OsprayDataType T>
 MaterialField<T> toMaterialField(const MaterialTexture2DStorage<T> &params)
 {
-    auto &texture = *castAsShared<UserTexture2D>(params.value.get().value, params.value);
+    auto &texture = castTextureAs<UserTexture2D>(params.value);
     return MaterialTexture2D<T>{texture.value, params.transform, params.factor};
 }
 
 template<OsprayDataType T>
 MaterialField<T> toMaterialField(const MaterialVolumeTextureStorage<T> &params)
 {
-    auto &texture = *castAsShared<UserVolumeTexture>(params.value.get().value, params.value);
+    auto &texture = castTextureAs<UserVolumeTexture>(params.value);
     return MaterialVolumeTexture<T>{texture.value, params.transform, params.factor};
 }
 

@@ -79,7 +79,7 @@ CreateObjectResult createTexture2D(ObjectManager &objects, Device &device, Creat
 GetTexture2DResult getTexture2D(ObjectManager &objects, const GetObjectParams &params)
 {
     auto object = objects.getAsStored<UserTexture>(params.id);
-    auto &texture = *castAsShared<UserTexture2D>(object.get().value, object);
+    auto &texture = castTextureAs<UserTexture2D>(object);
     auto &storage = texture.storage;
 
     auto result = Texture2DParams{storage.data.format, storage.data.size, storage.settings};
@@ -90,7 +90,7 @@ GetTexture2DResult getTexture2D(ObjectManager &objects, const GetObjectParams &p
 void updateTexture2D(ObjectManager &objects, Device &device, const UpdateTexture2DParams &params)
 {
     auto stored = objects.getAsStored<UserTexture>(params.id);
-    auto &texture = *castAsShared<UserTexture2D>(stored.get().value, stored);
+    auto &texture = castTextureAs<UserTexture2D>(stored);
 
     auto settings = getUpdatedParams(params, texture.storage.settings);
 

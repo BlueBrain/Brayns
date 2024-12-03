@@ -175,7 +175,7 @@ CreateObjectResult createHdriLight(ObjectManager &objects, Device &device, const
     const auto &[base, derived] = lightParams;
 
     auto texture = objects.getAsStored<UserTexture>(derived.map);
-    auto &map = *castAsShared<UserTexture2D>(texture.get().value, texture);
+    auto &map = castTextureAs<UserTexture2D>(texture);
 
     auto light = createHdriLight(device, map.value, base, derived.value);
 
@@ -210,7 +210,7 @@ void updateHdriLight(ObjectManager &objects, Device &device, const UpdateHdriLig
     auto updated = getUpdatedParams(params, std::move(current));
 
     auto texture = objects.getAsStored<UserTexture>(updated.map);
-    auto &map = *castAsShared<UserTexture2D>(texture.get().value, texture);
+    auto &map = castTextureAs<UserTexture2D>(texture);
 
     light.value.update(map.value, updated.value);
     device.throwIfError();

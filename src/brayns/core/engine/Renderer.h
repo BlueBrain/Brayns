@@ -42,11 +42,14 @@ enum class PixelFilter
     BlackmanHarris = OSP_PIXELFILTER_BLACKMAN_HARRIS,
 };
 
-using Background = std::variant<float, Color3, Color4, Texture2D>;
+template<typename T>
+using BackgroundOf = std::variant<float, Color3, Color4, T>;
+
+using Background = BackgroundOf<Texture2D>;
 
 struct RendererSettings
 {
-    std::vector<Material> materials;
+    std::vector<Material> materials = {};
     std::size_t samples = 1;
     std::size_t maxRecursion = 20;
     float minContribution = 0.001F;
@@ -60,6 +63,8 @@ class Renderer : public Managed<OSPRenderer>
 {
 public:
     using Managed::Managed;
+
+    void update(const RendererSettings &settings);
 };
 
 struct AoRendererSettings
@@ -74,6 +79,9 @@ class AoRenderer : public Renderer
 {
 public:
     using Renderer::Renderer;
+    using Renderer::update;
+
+    void update(const AoRendererSettings &settings);
 };
 
 AoRenderer createAoRenderer(Device &device, const RendererSettings &settings, const AoRendererSettings &ao = {});
@@ -91,15 +99,25 @@ class ScivisRenderer : public Renderer
 {
 public:
     using Renderer::Renderer;
+    using Renderer::update;
+
+    void update(const ScivisRendererSettings &settings);
 };
 
 ScivisRenderer createScivisRenderer(Device &device, const RendererSettings &settings, const ScivisRendererSettings &scivis = {});
+
+struct PathTracerSettings
+{
+};
 
 class PathTracer : public Renderer
 {
 public:
     using Renderer::Renderer;
+    using Renderer::update;
+
+    void update(const PathTracerSettings &settings);
 };
 
-PathTracer createPathTracer(Device &device, const RendererSettings &settings);
+PathTracer createPathTracer(Device &device, const RendererSettings &settings, const PathTracerSettings &pathTracer = {});
 }

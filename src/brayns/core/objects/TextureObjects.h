@@ -47,6 +47,19 @@ struct UserTextureOf
     T value;
 };
 
+template<typename T>
+T &castTextureAs(const Stored<UserTexture> &stored)
+{
+    return *castAsShared<T>(stored.get().value, stored);
+}
+
+template<typename T>
+const auto &getTextureFrom(const Stored<UserTexture> &stored)
+{
+    auto &texture = castTextureAs<T>(stored);
+    return texture.value;
+}
+
 template<>
 struct EnumReflector<TextureFormat>
 {

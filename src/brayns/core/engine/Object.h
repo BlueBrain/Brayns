@@ -93,6 +93,8 @@ public:
         return T(static_cast<typename T::Handle>(_handle));
     }
 
+    auto operator<=>(const Object &other) const = default;
+
 private:
     Handle _handle;
 
@@ -227,6 +229,20 @@ struct ObjectParamReflector<std::monostate>
     static void set(OSPObject handle, const char *id, std::monostate)
     {
         removeObjectParam(handle, id);
+    }
+};
+}
+
+namespace std
+{
+using namespace brayns;
+
+template<>
+struct hash<Object>
+{
+    std::size_t operator()(const Object &object) const
+    {
+        return reinterpret_cast<std::size_t>(object.getHandle());
     }
 };
 }
