@@ -72,7 +72,7 @@ TEST_CASE("Object creation")
     };
     auto transferFunction = createLinearTransferFunction(device, transferFunctionSettings);
 
-    createVolumetricModel(device, {volume, transferFunction});
+    createVolumetricModel(device, volume, transferFunction);
 
     auto triangleMeshSettings = MeshSettings{
         .positions = {{0, 0, 0}, {1, 1, 1}, {2, 2, 2}},
@@ -139,14 +139,13 @@ TEST_CASE("Object creation")
     auto pathTracerSettings = RendererSettings{{principled}};
     createPathTracer(device, pathTracerSettings);
 
-    auto modelSettings = GeometricModelSettings{.geometry = geometry, .materials = {IndexInRenderer(0)}};
-    auto model = createGeometricModel(device, modelSettings);
+    auto modelSettings = GeometricModelSettings{.materials = {RendererIndex(0)}};
+    auto model = createGeometricModel(device, geometry, modelSettings);
 
     auto groupSettings = GroupSettings{.geometries = {model}};
     auto group = createGroup(device, groupSettings);
 
-    auto instanceSettings = InstanceSettings{.group = group};
-    auto instance = createInstance(device, instanceSettings);
+    auto instance = createInstance(device, group);
 
     auto worldSettings = WorldSettings{.instances = {instance}};
     createWorld(device, worldSettings);
@@ -173,9 +172,9 @@ TEST_CASE("Render")
         .resolution = {std::size_t(width), std::size_t(height)},
         .format = FramebufferFormat::Srgba8,
         .channels = {FramebufferChannel::Color},
+        .operations = std::vector<ImageOperation>{toneMapper},
     };
-    auto operations = std::vector<ImageOperation>{toneMapper};
-    auto framebuffer = createFramebuffer(device, framebufferSettings, operations);
+    auto framebuffer = createFramebuffer(device, framebufferSettings);
 
     auto material = createScivisMaterial(device);
 
@@ -189,15 +188,11 @@ TEST_CASE("Render")
     auto spheres = createSpheres(device, sphereSettings);
 
     auto modelSettings = GeometricModelSettings{
-        .geometry = spheres,
-        .materials =
-            {
-                .values = {IndexInRenderer(0)},
-                .colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}},
-            },
+        .materials = {RendererIndex(0)},
+        .colors = std::vector<Color4>{{1, 0, 0, 1}, {0, 0, 1, 1}, {0, 1, 0, 1}},
     };
 
-    auto model = createGeometricModel(device, modelSettings);
+    auto model = createGeometricModel(device, spheres, modelSettings);
 
     auto light = createAmbientLight(device);
 

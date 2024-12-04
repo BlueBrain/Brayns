@@ -37,7 +37,7 @@ VolumeTextureStorage createVolumeTextureStorage(ObjectManager &objects, const Vo
 
 VolumeTextureSettings createVolumeTextureSettings(const VolumeTextureStorage &storage)
 {
-    return {getObjectHandle(storage.volume), getObjectHandle(storage.transferFunction)};
+    return {storage.volume.get().get(), storage.transferFunction.get().get()};
 }
 
 VolumeTextureParams createVolumeTextureParams(const VolumeTextureStorage &storage)

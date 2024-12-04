@@ -290,7 +290,7 @@ GetBoxesResult getBoxes(ObjectManager &objects, const GetObjectParams &params)
 
 CreateObjectResult createPlanes(ObjectManager &objects, Device &device, CreatePlanesParams params)
 {
-    auto validate = [](const auto &settings) { (void)settings; };
+    auto validate = [](const auto &settings) { checkAllSameSizeOrEmpty(settings.coefficients, settings.bounds); };
     auto create = [](auto &device, const auto &settings) { return createPlanes(device, settings); };
     return createGeometry(objects, device, std::move(params), validate, create, "Planes");
 }
@@ -305,7 +305,7 @@ CreateObjectResult createIsosurfaces(ObjectManager &objects, Device &device, Cre
     auto &[metadata, settings] = params;
 
     auto volume = objects.getAsStored<UserVolume>(settings.volume);
-    auto handle = getObjectHandle(volume);
+    auto handle = volume.get().get();
 
     auto isosurfaces = createIsosurfaces(device, handle, settings.value);
 

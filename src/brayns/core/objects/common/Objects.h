@@ -29,18 +29,18 @@
 namespace brayns
 {
 template<typename T>
-std::vector<Stored<T>> getStoredObjects(const ObjectManager &manager, const std::vector<ObjectId> &ids)
+std::vector<Stored<T>> getStoredObjects(const ObjectManager &objects, const std::vector<ObjectId> &ids)
 {
-    auto objects = std::vector<Stored<T>>();
-    objects.reserve(ids.size());
+    auto result = std::vector<Stored<T>>();
+    result.reserve(ids.size());
 
     for (auto id : ids)
     {
-        auto interface = manager.getAsStored<T>(id);
-        objects.push_back(std::move(interface));
+        auto stored = objects.getAsStored<T>(id);
+        result.push_back(std::move(stored));
     }
 
-    return objects;
+    return result;
 }
 
 template<typename T>
@@ -61,17 +61,5 @@ template<typename T>
 std::vector<ObjectId> getObjectIds(const std::vector<Stored<T>> &objects)
 {
     return mapObjects(objects, [](const auto &object) { return object.getId(); });
-}
-
-template<typename T>
-auto getObjectHandle(const Stored<T> &object)
-{
-    return object.get().get();
-}
-
-template<typename T>
-auto getObjectHandles(const std::vector<Stored<T>> &objects)
-{
-    return mapObjects(objects, [](const auto &object) { return getObjectHandle(object); });
 }
 }

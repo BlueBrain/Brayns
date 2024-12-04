@@ -25,39 +25,32 @@ namespace
 {
 using namespace brayns;
 
-void setMaterialParams(OSPGeometricModel handle, const Materials &materials)
+void setGeometricModelParams(OSPGeometricModel handle, const Geometry &geometry, const GeometricModelSettings &settings)
 {
-    setObjectParam(handle, "material", materials.values);
-    setObjectParam(handle, "color", materials.colors);
-    setObjectParam(handle, "index", materials.indices);
+    setObjectParam(handle, "geometry", geometry);
+    setObjectParam(handle, "material", settings.materials);
+    setObjectParam(handle, "color", settings.colors);
+    setObjectParam(handle, "index", settings.indices);
+    setObjectParam(handle, "invertNormals", settings.invertNormals);
+    setObjectParam(handle, "id", settings.id);
 }
 }
 
 namespace brayns
 {
-void GeometricModel::setMaterials(const Materials &materials)
+void GeometricModel::update(const Geometry &geometry, const GeometricModelSettings &settings)
 {
     auto handle = getHandle();
-    setMaterialParams(handle, materials);
+    setGeometricModelParams(handle, geometry, settings);
     commitObject(handle);
 }
 
-void GeometricModel::invertNormals(bool invert)
-{
-    auto handle = getHandle();
-    setObjectParam(handle, "invertNormals", invert);
-    commitObject(handle);
-}
-
-GeometricModel createGeometricModel(Device &device, const GeometricModelSettings &settings)
+GeometricModel createGeometricModel(Device &device, const Geometry &geometry, const GeometricModelSettings &settings)
 {
     auto handle = ospNewGeometricModel();
     auto model = wrapObjectHandleAs<GeometricModel>(device, handle);
 
-    setObjectParam(handle, "geometry", settings.geometry);
-    setMaterialParams(handle, settings.materials);
-    setObjectParam(handle, "invertNormals", settings.invertedNormals);
-    setObjectParam(handle, "id", settings.id);
+    setGeometricModelParams(handle, geometry, settings);
 
     commitObject(device, handle);
 

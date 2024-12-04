@@ -31,20 +31,14 @@
 
 namespace brayns
 {
-using IndexInRenderer = std::uint32_t;
-
-struct Materials
-{
-    std::variant<IndexInRenderer, std::vector<IndexInRenderer>> values;
-    std::variant<std::monostate, Color4, std::vector<Color4>> colors = {};
-    std::vector<std::uint8_t> indices = {};
-};
+using RendererIndex = std::uint32_t;
 
 struct GeometricModelSettings
 {
-    Geometry geometry;
-    Materials materials;
-    bool invertedNormals = false;
+    std::vector<RendererIndex> materials;
+    std::vector<Color4> colors = {};
+    std::vector<std::uint8_t> indices = {};
+    bool invertNormals = false;
     std::uint32_t id = std::uint32_t(-1);
 };
 
@@ -53,9 +47,8 @@ class GeometricModel : public Managed<OSPGeometricModel>
 public:
     using Managed::Managed;
 
-    void setMaterials(const Materials &materials);
-    void invertNormals(bool inverted);
+    void update(const Geometry &geometry, const GeometricModelSettings &settings);
 };
 
-GeometricModel createGeometricModel(Device &device, const GeometricModelSettings &settings);
+GeometricModel createGeometricModel(Device &device, const Geometry &geometry, const GeometricModelSettings &settings);
 }

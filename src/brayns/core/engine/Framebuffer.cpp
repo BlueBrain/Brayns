@@ -73,7 +73,7 @@ std::optional<float> Framebuffer::getVariance()
     return std::nullopt;
 }
 
-Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings, const std::vector<ImageOperation> &operations)
+Framebuffer createFramebuffer(Device &device, const FramebufferSettings &settings)
 {
     auto width = static_cast<int>(settings.resolution[0]);
     auto height = static_cast<int>(settings.resolution[1]);
@@ -98,7 +98,7 @@ Framebuffer createFramebuffer(Device &device, const FramebufferSettings &setting
     auto handle = ospNewFrameBuffer(width, height, format, channels);
     auto framebuffer = wrapObjectHandleAs<Framebuffer>(device, handle);
 
-    setObjectParam(handle, "imageOperation", operations);
+    setObjectParam(handle, "imageOperation", settings.operations);
 
     commitObject(device, handle);
 

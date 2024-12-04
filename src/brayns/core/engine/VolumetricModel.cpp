@@ -21,18 +21,43 @@
 
 #include "VolumetricModel.h"
 
+namespace
+{
+using namespace brayns;
+
+void setVolumetricModelParams(
+    OSPVolumetricModel handle,
+    const Volume &volume,
+    const TransferFunction &transferFunction,
+    const VolumetricModelSettings &settings)
+{
+    setObjectParam(handle, "volume", volume);
+    setObjectParam(handle, "transferFunction", transferFunction);
+    setObjectParam(handle, "densityScale", settings.densityScale);
+    setObjectParam(handle, "anisotropy", settings.anisotropy);
+    setObjectParam(handle, "id", settings.id);
+}
+}
+
 namespace brayns
 {
-VolumetricModel createVolumetricModel(Device &device, const VolumetricModelSettings &settings)
+void VolumetricModel::update(const Volume &volume, const TransferFunction &transferFunction, const VolumetricModelSettings &settings)
+{
+    auto handle = getHandle();
+    setVolumetricModelParams(handle, volume, transferFunction, settings);
+    commitObject(handle);
+}
+
+VolumetricModel createVolumetricModel(
+    Device &device,
+    const Volume &volume,
+    const TransferFunction &transferFunction,
+    const VolumetricModelSettings &settings)
 {
     auto handle = ospNewVolumetricModel();
     auto model = wrapObjectHandleAs<VolumetricModel>(device, handle);
 
-    setObjectParam(handle, "volume", settings.volume);
-    setObjectParam(handle, "transferFunction", settings.transferFunction);
-    setObjectParam(handle, "densityScale", settings.densityScale);
-    setObjectParam(handle, "anisotropy", settings.anisotropy);
-    setObjectParam(handle, "id", settings.id);
+    setVolumetricModelParams(handle, volume, transferFunction, settings);
 
     commitObject(device, handle);
 

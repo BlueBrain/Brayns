@@ -32,7 +32,6 @@ struct UserFramebuffer
 {
     FramebufferSettings settings;
     std::vector<Stored<UserImageOperation>> operations;
-    std::vector<ImageOperation> handles;
     Framebuffer value;
 };
 
@@ -103,18 +102,18 @@ struct JsonObjectReflector<FramebufferParams>
     }
 };
 
-struct FramebufferInfo
+struct FramebufferResult
 {
     FramebufferParams settings;
     std::optional<float> variance;
 };
 
 template<>
-struct JsonObjectReflector<FramebufferInfo>
+struct JsonObjectReflector<FramebufferResult>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<FramebufferInfo>();
+        auto builder = JsonBuilder<FramebufferResult>();
         builder.extend([](auto &object) { return &object.settings; });
         builder.field("varianceEstimate", [](auto &object) { return &object.variance; })
             .description("Variance of the framebuffer (null if no variance channels or nothing has been rendered yet)");
@@ -123,7 +122,7 @@ struct JsonObjectReflector<FramebufferInfo>
 };
 
 using CreateFramebufferParams = CreateParamsOf<FramebufferParams>;
-using GetFramebufferResult = GetResultOf<FramebufferInfo>;
+using GetFramebufferResult = GetResultOf<FramebufferResult>;
 
 CreateObjectResult createFramebuffer(ObjectManager &objects, Device &device, const CreateFramebufferParams &params);
 GetFramebufferResult getFramebuffer(ObjectManager &objects, const GetObjectParams &params);

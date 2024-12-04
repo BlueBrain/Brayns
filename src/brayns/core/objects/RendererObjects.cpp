@@ -95,7 +95,7 @@ RendererStorage getRendererStorage(ObjectManager &objects, const RendererParams 
 
     auto settings = params.value;
 
-    settings.materials = getObjectHandles(materials);
+    settings.materials = mapObjects(materials, [](const auto &object) { return object.get().get(); });
     settings.background = getBackground(background);
     settings.maxDepth = maxDepth ? getTextureFrom<UserTexture2D>(*maxDepth) : std::optional<Texture2D>();
 
@@ -183,7 +183,7 @@ void updateRenderer(ObjectManager &objects, Device &device, const UpdateRenderer
     auto &renderer = objects.getAs<UserRenderer>(params.id);
 
     auto current = getRendererParams(renderer.storage);
-    auto updated = getUpdatedParams(params, current);
+    auto updated = getUpdatedParams(params, std::move(current));
 
     auto storage = getRendererStorage(objects, updated);
 
