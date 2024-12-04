@@ -53,8 +53,8 @@ struct JsonObjectReflector<GeometricModelParams>
         auto builder = JsonBuilder<GeometricModelParams>();
         builder.field("geometry", [](auto &object) { return &object.geometry; }).description("ID of the geometry to use in the model");
         builder.field("materials", [](auto &object) { return &object.value.materials; })
-            .description("Indices of materials stored in the renderer to apply per primitive on the geometry")
-            .defaultValue(std::vector<ObjectId>{0});
+            .description("Indices of materials stored in the renderer to apply per primitive on the geometry (clamped to valid range)")
+            .minItems(1);
         builder.field("colors", [](auto &object) { return &object.value.colors; })
             .description("List of colors to apply per primitive on the geometry")
             .defaultValue(std::vector<Color4>());
