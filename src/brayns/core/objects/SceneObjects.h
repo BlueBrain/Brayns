@@ -218,8 +218,8 @@ struct JsonObjectReflector<InstanceParams>
     static auto reflect()
     {
         auto builder = JsonBuilder<InstanceParams>();
+        builder.extend([](auto &object) { return &object.value.transform; });
         builder.field("group", [](auto &object) { return &object.group; }).description("ID of group to instanciate");
-        builder.field("transform", [](auto &object) { return &object.value.transform; }).description("Group transform").defaultValue(Transform());
         builder.field("id", [](auto &object) { return &object.value.id; })
             .description("Optional ID to retreive the model in framebuffer or pick result")
             .defaultValue(std::uint32_t(-1));
