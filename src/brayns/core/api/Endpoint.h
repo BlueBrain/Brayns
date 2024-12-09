@@ -57,24 +57,21 @@ struct JsonObjectReflector<EndpointSchema>
 struct Endpoint
 {
     EndpointSchema schema;
-    std::function<Task()> start;
+    std::function<Task(Payload)> start;
     bool priority = false;
 };
 
 class EndpointTask
 {
 public:
-    explicit EndpointTask(Payload params, Task task, bool priority);
+    explicit EndpointTask(const Endpoint &endpoint, Payload params);
 
     bool hasPriority() const;
-    Payload run();
-    TaskOperation getCurrentOperation() const;
-    void cancel();
+    Task start();
 
 private:
+    const Endpoint *_endpoint;
     Payload _params;
-    Task _task;
-    bool _priority;
 };
 
 class EndpointRegistry
@@ -82,7 +79,7 @@ class EndpointRegistry
 public:
     std::vector<std::string> getMethods() const;
     const EndpointSchema &getSchema(const std::string &method) const;
-    EndpointTask start(const std::string &method, Payload params) const;
+    EndpointTask createTask(const std::string &method, Payload params) const;
     Endpoint &add(Endpoint endpoint);
 
 private:

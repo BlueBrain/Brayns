@@ -30,17 +30,29 @@
 #include <brayns/core/jsonrpc/Messages.h>
 #include <brayns/core/utils/Threading.h>
 
-#include "Task.h"
+#include "Progress.h"
 
 namespace brayns
 {
+struct TaskMonitor
+{
+    std::function<void()> wait;
+    std::function<TaskOperation()> getCurrentOperation;
+    std::function<void()> cancel;
+};
+
 struct ManagedTask
 {
     std::optional<JsonRpcId> id;
     bool priority;
-    std::function<void()> run;
-    std::function<TaskOperation()> getCurrentOperation;
+    std::function<std::optional<TaskMonitor>()> start;
     std::function<void()> cancel;
+};
+
+struct RunningTask
+{
+    std::optional<JsonRpcId> id;
+    TaskMonitor monitor;
 };
 
 class TaskQueue
@@ -54,6 +66,7 @@ public:
 
 private:
     std::mutex _mutex;
+    std::optional<RunningTask> _runningTask;
     std::deque<ManagedTask> _tasks;
 };
 

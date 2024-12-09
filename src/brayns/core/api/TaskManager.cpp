@@ -32,33 +32,6 @@ auto findTask(const std::deque<ManagedTask> &tasks, const JsonRpcId &id)
 {
     return std::ranges::find_if(tasks, [&](const auto &task) { return task.id == id; });
 }
-
-const ManagedTask &getTask(const std::deque<ManagedTask> &tasks, const JsonRpcId &id)
-{
-    auto i = findTask(tasks, id);
-
-    if (i != tasks.end())
-    {
-        return *i;
-    }
-
-    throw InvalidParams(fmt::format("No tasks found with ID {}", toString(id)));
-}
-
-void validateTaskId(const std::deque<ManagedTask> &tasks, const std::optional<JsonRpcId> &id)
-{
-    if (!id)
-    {
-        return;
-    }
-
-    auto i = findTask(tasks, *id);
-
-    if (i != tasks.end())
-    {
-        throw InvalidParams(fmt::format("A task with ID {} is already registered", toString(*id)));
-    }
-}
 }
 
 namespace brayns
@@ -85,36 +58,77 @@ TaskOperation TaskQueue::getCurrentOperation(const JsonRpcId &id)
 {
     auto lock = std::lock_guard(_mutex);
 
-    const auto &task = getTask(_tasks, id);
-    return task.getCurrentOperation();
+    if (_runningTask && _runningTask->id == id)
+    {
+        return _runningTask->monitor.getCurrentOperation();
+    }
+
+    auto i = findTask(_tasks, id);
+
+    if (i == _tasks.end())
+    {
+        throw InvalidParams(fmt::format("No tasks found with ID {}", toString(id)));
+    }
+
+    return notStartedYet();
 }
 
 void TaskQueue::cancel(const JsonRpcId &id)
 {
     auto lock = std::lock_guard(_mutex);
 
-    const auto &task = getTask(_tasks, id);
-    task.cancel();
+    if (_runningTask && _runningTask->id == id)
+    {
+        return _runningTask->monitor.cancel();
+    }
+
+    auto i = findTask(_tasks, id);
+
+    if (i == _tasks.end())
+    {
+        throw InvalidParams(fmt::format("No tasks found with ID {}", toString(id)));
+    }
+
+    i->cancel();
+    _tasks.erase(i);
 }
 
 void TaskQueue::add(ManagedTask task)
 {
     auto lock = std::lock_guard(_mutex);
 
-    validateTaskId(_tasks, task.id);
+    if (task.id && findTask(_tasks, *task.id) != _tasks.end())
+    {
+        throw InvalidParams(fmt::format("A task with ID {} is already in queue", toString(*task.id)));
+    }
 
     _tasks.push_back(std::move(task));
 }
 
 void TaskQueue::runNext()
 {
-    assert(!_tasks.empty());
+    {
+        auto lock = std::lock_guard(_mutex);
+        assert(!_runningTask);
+        assert(!_tasks.empty());
 
-    auto &task = _tasks.front();
-    task.run();
+        auto task = std::move(_tasks.front());
+        _tasks.pop_front();
+
+        auto monitor = task.start();
+
+        if (!monitor)
+        {
+            return;
+        }
+
+        _runningTask = RunningTask{std::move(task.id), std::move(*monitor)};
+    }
+
+    _runningTask->monitor.wait();
 
     auto lock = std::lock_guard(_mutex);
-    _tasks.pop_front();
+    _runningTask.reset();
 }
 
 TaskManager::TaskManager(std::unique_ptr<TaskQueue> tasks, Worker worker):
@@ -132,7 +146,13 @@ void TaskManager::add(ManagedTask task)
 {
     if (task.priority)
     {
-        task.run();
+        auto monitor = task.start();
+
+        if (monitor)
+        {
+            monitor->wait();
+        }
+
         return;
     }
 

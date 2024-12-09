@@ -33,41 +33,36 @@ namespace brayns
 {
 struct Task
 {
-    std::function<Payload(Payload)> run;
+    std::function<Payload()> wait;
     std::function<TaskOperation()> getCurrentOperation;
     std::function<void()> cancel;
 };
 
-template<ReflectedPayload Params, ReflectedPayload Result>
+template<ReflectedPayload T>
 struct TaskOf
 {
-    std::function<Result(Params)> run;
+    std::function<T()> wait;
     std::function<TaskOperation()> getCurrentOperation;
     std::function<void()> cancel;
 };
 
-template<ReflectedPayload Params, ReflectedPayload Result>
-Task addParsingToTask(TaskOf<Params, Result> task)
+template<ReflectedPayload T>
+Task addParsingToTask(TaskOf<T> task)
 {
-    auto run = [run = std::move(task.run)](auto payload)
-    {
-        auto params = PayloadReflector<Params>::deserialize(std::move(payload));
-        auto result = run(std::move(params));
-        return PayloadReflector<Result>::serialize(std::move(result));
-    };
-
     return {
-        .run = std::move(run),
+        .wait = [wait = std::move(task.wait)] { return PayloadReflector<T>::serialize(wait()); },
         .getCurrentOperation = std::move(task.getCurrentOperation),
         .cancel = std::move(task.cancel),
     };
 }
 
-template<ReflectedPayload Params, ReflectedPayload Result>
-TaskOf<Params, Result> createTaskWithoutProgress(std::function<Result(Params)> run)
+template<ReflectedPayload T>
+TaskOf<T> completedTask(T result)
 {
+    auto ptr = std::make_shared<T>(std::move(result));
+
     return {
-        .run = std::move(run),
+        .wait = [=] { return std::move(*ptr); },
         .getCurrentOperation = [] { return notStartedYet(); },
         .cancel = [] {},
     };
@@ -78,15 +73,11 @@ struct TaskReflector
 {
 };
 
-template<ReflectedPayload T, ReflectedPayload U>
-struct TaskReflector<TaskOf<T, U>>
+template<ReflectedPayload T>
+struct TaskReflector<TaskOf<T>>
 {
-    using Params = T;
-    using Result = U;
+    using Result = T;
 };
-
-template<typename T>
-using TaskParamsOf = typename TaskReflector<T>::Params;
 
 template<typename T>
 using TaskResultOf = typename TaskReflector<T>::Result;

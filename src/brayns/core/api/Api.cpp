@@ -75,10 +75,10 @@ void sendErrorResponseIfNeeded(const JsonRpcException &e, const ResponseHandler 
     }
 }
 
-class ApiTask
+class ApiTaskMonitor
 {
 public:
-    explicit ApiTask(Logger &logger, std::optional<JsonRpcId> id, EndpointTask task, ResponseHandler handler):
+    explicit ApiTaskMonitor(Logger &logger, std::optional<JsonRpcId> id, Task task, ResponseHandler handler):
         _logger(&logger),
         _id(std::move(id)),
         _task(std::move(task)),
@@ -86,13 +86,13 @@ public:
     {
     }
 
-    void run()
+    void wait()
     {
         try
         {
             _logger->info("Executing request {}", toString(_id));
-            auto result = _task.run();
-            _logger->info("Executed request");
+            auto result = _task.wait();
+            _logger->info("Executed request {}", toString(_id));
 
             sendSuccessResponseIfNeeded(std::move(result), _handler, _id);
         }
@@ -126,13 +126,72 @@ public:
 private:
     Logger *_logger;
     std::optional<JsonRpcId> _id;
+    Task _task;
+    ResponseHandler _handler;
+};
+
+class ApiTask
+{
+public:
+    explicit ApiTask(Logger &logger, std::optional<JsonRpcId> id, EndpointTask task, ResponseHandler handler):
+        _logger(&logger),
+        _id(std::move(id)),
+        _task(std::move(task)),
+        _handler(std::move(handler))
+    {
+    }
+
+    std::optional<TaskMonitor> start()
+    {
+        try
+        {
+            _logger->info("Starting request {}", toString(_id));
+            auto task = _task.start();
+            _logger->info("Started request {}", toString(_id));
+
+            auto ptr = std::make_shared<ApiTaskMonitor>(*_logger, std::move(_id), std::move(task), std::move(_handler));
+
+            return TaskMonitor{
+                .wait = [=] { ptr->wait(); },
+                .getCurrentOperation = [=] { return ptr->getCurrentOperation(); },
+                .cancel = [=] { ptr->cancel(); },
+            };
+        }
+        catch (const JsonRpcException &e)
+        {
+            _logger->warn("Start error: {}", e.what());
+            sendErrorResponseIfNeeded(e, _handler, _id);
+        }
+        catch (const std::exception &e)
+        {
+            _logger->error("Internal start error: {}", e.what());
+            sendErrorResponseIfNeeded(InternalError(e), _handler, _id);
+        }
+        catch (...)
+        {
+            _logger->error("Unknown start error");
+            sendErrorResponseIfNeeded(InternalError("Unknown start error"), _handler, _id);
+        }
+
+        return std::nullopt;
+    }
+
+    void cancel()
+    {
+        _logger->info("Task {} cancelled before start", toString(_id));
+        sendErrorResponseIfNeeded(TaskCancelledException(), _handler, _id);
+    }
+
+private:
+    Logger *_logger;
+    std::optional<JsonRpcId> _id;
     EndpointTask _task;
     ResponseHandler _handler;
 };
 
 ManagedTask createTask(Logger &logger, const EndpointRegistry &endpoints, JsonRpcRequest request, ResponseHandler handler)
 {
-    auto task = endpoints.start(request.method, std::move(request.params));
+    auto task = endpoints.createTask(request.method, std::move(request.params));
     auto priority = task.hasPriority();
 
     auto ptr = std::make_shared<ApiTask>(logger, request.id, std::move(task), std::move(handler));
@@ -140,8 +199,7 @@ ManagedTask createTask(Logger &logger, const EndpointRegistry &endpoints, JsonRp
     return {
         .id = std::move(request.id),
         .priority = priority,
-        .run = [=] { ptr->run(); },
-        .getCurrentOperation = [=] { return ptr->getCurrentOperation(); },
+        .start = [=] { return ptr->start(); },
         .cancel = [=] { ptr->cancel(); },
     };
 }

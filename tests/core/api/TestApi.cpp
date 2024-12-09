@@ -25,6 +25,12 @@
 
 using namespace brayns;
 
+auto run(const EndpointRegistry &endpoints, const std::string &method, Payload params)
+{
+    auto task = endpoints.createTask(method, std::move(params));
+    return task.start().wait();
+}
+
 TEST_CASE("Basic")
 {
     auto offset = 1;
@@ -48,7 +54,7 @@ TEST_CASE("Basic")
 
     auto params = Payload{2};
 
-    auto result = endpoints.start("test", params).run();
+    auto result = run(endpoints, "test", params);
 
     CHECK_EQ(result.json.extract<float>(), 3.0f);
     CHECK(result.binary.empty());
@@ -74,7 +80,7 @@ TEST_CASE("With binary")
 
     auto params = Payload{1, {1, 2, 3}};
 
-    auto result = endpoints.start("test2", params).run();
+    auto result = run(endpoints, "test2", params);
 
     CHECK_EQ(value, 1);
     CHECK_EQ(buffer, std::vector<char>{1, 2, 3});
@@ -99,9 +105,9 @@ TEST_CASE("No params or result")
     CHECK_EQ(endpoints.getSchema("test3").params, getJsonSchema<NullJson>());
     CHECK_EQ(endpoints.getSchema("test3").result, getJsonSchema<NullJson>());
 
-    CHECK_EQ(endpoints.start("test1", Payload()).run().json, serializeToJson(0));
-    CHECK_EQ(endpoints.start("test2", Payload(0)).run().json, serializeToJson(NullJson()));
-    CHECK_EQ(endpoints.start("test3", Payload()).run().json, serializeToJson(NullJson()));
+    CHECK_EQ(run(endpoints, "test1", Payload()).json, serializeToJson(0));
+    CHECK_EQ(run(endpoints, "test2", Payload(0)).json, serializeToJson(NullJson()));
+    CHECK_EQ(run(endpoints, "test3", Payload()).json, serializeToJson(NullJson()));
 }
 
 struct NonCopyable
@@ -138,7 +144,7 @@ TEST_CASE("Copy")
 
     auto params = Payload{createJsonObject()};
 
-    auto result = endpoints.start("test", params).run();
+    auto result = run(endpoints, "test", Payload());
 
     CHECK(getObject(result.json).size() == 0);
     CHECK(result.binary.empty());

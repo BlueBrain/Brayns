@@ -60,9 +60,6 @@ template<typename T>
 concept WithReflectableResult = WithReflectedResult<T> || WithoutResult<T>;
 
 template<typename T>
-concept WithReflectedTaskParams = ReflectedPayload<TaskParamsOf<ResultOf<T>>>;
-
-template<typename T>
 concept WithReflectedTaskResult = ReflectedPayload<TaskResultOf<ResultOf<T>>>;
 
 template<typename T>
@@ -72,7 +69,7 @@ template<typename T>
 concept TaskRunner = WithReflectedParams<T> && WithReflectedResult<T>;
 
 template<typename T>
-concept TaskFactory = WithReflectedTaskParams<T> && WithReflectedTaskResult<T>;
+concept TaskFactory = WithReflectedParams<T> && WithReflectedTaskResult<T>;
 
 auto ensureHasParams(WithReflectedParams auto run)
 {
@@ -101,13 +98,18 @@ auto ensureHasResult(WithoutResult auto run)
 template<TaskRunner T>
 auto wrapAsTaskFactory(T run)
 {
-    return [run = std::move(run)] { return createTaskWithoutProgress<ParamsOf<T>, ResultOf<T>>(run); };
+    return [run = std::move(run)](ParamsOf<T> params) { return completedTask(run(std::move(params))); };
 }
 
 template<TaskFactory T>
 auto addParsingToTaskFactory(T start)
 {
-    return [start = std::move(start)] { return addParsingToTask(start()); };
+    return [start = std::move(start)](Payload payload)
+    {
+        auto params = PayloadReflector<ParamsOf<T>>::deserialize(std::move(payload));
+        auto task = start(std::move(params));
+        return addParsingToTask(std::move(task));
+    };
 }
 
 template<TaskFactory T>
@@ -115,7 +117,7 @@ EndpointSchema reflectEndpointSchema(std::string method)
 {
     return {
         .method = std::move(method),
-        .params = PayloadReflector<TaskParamsOf<ResultOf<T>>>::getSchema(),
+        .params = PayloadReflector<ParamsOf<T>>::getSchema(),
         .result = PayloadReflector<TaskResultOf<ResultOf<T>>>::getSchema(),
     };
 }

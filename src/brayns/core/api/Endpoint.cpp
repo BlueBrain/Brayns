@@ -25,31 +25,20 @@
 
 namespace brayns
 {
-EndpointTask::EndpointTask(Payload params, Task task, bool priority):
-    _params(std::move(params)),
-    _task(std::move(task)),
-    _priority(priority)
+EndpointTask::EndpointTask(const Endpoint &endpoint, Payload params):
+    _endpoint(&endpoint),
+    _params(std::move(params))
 {
 }
 
 bool EndpointTask::hasPriority() const
 {
-    return _priority;
+    return _endpoint->priority;
 }
 
-Payload EndpointTask::run()
+Task EndpointTask::start()
 {
-    return _task.run(std::move(_params));
-}
-
-TaskOperation EndpointTask::getCurrentOperation() const
-{
-    return _task.getCurrentOperation();
-}
-
-void EndpointTask::cancel()
-{
-    _task.cancel();
+    return _endpoint->start(std::move(_params));
 }
 
 std::vector<std::string> EndpointRegistry::getMethods() const
@@ -77,7 +66,7 @@ const EndpointSchema &EndpointRegistry::getSchema(const std::string &method) con
     return i->second.schema;
 }
 
-EndpointTask EndpointRegistry::start(const std::string &method, Payload params) const
+EndpointTask EndpointRegistry::createTask(const std::string &method, Payload params) const
 {
     auto i = _endpoints.find(method);
 
@@ -95,9 +84,7 @@ EndpointTask EndpointRegistry::start(const std::string &method, Payload params) 
         throw InvalidParams("Invalid params schema", errors);
     }
 
-    auto task = endpoint.start();
-
-    return EndpointTask(std::move(params), std::move(task), endpoint.priority);
+    return EndpointTask(endpoint, std::move(params));
 }
 
 Endpoint &EndpointRegistry::add(Endpoint endpoint)
