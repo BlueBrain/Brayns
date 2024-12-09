@@ -29,16 +29,15 @@ void setLinearTransferFunctionParams(OSPTransferFunction handle, const LinearTra
 {
     setObjectParam(handle, "value", settings.scalarRange);
 
-    auto data = settings.colors.data();
+    auto data = reinterpret_cast<const char *>(settings.colors.data());
     auto itemCount = Size3(settings.colors.size(), 1, 1);
     auto stride = Stride3(static_cast<std::ptrdiff_t>(sizeof(Color4)), 0, 0);
+    auto opacityOffset = sizeof(Color3);
 
     auto colors = createData(data, OSP_VEC3F, itemCount, stride);
     setObjectParam(handle, "color", colors);
 
-    auto offset = sizeof(Color3);
-
-    auto opacities = createData(data + offset, OSP_FLOAT, itemCount, stride);
+    auto opacities = createData(data + opacityOffset, OSP_FLOAT, itemCount, stride);
     setObjectParam(handle, "opacity", opacities);
 }
 }

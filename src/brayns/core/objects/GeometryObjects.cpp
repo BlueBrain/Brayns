@@ -309,7 +309,7 @@ CreateObjectResult createIsosurfaces(ObjectManager &objects, Device &device, Cre
 
     auto isosurfaces = createIsosurfaces(device, handle, settings.value);
 
-    auto storage = IsosurfaceStorage{std::move(settings.value), std::move(volume)};
+    auto storage = IsosurfaceStorage{std::move(volume), std::move(settings.value)};
 
     auto ptr = toShared(UserIsosurfaces{std::move(storage), std::move(isosurfaces)});
 

@@ -100,10 +100,10 @@ RendererStorage getRendererStorage(ObjectManager &objects, const RendererParams 
     settings.maxDepth = maxDepth ? getTextureFrom<UserTexture2D>(*maxDepth) : std::optional<Texture2D>();
 
     return {
-        .settings = std::move(settings),
         .materials = std::move(materials),
         .background = std::move(background),
         .maxDepth = std::move(maxDepth),
+        .settings = std::move(settings),
     };
 }
 

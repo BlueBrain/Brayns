@@ -30,8 +30,8 @@ namespace brayns
 {
 struct UserFramebuffer
 {
-    FramebufferSettings settings;
     std::vector<Stored<UserImageOperation>> operations;
+    FramebufferSettings settings;
     Framebuffer value;
 };
 

@@ -68,7 +68,7 @@ CreateObjectResult createGeometricModel(ObjectManager &objects, Device &device, 
 
     auto model = createGeometricModel(device, geometry.get().get(), derived.value);
 
-    auto object = UserGeometricModel{std::move(derived.value), std::move(model), std::move(geometry)};
+    auto object = UserGeometricModel{std::move(geometry), std::move(derived.value), std::move(model)};
     auto stored = objects.add(std::move(object), {"GeometricModel"}, std::move(base));
 
     return getResult(stored);
@@ -106,7 +106,7 @@ CreateObjectResult createVolumetricModel(ObjectManager &objects, Device &device,
 
     auto model = createVolumetricModel(device, volume.get().get(), transferFunction.get().get(), derived.value);
 
-    auto object = UserVolumetricModel{std::move(derived.value), std::move(model), std::move(volume), std::move(transferFunction)};
+    auto object = UserVolumetricModel{std::move(volume), std::move(transferFunction), std::move(derived.value), std::move(model)};
     auto stored = objects.add(std::move(object), {"VolumetricModel"}, std::move(base));
 
     return getResult(stored);
@@ -146,7 +146,7 @@ CreateObjectResult createGroup(ObjectManager &objects, Device &device, const Cre
 
     auto group = createGroup(device, settings);
 
-    auto object = UserGroup{std::move(settings), std::move(storage), std::move(group)};
+    auto object = UserGroup{std::move(storage), std::move(settings), std::move(group)};
     auto stored = objects.add(std::move(object), {"Group"}, std::move(base));
 
     return getResult(stored);
@@ -182,7 +182,7 @@ CreateObjectResult createInstance(ObjectManager &objects, Device &device, const 
 
     auto instance = createInstance(device, group.get().value, derived.value);
 
-    auto object = UserInstance{derived.value, std::move(instance), std::move(group)};
+    auto object = UserInstance{std::move(group), derived.value, std::move(instance)};
     auto stored = objects.add(std::move(object), {"Instance"}, std::move(base));
 
     return getResult(stored);
@@ -220,7 +220,7 @@ CreateObjectResult createWorld(ObjectManager &objects, Device &device, const Cre
 
     auto world = createWorld(device, settings);
 
-    auto object = UserWorld{std::move(settings), std::move(world), std::move(instances)};
+    auto object = UserWorld{std::move(instances), std::move(settings), std::move(world)};
     auto stored = objects.add(std::move(object), {"World"}, std::move(base));
 
     return getResult(stored);

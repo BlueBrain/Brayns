@@ -56,7 +56,6 @@ class UpdateGeometricModelParams(TypedDict, total=False):
 
 class CreateGeometricModelParams(CreateObjectParams, UpdateGeometricModelParams):
     geometry: Required[Geometry]
-    materials: Required[list[int]]
 
 
 async def create_geometric_model(
@@ -117,6 +116,7 @@ class GetGroupResult:
     clipping_geometries: list[GeometricModel]
     volumes: list[VolumetricModel]
     lights: list[Light]
+    bounds: tuple[tuple[float, float, float], tuple[float, float, float]]
 
 
 class UpdateGroupParams(TypedDict, total=False):
@@ -149,6 +149,7 @@ class GetInstanceResult:
     rotation: tuple[float, float, float, float]
     scale: tuple[float, float, float]
     id: int
+    bounds: tuple[tuple[float, float, float], tuple[float, float, float]]
 
 
 class UpdateInstanceParams(TypedDict, total=False):
@@ -179,6 +180,7 @@ class World(Object): ...
 @dataclass
 class GetWorldResult:
     instances: list[Instance]
+    bounds: tuple[tuple[float, float, float], tuple[float, float, float]]
 
 
 class UpdateWorldParams(TypedDict, total=False):

@@ -277,8 +277,8 @@ struct JsonObjectReflector<HdriLightParams>
 
 struct HdriLightStorage
 {
-    HdriLightSettings settings;
     Stored<UserTexture> map;
+    HdriLightSettings settings;
 };
 
 using CreateHdriLightParams = CreateLightParamsOf<HdriLightParams>;

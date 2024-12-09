@@ -38,16 +38,15 @@ void setMeshParams(OSPGeometry handle, const MeshSettings &settings)
 // TODO remove when OSPRay exposes sphere.position_radius to match embree internal layout
 void setInterleavedSpheresParams(OSPGeometry handle, const std::vector<Vector4> &spheres)
 {
-    auto data = spheres.data();
+    auto data = reinterpret_cast<const char *>(spheres.data());
     auto itemCount = Size3(spheres.size(), 1, 1);
     auto stride = Stride3(static_cast<std::ptrdiff_t>(sizeof(Vector4)), 0, 0);
+    auto radiusOffset = sizeof(Vector3);
 
     auto positionData = createData(data, OSP_VEC3F, itemCount, stride);
     setObjectParam(handle, "sphere.position", positionData);
 
-    auto offset = sizeof(Vector3);
-
-    auto radiusData = createData(data + offset, OSP_FLOAT, itemCount, stride);
+    auto radiusData = createData(data + radiusOffset, OSP_FLOAT, itemCount, stride);
     setObjectParam(handle, "sphere.radius", radiusData);
 }
 

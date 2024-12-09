@@ -54,16 +54,16 @@ struct JsonObjectReflector<GeometricModelParams>
         builder.field("geometry", [](auto &object) { return &object.geometry; }).description("ID of the geometry to use in the model");
         builder.field("materials", [](auto &object) { return &object.value.materials; })
             .description("Indices of materials stored in the renderer to apply per primitive on the geometry (clamped to valid range)")
-            .minItems(1);
+            .defaultValue(std::vector<RendererIndex>());
         builder.field("colors", [](auto &object) { return &object.value.colors; })
-            .description("List of colors to apply per primitive on the geometry")
+            .description("List of colors to apply per primitive on the geometry (clamped to valid range)")
             .defaultValue(std::vector<Color4>());
         builder.field("indices", [](auto &object) { return &object.value.indices; })
-            .description("Optional indices to map materials and colors")
-            .defaultValue(std::vector<std::uint32_t>());
+            .description("Optional indices into materials and colors to reuse them (clamped to valid range)")
+            .defaultValue(std::vector<std::uint8_t>());
         builder.field("invertNormals", [](auto &object) { return &object.value.invertNormals; })
             .description("Wether to invert or not shading normals (mostly for clipping)")
-            .defaultValue(std::vector<std::uint32_t>());
+            .defaultValue(false);
         builder.field("id", [](auto &object) { return &object.value.id; })
             .description("Optional ID to retreive the model in framebuffer or pick result")
             .defaultValue(std::uint32_t(-1));
@@ -73,9 +73,9 @@ struct JsonObjectReflector<GeometricModelParams>
 
 struct UserGeometricModel
 {
+    Stored<UserGeometry> geometry;
     GeometricModelSettings settings;
     GeometricModel value;
-    Stored<UserGeometry> geometry;
 };
 
 using CreateGeometricModelParams = CreateParamsOf<GeometricModelParams>;
@@ -119,10 +119,10 @@ struct JsonObjectReflector<VolumetricModelParams>
 
 struct UserVolumetricModel
 {
-    VolumetricModelSettings settings;
-    VolumetricModel value;
     Stored<UserVolume> volume;
     Stored<UserTransferFunction> transferFunction;
+    VolumetricModelSettings settings;
+    VolumetricModel value;
 };
 
 using CreateVolumetricModelParams = CreateParamsOf<VolumetricModelParams>;
@@ -192,8 +192,8 @@ struct GroupStorage
 
 struct UserGroup
 {
-    GroupSettings settings;
     GroupStorage storage;
+    GroupSettings settings;
     Group value;
 };
 
@@ -229,9 +229,9 @@ struct JsonObjectReflector<InstanceParams>
 
 struct UserInstance
 {
+    Stored<UserGroup> group;
     InstanceSettings settings;
     Instance value;
-    Stored<UserGroup> group;
 };
 
 using CreateInstanceParams = CreateParamsOf<InstanceParams>;
@@ -261,9 +261,9 @@ struct JsonObjectReflector<WorldParams>
 
 struct UserWorld
 {
+    std::vector<Stored<UserInstance>> instances;
     WorldSettings settings;
     World value;
-    std::vector<Stored<UserInstance>> instances;
 };
 
 using CreateWorldParams = CreateParamsOf<WorldParams>;

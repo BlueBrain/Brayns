@@ -179,7 +179,7 @@ CreateObjectResult createHdriLight(ObjectManager &objects, Device &device, const
 
     auto light = createHdriLight(device, map.value, base, derived.value);
 
-    auto ptr = toShared(UserHdriLight{{std::move(derived.value), std::move(texture)}, std::move(light)});
+    auto ptr = toShared(UserHdriLight{{std::move(texture), std::move(derived.value)}, std::move(light)});
 
     auto object = UserLight{
         .settings = base,
@@ -215,7 +215,7 @@ void updateHdriLight(ObjectManager &objects, Device &device, const UpdateHdriLig
     light.value.update(map.value, updated.value);
     device.throwIfError();
 
-    light.storage = {std::move(updated.value), std::move(texture)};
+    light.storage = {std::move(texture), std::move(updated.value)};
 }
 
 CreateObjectResult createAmbientLight(ObjectManager &objects, Device &device, const CreateAmbientLightParams &params)

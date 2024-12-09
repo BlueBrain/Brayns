@@ -38,10 +38,10 @@ using BackgroundStorage = BackgroundOf<Stored<UserTexture>>;
 
 struct RendererStorage
 {
-    RendererSettings settings;
     std::vector<Stored<UserMaterial>> materials;
     BackgroundStorage background;
     std::optional<Stored<UserTexture>> maxDepth;
+    RendererSettings settings;
 };
 
 struct UserRenderer

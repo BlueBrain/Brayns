@@ -18,7 +18,6 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from collections.abc import Iterable
 from dataclasses import dataclass
 from typing import Any, TypedDict, Unpack
 
@@ -63,8 +62,8 @@ async def update_object(connection: Connection, object: Object, **settings: Unpa
     await connection.get_result("updateObject", {"id": object.id, "settings": serialize(settings)})
 
 
-async def remove_objects(connection: Connection, objects: Iterable[Object]) -> None:
-    await connection.get_result("removeObjects", {"ids": [object.id for object in objects]})
+async def remove_objects(connection: Connection, objects: list[Object]) -> None:
+    await connection.get_result("removeObjects", {"ids": serialize(objects)})
 
 
 async def clear_objects(connection: Connection) -> None:

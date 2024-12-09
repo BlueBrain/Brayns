@@ -37,8 +37,8 @@ CreateObjectResult createFramebuffer(ObjectManager &objects, Device &device, con
     auto framebuffer = createFramebuffer(device, settings);
 
     auto object = UserFramebuffer{
-        .settings = std::move(settings),
         .operations = std::move(operations),
+        .settings = std::move(settings),
         .value = std::move(framebuffer),
     };
 

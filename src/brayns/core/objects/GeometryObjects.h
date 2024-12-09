@@ -355,8 +355,8 @@ struct JsonObjectReflector<IsosurfaceParams>
 
 struct IsosurfaceStorage
 {
-    IsosurfaceSettings settings;
     Stored<UserVolume> volume;
+    IsosurfaceSettings settings;
 };
 
 using CreateIsosurfacesParams = CreateParamsOf<IsosurfaceParams>;
