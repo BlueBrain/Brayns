@@ -144,7 +144,7 @@ TEST_CASE("Copy")
 
     auto params = Payload{createJsonObject()};
 
-    auto result = run(endpoints, "test", Payload());
+    auto result = run(endpoints, "test", params);
 
     CHECK(getObject(result.json).size() == 0);
     CHECK(result.binary.empty());

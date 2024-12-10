@@ -22,8 +22,8 @@
 #pragma once
 
 #include <filesystem>
-#include <string>
 #include <span>
+#include <string>
 
 namespace brayns
 {
