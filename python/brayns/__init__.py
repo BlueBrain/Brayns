@@ -242,6 +242,7 @@ from .api.core.objects import (
     remove_objects,
     update_object,
 )
+from .api.core.render import RenderParams, RenderResult, render
 from .api.core.renderer import (
     AoRenderer,
     Background,
@@ -621,7 +622,10 @@ __all__ = [
     "read_framebuffer",
     "RegularVolume",
     "remove_objects",
+    "render",
     "Renderer",
+    "RenderParams",
+    "RenderResult",
     "Response",
     "Ribbon",
     "RibbonBasis",

@@ -21,45 +21,11 @@
 
 #pragma once
 
-#include <optional>
-
-#include "Camera.h"
-#include "Device.h"
-#include "Framebuffer.h"
-#include "Object.h"
-#include "Renderer.h"
-#include "World.h"
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/engine/Device.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-struct RenderSettings
-{
-    Framebuffer framebuffer;
-    Renderer renderer;
-    Camera camera;
-    World world;
-};
-
-class Future : public Managed<OSPFuture>
-{
-public:
-    using Managed::Managed;
-
-    bool isReady() const;
-    float getProgress() const;
-    void cancel();
-    float waitAndGetDuration();
-};
-
-Future render(Device &device, const RenderSettings &settings);
-
-struct PickResult
-{
-    Vector3 worldPosition;
-    Instance instance;
-    GeometricModel model;
-    std::uint32_t primitiveIndex;
-};
-
-std::optional<PickResult> pick(Device &device, const RenderSettings &settings, Vector2 position);
+void addRenderEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

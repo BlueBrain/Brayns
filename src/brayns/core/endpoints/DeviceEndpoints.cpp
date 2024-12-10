@@ -28,6 +28,7 @@
 #include "ImageOperationEndpoints.h"
 #include "LightEndpoints.h"
 #include "MaterialEndpoints.h"
+#include "RenderEndpoints.h"
 #include "RendererEndpoints.h"
 #include "SceneEndpoints.h"
 #include "TextureEndpoints.h"
@@ -50,5 +51,6 @@ void addDeviceEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &dev
     addLightEndpoints(builder, objects, device);
     addRendererEndpoints(builder, objects, device);
     addSceneEndpoints(builder, objects, device);
+    addRenderEndpoints(builder, objects, device);
 }
 }

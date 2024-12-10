@@ -80,7 +80,7 @@ async def test_update_object(connection: Connection) -> None:
 async def test_remove_objects(connection: Connection) -> None:
     objects = [await create_empty_object(connection) for _ in range(10)]
 
-    await remove_objects(connection, objects[:3])
+    await remove_objects(connection, [i for i in objects[:3]])
     tests = await get_all_objects(connection)
 
     assert [object.id for object in tests] == list(range(4, 11))
