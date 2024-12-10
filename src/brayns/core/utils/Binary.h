@@ -85,17 +85,19 @@ void composeBytesAsPrimtive(const T &value, std::endian endian, std::vector<char
 {
     auto bytes = asBytes(value);
 
-    output.insert(output.end(), bytes.begin(), bytes.end());
-
-    if (endian != std::endian::native)
+    if (endian == std::endian::native)
     {
-        auto offset = static_cast<std::ptrdiff_t>(output.size() - bytes.size());
-
-        auto first = output.begin() + offset;
-        auto last = output.end();
-
-        auto appended = std::span<char>(first, last);
-        std::ranges::reverse(appended);
+        for (auto byte : bytes)
+        {
+            output.push_back(byte);
+        }
+    }
+    else
+    {
+        for (auto byte : std::views::reverse(bytes))
+        {
+            output.push_back(byte);
+        }
     }
 }
 
