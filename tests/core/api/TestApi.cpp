@@ -25,43 +25,48 @@
 
 using namespace brayns;
 
+auto run(const EndpointRegistry &endpoints, const std::string &method, Payload params)
+{
+    auto task = endpoints.createTask(method, std::move(params));
+    return task.start().wait();
+}
+
 TEST_CASE("Basic")
 {
     auto offset = 1;
 
-    auto builder = ApiBuilder();
+    auto endpoints = EndpointRegistry();
+    auto builder = ApiBuilder(endpoints);
 
     builder.endpoint("test", [&](int value) { return float(offset + value); }).description("Test");
 
-    auto api = builder.build();
-
-    auto methods = api.getMethods();
+    auto methods = endpoints.getMethods();
 
     CHECK_EQ(methods.size(), 1);
     CHECK_EQ(methods[0], "test");
 
-    const auto &schema = api.getSchema("test");
+    const auto &schema = endpoints.getSchema("test");
 
     CHECK_EQ(schema.method, "test");
     CHECK_EQ(schema.description, "Test");
     CHECK_EQ(schema.params, getJsonSchema<int>());
     CHECK_EQ(schema.result, getJsonSchema<float>());
-    CHECK_FALSE(schema.async);
 
     auto params = Payload{2};
 
-    auto result = api.execute("test", params);
+    auto result = run(endpoints, "test", params);
 
     CHECK_EQ(result.json.extract<float>(), 3.0f);
-    CHECK_EQ(result.binary, "");
+    CHECK(result.binary.empty());
 }
 
 TEST_CASE("With binary")
 {
-    auto builder = ApiBuilder();
+    auto endpoints = EndpointRegistry();
+    auto builder = ApiBuilder(endpoints);
 
     auto value = 0;
-    auto buffer = std::string();
+    auto buffer = std::vector<char>();
 
     builder.endpoint("test1", [](int) { return NullJson(); });
     builder.endpoint(
@@ -70,44 +75,39 @@ TEST_CASE("With binary")
         {
             value = params.value;
             buffer = params.binary;
-            return Result<int>{2, "1234"};
+            return Result<int>{2, {1, 2, 3, 4}};
         });
 
-    auto api = builder.build();
+    auto params = Payload{1, {1, 2, 3}};
 
-    auto params = Payload{1, "123"};
-
-    CHECK_THROWS_AS(api.execute("test1", params), InvalidParams);
-
-    auto result = api.execute("test2", params);
+    auto result = run(endpoints, "test2", params);
 
     CHECK_EQ(value, 1);
-    CHECK_EQ(buffer, "123");
+    CHECK_EQ(buffer, std::vector<char>{1, 2, 3});
 
     CHECK_EQ(result.json, 2);
-    CHECK_EQ(result.binary, "1234");
+    CHECK_EQ(result.binary, std::vector<char>{1, 2, 3, 4});
 }
 
 TEST_CASE("No params or result")
 {
-    auto builder = ApiBuilder();
+    auto endpoints = EndpointRegistry();
+    auto builder = ApiBuilder(endpoints);
 
     builder.endpoint("test1", [] { return 0; });
     builder.endpoint("test2", [](int) {});
     builder.endpoint("test3", [] {});
 
-    auto api = builder.build();
+    CHECK_EQ(endpoints.getSchema("test1").params, getJsonSchema<NullJson>());
+    CHECK_EQ(endpoints.getSchema("test1").result, getJsonSchema<int>());
+    CHECK_EQ(endpoints.getSchema("test2").params, getJsonSchema<int>());
+    CHECK_EQ(endpoints.getSchema("test2").result, getJsonSchema<NullJson>());
+    CHECK_EQ(endpoints.getSchema("test3").params, getJsonSchema<NullJson>());
+    CHECK_EQ(endpoints.getSchema("test3").result, getJsonSchema<NullJson>());
 
-    CHECK_EQ(api.getSchema("test1").params, getJsonSchema<NullJson>());
-    CHECK_EQ(api.getSchema("test1").result, getJsonSchema<int>());
-    CHECK_EQ(api.getSchema("test2").params, getJsonSchema<int>());
-    CHECK_EQ(api.getSchema("test2").result, getJsonSchema<NullJson>());
-    CHECK_EQ(api.getSchema("test3").params, getJsonSchema<NullJson>());
-    CHECK_EQ(api.getSchema("test3").result, getJsonSchema<NullJson>());
-
-    CHECK_EQ(api.execute("test1", Payload()).json, serializeToJson(0));
-    CHECK_EQ(api.execute("test2", Payload(0)).json, serializeToJson(NullJson()));
-    CHECK_EQ(api.execute("test3", Payload()).json, serializeToJson(NullJson()));
+    CHECK_EQ(run(endpoints, "test1", Payload()).json, serializeToJson(0));
+    CHECK_EQ(run(endpoints, "test2", Payload(0)).json, serializeToJson(NullJson()));
+    CHECK_EQ(run(endpoints, "test3", Payload()).json, serializeToJson(NullJson()));
 }
 
 struct NonCopyable
@@ -137,15 +137,14 @@ struct JsonObjectReflector<NonCopyable>
 
 TEST_CASE("Copy")
 {
-    auto builder = ApiBuilder();
+    auto endpoints = EndpointRegistry();
+    auto builder = ApiBuilder(endpoints);
 
     builder.endpoint("test", [](NonCopyable) { return NonCopyable(); });
 
-    auto api = builder.build();
-
     auto params = Payload{createJsonObject()};
 
-    auto result = api.execute("test", params);
+    auto result = run(endpoints, "test", params);
 
     CHECK(getObject(result.json).size() == 0);
     CHECK(result.binary.empty());
@@ -153,66 +152,11 @@ TEST_CASE("Copy")
 
 TEST_CASE("Duplication")
 {
-    auto builder = ApiBuilder();
+    auto endpoints = EndpointRegistry();
+    auto builder = ApiBuilder(endpoints);
 
     auto handler = [](NullJson) { return NullJson(); };
 
     builder.endpoint("test", handler);
     CHECK_THROWS_AS(builder.endpoint("test", handler), std::invalid_argument);
-}
-
-TEST_CASE("Task")
-{
-    auto builder = ApiBuilder();
-
-    auto offset = 1;
-
-    auto worker = [&](Progress progress, int value)
-    {
-        progress.nextOperation("1");
-        progress.update(0.5F);
-        return value + offset;
-    };
-
-    builder.task("test", [=](int value) { return startTask(worker, value, 2); });
-
-    auto api = builder.build();
-
-    auto params = Payload{2};
-
-    auto [json, binary] = api.execute("test", params);
-
-    CHECK(binary.empty());
-
-    auto object = getObject(json);
-    auto taskId = object.get("taskId").extract<TaskId>();
-
-    CHECK_EQ(taskId, 0);
-
-    auto tasks = api.getTasks();
-
-    CHECK_EQ(tasks.size(), 1);
-
-    while (true)
-    {
-        auto info = api.getTask(taskId);
-
-        if (info.currentOperation.completion != 0.0F)
-        {
-            CHECK_EQ(info.currentOperation.description, "1");
-            CHECK_EQ(info.currentOperation.completion, 0.5F);
-            break;
-        }
-    }
-
-    auto result = api.waitForTaskResult(taskId);
-
-    CHECK_EQ(result.json.extract<int>(), 3);
-    CHECK(result.binary.empty());
-
-    CHECK_THROWS_AS(api.cancelTask(taskId), InvalidParams);
-    CHECK_THROWS_AS(api.waitForTaskResult(taskId), InvalidParams);
-    CHECK_THROWS_AS(api.getTask(taskId), InvalidParams);
-
-    CHECK(api.getTasks().empty());
 }

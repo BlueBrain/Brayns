@@ -61,8 +61,8 @@ struct JsonObjectReflector<JpegSettings>
     }
 };
 
-std::string readChannel(UserFramebuffer &framebuffer, FramebufferChannel channel);
-std::string readChannelAsJpeg(UserFramebuffer &framebuffer, JpegChannel channel, const JpegSettings &settings);
-std::string readChannelAsPng(UserFramebuffer &framebuffer, PngChannel channel);
-std::string readChannelsAsExr(UserFramebuffer &framebuffer, const std::set<FramebufferChannel> &channels);
+std::vector<char> readChannel(UserFramebuffer &framebuffer, FramebufferChannel channel);
+std::vector<char> readChannelAsJpeg(UserFramebuffer &framebuffer, JpegChannel channel, const JpegSettings &settings);
+std::vector<char> readChannelAsPng(UserFramebuffer &framebuffer, PngChannel channel);
+std::vector<char> readChannelsAsExr(UserFramebuffer &framebuffer, const std::set<FramebufferChannel> &channels);
 }

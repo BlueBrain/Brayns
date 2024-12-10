@@ -61,5 +61,5 @@ struct PickResult
     std::uint32_t primitiveIndex;
 };
 
-std::optional<PickResult> pick(Device &device, const RenderSettings &settings, Vector2 normalizedScreenPosition);
+std::optional<PickResult> pick(Device &device, const RenderSettings &settings, Vector2 position);
 }

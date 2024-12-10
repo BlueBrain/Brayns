@@ -30,6 +30,7 @@
 #include "types/Buffer.h"
 #include "types/Consts.h"
 #include "types/Enums.h"
+#include "types/Info.h"
 #include "types/Maps.h"
 #include "types/Math.h"
 #include "types/Objects.h"

@@ -18,18 +18,21 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Any, NamedTuple
+from typing import TypedDict, Unpack
 
 from brayns.network.connection import Connection
-from brayns.utils.parsing import deserialize_vector, get, get_tuple, try_get
-from brayns.utils.vector import Vector3
+from brayns.utils.composing import serialize
+from brayns.utils.parsing import deserialize
 
-from .objects import Object, create_composed_object, get_specific_object, update_specific_object
+from .objects import CreateObjectParams, Object, create_specific_object, get_specific_object, update_specific_object
 
 
 class Volume(Object): ...
+
+
+class RegularVolume(Volume): ...
 
 
 class VoxelType(Enum):
@@ -45,83 +48,43 @@ class VolumeFilter(Enum):
     CUBIC = "Cubic"
 
 
-class VolumeType(Enum):
-    CELL_CENTERED = "CellCentered"
-    VERTEX_CENTERED = "VertexCentered"
-
-
 @dataclass
-class RegularVolumeUpdate:
-    origin: Vector3 = Vector3()
-    spacing: Vector3 = Vector3.full(1.0)
-    type: VolumeType = VolumeType.VERTEX_CENTERED
-    filter: VolumeFilter = VolumeFilter.LINEAR
-    background: float | None = None
-
-
-def serialize_volume_update(settings: RegularVolumeUpdate) -> dict[str, Any]:
-    return {
-        "origin": list(settings.origin),
-        "spacing": list(settings.spacing),
-        "type": settings.type.value,
-        "filter": settings.filter.value,
-        "background": settings.background,
-    }
-
-
-def deserialize_volume_update(message: dict[str, Any]) -> RegularVolumeUpdate:
-    return RegularVolumeUpdate(
-        origin=deserialize_vector(message, "origin", Vector3),
-        spacing=deserialize_vector(message, "spacing", Vector3),
-        type=VolumeType(get(message, "type", str)),
-        filter=VolumeFilter(get(message, "filter", str)),
-        background=try_get(message, "background", float | None, None),
-    )
-
-
-class Size3(NamedTuple):
-    x: int
-    y: int
-    z: int
-
-
-@dataclass
-class RegularVolumeSettings:
+class GetRegularVolumeResult:
     voxel_type: VoxelType
-    voxel_count: Size3
-    update: RegularVolumeUpdate = field(default_factory=RegularVolumeUpdate)
+    size: tuple[int, int, int]
+    origin: tuple[float, float, float]
+    spacing: tuple[float, float, float]
+    cell_centered: bool
+    filter: VolumeFilter
+    background: float | None
 
 
-def serialize_volume_settings(settings: RegularVolumeSettings) -> dict[str, Any]:
-    return {
-        "voxelType": settings.voxel_type.value,
-        "voxelCount": list(settings.voxel_count),
-        "settings": serialize_volume_update(settings.update),
-    }
+class UpdateRegularVolumeParams(TypedDict, total=False):
+    origin: tuple[float, float, float]
+    spacing: tuple[float, float, float]
+    cell_centered: bool
+    filter: VolumeFilter
+    background: float | None
 
 
-def deserialize_volume_settings(message: dict[str, Any]) -> RegularVolumeSettings:
-    return RegularVolumeSettings(
-        voxel_type=VoxelType(get(message, "voxelType", str)),
-        voxel_count=Size3(*get_tuple(message, "voxelCount", int, 3)),
-        update=deserialize_volume_update(get(message, "settings", dict[str, Any])),
-    )
+class CreateRegularVolumeParams(CreateObjectParams, UpdateRegularVolumeParams):
+    voxel_type: VoxelType
+    size: tuple[int, int, int]
 
 
-class RegularVolume(Volume): ...
-
-
-async def create_regular_volume(connection: Connection, settings: RegularVolumeSettings, data: bytes) -> RegularVolume:
-    params = serialize_volume_settings(settings)
-    object = await create_composed_object(connection, "RegularVolume", None, params, data)
+async def create_regular_volume(
+    connection: Connection, data: bytes, **settings: Unpack[CreateRegularVolumeParams]
+) -> RegularVolume:
+    object = await create_specific_object(connection, "RegularVolume", serialize(settings), data)
     return RegularVolume(object.id)
 
 
-async def get_regular_volume(connection: Connection, volume: RegularVolume) -> RegularVolumeSettings:
+async def get_regular_volume(connection: Connection, volume: RegularVolume) -> GetRegularVolumeResult:
     result = await get_specific_object(connection, "RegularVolume", volume)
-    return deserialize_volume_settings(result)
+    return deserialize(result, GetRegularVolumeResult)
 
 
-async def update_regular_volume(connection: Connection, volume: RegularVolume, settings: RegularVolumeUpdate) -> None:
-    params = serialize_volume_update(settings)
-    await update_specific_object(connection, "RegularVolume", volume, params)
+async def update_regular_volume(
+    connection: Connection, volume: RegularVolume, **settings: Unpack[UpdateRegularVolumeParams]
+) -> None:
+    await update_specific_object(connection, "RegularVolume", volume, serialize(settings))

@@ -19,16 +19,16 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 from dataclasses import dataclass, field
+from logging import Logger
 
 from brayns.network.connection import Connection
 from brayns.network.json_rpc import (
     JsonRpcErrorResponse,
     JsonRpcResponse,
     JsonRpcSuccessResponse,
-    compose_binary,
-    compose_text,
 )
 from brayns.network.websocket import WebSocket
+from brayns.utils.composing import compose_binary, compose_text
 
 
 @dataclass
@@ -92,4 +92,4 @@ def mock_connection(responses: list[JsonRpcResponse]) -> tuple[Connection, MockW
 
     websocket = MockWebSocket(packets)
 
-    return Connection(websocket), websocket
+    return Connection(websocket, Logger("test")), websocket

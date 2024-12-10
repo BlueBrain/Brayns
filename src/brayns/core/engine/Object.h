@@ -41,7 +41,7 @@ class Object
 public:
     using Handle = OSPObject;
 
-    explicit Object(Handle handle = nullptr):
+    explicit Object(Handle handle):
         _handle(handle)
     {
     }
@@ -93,6 +93,8 @@ public:
         return T(static_cast<typename T::Handle>(_handle));
     }
 
+    auto operator<=>(const Object &other) const = default;
+
 private:
     Handle _handle;
 
@@ -119,7 +121,7 @@ class Managed : public Object
 public:
     using Handle = HandleType;
 
-    explicit Managed(Handle handle = nullptr):
+    explicit Managed(Handle handle):
         Object(handle)
     {
     }
@@ -181,8 +183,7 @@ template<typename T>
 struct ObjectParamReflector;
 
 template<typename T>
-concept ObjectParam =
-    std::is_void_v<decltype(ObjectParamReflector<T>::set(OSPObject(), "", std::declval<const T &>()))>;
+concept ObjectParam = std::is_void_v<decltype(ObjectParamReflector<T>::set(OSPObject(), "", std::declval<const T &>()))>;
 
 template<ObjectParam T>
 void setObjectParam(OSPObject handle, const char *id, const T &value)
@@ -195,8 +196,7 @@ struct ObjectParamReflector<T>
 {
     static void set(OSPObject handle, const char *id, const T &value)
     {
-        constexpr auto type = dataTypeOf<T>;
-        ospSetParam(handle, id, type, &value);
+        ospSetParam(handle, id, dataTypeOf<T>, &value);
     }
 };
 
@@ -229,6 +229,20 @@ struct ObjectParamReflector<std::monostate>
     static void set(OSPObject handle, const char *id, std::monostate)
     {
         removeObjectParam(handle, id);
+    }
+};
+}
+
+namespace std
+{
+using namespace brayns;
+
+template<>
+struct hash<Object>
+{
+    std::size_t operator()(const Object &object) const
+    {
+        return reinterpret_cast<std::size_t>(object.getHandle());
     }
 };
 }

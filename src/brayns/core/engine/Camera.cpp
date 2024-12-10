@@ -27,47 +27,23 @@ using namespace brayns;
 
 void setCameraParams(OSPCamera handle, const CameraSettings &settings)
 {
-    setObjectParam(handle, "position", settings.view.position);
-    setObjectParam(handle, "direction", settings.view.direction);
-    setObjectParam(handle, "up", settings.view.up);
+    setObjectParam(handle, "position", settings.position);
+    setObjectParam(handle, "direction", settings.direction);
+    setObjectParam(handle, "up", settings.up);
     setObjectParam(handle, "nearClip", settings.nearClip);
-    setObjectParam(handle, "imageStart", settings.imageRegion.lower);
-    setObjectParam(handle, "imageEnd", settings.imageRegion.upper);
-}
-
-void setStereoParams(OSPCamera handle, const std::optional<Stereo> &stereo)
-{
-    if (stereo)
-    {
-        setObjectParam(handle, "stereoMode", static_cast<OSPStereoMode>(stereo->mode));
-        setObjectParam(handle, "interpupillaryDistance", stereo->interpupillaryDistance);
-    }
-    else
-    {
-        removeObjectParam(handle, "stereoMode");
-        removeObjectParam(handle, "interpupillaryDistance");
-    }
+    setObjectParam(handle, "imageStart", settings.region.lower);
+    setObjectParam(handle, "imageEnd", settings.region.upper);
 }
 
 void setPerspectiveParams(OSPCamera handle, const PerspectiveCameraSettings &settings)
 {
     setObjectParam(handle, "fovy", degrees(settings.fovy));
     setObjectParam(handle, "aspect", settings.aspect);
-
-    if (settings.depthOfField)
-    {
-        setObjectParam(handle, "apertureRadius", settings.depthOfField->apertureRadius);
-        setObjectParam(handle, "focusDistance", settings.depthOfField->focusDistance);
-    }
-    else
-    {
-        removeObjectParam(handle, "apertureRadius");
-        removeObjectParam(handle, "focusDistance");
-    }
-
+    setObjectParam(handle, "apertureRadius", settings.apertureRadius);
+    setObjectParam(handle, "focusDistance", settings.focusDistance);
     setObjectParam(handle, "architectural", settings.architectural);
-
-    setStereoParams(handle, settings.stereo);
+    setObjectParam(handle, "stereoMode", static_cast<OSPStereoMode>(settings.stereo));
+    setObjectParam(handle, "interpupillaryDistance", settings.interpupillaryDistance);
 }
 
 void setOrthographicParams(OSPCamera handle, const OrthographicCameraSettings &settings)
@@ -78,7 +54,8 @@ void setOrthographicParams(OSPCamera handle, const OrthographicCameraSettings &s
 
 void setPanoramicParams(OSPCamera handle, const PanoramicCameraSettings &settings)
 {
-    setStereoParams(handle, settings.stereo);
+    setObjectParam(handle, "stereoMode", static_cast<OSPStereoMode>(settings.stereo));
+    setObjectParam(handle, "interpupillaryDistance", settings.interpupillaryDistance);
 }
 }
 
@@ -98,17 +75,7 @@ void PerspectiveCamera::update(const PerspectiveCameraSettings &settings)
     commitObject(handle);
 }
 
-void PerspectiveCamera::setAspect(float aspect)
-{
-    auto handle = getHandle();
-    setObjectParam(handle, "aspect", aspect);
-    commitObject(handle);
-}
-
-PerspectiveCamera createPerspectiveCamera(
-    Device &device,
-    const CameraSettings &settings,
-    const PerspectiveCameraSettings &perspective)
+PerspectiveCamera createPerspectiveCamera(Device &device, const CameraSettings &settings, const PerspectiveCameraSettings &perspective)
 {
     auto handle = ospNewCamera("perspective");
     auto camera = wrapObjectHandleAs<PerspectiveCamera>(device, handle);
@@ -128,17 +95,7 @@ void OrthographicCamera::update(const OrthographicCameraSettings &settings)
     commitObject(handle);
 }
 
-void OrthographicCamera::setAspect(float aspect)
-{
-    auto handle = getHandle();
-    setObjectParam(handle, "aspect", aspect);
-    commitObject(handle);
-}
-
-OrthographicCamera createOrthographicCamera(
-    Device &device,
-    const CameraSettings &settings,
-    const OrthographicCameraSettings &orthographic)
+OrthographicCamera createOrthographicCamera(Device &device, const CameraSettings &settings, const OrthographicCameraSettings &orthographic)
 {
     auto handle = ospNewCamera("orthographic");
     auto camera = wrapObjectHandleAs<OrthographicCamera>(device, handle);
@@ -158,10 +115,7 @@ void PanoramicCamera::update(const PanoramicCameraSettings &settings)
     commitObject(handle);
 }
 
-PanoramicCamera createPanoramicCamera(
-    Device &device,
-    const CameraSettings &settings,
-    const PanoramicCameraSettings &panoramic)
+PanoramicCamera createPanoramicCamera(Device &device, const CameraSettings &settings, const PanoramicCameraSettings &panoramic)
 {
     auto handle = ospNewCamera("panoramic");
     auto camera = wrapObjectHandleAs<PanoramicCamera>(device, handle);

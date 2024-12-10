@@ -29,8 +29,8 @@
 
 #include <brayns/core/utils/Logger.h>
 
-#include "RequestQueue.h"
-#include "WebSocket.h"
+#include "Request.h"
+#include "WebSocketHandler.h"
 
 namespace brayns
 {
@@ -55,7 +55,7 @@ struct WebSocketServerSettings
 class WebSocketServer
 {
 public:
-    explicit WebSocketServer(std::unique_ptr<Poco::Net::HTTPServer> server, std::unique_ptr<RequestQueue> requests);
+    explicit WebSocketServer(std::unique_ptr<WebSocketHandler> handler, std::unique_ptr<Poco::Net::HTTPServer> server);
     ~WebSocketServer();
 
     WebSocketServer(const WebSocketServer &) = delete;
@@ -63,11 +63,11 @@ public:
     WebSocketServer &operator=(const WebSocketServer &) = delete;
     WebSocketServer &operator=(WebSocketServer &&) = default;
 
-    std::vector<Request> waitForRequests();
+    Request wait();
 
 private:
+    std::unique_ptr<WebSocketHandler> _handler;
     std::unique_ptr<Poco::Net::HTTPServer> _server;
-    std::unique_ptr<RequestQueue> _requests;
 };
 
 WebSocketServer startServer(const WebSocketServerSettings &settings, Logger &logger);

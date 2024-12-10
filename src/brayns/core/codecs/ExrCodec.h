@@ -51,5 +51,5 @@ struct ExrImage
     RowOrder rowOrder = RowOrder::BottomUp;
 };
 
-std::string encodeExr(const ExrImage &image);
+std::vector<char> encodeExr(const ExrImage &image);
 }

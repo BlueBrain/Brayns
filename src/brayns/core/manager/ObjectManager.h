@@ -21,36 +21,55 @@
 
 #pragma once
 
-#include <concepts>
-#include <mutex>
+#include <map>
+#include <memory>
+#include <vector>
 
-#include <brayns/core/utils/Logger.h>
+#include <brayns/core/utils/IdGenerator.h>
 
-#include "ObjectRegistry.h"
+#include "Messages.h"
+#include "UserObject.h"
 
 namespace brayns
 {
 class ObjectManager
 {
 public:
-    explicit ObjectManager(ObjectRegistry objects, Logger &logger):
-        _objects(std::move(objects)),
-        _logger(&logger)
+    std::vector<ObjectSummary> getAll() const;
+    GetObjectResult get(ObjectId id) const;
+    void update(UpdateObjectParams params);
+    void remove(ObjectId id);
+    void clear();
+
+    template<typename T>
+    Stored<T> add(T value, ObjectMetadata metadata, ObjectSettings settings)
     {
+        auto ptr = toShared(std::move(value));
+        auto object = toShared(createObject(ptr, std::move(metadata), std::move(settings)));
+        store(object);
+        return Stored(std::move(object), std::move(ptr));
     }
 
-    auto visit(std::invocable<ObjectRegistry &> auto &&callable) -> decltype(callable(std::declval<ObjectRegistry &>()))
+    template<typename T>
+    Stored<T> getAsStored(ObjectId id) const
     {
-        _logger->info("Waiting for object manager lock");
-        auto lock = std::lock_guard(_mutex);
-        _logger->info("Object manager lock acquired");
+        const auto &object = retreive(id);
+        const auto &value = castAsShared<T>(*object);
+        return Stored<T>(object, value);
+    }
 
-        return callable(_objects);
+    template<typename T>
+    T &getAs(ObjectId id) const
+    {
+        const auto &object = retreive(id);
+        return *castAsShared<T>(*object);
     }
 
 private:
-    std::mutex _mutex;
-    ObjectRegistry _objects;
-    Logger *_logger;
+    std::map<ObjectId, std::shared_ptr<UserObject>> _objects;
+    IdGenerator<ObjectId> _ids{1};
+
+    void store(std::shared_ptr<UserObject> object);
+    const std::shared_ptr<UserObject> &retreive(ObjectId id) const;
 };
 }

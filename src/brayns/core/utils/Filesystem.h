@@ -22,11 +22,11 @@
 #pragma once
 
 #include <filesystem>
+#include <span>
 #include <string>
-#include <string_view>
 
 namespace brayns
 {
 std::string readFile(const std::filesystem::path &path);
-void writeFile(std::string_view data, const std::filesystem::path &path);
+void writeFile(std::span<const char> data, const std::filesystem::path &path);
 }

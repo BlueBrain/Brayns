@@ -90,23 +90,20 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     logger.info("Building JSON-RPC API");
 
-    auto api = Api();
-    auto builder = ApiBuilder();
+    auto tasks = createTaskManager();
+    auto endpoints = EndpointRegistry();
+    auto builder = ApiBuilder(endpoints);
 
-    addServiceEndpoints(builder, api, token);
+    addServiceEndpoints(builder, tasks, endpoints, token);
 
-    auto objects = ObjectRegistry();
-    auto locked = ObjectManager(std::move(objects), logger);
+    auto objects = ObjectManager();
 
-    addObjectEndpoints(builder, locked);
-
-    addDeviceEndpoints(builder, locked, device);
-
-    api = builder.build();
+    addObjectEndpoints(builder, objects);
+    addDeviceEndpoints(builder, objects, device);
 
     logger.info("JSON-RCP API ready");
 
-    auto methods = api.getMethods();
+    auto methods = endpoints.getMethods();
     logger.debug("Available methods:\n    {}", join(methods, "\n    "));
 
     logger.info("Starting websocket server on {}:{}", settings.host, settings.port);
@@ -116,8 +113,9 @@ void startServerAndRunService(const ServiceSettings &settings, Logger &logger)
 
     logger.info("Websocket server started");
 
-    logger.info("Service running");
-    runService([&] { return server.waitForRequests(); }, api, token, logger);
+    auto api = Api(logger, tasks, endpoints);
+
+    runService([&] { return server.wait(); }, api, token, logger);
 }
 }
 

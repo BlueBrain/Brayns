@@ -235,10 +235,8 @@ template<typename GetterType, typename SettingsType>
 using GetOptionType = std::decay_t<std::remove_pointer_t<std::invoke_result_t<GetterType, SettingsType &>>>;
 
 template<typename GetterType, typename SettingsType>
-concept ArgvOptionGetter =
-    std::invocable<GetterType, SettingsType &> && std::invocable<GetterType, const SettingsType &>
-    && std::is_pointer_v<std::invoke_result_t<GetterType, SettingsType &>>
-    && ReflectedArgvOption<GetOptionType<GetterType, SettingsType>>;
+concept ArgvOptionGetter = std::invocable<GetterType, SettingsType &> && std::invocable<GetterType, const SettingsType &>
+    && std::is_pointer_v<std::invoke_result_t<GetterType, SettingsType &>> && ReflectedArgvOption<GetOptionType<GetterType, SettingsType>>;
 
 template<typename SettingsType>
 class ArgvBuilder

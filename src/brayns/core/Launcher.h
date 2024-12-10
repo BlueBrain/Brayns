@@ -54,9 +54,7 @@ struct ArgvSettingsReflector<ServiceSettings>
 
         builder.description(getCopyright());
 
-        builder.option("help", [](auto &settings) { return &settings.help; })
-            .description("Display this help message and exit")
-            .defaultValue(false);
+        builder.option("help", [](auto &settings) { return &settings.help; }).description("Display this help message and exit").defaultValue(false);
 
         builder.option("version", [](auto &settings) { return &settings.version; })
             .description("Display brayns copyright with version and exit")
@@ -69,9 +67,7 @@ struct ArgvSettingsReflector<ServiceSettings>
         builder.option("host", [](auto &settings) { return &settings.host; })
             .description("Websocket server hostname, use 0.0.0.0 to allow any host to connect")
             .defaultValue("localhost");
-        builder.option("port", [](auto &settings) { return &settings.port; })
-            .description("Websocket server port")
-            .defaultValue(5'000);
+        builder.option("port", [](auto &settings) { return &settings.port; }).description("Websocket server port").defaultValue(5'000);
         builder.option("max-thread-count", [](auto &settings) { return &settings.maxThreadCount; })
             .description("Maximum number of threads for the websocket server")
             .defaultValue(10);

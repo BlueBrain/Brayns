@@ -24,7 +24,6 @@ from brayns import (
     Connection,
     FramebufferChannel,
     FramebufferFormat,
-    FramebufferSettings,
     JpegChannel,
     JsonRpcError,
     PngChannel,
@@ -39,8 +38,7 @@ from brayns import (
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_read_invalid_channel(connection: Connection) -> None:
-    settings = FramebufferSettings()
-    framebuffer = await create_framebuffer(connection, settings)
+    framebuffer = await create_framebuffer(connection)
 
     channel = FramebufferChannel.PRIMITIVE_ID
 
@@ -51,38 +49,32 @@ async def test_read_invalid_channel(connection: Connection) -> None:
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_read_framebuffer(connection: Connection) -> None:
-    settings = FramebufferSettings(channels={FramebufferChannel.PRIMITIVE_ID})
-    framebuffer = await create_framebuffer(connection, settings)
+    framebuffer = await create_framebuffer(connection, channels={FramebufferChannel.PRIMITIVE_ID})
 
     channel = FramebufferChannel.PRIMITIVE_ID
     data = await read_framebuffer(connection, framebuffer, channel)
 
     primitive_id = int.from_bytes(data[:4], "little", signed=False)
-
     assert primitive_id == 0
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_read_framebuffer_as_jpeg(connection: Connection) -> None:
-    settings = FramebufferSettings()
-    framebuffer = await create_framebuffer(connection, settings)
+    framebuffer = await create_framebuffer(connection)
 
     channel = JpegChannel.COLOR
     data = await read_framebuffer_as_jpeg(connection, framebuffer, channel)
-
     assert data
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_read_framebuffer_as_png(connection: Connection) -> None:
-    settings = FramebufferSettings()
-    framebuffer = await create_framebuffer(connection, settings)
+    framebuffer = await create_framebuffer(connection)
 
     channel = PngChannel.COLOR
     data = await read_framebuffer_as_png(connection, framebuffer, channel)
-
     assert data
 
 
@@ -90,9 +82,7 @@ async def test_read_framebuffer_as_png(connection: Connection) -> None:
 @pytest.mark.asyncio
 async def test_read_framebuffer_as_exr(connection: Connection) -> None:
     channels = set(FramebufferChannel)
-    settings = FramebufferSettings(format=FramebufferFormat.RGBA8, channels=channels)
-    framebuffer = await create_framebuffer(connection, settings)
+    framebuffer = await create_framebuffer(connection, format=FramebufferFormat.RGBA8, channels=channels)
 
     data = await read_framebuffer_as_exr(connection, framebuffer, channels)
-
     assert data

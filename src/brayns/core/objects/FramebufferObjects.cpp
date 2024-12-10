@@ -21,111 +21,45 @@
 
 #include "FramebufferObjects.h"
 
-namespace
-{
-using namespace brayns;
-
-std::vector<Stored<UserImageOperation>> getImageOperations(ObjectRegistry &objects, const std::vector<ObjectId> &ids)
-{
-    auto operations = std::vector<Stored<UserImageOperation>>();
-    operations.reserve(ids.size());
-
-    for (auto id : ids)
-    {
-        auto interface = objects.getAsStored<UserImageOperation>(id);
-        operations.push_back(std::move(interface));
-    }
-
-    return operations;
-}
-
-std::vector<ObjectId> getImageOperationIds(const std::vector<Stored<UserImageOperation>> &operations)
-{
-    auto ids = std::vector<ObjectId>();
-    ids.reserve(operations.size());
-
-    for (const auto &operation : operations)
-    {
-        ids.push_back(operation.getId());
-    }
-
-    return ids;
-}
-
-std::optional<Data<ImageOperation>> createImageOperationData(
-    Device &device,
-    const std::vector<Stored<UserImageOperation>> &operations)
-{
-    auto itemCount = operations.size();
-
-    if (itemCount == 0)
-    {
-        return std::nullopt;
-    }
-
-    auto data = allocateData<ImageOperation>(device, itemCount);
-    auto items = data.getItems();
-
-    for (auto i = std::size_t(0); i < itemCount; ++i)
-    {
-        const auto &interface = operations[i].get();
-        items[i] = interface.get();
-    }
-
-    return data;
-}
-}
+#include "common/Objects.h"
 
 namespace brayns
 {
-ObjectResult createFramebuffer(ObjectRegistry &objects, Device &device, const FramebufferParams &params)
+CreateObjectResult createFramebuffer(ObjectManager &objects, Device &device, const CreateFramebufferParams &params)
 {
-    auto settings = params.settings;
+    const auto &[base, derived] = params;
 
-    auto operations = getImageOperations(objects, params.operations);
-    settings.operations = createImageOperationData(device, operations);
+    auto settings = derived.value;
+
+    auto operations = getStoredObjects<UserImageOperation>(objects, derived.operations);
+    settings.operations = mapObjects(operations, [](const auto &object) { return object.get().get(); });
 
     auto framebuffer = createFramebuffer(device, settings);
 
     auto object = UserFramebuffer{
-        .device = device,
-        .settings = std::move(settings),
         .operations = std::move(operations),
+        .settings = std::move(settings),
         .value = std::move(framebuffer),
     };
 
-    auto stored = objects.add(std::move(object), "Framebuffer");
+    auto stored = objects.add(std::move(object), {"Framebuffer"}, base);
 
-    return {stored.getId()};
+    return getResult(stored);
 }
 
-FramebufferInfo getFramebuffer(ObjectRegistry &objects, const ObjectParams &params)
+GetFramebufferResult getFramebuffer(ObjectManager &objects, const GetObjectParams &params)
 {
     auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
 
-    auto ids = getImageOperationIds(framebuffer.operations);
-    auto result = FramebufferParams{framebuffer.settings, std::move(ids)};
+    auto ids = getObjectIds(framebuffer.operations);
     auto variance = framebuffer.value.getVariance();
 
-    return {std::move(result), variance};
+    auto info = FramebufferResult{{framebuffer.settings, std::move(ids)}, variance};
+
+    return getResult(std::move(info));
 }
 
-void updateFramebuffer(ObjectRegistry &objects, const FramebufferUpdate &params)
-{
-    auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
-    auto &device = framebuffer.device.get();
-
-    auto operations = getImageOperations(objects, params.settings.operations);
-    auto data = createImageOperationData(device, operations);
-
-    framebuffer.value.update(data);
-    device.throwIfError();
-
-    framebuffer.operations = std::move(operations);
-    framebuffer.settings.operations = std::move(data);
-}
-
-void clearFramebuffer(ObjectRegistry &objects, const ObjectParams &params)
+void clearFramebuffer(ObjectManager &objects, const GetObjectParams &params)
 {
     auto &framebuffer = objects.getAs<UserFramebuffer>(params.id);
     framebuffer.value.resetAccumulation();

@@ -57,51 +57,92 @@ void setRendererParams(OSPRenderer handle, const RendererSettings &settings)
 
     setObjectParam(handle, "pixelFilter", static_cast<OSPPixelFilterType>(settings.pixelFilter));
 }
-}
 
-namespace brayns
+void setAoRendererParams(OSPRenderer handle, const AoRendererSettings &settings)
 {
-AoRenderer createAoRenderer(Device &device, const AoRendererSettings &settings)
-{
-    auto handle = ospNewRenderer("ao");
-    auto renderer = wrapObjectHandleAs<AoRenderer>(device, handle);
-
-    setRendererParams(handle, settings.base);
-
     setObjectParam(handle, "aoSamples", static_cast<int>(settings.aoSamples));
     setObjectParam(handle, "aoDistance", settings.aoDistance);
     setObjectParam(handle, "aoIntensity", settings.aoIntensity);
     setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
-
-    commitObject(device, handle);
-
-    return renderer;
 }
 
-ScivisRenderer createScivisRenderer(Device &device, const ScivisRendererSettings &settings)
+void setScivisRendererParams(OSPRenderer handle, const ScivisRendererSettings &settings)
 {
-    auto handle = ospNewRenderer("scivis");
-    auto renderer = wrapObjectHandleAs<ScivisRenderer>(device, handle);
-
-    setRendererParams(handle, settings.base);
-
     setObjectParam(handle, "shadows", settings.shadows);
     setObjectParam(handle, "aoSamples", static_cast<int>(settings.aoSamples));
     setObjectParam(handle, "aoDistance", settings.aoDistance);
     setObjectParam(handle, "volumeSamplingRate", settings.volumeSamplingRate);
     setObjectParam(handle, "visibleLights", settings.showVisibleLights);
+}
+
+void setPathTracerParams(OSPRenderer handle, const PathTracerSettings &settings)
+{
+    (void)handle;
+    (void)settings;
+}
+}
+
+namespace brayns
+{
+void Renderer::update(const RendererSettings &settings)
+{
+    auto handle = getHandle();
+    setRendererParams(handle, settings);
+    commitObject(handle);
+}
+
+void AoRenderer::update(const AoRendererSettings &settings)
+{
+    auto handle = getHandle();
+    setAoRendererParams(handle, settings);
+    commitObject(handle);
+}
+
+AoRenderer createAoRenderer(Device &device, const RendererSettings &settings, const AoRendererSettings &ao)
+{
+    auto handle = ospNewRenderer("ao");
+    auto renderer = wrapObjectHandleAs<AoRenderer>(device, handle);
+
+    setRendererParams(handle, settings);
+    setAoRendererParams(handle, ao);
 
     commitObject(device, handle);
 
     return renderer;
 }
 
-PathTracer createPathTracer(Device &device, const PathTracerSettings &settings)
+void ScivisRenderer::update(const ScivisRendererSettings &settings)
+{
+    auto handle = getHandle();
+    setScivisRendererParams(handle, settings);
+    commitObject(handle);
+}
+
+ScivisRenderer createScivisRenderer(Device &device, const RendererSettings &settings, const ScivisRendererSettings &scivis)
+{
+    auto handle = ospNewRenderer("scivis");
+    auto renderer = wrapObjectHandleAs<ScivisRenderer>(device, handle);
+
+    setRendererParams(handle, settings);
+    setScivisRendererParams(handle, scivis);
+
+    commitObject(device, handle);
+
+    return renderer;
+}
+
+void PathTracer::update(const PathTracerSettings &settings)
+{
+    (void)settings;
+}
+
+PathTracer createPathTracer(Device &device, const RendererSettings &settings, const PathTracerSettings &pathTracer)
 {
     auto handle = ospNewRenderer("pathtracer");
     auto renderer = wrapObjectHandleAs<PathTracer>(device, handle);
 
-    setRendererParams(handle, settings.base);
+    setRendererParams(handle, settings);
+    setPathTracerParams(handle, pathTracer);
 
     commitObject(device, handle);
 

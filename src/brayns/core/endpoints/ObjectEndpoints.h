@@ -26,5 +26,5 @@
 
 namespace brayns
 {
-void addObjectEndpoints(ApiBuilder &builder, ObjectManager &manager);
+void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects);
 }

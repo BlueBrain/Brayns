@@ -57,7 +57,7 @@ std::string readFile(const std::filesystem::path &path)
     return data;
 }
 
-void writeFile(std::string_view data, const std::filesystem::path &path)
+void writeFile(std::span<const char> data, const std::filesystem::path &path)
 {
     auto stream = std::ofstream(path);
 

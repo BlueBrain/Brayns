@@ -52,5 +52,5 @@ public:
     void update(const ToneMapperSettings &settings);
 };
 
-ToneMapper createToneMapper(Device &device, const ToneMapperSettings &settings);
+ToneMapper createToneMapper(Device &device, const ToneMapperSettings &settings = {});
 }

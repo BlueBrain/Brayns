@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include <string>
+#include <vector>
 
 #include "Common.h"
 
 namespace brayns
 {
-std::string encodePng(const ImageView &image);
+std::vector<char> encodePng(const ImageView &image);
 }

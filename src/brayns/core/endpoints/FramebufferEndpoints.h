@@ -27,5 +27,5 @@
 
 namespace brayns
 {
-void addFramebufferEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
+void addFramebufferEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

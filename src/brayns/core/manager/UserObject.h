@@ -22,9 +22,9 @@
 #pragma once
 
 #include <any>
-#include <concepts>
 #include <memory>
-#include <string>
+
+#include <fmt/format.h>
 
 #include <brayns/core/jsonrpc/Errors.h>
 
@@ -32,49 +32,14 @@
 
 namespace brayns
 {
-struct UserObject
+template<typename T>
+std::shared_ptr<T> toShared(T value)
 {
-    ObjectInfo info;
-    std::any value;
-};
+    return std::make_shared<T>(std::move(value));
+}
 
 template<typename T>
-class Stored
-{
-public:
-    explicit Stored(std::shared_ptr<UserObject> wrapper, std::shared_ptr<T> object):
-        _wrapper(std::move(wrapper)),
-        _object(std::move(object))
-    {
-    }
-
-    const ObjectInfo &getInfo() const
-    {
-        return _wrapper->info;
-    }
-
-    ObjectId getId() const
-    {
-        return _wrapper->info.id;
-    }
-
-    bool isRemoved() const
-    {
-        return getId() == nullId;
-    }
-
-    T &get() const
-    {
-        return *_object;
-    }
-
-private:
-    std::shared_ptr<UserObject> _wrapper;
-    std::shared_ptr<T> _object;
-};
-
-template<typename T>
-const std::shared_ptr<T> &castAsShared(const std::any &value, const ObjectInfo &info)
+const std::shared_ptr<T> &castAsShared(const std::any &value, ObjectId id, const std::string &type)
 {
     const auto *ptr = std::any_cast<std::shared_ptr<T>>(&value);
 
@@ -83,12 +48,83 @@ const std::shared_ptr<T> &castAsShared(const std::any &value, const ObjectInfo &
         return *ptr;
     }
 
-    throw InvalidParams(fmt::format("Invalid type for object with ID {}: {}", info.id, info.type));
+    throw InvalidParams(fmt::format("Invalid type for object with ID {}: {}", id, type));
+}
+
+struct UserObject
+{
+    ObjectId id;
+    ObjectMetadata metadata;
+    ObjectSettings settings;
+    std::any value;
+};
+
+template<typename T>
+UserObject createObject(std::shared_ptr<T> value, ObjectMetadata metadata, ObjectSettings settings)
+{
+    return {
+        .id = nullId,
+        .metadata = std::move(metadata),
+        .settings = std::move(settings),
+        .value = std::move(value),
+    };
+}
+
+inline ObjectSummary getSummary(const UserObject &object)
+{
+    return {object.id, object.metadata.type, object.settings.tag};
+}
+
+inline GetObjectResult getResult(const UserObject &object)
+{
+    return {object.metadata, object.settings};
 }
 
 template<typename T>
-T &castAs(const std::any &value, const ObjectInfo &info)
+const std::shared_ptr<T> &castAsShared(const UserObject &object)
 {
-    return *castAsShared<T>(value, info);
+    return castAsShared<T>(object.value, object.id, object.metadata.type);
+}
+
+template<typename T>
+class Stored
+{
+public:
+    explicit Stored(std::shared_ptr<UserObject> object, std::shared_ptr<T> value):
+        _object(std::move(object)),
+        _value(std::move(value))
+    {
+    }
+
+    ObjectId getId() const
+    {
+        return _object->id;
+    }
+
+    const std::string &getType() const
+    {
+        return _object->metadata.type;
+    }
+
+    T &get() const
+    {
+        return *_value;
+    }
+
+private:
+    std::shared_ptr<UserObject> _object;
+    std::shared_ptr<T> _value;
+};
+
+template<typename T, typename U>
+const std::shared_ptr<T> &castAsShared(const std::any &value, const Stored<U> &object)
+{
+    return castAsShared<T>(value, object.getId(), object.getType());
+}
+
+template<typename T>
+CreateObjectResult getResult(const Stored<T> &object)
+{
+    return {object.getId()};
 }
 }

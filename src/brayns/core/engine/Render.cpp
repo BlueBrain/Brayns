@@ -60,13 +60,13 @@ Future render(Device &device, const RenderSettings &settings)
     return wrapObjectHandleAs<Future>(device, handle);
 }
 
-std::optional<PickResult> pick(Device &device, const RenderSettings &settings, Vector2 normalizedScreenPosition)
+std::optional<PickResult> pick(Device &device, const RenderSettings &settings, Vector2 position)
 {
     auto framebuffer = settings.framebuffer.getHandle();
     auto renderer = settings.renderer.getHandle();
     auto camera = settings.camera.getHandle();
     auto world = settings.world.getHandle();
-    auto [screenX, screenY] = normalizedScreenPosition;
+    auto [screenX, screenY] = position;
 
     auto result = OSPPickResult();
     ospPick(&result, framebuffer, renderer, camera, world, screenX, screenY);

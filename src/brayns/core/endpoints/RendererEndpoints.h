@@ -21,39 +21,11 @@
 
 #pragma once
 
-#include <condition_variable>
-#include <functional>
-#include <mutex>
-#include <vector>
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/engine/Device.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-using ClientId = std::uint32_t;
-
-struct Message
-{
-    std::string data;
-    bool binary = false;
-};
-
-using ResponseHandler = std::function<void(const Message &)>;
-
-struct Request
-{
-    ClientId clientId;
-    Message message;
-    ResponseHandler respond;
-};
-
-class RequestQueue
-{
-public:
-    void push(Request request);
-    std::vector<Request> wait();
-
-private:
-    std::mutex _mutex;
-    std::condition_variable _condition;
-    std::vector<Request> _requests;
-};
+void addRendererEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

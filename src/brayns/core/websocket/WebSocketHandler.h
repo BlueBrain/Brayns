@@ -21,12 +21,10 @@
 
 #pragma once
 
-#include <mutex>
-
 #include <brayns/core/utils/IdGenerator.h>
 #include <brayns/core/utils/Logger.h>
 
-#include "RequestQueue.h"
+#include "Request.h"
 #include "WebSocket.h"
 
 namespace brayns
@@ -34,14 +32,14 @@ namespace brayns
 class WebSocketHandler
 {
 public:
-    explicit WebSocketHandler(RequestQueue &requests, Logger &logger);
+    explicit WebSocketHandler(Logger &logger);
 
-    void handle(WebSocket &websocket);
+    Request wait();
+    void handle(WebSocket websocket);
 
 private:
-    RequestQueue *_requests;
     Logger *_logger;
-    std::mutex _mutex;
+    RequestQueue _requests;
     IdGenerator<ClientId> _ids;
 };
 }

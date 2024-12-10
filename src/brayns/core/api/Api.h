@@ -23,36 +23,26 @@
 
 #include <map>
 
-#include <brayns/core/utils/IdGenerator.h>
+#include <brayns/core/jsonrpc/Messages.h>
+#include <brayns/core/utils/Logger.h>
+#include <brayns/core/websocket/Request.h>
 
 #include "Endpoint.h"
 #include "Task.h"
+#include "TaskManager.h"
 
 namespace brayns
 {
 class Api
 {
 public:
-    explicit Api(std::map<std::string, Endpoint> endpoints = {});
-    ~Api();
+    explicit Api(Logger &logger, TaskManager &tasks, const EndpointRegistry &endpoints);
 
-    Api(const Api &) = delete;
-    Api(Api &&) = default;
-    Api &operator=(const Api &) = delete;
-    Api &operator=(Api &&) = default;
-
-    std::vector<std::string> getMethods() const;
-    const EndpointSchema &getSchema(const std::string &method) const;
-    Payload execute(const std::string &method, Payload params);
-    std::vector<TaskInfo> getTasks() const;
-    TaskInfo getTask(TaskId id) const;
-    Payload waitForTaskResult(TaskId id);
-    void cancelTask(TaskId id);
-    void cancelAllTasks();
+    void execute(const Request &request);
 
 private:
-    std::map<std::string, Endpoint> _endpoints;
-    std::map<TaskId, TaskInterface> _tasks;
-    IdGenerator<TaskId> _ids;
+    Logger *_logger;
+    TaskManager *_tasks;
+    const EndpointRegistry *_endpoints;
 };
 }

@@ -88,7 +88,7 @@ template<ReflectedJson T>
 struct Params
 {
     T value;
-    std::string binary = {};
+    std::vector<char> binary = {};
 };
 
 template<ReflectedJson T>

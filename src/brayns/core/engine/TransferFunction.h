@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "Data.h"
 #include "Device.h"
 #include "Object.h"
@@ -36,7 +38,7 @@ public:
 struct LinearTransferFunctionSettings
 {
     Box1 scalarRange;
-    Data<Color4> colors;
+    std::vector<Color4> colors;
 };
 
 class LinearTransferFunction : public TransferFunction

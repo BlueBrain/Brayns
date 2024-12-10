@@ -19,175 +19,254 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Task.h"
-
-#include <cassert>
+#include "Api.h"
 
 #include <fmt/format.h>
-#include "Api.h"
+
+#include <brayns/core/jsonrpc/Errors.h>
+#include <brayns/core/jsonrpc/Parser.h>
 
 namespace
 {
 using namespace brayns;
 
-const TaskInterface &getRawTask(const std::map<TaskId, TaskInterface> &tasks, TaskId id)
+JsonRpcRequest parseRequest(const Message &message)
 {
-    auto i = tasks.find(id);
-
-    if (i == tasks.end())
-    {
-        throw InvalidParams(fmt::format("Task ID not found: {}", id));
-    }
-
-    return i->second;
+    return std::visit([](const auto &data) { return parseJsonRpcRequest(data); }, message);
 }
 
-TaskId addTask(TaskInterface task, std::map<TaskId, TaskInterface> &tasks, IdGenerator<TaskId> &ids)
+Message composeSuccessResponse(const JsonRpcSuccessResponse &response)
 {
-    auto id = ids.next();
-    assert(!tasks.contains(id));
+    if (response.result.binary.empty())
+    {
+        return composeAsText(response);
+    }
+
+    return composeAsBinary(response);
+}
+
+void sendSuccessResponse(Payload result, const ResponseHandler &handler, JsonRpcId id)
+{
+    auto response = JsonRpcSuccessResponse{std::move(id), std::move(result)};
+    auto message = composeSuccessResponse(response);
+    handler(message);
+}
+
+void sendSuccessResponseIfNeeded(Payload result, const ResponseHandler &handler, std::optional<JsonRpcId> id)
+{
+    if (id)
+    {
+        sendSuccessResponse(std::move(result), handler, std::move(*id));
+    }
+}
+
+void sendErrorResponse(const JsonRpcException &e, const ResponseHandler &handler, std::optional<JsonRpcId> id = {})
+{
+    auto response = JsonRpcErrorResponse{composeError(e), std::move(*id)};
+    auto message = composeAsText(response);
+    handler(message);
+}
+
+void sendErrorResponseIfNeeded(const JsonRpcException &e, const ResponseHandler &handler, std::optional<JsonRpcId> id)
+{
+    if (id)
+    {
+        sendErrorResponse(e, handler, std::move(id));
+    }
+}
+
+class ApiTaskMonitor
+{
+public:
+    explicit ApiTaskMonitor(Logger &logger, std::optional<JsonRpcId> id, Task task, ResponseHandler handler):
+        _logger(&logger),
+        _id(std::move(id)),
+        _task(std::move(task)),
+        _handler(std::move(handler))
+    {
+    }
+
+    void wait()
+    {
+        try
+        {
+            _logger->info("Executing request {}", toString(_id));
+            auto result = _task.wait();
+            _logger->info("Executed request {}", toString(_id));
+
+            sendSuccessResponseIfNeeded(std::move(result), _handler, _id);
+        }
+        catch (const JsonRpcException &e)
+        {
+            _logger->warn("Execution error: {}", e.what());
+            sendErrorResponseIfNeeded(e, _handler, _id);
+        }
+        catch (const std::exception &e)
+        {
+            _logger->error("Internal execution error: {}", e.what());
+            sendErrorResponseIfNeeded(InternalError(e), _handler, _id);
+        }
+        catch (...)
+        {
+            _logger->error("Unknown execution error");
+            sendErrorResponseIfNeeded(InternalError("Unknown parse error"), _handler, _id);
+        }
+    }
+
+    TaskOperation getCurrentOperation() const
+    {
+        return _task.getCurrentOperation();
+    }
+
+    void cancel()
+    {
+        _task.cancel();
+    }
+
+private:
+    Logger *_logger;
+    std::optional<JsonRpcId> _id;
+    Task _task;
+    ResponseHandler _handler;
+};
+
+class ApiTask
+{
+public:
+    explicit ApiTask(Logger &logger, std::optional<JsonRpcId> id, EndpointTask task, ResponseHandler handler):
+        _logger(&logger),
+        _id(std::move(id)),
+        _task(std::move(task)),
+        _handler(std::move(handler))
+    {
+    }
+
+    std::optional<TaskMonitor> start()
+    {
+        try
+        {
+            _logger->info("Starting request {}", toString(_id));
+            auto task = _task.start();
+            _logger->info("Started request {}", toString(_id));
+
+            auto ptr = std::make_shared<ApiTaskMonitor>(*_logger, std::move(_id), std::move(task), std::move(_handler));
+
+            return TaskMonitor{
+                .wait = [=] { ptr->wait(); },
+                .getCurrentOperation = [=] { return ptr->getCurrentOperation(); },
+                .cancel = [=] { ptr->cancel(); },
+            };
+        }
+        catch (const JsonRpcException &e)
+        {
+            _logger->warn("Start error: {}", e.what());
+            sendErrorResponseIfNeeded(e, _handler, _id);
+        }
+        catch (const std::exception &e)
+        {
+            _logger->error("Internal start error: {}", e.what());
+            sendErrorResponseIfNeeded(InternalError(e), _handler, _id);
+        }
+        catch (...)
+        {
+            _logger->error("Unknown start error");
+            sendErrorResponseIfNeeded(InternalError("Unknown start error"), _handler, _id);
+        }
+
+        return std::nullopt;
+    }
+
+    void cancel()
+    {
+        _logger->info("Task {} cancelled before start", toString(_id));
+        sendErrorResponseIfNeeded(TaskCancelledException(), _handler, _id);
+    }
+
+private:
+    Logger *_logger;
+    std::optional<JsonRpcId> _id;
+    EndpointTask _task;
+    ResponseHandler _handler;
+};
+
+ManagedTask createTask(Logger &logger, const EndpointRegistry &endpoints, JsonRpcRequest request, ResponseHandler handler)
+{
+    auto task = endpoints.createTask(request.method, std::move(request.params));
+    auto priority = task.hasPriority();
+
+    auto ptr = std::make_shared<ApiTask>(logger, request.id, std::move(task), std::move(handler));
+
+    return {
+        .id = std::move(request.id),
+        .priority = priority,
+        .start = [=] { return ptr->start(); },
+        .cancel = [=] { ptr->cancel(); },
+    };
+}
+
+void executeRequest(Logger &logger, const EndpointRegistry &endpoints, TaskManager &tasks, JsonRpcRequest request, const ResponseHandler &handler)
+{
+    auto id = request.id;
 
     try
     {
-        tasks[id] = std::move(task);
+        logger.info("Scheduling request for execution");
+        auto task = createTask(logger, endpoints, std::move(request), handler);
+        logger.info("Scheduled request for execution");
+
+        tasks.add(std::move(task));
+    }
+    catch (const JsonRpcException &e)
+    {
+        logger.warn("Schedule error: {}", e.what());
+        sendErrorResponseIfNeeded(e, handler, id);
+    }
+    catch (const std::exception &e)
+    {
+        logger.error("Internal schedule error: {}", e.what());
+        sendErrorResponseIfNeeded(InternalError(e), handler, id);
     }
     catch (...)
     {
-        ids.recycle(id);
-        throw;
+        logger.error("Unknown schedule error");
+        sendErrorResponseIfNeeded(InternalError("Unknown parse error"), handler, id);
     }
-
-    return id;
 }
 }
 
 namespace brayns
 {
-Api::Api(std::map<std::string, Endpoint> endpoints):
-    _endpoints(std::move(endpoints))
+Api::Api(Logger &logger, TaskManager &tasks, const EndpointRegistry &endpoints):
+    _logger(&logger),
+    _tasks(&tasks),
+    _endpoints(&endpoints)
 {
 }
 
-Api::~Api()
+void Api::execute(const Request &request)
 {
-    cancelAllTasks();
-}
-
-std::vector<std::string> Api::getMethods() const
-{
-    auto result = std::vector<std::string>();
-    result.reserve(_endpoints.size());
-
-    for (const auto &[method, endpoint] : _endpoints)
+    try
     {
-        result.push_back(method);
+        _logger->info("Parsing request");
+        auto parsed = parseRequest(request.message);
+        _logger->info("Parsed request");
+
+        executeRequest(*_logger, *_endpoints, *_tasks, std::move(parsed), request.respond);
     }
-
-    return result;
-}
-
-const EndpointSchema &Api::getSchema(const std::string &method) const
-{
-    auto i = _endpoints.find(method);
-
-    if (i == _endpoints.end())
+    catch (const JsonRpcException &e)
     {
-        throw InvalidParams(fmt::format("Invalid endpoint method: '{}'", method));
+        _logger->warn("Parse error: {}", e.what());
+        sendErrorResponse(e, request.respond);
     }
-
-    return i->second.schema;
-}
-
-Payload Api::execute(const std::string &method, Payload params)
-{
-    auto i = _endpoints.find(method);
-
-    if (i == _endpoints.end())
+    catch (const std::exception &e)
     {
-        throw MethodNotFound(method);
+        _logger->error("Internal parse error: {}", e.what());
+        sendErrorResponse(InternalError(e), request.respond);
     }
-
-    const auto &endpoint = i->second;
-
-    auto errors = validate(params.json, endpoint.schema.params);
-
-    if (!errors.empty())
+    catch (...)
     {
-        throw InvalidParams("Invalid params schema", errors);
+        _logger->error("Unknown parse error");
+        sendErrorResponse(InternalError("Unknown parse error"), request.respond);
     }
-
-    if (endpoint.schema.async)
-    {
-        const auto &handler = std::get<AsyncEndpointHandler>(endpoint.handler);
-
-        auto task = handler(std::move(params));
-
-        auto id = addTask(std::move(task), _tasks, _ids);
-
-        return {serializeToJson(TaskResult{id})};
-    }
-
-    const auto &handler = std::get<SyncEndpointHandler>(endpoint.handler);
-
-    return handler(std::move(params));
-}
-
-std::vector<TaskInfo> Api::getTasks() const
-{
-    auto infos = std::vector<TaskInfo>();
-    infos.reserve(_tasks.size());
-
-    for (const auto &[id, task] : _tasks)
-    {
-        auto operationCount = task.operationCount;
-        auto currentOperation = task.getCurrentOperation();
-
-        infos.push_back({id, operationCount, std::move(currentOperation)});
-    }
-
-    return infos;
-}
-
-TaskInfo Api::getTask(TaskId id) const
-{
-    const auto &task = getRawTask(_tasks, id);
-
-    auto operationCount = task.operationCount;
-    auto currentOperation = task.getCurrentOperation();
-
-    return {id, operationCount, std::move(currentOperation)};
-}
-
-Payload Api::waitForTaskResult(TaskId id)
-{
-    const auto &task = getRawTask(_tasks, id);
-
-    auto result = task.wait();
-
-    _tasks.erase(id);
-    _ids.recycle(id);
-
-    return result;
-}
-
-void Api::cancelTask(TaskId id)
-{
-    const auto &task = getRawTask(_tasks, id);
-
-    task.cancel();
-
-    _tasks.erase(id);
-    _ids.recycle(id);
-}
-
-void Api::cancelAllTasks()
-{
-    for (const auto &[id, task] : _tasks)
-    {
-        task.cancel();
-    }
-
-    _tasks.clear();
-    _ids.reset();
 }
 }

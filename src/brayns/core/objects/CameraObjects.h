@@ -26,23 +26,15 @@
 #include <functional>
 
 #include <brayns/core/engine/Camera.h>
-#include <brayns/core/manager/ObjectRegistry.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-template<>
-struct JsonObjectReflector<View>
+struct UserCamera
 {
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<View>();
-        builder.field("position", [](auto &object) { return &object.position; }).description("Position XYZ");
-        builder.field("direction", [](auto &object) { return &object.direction; }).description("Forward direction XYZ");
-        builder.field("up", [](auto &object) { return &object.up; })
-            .description("Up direction XYZ")
-            .defaultValue(Vector3(0.0F, 1.0F, 0.0F));
-        return builder.build();
-    }
+    CameraSettings settings;
+    std::any value;
+    std::function<Camera()> get;
 };
 
 template<>
@@ -51,84 +43,51 @@ struct JsonObjectReflector<CameraSettings>
     static auto reflect()
     {
         auto builder = JsonBuilder<CameraSettings>();
-        builder.field("view", [](auto &object) { return &object.view; }).description("Camera view in 3D space");
+        builder.field("position", [](auto &object) { return &object.position; })
+            .description("Camera position XYZ")
+            .defaultValue(Vector3(0.0F, 0.0F, 0.0F));
+        builder.field("direction", [](auto &object) { return &object.direction; })
+            .description("Camera forward direction XYZ")
+            .defaultValue(Vector3(0.0F, 0.0F, 1.0F));
+        builder.field("up", [](auto &object) { return &object.up; }).description("Camera up direction XYZ").defaultValue(Vector3(0.0F, 1.0F, 0.0F));
         builder.field("nearClip", [](auto &object) { return &object.nearClip; })
             .description("Distance to clip objects that are too close to the camera")
             .defaultValue(0.0F)
             .minimum(0.0F);
-        builder.field("imageRegion", [](auto &object) { return &object.imageRegion; })
-            .description("Normalized region of the camera viewport to be rendered (does not affect resolution)")
+        builder.field("region", [](auto &object) { return &object.region; })
+            .description("Normalized region of the camera to be rendered")
             .defaultValue(Box2{{0.0F, 0.0F}, {1.0F, 1.0F}});
         return builder.build();
     }
 };
 
-template<ReflectedJson T>
-using CameraParams = ComposedParams<CameraSettings, T>;
+using GetCameraResult = GetResultOf<CameraSettings>;
+using UpdateCameraParams = UpdateParamsOf<CameraSettings>;
 
-using CameraInfo = CameraSettings;
-using CameraUpdate = UpdateParams<CameraSettings>;
+GetCameraResult getCamera(ObjectManager &objects, const GetObjectParams &params);
+void updateCamera(ObjectManager &objects, Device &device, const UpdateCameraParams &params);
 
-struct UserCamera
-{
-    std::reference_wrapper<Device> device;
-    CameraSettings settings;
-    std::any value;
-    std::function<Camera()> get;
-    std::function<void(float)> setAspect;
-};
-
-template<ReflectedJson Settings, std::derived_from<Camera> T>
-struct DerivedCamera
+template<ReflectedJsonObject Settings, std::derived_from<Camera> T>
+struct UserCameraOf
 {
     Settings settings;
     T value;
 };
 
-CameraInfo getCamera(ObjectRegistry &objects, const ObjectParams &params);
-void updateCamera(ObjectRegistry &objects, const CameraUpdate &params);
+template<ReflectedJsonObject T>
+using CreateCameraParamsOf = CreateParamsOf<ComposedParamsOf<CameraSettings, T>>;
 
 template<>
-struct JsonObjectReflector<DepthOfField>
+struct EnumReflector<Stereo>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<DepthOfField>();
-        builder.field("apertureRadius", [](auto &object) { return &object.apertureRadius; })
-            .description("Size of the aperture radius (0 is no depth of field)")
-            .defaultValue(0.1F);
-        builder.field("focusDistance", [](auto &object) { return &object.focusDistance; })
-            .description("Distance at which the image is the sharpest")
-            .defaultValue(1.0F);
-        return builder.build();
-    }
-};
-
-template<>
-struct EnumReflector<StereoMode>
-{
-    static auto reflect()
-    {
-        auto builder = EnumBuilder<StereoMode>();
-        builder.field("Left", StereoMode::Left).description("Render left eye");
-        builder.field("Right", StereoMode::Right).description("Render right eye");
-        builder.field("SideBySide", StereoMode::SideBySide).description("Render both eyes side by side");
-        builder.field("TopBottom", StereoMode::TopBottom).description("Render left eye above right eye");
-        return builder.build();
-    }
-};
-
-template<>
-struct JsonObjectReflector<Stereo>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Stereo>();
-        builder.field("mode", [](auto &object) { return &object.mode; })
-            .description("How to render images for each eye");
-        builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
-            .description("Distance between observer eyes")
-            .defaultValue(0.0635F);
+        auto builder = EnumBuilder<Stereo>();
+        builder.field("None", Stereo::None).description("Disable stereo");
+        builder.field("Left", Stereo::Left).description("Render left eye");
+        builder.field("Right", Stereo::Right).description("Render right eye");
+        builder.field("SideBySide", Stereo::SideBySide).description("Render both eyes side by side");
+        builder.field("TopBottom", Stereo::TopBottom).description("Render left eye above right eye");
         return builder.build();
     }
 };
@@ -140,27 +99,36 @@ struct JsonObjectReflector<PerspectiveCameraSettings>
     {
         auto builder = JsonBuilder<PerspectiveCameraSettings>();
         builder.field("fovy", [](auto &object) { return &object.fovy; })
-            .description("Camera vertical field of view in radians (horizontal is deduced from framebuffer aspect)")
+            .description("Camera vertical field of view in radians")
             .defaultValue(radians(45.0F));
-        builder.field("depthOfField", [](auto &object) { return &object.depthOfField; })
-            .description("Depth of field settings, set to null to disable it");
+        builder.field("aspect", [](auto &object) { return &object.aspect; })
+            .description("Camera image aspect ratio (width / height)")
+            .defaultValue(1.0F);
+        builder.field("apertureRadius", [](auto &object) { return &object.apertureRadius; })
+            .description("Size of the aperture radius (0 is no depth of field)")
+            .defaultValue(0.0F);
+        builder.field("focusDistance", [](auto &object) { return &object.focusDistance; })
+            .description("Distance at which the image is the sharpest")
+            .defaultValue(1.0F);
         builder.field("architectural", [](auto &object) { return &object.architectural; })
             .description("Vertical edges are projected to be parallel")
             .defaultValue(false);
-        builder.field("stereo", [](auto &object) { return &object.stereo; })
-            .description("Stereo settings, set to null to disable it");
+        builder.field("stereo", [](auto &object) { return &object.stereo; }).description("Stereo mode").defaultValue(Stereo::None);
+        builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
+            .description("Distance between observer eyes when stereo is enabled")
+            .defaultValue(0.0635F);
         return builder.build();
     }
 };
 
-using PerspectiveCameraParams = CameraParams<PerspectiveCameraSettings>;
-using PerspectiveCameraInfo = PerspectiveCameraSettings;
-using PerspectiveCameraUpdate = UpdateParams<PerspectiveCameraSettings>;
-using UserPerspectiveCamera = DerivedCamera<PerspectiveCameraSettings, PerspectiveCamera>;
+using CreatePerspectiveCameraParams = CreateCameraParamsOf<PerspectiveCameraSettings>;
+using GetPerspectiveCameraResult = GetResultOf<PerspectiveCameraSettings>;
+using UpdatePerspectiveCameraParams = UpdateParamsOf<PerspectiveCameraSettings>;
+using UserPerspectiveCamera = UserCameraOf<PerspectiveCameraSettings, PerspectiveCamera>;
 
-ObjectResult createPerspectiveCamera(ObjectRegistry &objects, Device &device, const PerspectiveCameraParams &params);
-PerspectiveCameraInfo getPerspectiveCamera(ObjectRegistry &objects, const ObjectParams &params);
-void updatePerspectiveCamera(ObjectRegistry &objects, const PerspectiveCameraUpdate &params);
+CreateObjectResult createPerspectiveCamera(ObjectManager &objects, Device &device, const CreatePerspectiveCameraParams &params);
+GetPerspectiveCameraResult getPerspectiveCamera(ObjectManager &objects, const GetObjectParams &params);
+void updatePerspectiveCamera(ObjectManager &objects, Device &device, const UpdatePerspectiveCameraParams &params);
 
 template<>
 struct JsonObjectReflector<OrthographicCameraSettings>
@@ -171,18 +139,21 @@ struct JsonObjectReflector<OrthographicCameraSettings>
         builder.field("height", [](auto &object) { return &object.height; })
             .description("Camera viewport height in world coordinates (horizontal is deduced from framebuffer aspect)")
             .defaultValue(1.0F);
+        builder.field("aspect", [](auto &object) { return &object.aspect; })
+            .description("Camera image aspect ratio (width / height)")
+            .defaultValue(1.0F);
         return builder.build();
     }
 };
 
-using OrthographicCameraParams = CameraParams<OrthographicCameraSettings>;
-using OrthographicCameraInfo = OrthographicCameraSettings;
-using OrthographicCameraUpdate = UpdateParams<OrthographicCameraSettings>;
-using UserOrthographicCamera = DerivedCamera<OrthographicCameraSettings, OrthographicCamera>;
+using CreateOrthographicCameraParams = CreateCameraParamsOf<OrthographicCameraSettings>;
+using GetOrthographicCameraResult = GetResultOf<OrthographicCameraSettings>;
+using UpdateOrthographicCameraParams = UpdateParamsOf<OrthographicCameraSettings>;
+using UserOrthographicCamera = UserCameraOf<OrthographicCameraSettings, OrthographicCamera>;
 
-ObjectResult createOrthographicCamera(ObjectRegistry &objects, Device &device, const OrthographicCameraParams &params);
-OrthographicCameraInfo getOrthographicCamera(ObjectRegistry &objects, const ObjectParams &params);
-void updateOrthographicCamera(ObjectRegistry &objects, const OrthographicCameraUpdate &params);
+CreateObjectResult createOrthographicCamera(ObjectManager &objects, Device &device, const CreateOrthographicCameraParams &params);
+GetOrthographicCameraResult getOrthographicCamera(ObjectManager &objects, const GetObjectParams &params);
+void updateOrthographicCamera(ObjectManager &objects, Device &device, const UpdateOrthographicCameraParams &params);
 
 template<>
 struct JsonObjectReflector<PanoramicCameraSettings>
@@ -190,18 +161,20 @@ struct JsonObjectReflector<PanoramicCameraSettings>
     static auto reflect()
     {
         auto builder = JsonBuilder<PanoramicCameraSettings>();
-        builder.field("stereo", [](auto &object) { return &object.stereo; })
-            .description("Stereo settings, set to null to disable it");
+        builder.field("stereo", [](auto &object) { return &object.stereo; }).description("Stereo mode").defaultValue(Stereo::None);
+        builder.field("interpupillaryDistance", [](auto &object) { return &object.interpupillaryDistance; })
+            .description("Distance between observer eyes when stereo is enabled")
+            .defaultValue(0.0635F);
         return builder.build();
     }
 };
 
-using PanoramicCameraParams = CameraParams<PanoramicCameraSettings>;
-using PanoramicCameraInfo = PanoramicCameraSettings;
-using PanoramicCameraUpdate = UpdateParams<PanoramicCameraSettings>;
-using UserPanoramicCamera = DerivedCamera<PanoramicCameraSettings, PanoramicCamera>;
+using CreatePanoramicCameraParams = CreateCameraParamsOf<PanoramicCameraSettings>;
+using GetPanoramicCameraResult = GetResultOf<PanoramicCameraSettings>;
+using UpdatePanoramicCameraParams = UpdateParamsOf<PanoramicCameraSettings>;
+using UserPanoramicCamera = UserCameraOf<PanoramicCameraSettings, PanoramicCamera>;
 
-ObjectResult createPanoramicCamera(ObjectRegistry &objects, Device &device, const PanoramicCameraParams &params);
-PanoramicCameraInfo getPanoramicCamera(ObjectRegistry &objects, const ObjectParams &params);
-void updatePanoramicCamera(ObjectRegistry &objects, const PanoramicCameraUpdate &params);
+CreateObjectResult createPanoramicCamera(ObjectManager &objects, Device &device, const CreatePanoramicCameraParams &params);
+GetPanoramicCameraResult getPanoramicCamera(ObjectManager &objects, const GetObjectParams &params);
+void updatePanoramicCamera(ObjectManager &objects, Device &device, const UpdatePanoramicCameraParams &params);
 }

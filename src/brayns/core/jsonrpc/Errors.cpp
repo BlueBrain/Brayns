@@ -98,12 +98,12 @@ InvalidParams::InvalidParams(const std::string &message, const std::vector<JsonS
 }
 
 InternalError::InternalError(const std::string &message):
-    JsonRpcException(-32'603, message)
+    JsonRpcException(-32'603, fmt::format("Internal error: '{}'", message))
 {
 }
 
 InternalError::InternalError(const std::exception &e):
-    JsonRpcException(-32'603, e.what())
+    InternalError(e.what())
 {
 }
 }

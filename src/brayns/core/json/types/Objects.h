@@ -180,6 +180,17 @@ JsonField<Parent> createJsonField(std::string name, JsonFieldGetter<Parent> auto
     };
 }
 
+template<typename Parent>
+JsonField<Parent> createConstJsonField(std::string name, std::string value)
+{
+    return {
+        .name = std::move(name),
+        .schema = createJsonConstSchema(value),
+        .serialize = [=](const auto &, auto &json) { serializeToJson(value, json); },
+        .deserialize = [=](const auto &json, auto &) { deserializeJsonConst(json, value); },
+    };
+}
+
 template<typename T>
 concept PtrToReflectedJsonObject = std::is_pointer_v<T> && ReflectedJsonObject<std::decay_t<std::remove_pointer_t<T>>>;
 
@@ -195,25 +206,25 @@ concept JsonChildGetter = requires(T callable, Parent parent) {
 template<typename Parent, typename Child>
 JsonField<Parent> convertJsonField(const JsonField<Child> &child, JsonChildGetter<Parent> auto getChildPtr)
 {
-    auto childSerialize = child.serialize;
-    auto parentSerialize = [=](const auto &object, auto &json)
+    auto serializeChild = child.serialize;
+    auto serializeParent = [=](const auto &object, auto &json)
     {
         const auto &childObject = *getChildPtr(object);
-        childSerialize(childObject, json);
+        serializeChild(childObject, json);
     };
 
-    auto childDeserialize = child.deserialize;
-    auto parentDeserialize = [=](const auto &json, auto &object)
+    auto deserializeChild = child.deserialize;
+    auto deserializeParent = [=](const auto &json, auto &object)
     {
         auto &childObject = *getChildPtr(object);
-        childDeserialize(json, childObject);
+        deserializeChild(json, childObject);
     };
 
     return {
         .name = child.name,
         .schema = child.schema,
-        .serialize = std::move(parentSerialize),
-        .deserialize = std::move(parentDeserialize),
+        .serialize = std::move(serializeParent),
+        .deserialize = std::move(deserializeParent),
     };
 }
 
@@ -297,6 +308,13 @@ public:
     void description(std::string value)
     {
         _info.description = std::move(value);
+    }
+
+    JsonFieldBuilder constant(std::string name, std::string value)
+    {
+        auto field = createConstJsonField<T>(std::move(name), std::move(value));
+        _info.fields.push_back(std::move(field));
+        return JsonFieldBuilder(_info.fields.back().schema);
     }
 
     JsonFieldBuilder field(std::string name, JsonFieldGetter<T> auto getFieldPtr)

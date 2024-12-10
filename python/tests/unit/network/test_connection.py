@@ -66,7 +66,7 @@ async def test_json_rpc() -> None:
 
     request = mock_request()
 
-    future = await connection.send_json_rpc(request)
+    future = await connection.send(request)
 
     assert not future.done
 
@@ -83,7 +83,7 @@ async def test_error() -> None:
 
     request = mock_request()
 
-    future = await connection.send_json_rpc(request)
+    future = await connection.send(request)
 
     with pytest.raises(JsonRpcError) as e:
         await future.wait()

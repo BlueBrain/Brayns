@@ -21,61 +21,52 @@
 import pytest
 
 from brayns import (
-    Accumulation,
     Connection,
     FramebufferChannel,
     FramebufferFormat,
-    FramebufferSettings,
-    Size2,
-    ToneMapperSettings,
     create_framebuffer,
     create_tone_mapper,
     get_framebuffer,
     remove_objects,
-    update_framebuffer,
 )
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_framebuffer(connection: Connection) -> None:
-    settings = FramebufferSettings(
-        resolution=Size2(1920, 1080),
+    tone_mapper = await create_tone_mapper(connection)
+
+    framebuffer = await create_framebuffer(
+        connection,
+        resolution=(1920, 1080),
         format=FramebufferFormat.RGBA32F,
         channels=set(FramebufferChannel),
-        accumulation=Accumulation(variance=True),
+        accumulation=True,
+        variance=True,
+        operations=[tone_mapper],
     )
 
-    framebuffer = await create_framebuffer(connection, settings)
+    settings = await get_framebuffer(connection, framebuffer)
 
-    info = await get_framebuffer(connection, framebuffer)
-    assert info.settings == settings
-    assert info.variance is None
-
-    tone_mapper_settings = ToneMapperSettings()
-    tone_mapper = await create_tone_mapper(connection, tone_mapper_settings)
-
-    settings.operations = [tone_mapper]
-    await update_framebuffer(connection, framebuffer, settings.operations)
-
-    info = await get_framebuffer(connection, framebuffer)
-    assert info.settings == settings
-    assert info.variance is None
+    assert settings.resolution == (1920, 1080)
+    assert settings.format == FramebufferFormat.RGBA32F
+    assert settings.channels == set(FramebufferChannel)
+    assert settings.accumulation
+    assert settings.variance
+    assert settings.operations == [tone_mapper]
+    assert settings.variance_estimate is None
 
 
 @pytest.mark.integration_test
 @pytest.mark.asyncio
 async def test_remove_operations(connection: Connection) -> None:
-    tone_mapper_settings = ToneMapperSettings()
-    tone_mapper = await create_tone_mapper(connection, tone_mapper_settings)
-
-    settings = FramebufferSettings(operations=[tone_mapper])
-    framebuffer = await create_framebuffer(connection, settings)
+    tone_mapper = await create_tone_mapper(connection)
+    framebuffer = await create_framebuffer(connection, operations=[tone_mapper])
 
     before_remove = await get_framebuffer(connection, framebuffer)
-    assert before_remove.settings.operations == [tone_mapper]
+    assert before_remove.operations == [tone_mapper]
 
     await remove_objects(connection, [tone_mapper])
 
     after_remove = await get_framebuffer(connection, framebuffer)
-    assert after_remove.settings.operations[0].id == 0
+    assert after_remove.operations[0].id == 0

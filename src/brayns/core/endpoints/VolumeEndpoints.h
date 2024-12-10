@@ -27,5 +27,5 @@
 
 namespace brayns
 {
-void addVolumeEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
+void addVolumeEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

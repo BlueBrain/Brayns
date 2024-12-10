@@ -25,31 +25,15 @@
 
 namespace brayns
 {
-ObjectResult createToneMapper(ObjectManager &manager, Device &device, const ToneMapperParams &params)
+void addImageOperationEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device)
 {
-    return manager.visit([&](ObjectRegistry &objects) { return createToneMapper(objects, device, params); });
-}
-
-ToneMapperInfo getToneMapper(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { return getToneMapper(objects, params); });
-}
-
-void updateToneMapper(ObjectManager &manager, const ToneMapperUpdate &params)
-{
-    return manager.visit([&](ObjectRegistry &objects) { updateToneMapper(objects, params); });
-}
-
-void addImageOperationEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device)
-{
-    builder
-        .endpoint("createToneMapper", [&](ToneMapperParams params) { return createToneMapper(manager, device, params); })
+    builder.endpoint("createToneMapper", [&](CreateToneMapperParams params) { return createToneMapper(objects, device, params); })
         .description("Create a tone mapper that can be attached to a framebuffer");
 
-    builder.endpoint("getToneMapper", [&](ObjectParams params) { return getToneMapper(manager, params); })
+    builder.endpoint("getToneMapper", [&](GetObjectParams params) { return getToneMapper(objects, params); })
         .description("Get tone mapper specific params");
 
-    builder.endpoint("updateToneMapper", [&](ToneMapperUpdate params) { updateToneMapper(manager, params); })
+    builder.endpoint("updateToneMapper", [&](UpdateToneMapperParams params) { updateToneMapper(objects, device, params); })
         .description("Update tone mapper specific params");
 }
 }

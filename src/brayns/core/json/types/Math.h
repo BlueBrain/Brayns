@@ -31,22 +31,49 @@ namespace brayns
 template<typename T>
 struct JsonBoxReflector
 {
-    static auto reflect()
+    using ValueType = typename T::bound_t;
+
+    static JsonSchema getSchema()
     {
-        auto builder = JsonBuilder<T>();
-        builder.field("min", [](auto &object) { return &object.lower; }).description("Lower bounds");
-        builder.field("max", [](auto &object) { return &object.upper; }).description("Upper bounds");
-        return builder.build();
+        return {
+            .type = JsonType::Array,
+            .items = {getJsonSchema<ValueType>()},
+            .minItems = 2,
+            .maxItems = 2,
+        };
+    }
+
+    static void serialize(const T &value, JsonValue &json)
+    {
+        auto array = createJsonArray();
+
+        array->add(serializeToJson(value.lower));
+        array->add(serializeToJson(value.upper));
+
+        json = array;
+    }
+
+    static void deserialize(const JsonValue &json, T &value)
+    {
+        const auto &array = getArray(json);
+
+        if (array.size() != 2)
+        {
+            throw JsonException("Invalid box");
+        }
+
+        deserializeJson(array.get(0), value.lower);
+        deserializeJson(array.get(1), value.upper);
     }
 };
 
 template<typename T>
-struct JsonObjectReflector<Range<T>> : JsonBoxReflector<Range<T>>
+struct JsonReflector<Range<T>> : JsonBoxReflector<Range<T>>
 {
 };
 
 template<typename T, int S>
-struct JsonObjectReflector<BoxT<T, S>> : JsonBoxReflector<BoxT<T, S>>
+struct JsonReflector<BoxT<T, S>> : JsonBoxReflector<BoxT<T, S>>
 {
 };
 
@@ -62,9 +89,20 @@ struct JsonObjectReflector<Transform>
         builder.field("rotation", [](auto &object) { return &object.rotation; })
             .description("Rotation quaternion XYZW")
             .defaultValue(Quaternion(1.0F, 0.0F, 0.0F, 0.0F));
-        builder.field("scale", [](auto &object) { return &object.scale; })
-            .description("Scale XYZ")
-            .defaultValue(Vector3(1.0F, 1.0F, 1.0F));
+        builder.field("scale", [](auto &object) { return &object.scale; }).description("Scale XYZ").defaultValue(Vector3(1.0F, 1.0F, 1.0F));
+        return builder.build();
+    }
+};
+
+template<>
+struct JsonObjectReflector<Transform2D>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<Transform2D>();
+        builder.field("translation", [](auto &object) { return &object.translation; }).description("Translation XY").defaultValue(Vector2(0.0F, 0.0F));
+        builder.field("rotation", [](auto &object) { return &object.rotation; }).description("Rotation angle in radians").defaultValue(0.0F);
+        builder.field("scale", [](auto &object) { return &object.scale; }).description("Scale XY").defaultValue(Vector2(1.0F, 1.0F));
         return builder.build();
     }
 };

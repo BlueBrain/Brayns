@@ -58,11 +58,11 @@ std::size_t getPixelSize(ExrDataType type)
     }
 }
 
-std::vector<std::string> packChannels(const ExrImage &image)
+std::vector<std::vector<char>> packChannels(const ExrImage &image)
 {
     const auto &channels = image.channels;
 
-    auto packedChannels = std::vector<std::string>();
+    auto packedChannels = std::vector<std::vector<char>>();
     packedChannels.reserve(channels.size());
 
     auto [width, height] = image.size;
@@ -73,7 +73,7 @@ std::vector<std::string> packChannels(const ExrImage &image)
         auto pixelSize = getPixelSize(channel.dataType);
         auto channelSize = pixelCount * pixelSize;
 
-        auto packedChannel = std::string();
+        auto packedChannel = std::vector<char>();
         packedChannel.reserve(channelSize);
 
         auto bytes = static_cast<const char *>(channel.data);
@@ -91,8 +91,10 @@ std::vector<std::string> packChannels(const ExrImage &image)
             for (auto x = std::size_t(0); x < width; ++x)
             {
                 auto offsetX = offsetY + x * strideX;
+                auto first = bytes + offsetX;
+                auto last = first + pixelSize;
 
-                packedChannel.append(bytes + offsetX, pixelSize);
+                packedChannel.insert(packedChannel.end(), first, last);
             }
         }
 
@@ -105,7 +107,7 @@ std::vector<std::string> packChannels(const ExrImage &image)
 
 namespace brayns
 {
-std::string encodeExr(const ExrImage &image)
+std::vector<char> encodeExr(const ExrImage &image)
 {
     auto width = static_cast<int>(image.size[0]);
     auto height = static_cast<int>(image.size[1]);
@@ -139,6 +141,8 @@ std::string encodeExr(const ExrImage &image)
         output.writePixels(height);
     }
 
-    return stream.str();
+    auto text = stream.str();
+
+    return std::vector<char>(text.begin(), text.end());
 }
 }

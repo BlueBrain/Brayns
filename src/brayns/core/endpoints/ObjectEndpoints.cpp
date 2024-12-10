@@ -23,118 +23,57 @@
 
 namespace brayns
 {
-struct AllObjectsResult
-{
-    std::vector<ObjectInfo> objects;
-};
-
-template<>
-struct JsonObjectReflector<AllObjectsResult>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<AllObjectsResult>();
-        builder.field("objects", [](auto &object) { return &object.objects; }).description("List of object info");
-        return builder.build();
-    }
-};
-
-AllObjectsResult getAllObjects(ObjectManager &manager)
-{
-    return {manager.visit([](auto &objects) { return objects.getAll(); })};
-}
-
-ObjectInfo getObject(ObjectManager &manager, const ObjectParams &params)
-{
-    return manager.visit([&](auto &objects) { return objects.get(params.id); });
-}
-
-struct ObjectUpdate
-{
-    JsonValue userData;
-};
-
-template<>
-struct JsonObjectReflector<ObjectUpdate>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<ObjectUpdate>();
-        builder.field("userData", [](auto &object) { return &object.userData; })
-            .description("User data to store in the object (not used by Brayns)");
-        return builder.build();
-    }
-};
-
-void updateObject(ObjectManager &manager, const UpdateParams<ObjectUpdate> &params)
-{
-    manager.visit([&](auto &objects) { objects.update(params.id, params.settings.userData); });
-}
-
-struct RemoveParams
+struct RemoveObjectsParams
 {
     std::vector<ObjectId> ids;
 };
 
 template<>
-struct JsonObjectReflector<RemoveParams>
+struct JsonObjectReflector<RemoveObjectsParams>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<RemoveParams>();
+        auto builder = JsonBuilder<RemoveObjectsParams>();
         builder.field("ids", [](auto &object) { return &object.ids; }).description("IDs of the objects to remove");
         return builder.build();
     }
 };
 
-void removeObjects(ObjectManager &manager, const RemoveParams &params)
+void removeObjects(ObjectManager &objects, const RemoveObjectsParams &params)
 {
-    manager.visit(
-        [&](auto &objects)
-        {
-            for (auto id : params.ids)
-            {
-                objects.remove(id);
-            }
-        });
-}
-
-void clearObjects(ObjectManager &manager)
-{
-    manager.visit([](auto &objects) { objects.clear(); });
+    for (auto id : params.ids)
+    {
+        objects.remove(id);
+    }
 }
 
 struct EmptyObject
 {
 };
 
-ObjectResult createEmptyObject(ObjectManager &manager)
+CreateObjectResult createEmptyObject(ObjectManager &objects, CreateObjectParams params)
 {
-    return manager.visit(
-        [&](auto &objects)
-        {
-            auto object = objects.add(EmptyObject(), "EmptyObject");
-            return ObjectResult{object.getId()};
-        });
+    auto object = objects.add(EmptyObject(), {"EmptyObject"}, std::move(params));
+    return getResult(object);
 }
 
-void addObjectEndpoints(ApiBuilder &builder, ObjectManager &manager)
+void addObjectEndpoints(ApiBuilder &builder, ObjectManager &objects)
 {
-    builder.endpoint("getAllObjects", [&] { return getAllObjects(manager); })
-        .description("Get generic properties of all objects, use get-{type} to get details of an object");
+    builder.endpoint("getAllObjects", [&] { return objects.getAll(); })
+        .description("Get summary all objects in registry, use get-{type} to get details about a specific object");
 
-    builder.endpoint("getObject", [&](ObjectParams params) { return getObject(manager, params); })
+    builder.endpoint("getObject", [&](GetObjectParams params) { return objects.get(params.id); })
         .description("Get generic object properties from given object IDs");
 
-    builder.endpoint("updateObject", [&](UpdateParams<ObjectUpdate> params) { return updateObject(manager, params); });
+    builder.endpoint("updateObject", [&](UpdateObjectParams params) { objects.update(std::move(params)); })
+        .description("Update generic properties of an object");
 
-    builder.endpoint("removeObjects", [&](RemoveParams params) { removeObjects(manager, params); })
+    builder.endpoint("removeObjects", [&](RemoveObjectsParams params) { removeObjects(objects, params); })
         .description("Remove selected objects from registry (but not from scene)");
 
-    builder.endpoint("clearObjects", [&] { clearObjects(manager); })
-        .description("Remove all objects currently in registry");
+    builder.endpoint("clearObjects", [&] { objects.clear(); }).description("Remove all objects currently in registry");
 
-    builder.endpoint("createEmptyObject", [&] { return createEmptyObject(manager); })
+    builder.endpoint("createEmptyObject", [&](CreateObjectParams params) { return createEmptyObject(objects, std::move(params)); })
         .description("Create an empty object (for testing or to store user data)");
 }
 }

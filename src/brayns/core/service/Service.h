@@ -25,7 +25,7 @@
 
 #include <brayns/core/api/Api.h>
 #include <brayns/core/utils/Logger.h>
-#include <brayns/core/websocket/RequestQueue.h>
+#include <brayns/core/websocket/Request.h>
 
 namespace brayns
 {
@@ -39,7 +39,7 @@ private:
     bool _stopped = false;
 };
 
-using RequestProvider = std::function<std::vector<Request>()>;
+using RequestProvider = std::function<Request()>;
 
 void runService(RequestProvider waitForRequests, Api &api, StopToken &token, Logger &logger);
 }

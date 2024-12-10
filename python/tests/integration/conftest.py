@@ -43,7 +43,7 @@ def create_ssl_context() -> SSLContext:
 async def connect_to_service() -> Connection:
     logger = create_logger(DEBUG)
     ssl = create_ssl_context() if SSL else None
-    return await connect(HOST, PORT, ssl, max_attempts=10, logger=logger)
+    return await connect(HOST, PORT, ssl, logger=logger)
 
 
 @pytest_asyncio.fixture

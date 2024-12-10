@@ -56,7 +56,7 @@ async def test_get_object(connection: Connection) -> None:
     retreived = await get_all_objects(connection)
     tests = [await get_object(connection, object) for object in created]
 
-    assert all(x.id == y.id for x, y in zip(tests, retreived))
+    assert all(x.tag == y.tag for x, y in zip(tests, retreived))
 
     with pytest.raises(JsonRpcError):
         await get_object(connection, Object(123))
@@ -67,11 +67,10 @@ async def test_get_object(connection: Connection) -> None:
 async def test_update_object(connection: Connection) -> None:
     objects = [await create_empty_object(connection) for _ in range(10)]
 
-    await update_object(connection, objects[0], "test")
+    await update_object(connection, objects[0], user_data="test")
 
     test = await get_object(connection, objects[0])
 
-    assert test.id == 1
     assert test.type == "EmptyObject"
     assert test.user_data == "test"
 
@@ -81,7 +80,7 @@ async def test_update_object(connection: Connection) -> None:
 async def test_remove_objects(connection: Connection) -> None:
     objects = [await create_empty_object(connection) for _ in range(10)]
 
-    await remove_objects(connection, objects[:3])
+    await remove_objects(connection, [i for i in objects[:3]])
     tests = await get_all_objects(connection)
 
     assert [object.id for object in tests] == list(range(4, 11))

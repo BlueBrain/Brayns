@@ -18,11 +18,11 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import json
 from dataclasses import dataclass
 from typing import Any
 
-from brayns.utils.parsing import get, try_get
+from brayns.utils.composing import compose
+from brayns.utils.parsing import deserialize, parse
 
 JsonRpcId = int | str
 
@@ -38,7 +38,7 @@ class JsonRpcRequest:
 @dataclass
 class JsonRpcSuccessResponse:
     id: JsonRpcId
-    result: Any = None
+    result: Any
     binary: bytes = b""
 
 
@@ -61,104 +61,31 @@ class JsonRpcErrorResponse:
 JsonRpcResponse = JsonRpcSuccessResponse | JsonRpcErrorResponse
 
 
-def serialize_request(request: JsonRpcRequest) -> dict[str, Any]:
-    message = {
+def compose_request(request: JsonRpcRequest) -> bytes | str:
+    message: dict[str, Any] = {
         "jsonrpc": "2.0",
         "method": request.method,
-        "params": request.params,
     }
+
+    if request.params is not None:
+        message["params"] = request.params
 
     if request.id is not None:
         message["id"] = request.id
 
-    return message
-
-
-def compose_text(message: Any) -> str:
-    return json.dumps(message, separators=(",", ":"))
-
-
-def compose_binary(message: Any, binary: bytes) -> bytes:
-    text = compose_text(message)
-    json_part = text.encode()
-
-    header = len(json_part).to_bytes(4, byteorder="little", signed=False)
-
-    return header + json_part + binary
-
-
-def compose_request(request: JsonRpcRequest) -> bytes | str:
-    message = serialize_request(request)
-
-    if request.binary:
-        return compose_binary(message, request.binary)
-
-    return compose_text(message)
-
-
-def deserialize_result(message: dict[str, Any], binary: bytes = b"") -> JsonRpcSuccessResponse:
-    response_id = get(message, "id", int | str)
-
-    return JsonRpcSuccessResponse(
-        id=response_id,
-        result=message["result"],
-        binary=binary,
-    )
-
-
-def deserialize_error(message: dict[str, Any]) -> JsonRpcErrorResponse:
-    error: dict[str, Any] = get(message, "error", dict[str, Any])
-
-    return JsonRpcErrorResponse(
-        id=try_get(message, "id", int | str | None, None),
-        error=JsonRpcError(
-            code=get(error, "code", int),
-            message=get(error, "message", str),
-            data=error.get("data"),
-        ),
-    )
-
-
-def deserialize_response(message: dict[str, Any], binary: bytes = b"") -> JsonRpcResponse:
-    if "result" in message:
-        return deserialize_result(message, binary)
-
-    if "error" not in message:
-        raise ValueError("Invalid JSON-RPC message without 'result' and 'error'")
-
-    if binary:
-        raise ValueError("Invalid error message with binary")
-
-    return deserialize_error(message)
-
-
-def parse_binary(data: bytes) -> tuple[Any, bytes]:
-    size = len(data)
-
-    if size < 4:
-        raise ValueError("Invalid binary frame with header < 4 bytes")
-
-    header = data[:4]
-
-    json_size = int.from_bytes(header, byteorder="little", signed=False)
-
-    if json_size > size - 4:
-        raise ValueError(f"Invalid JSON size: {json_size} > {size - 4}")
-
-    json_part = data[4 : 4 + json_size].decode("utf-8")
-    message = json.loads(json_part)
-
-    binary_part = data[4 + json_size :]
-
-    return message, binary_part
+    return compose(message, request.binary)
 
 
 def parse_response(data: bytes | str) -> JsonRpcResponse:
-    if isinstance(data, bytes):
-        message, binary = parse_binary(data)
+    message, binary = parse(data)
 
-        return deserialize_response(message, binary)
+    response = deserialize(message, JsonRpcResponse)
 
-    message = json.loads(data)
+    if isinstance(response, JsonRpcSuccessResponse):
+        response.binary = binary
+        return response
 
-    return deserialize_response(message)
+    if binary:
+        raise ValueError("Invalid JSON-RPC error with binary")
+
+    return response

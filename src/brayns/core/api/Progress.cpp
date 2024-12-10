@@ -30,74 +30,46 @@ TaskCancelledException::TaskCancelledException():
 {
 }
 
-TaskMonitor::TaskMonitor(std::size_t operationCount):
-    _operationCount(operationCount)
-{
-}
-
-std::size_t TaskMonitor::getOperationCount() const
-{
-    return _operationCount;
-}
-
-TaskOperation TaskMonitor::getCurrentOperation()
+TaskOperation Progress::getCurrentOperation()
 {
     auto lock = std::lock_guard(_mutex);
 
     return _currentOperation;
 }
 
-void TaskMonitor::update(float completion)
-{
-    auto lock = std::lock_guard(_mutex);
-
-    if (_cancelled)
-    {
-        throw TaskCancelledException();
-    }
-
-    assert(completion >= 0.0F && completion <= 1.0F);
-
-    _currentOperation.completion = completion;
-}
-
-void TaskMonitor::nextOperation(std::string description)
-{
-    auto lock = std::lock_guard(_mutex);
-
-    if (_cancelled)
-    {
-        throw TaskCancelledException();
-    }
-
-    _currentOperation.description = std::move(description);
-    _currentOperation.completion = 0.0F;
-    _currentOperation.index += 1;
-
-    assert(_currentOperation.index < _operationCount);
-}
-
-void TaskMonitor::cancel()
-{
-    auto lock = std::lock_guard(_mutex);
-
-    assert(!_cancelled);
-
-    _cancelled = true;
-}
-
-Progress::Progress(std::shared_ptr<TaskMonitor> monitor):
-    _monitor(std::move(monitor))
-{
-}
-
 void Progress::update(float completion)
 {
-    _monitor->update(completion);
+    auto lock = std::lock_guard(_mutex);
+
+    checkCancellation();
+
+    assert(completion >= 0.0F && completion <= 1.0F);
+    _currentOperation.completion = completion;
 }
 
 void Progress::nextOperation(std::string description)
 {
-    _monitor->nextOperation(std::move(description));
+    auto lock = std::lock_guard(_mutex);
+
+    checkCancellation();
+
+    _currentOperation.description = std::move(description);
+    _currentOperation.completion = 0.0F;
+}
+
+void Progress::cancel()
+{
+    auto lock = std::lock_guard(_mutex);
+
+    assert(!_cancelled);
+    _cancelled = true;
+}
+
+void Progress::checkCancellation()
+{
+    if (_cancelled)
+    {
+        throw TaskCancelledException();
+    }
 }
 }

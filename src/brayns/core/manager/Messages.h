@@ -31,94 +31,176 @@ using ObjectId = std::uint32_t;
 
 constexpr auto nullId = ObjectId(0);
 
-struct ObjectInfo
+struct ObjectMetadata
 {
     std::string type;
-    ObjectId id = nullId;
+};
+
+template<>
+struct JsonObjectReflector<ObjectMetadata>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<ObjectMetadata>();
+        builder.field("type", [](auto &object) { return &object.type; }).description("Object type");
+        return builder.build();
+    }
+};
+
+struct ObjectSettings
+{
+    std::string tag = {};
     JsonValue userData = {};
 };
 
 template<>
-struct JsonObjectReflector<ObjectInfo>
+struct JsonObjectReflector<ObjectSettings>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<ObjectInfo>();
-        builder.field("type", [](auto &object) { return &object.type; })
-            .description("Object type, use 'get{type}' to query detailed information about the object");
-        builder.field("id", [](auto &object) { return &object.id; })
-            .description("Object ID (starts at 1, uses 0 for objects that are not in registry)");
+        auto builder = JsonBuilder<ObjectSettings>();
+        builder.field("tag", [](auto &object) { return &object.tag; })
+            .description("Optional user tag, visible also in object summary (not used by Brayns)")
+            .defaultValue("");
         builder.field("userData", [](auto &object) { return &object.userData; })
-            .description("Data set by user (not used by Brayns)");
+            .description("Optional user data, not visible in object summary (not used by Brayns)")
+            .defaultValue(NullJson());
         return builder.build();
     }
 };
 
-struct ObjectParams
+struct ObjectSummary
+{
+    ObjectId id;
+    std::string type;
+    std::string tag;
+};
+
+template<>
+struct JsonObjectReflector<ObjectSummary>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<ObjectSummary>();
+        builder.field("id", [](auto &object) { return &object.id; })
+            .description("Object ID (0 is reserved for objects that are not stored in the registry, so valid object IDs start at 1)");
+        builder.field("type", [](auto &object) { return &object.type; })
+            .description("Object type, use 'get{type}' to query detailed information about the object");
+        builder.field("tag", [](auto &object) { return &object.tag; }).description("Optional tag set by user");
+        return builder.build();
+    }
+};
+
+using CreateObjectParams = ObjectSettings;
+
+struct CreateObjectResult
 {
     ObjectId id;
 };
 
 template<>
-struct JsonObjectReflector<ObjectParams>
+struct JsonObjectReflector<CreateObjectResult>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<ObjectParams>();
-        builder.field("id", [](auto &object) { return &object.id; }).description("Object ID");
+        auto builder = JsonBuilder<CreateObjectResult>();
+        builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object that has been created");
         return builder.build();
     }
 };
 
-using ObjectResult = ObjectParams;
-
-template<ReflectedJson T>
-struct UpdateParams
+struct GetObjectParams
 {
     ObjectId id;
-    T settings;
 };
 
-template<ReflectedJson T>
-struct JsonObjectReflector<UpdateParams<T>>
+template<>
+struct JsonObjectReflector<GetObjectParams>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<UpdateParams<T>>();
+        auto builder = JsonBuilder<GetObjectParams>();
+        builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to get");
+        return builder.build();
+    }
+};
+
+struct GetObjectResult
+{
+    ObjectMetadata metadata;
+    ObjectSettings settings;
+};
+
+template<>
+struct JsonObjectReflector<GetObjectResult>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<GetObjectResult>();
+        builder.extend([](auto &object) { return &object.metadata; });
+        builder.extend([](auto &object) { return &object.settings; });
+        return builder.build();
+    }
+};
+
+template<ReflectedJsonObject T, ReflectedJsonObject U>
+struct ComposedParamsOf
+{
+    T base;
+    U derived;
+};
+
+template<ReflectedJsonObject T, ReflectedJsonObject U>
+struct JsonObjectReflector<ComposedParamsOf<T, U>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<ComposedParamsOf<T, U>>();
+        builder.extend([](auto &object) { return &object.base; });
+        builder.extend([](auto &object) { return &object.derived; });
+        return builder.build();
+    }
+};
+
+template<ReflectedJsonObject T>
+using CreateParamsOf = ComposedParamsOf<CreateObjectParams, T>;
+
+template<ReflectedJsonObject T>
+using GetResultOf = JsonInfo<T>;
+
+template<ReflectedJsonObject T>
+GetResultOf<T> getResult(T value)
+{
+    return {std::move(value)};
+}
+
+template<ReflectedJsonObject T>
+struct UpdateParamsOf
+{
+    ObjectId id;
+    JsonBuffer<JsonUpdate<T>> settings;
+};
+
+template<ReflectedJsonObject T>
+struct JsonObjectReflector<UpdateParamsOf<T>>
+{
+    static auto reflect()
+    {
+        auto builder = JsonBuilder<UpdateParamsOf<T>>();
         builder.field("id", [](auto &object) { return &object.id; }).description("ID of the object to update");
         builder.field("settings", [](auto &object) { return &object.settings; })
-            .description("Settings to update the object");
+            .description("New object settings (missing fields keep their current value)");
         return builder.build();
     }
 };
 
-template<ReflectedJson Base, ReflectedJson Derived>
-struct ComposedParams
+template<typename T>
+T getUpdatedParams(const UpdateParamsOf<T> &params, T current)
 {
-    Base base;
-    Derived derived;
-};
+    auto update = JsonUpdate<T>{std::move(current)};
+    params.settings.extract(update);
+    return std::move(update.value);
+}
 
-template<ReflectedJson Base, ReflectedJson Derived>
-struct JsonObjectReflector<ComposedParams<Base, Derived>>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<ComposedParams<Base, Derived>>();
-
-        if (!std::is_same_v<Base, NullJson>)
-        {
-            builder.field("base", [](auto &object) { return &object.base; })
-                .description("Base properties common to all derived objects (camera, renderer)");
-        }
-
-        if (!std::is_same_v<Derived, NullJson>)
-        {
-            builder.field("derived", [](auto &object) { return &object.derived; })
-                .description("Derived properties that are specific to the object type (perspective, scivis)");
-        }
-
-        return builder.build();
-    }
-};
+using UpdateObjectParams = UpdateParamsOf<ObjectSettings>;
 }

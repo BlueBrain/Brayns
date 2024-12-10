@@ -64,7 +64,7 @@ struct JsonConstReflector<JsonRpcVersion>
 struct Payload
 {
     JsonValue json;
-    std::string binary = {};
+    std::vector<char> binary = {};
 };
 
 struct JsonRpcRequest

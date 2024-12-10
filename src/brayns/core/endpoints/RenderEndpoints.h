@@ -19,29 +19,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "RequestQueue.h"
+#pragma once
 
-#include <utility>
+#include <brayns/core/api/ApiBuilder.h>
+#include <brayns/core/engine/Device.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 namespace brayns
 {
-void RequestQueue::push(Request request)
-{
-    auto lock = std::lock_guard(_mutex);
-
-    _requests.push_back(std::move(request));
-    _condition.notify_all();
-}
-
-std::vector<Request> RequestQueue::wait()
-{
-    auto lock = std::unique_lock(_mutex);
-
-    if (_requests.empty())
-    {
-        _condition.wait(lock);
-    }
-
-    return std::exchange(_requests, {});
-}
+void addRenderEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

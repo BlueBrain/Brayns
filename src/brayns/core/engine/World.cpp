@@ -21,6 +21,31 @@
 
 #include "World.h"
 
+namespace
+{
+using namespace brayns;
+
+void setGroupParams(OSPGroup handle, const GroupSettings &settings)
+{
+    setObjectParam(handle, "geometry", settings.geometries);
+    setObjectParam(handle, "clippingGeometry", settings.clippingGeometries);
+    setObjectParam(handle, "volume", settings.volumes);
+    setObjectParam(handle, "light", settings.lights);
+}
+
+void setInstanceParams(OSPInstance handle, const Group &group, const InstanceSettings &settings)
+{
+    setObjectParam(handle, "group", group);
+    setObjectParam(handle, "transform", toAffine(settings.transform));
+    setObjectParam(handle, "id", settings.id);
+}
+
+void setWorldParams(OSPWorld handle, const WorldSettings &settings)
+{
+    setObjectParam(handle, "instance", settings.instances);
+}
+}
+
 namespace brayns
 {
 Box3 Group::getBounds() const
@@ -29,15 +54,19 @@ Box3 Group::getBounds() const
     return getObjectBounds(handle);
 }
 
+void Group::update(const GroupSettings &settings)
+{
+    auto handle = getHandle();
+    setGroupParams(handle, settings);
+    commitObject(handle);
+}
+
 Group createGroup(Device &device, const GroupSettings &settings)
 {
     auto handle = ospNewGroup();
     auto group = wrapObjectHandleAs<Group>(device, handle);
 
-    setObjectParam(handle, "geometry", settings.geometries);
-    setObjectParam(handle, "clippingGeometry", settings.clippingGeometries);
-    setObjectParam(handle, "volume", settings.volumes);
-    setObjectParam(handle, "light", settings.lights);
+    setGroupParams(handle, settings);
 
     commitObject(device, handle);
 
@@ -50,14 +79,19 @@ Box3 Instance::getBounds() const
     return getObjectBounds(handle);
 }
 
-Instance createInstance(Device &device, const InstanceSettings &settings)
+void Instance::update(const Group &group, const InstanceSettings &settings)
+{
+    auto handle = getHandle();
+    setInstanceParams(handle, group, settings);
+    commitObject(handle);
+}
+
+Instance createInstance(Device &device, const Group &group, const InstanceSettings &settings)
 {
     auto handle = ospNewInstance();
     auto instance = wrapObjectHandleAs<Instance>(device, handle);
 
-    setObjectParam(handle, "group", settings.group);
-    setObjectParam(handle, "transform", toAffine(settings.transform));
-    setObjectParam(handle, "id", settings.id);
+    setInstanceParams(handle, group, settings);
 
     commitObject(device, handle);
 
@@ -70,12 +104,19 @@ Box3 World::getBounds() const
     return getObjectBounds(handle);
 }
 
+void World::update(const WorldSettings &settings)
+{
+    auto handle = getHandle();
+    setWorldParams(handle, settings);
+    commitObject(handle);
+}
+
 World createWorld(Device &device, const WorldSettings &settings)
 {
     auto handle = ospNewWorld();
     auto world = wrapObjectHandleAs<World>(device, handle);
 
-    setObjectParam(handle, "instance", settings.instances);
+    setWorldParams(handle, settings);
 
     commitObject(device, handle);
 

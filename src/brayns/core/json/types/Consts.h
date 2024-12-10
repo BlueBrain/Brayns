@@ -41,6 +41,24 @@ auto getJsonConst()
     return JsonConstReflector<T>::reflect();
 }
 
+template<ReflectedJson T>
+JsonSchema createJsonConstSchema(T value)
+{
+    return {
+        .type = jsonTypeOf<decltype(value)>,
+        .constant = std::move(value),
+    };
+}
+
+template<ReflectedJson T>
+void deserializeJsonConst(const JsonValue &json, const T &value)
+{
+    if (deserializeJsonAs<T>(json) != value)
+    {
+        throw JsonException("Invalid const");
+    }
+}
+
 template<ReflectedJsonConst T>
 struct JsonReflector<T>
 {
@@ -48,10 +66,7 @@ struct JsonReflector<T>
 
     static JsonSchema getSchema()
     {
-        return {
-            .type = jsonTypeOf<decltype(value)>,
-            .constant = value,
-        };
+        return createJsonConstSchema(value);
     }
 
     static void serialize(const T &, JsonValue &json)
@@ -61,10 +76,7 @@ struct JsonReflector<T>
 
     static void deserialize(const JsonValue &json, T &)
     {
-        if (deserializeJsonAs<decltype(value)>(json) != value)
-        {
-            throw JsonException("Invalid const");
-        }
+        deserializeJsonConst(json, value);
     }
 };
 

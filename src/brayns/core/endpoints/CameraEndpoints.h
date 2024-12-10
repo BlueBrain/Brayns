@@ -27,5 +27,5 @@
 
 namespace brayns
 {
-void addCameraEndpoints(ApiBuilder &builder, ObjectManager &manager, Device &device);
+void addCameraEndpoints(ApiBuilder &builder, ObjectManager &objects, Device &device);
 }

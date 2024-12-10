@@ -26,135 +26,114 @@ namespace
 using namespace brayns;
 
 template<typename T>
-auto getCameraAs(ObjectRegistry &objects, const ObjectParams &params)
+auto createCameraAs(ObjectManager &objects, const auto &params, std::string type, auto &&create)
 {
-    auto stored = objects.getAsStored<UserCamera>(params.id);
-    auto &derived = castAs<T>(stored.get().value, stored.getInfo());
-    return derived.settings;
+    const auto &[objectParams, cameraParams] = params;
+    const auto &[base, derived] = cameraParams;
+
+    auto camera = create(base, derived);
+
+    auto ptr = toShared(T{derived, std::move(camera)});
+
+    auto object = UserCamera{
+        .settings = base,
+        .value = ptr,
+        .get = [=] { return ptr->value; },
+    };
+
+    auto stored = objects.add(std::move(object), {std::move(type)}, objectParams);
+
+    return getResult(stored);
+}
+
+template<typename T>
+auto getCameraAs(ObjectManager &objects, const GetObjectParams &params)
+{
+    auto object = objects.getAsStored<UserCamera>(params.id);
+    auto &camera = *castAsShared<T>(object.get().value, object);
+    return getResult(camera.settings);
 }
 
 template<typename T, typename U>
-auto updateCameraAs(ObjectRegistry &objects, const UpdateParams<U> &params)
+void updateCameraAs(ObjectManager &objects, Device &device, const UpdateParamsOf<U> &params)
 {
-    auto stored = objects.getAsStored<UserCamera>(params.id);
-    auto &base = stored.get();
-    auto &derived = castAs<T>(base.value, stored.getInfo());
-    auto &device = base.device.get();
+    auto object = objects.getAsStored<UserCamera>(params.id);
+    auto &camera = *castAsShared<T>(object.get().value, object);
 
-    derived.value.update(params.settings);
+    auto settings = getUpdatedParams(params, camera.settings);
+
+    camera.value.update(settings);
     device.throwIfError();
 
-    derived.settings = params.settings;
+    camera.settings = settings;
 }
 }
 
 namespace brayns
 {
-CameraInfo getCamera(ObjectRegistry &objects, const ObjectParams &params)
+GetCameraResult getCamera(ObjectManager &objects, const GetObjectParams &params)
 {
     auto &camera = objects.getAs<UserCamera>(params.id);
-    return camera.settings;
+    return getResult(camera.settings);
 }
 
-void updateCamera(ObjectRegistry &objects, const CameraUpdate &params)
+void updateCamera(ObjectManager &objects, Device &device, const UpdateCameraParams &params)
 {
-    auto &object = objects.getAs<UserCamera>(params.id);
-    auto &device = object.device.get();
-    auto camera = object.get();
+    auto &camera = objects.getAs<UserCamera>(params.id);
 
-    camera.update(params.settings);
+    auto settings = getUpdatedParams(params, camera.settings);
+
+    camera.get().update(settings);
     device.throwIfError();
 
-    object.settings = params.settings;
+    camera.settings = settings;
 }
 
-ObjectResult createPerspectiveCamera(ObjectRegistry &objects, Device &device, const PerspectiveCameraParams &params)
+CreateObjectResult createPerspectiveCamera(ObjectManager &objects, Device &device, const CreatePerspectiveCameraParams &params)
 {
-    auto camera = createPerspectiveCamera(device, params.base, params.derived);
-
-    auto derived = UserPerspectiveCamera{params.derived, std::move(camera)};
-    auto ptr = std::make_shared<decltype(derived)>(std::move(derived));
-
-    auto object = UserCamera{
-        .device = device,
-        .settings = params.base,
-        .value = ptr,
-        .get = [=] { return ptr->value; },
-        .setAspect = [=](auto value) { ptr->value.setAspect(value); },
-    };
-
-    auto stored = objects.add(std::move(object), "PerspectiveCamera");
-
-    return {stored.getId()};
+    auto create = [&](const auto &base, const auto &derived) { return createPerspectiveCamera(device, base, derived); };
+    return createCameraAs<UserPerspectiveCamera>(objects, params, "PerspectiveCamera", create);
 }
 
-PerspectiveCameraInfo getPerspectiveCamera(ObjectRegistry &objects, const ObjectParams &params)
+GetPerspectiveCameraResult getPerspectiveCamera(ObjectManager &objects, const GetObjectParams &params)
 {
     return getCameraAs<UserPerspectiveCamera>(objects, params);
 }
 
-void updatePerspectiveCamera(ObjectRegistry &objects, const PerspectiveCameraUpdate &params)
+void updatePerspectiveCamera(ObjectManager &objects, Device &device, const UpdatePerspectiveCameraParams &params)
 {
-    updateCameraAs<UserPerspectiveCamera>(objects, params);
+    updateCameraAs<UserPerspectiveCamera>(objects, device, params);
 }
 
-ObjectResult createOrthographicCamera(ObjectRegistry &objects, Device &device, const OrthographicCameraParams &params)
+CreateObjectResult createOrthographicCamera(ObjectManager &objects, Device &device, const CreateOrthographicCameraParams &params)
 {
-    auto camera = createOrthographicCamera(device, params.base, params.derived);
-
-    auto derived = UserOrthographicCamera{params.derived, std::move(camera)};
-    auto ptr = std::make_shared<decltype(derived)>(std::move(derived));
-
-    auto object = UserCamera{
-        .device = device,
-        .settings = params.base,
-        .value = ptr,
-        .get = [=] { return ptr->value; },
-        .setAspect = [=](auto value) { ptr->value.setAspect(value); },
-    };
-
-    auto stored = objects.add(std::move(object), "OrthographicCamera");
-
-    return {stored.getId()};
+    auto create = [&](const auto &base, const auto &derived) { return createOrthographicCamera(device, base, derived); };
+    return createCameraAs<UserOrthographicCamera>(objects, params, "OrthographicCamera", create);
 }
 
-OrthographicCameraInfo getOrthographicCamera(ObjectRegistry &objects, const ObjectParams &params)
+GetOrthographicCameraResult getOrthographicCamera(ObjectManager &objects, const GetObjectParams &params)
 {
     return getCameraAs<UserOrthographicCamera>(objects, params);
 }
 
-void updateOrthographicCamera(ObjectRegistry &objects, const OrthographicCameraUpdate &params)
+void updateOrthographicCamera(ObjectManager &objects, Device &device, const UpdateOrthographicCameraParams &params)
 {
-    updateCameraAs<UserOrthographicCamera>(objects, params);
+    updateCameraAs<UserOrthographicCamera>(objects, device, params);
 }
 
-ObjectResult createPanoramicCamera(ObjectRegistry &objects, Device &device, const PanoramicCameraParams &params)
+CreateObjectResult createPanoramicCamera(ObjectManager &objects, Device &device, const CreatePanoramicCameraParams &params)
 {
-    auto camera = createPanoramicCamera(device, params.base, params.derived);
-
-    auto derived = UserPanoramicCamera{params.derived, std::move(camera)};
-    auto ptr = std::make_shared<decltype(derived)>(std::move(derived));
-
-    auto object = UserCamera{
-        .device = device,
-        .settings = params.base,
-        .value = ptr,
-        .get = [=] { return ptr->value; },
-        .setAspect = [](auto) {},
-    };
-
-    auto stored = objects.add(std::move(object), "PanoramicCamera");
-
-    return {stored.getId()};
+    auto create = [&](const auto &base, const auto &derived) { return createPanoramicCamera(device, base, derived); };
+    return createCameraAs<UserPanoramicCamera>(objects, params, "PanoramicCamera", create);
 }
 
-PanoramicCameraInfo getPanoramicCamera(ObjectRegistry &objects, const ObjectParams &params)
+GetPanoramicCameraResult getPanoramicCamera(ObjectManager &objects, const GetObjectParams &params)
 {
     return getCameraAs<UserPanoramicCamera>(objects, params);
 }
 
-void updatePanoramicCamera(ObjectRegistry &objects, const PanoramicCameraUpdate &params)
+void updatePanoramicCamera(ObjectManager &objects, Device &device, const UpdatePanoramicCameraParams &params)
 {
-    updateCameraAs<UserPanoramicCamera>(objects, params);
+    updateCameraAs<UserPanoramicCamera>(objects, device, params);
 }
 }

@@ -21,7 +21,7 @@
 
 #pragma once
 
-#include <string>
+#include <vector>
 
 #include "Common.h"
 
@@ -32,5 +32,5 @@ struct JpegSettings
     int quality = 100;
 };
 
-std::string encodeJpeg(const ImageView &image, const JpegSettings &settings = {});
+std::vector<char> encodeJpeg(const ImageView &image, const JpegSettings &settings = {});
 }

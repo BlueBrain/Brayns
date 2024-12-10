@@ -49,7 +49,7 @@ std::uint32_t getImageFormat(ImageFormat format)
 
 namespace brayns
 {
-std::string encodePng(const ImageView &image)
+std::vector<char> encodePng(const ImageView &image)
 {
     auto [data, size, format, rowOrder] = image;
 
@@ -76,7 +76,7 @@ std::string encodePng(const ImageView &image)
     auto colorMap = static_cast<const void *>(nullptr);
 
     auto bufferSize = static_cast<std::size_t>(PNG_IMAGE_BUFFER_SIZE(png, rowStride));
-    auto buffer = std::string(bufferSize, '\0');
+    auto buffer = std::vector<char>(bufferSize, '\0');
 
     auto code = png_image_write_to_memory(&png, buffer.data(), &bufferSize, convertTo8Bits, data, rowStride, colorMap);
 

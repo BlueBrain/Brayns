@@ -21,18 +21,20 @@
 
 #pragma once
 
+#include <span>
 #include <string>
+#include <vector>
 
 #include "Errors.h"
 #include "Messages.h"
 
 namespace brayns
 {
-JsonRpcRequest parseTextJsonRpcRequest(const std::string &text);
-JsonRpcRequest parseBinaryJsonRpcRequest(const std::string &binary);
+JsonRpcRequest parseJsonRpcRequest(const std::string &text);
+JsonRpcRequest parseJsonRpcRequest(const std::vector<char> &binary);
 std::string composeAsText(const JsonRpcSuccessResponse &response);
 std::string composeAsText(const JsonRpcErrorResponse &response);
-std::string composeAsBinary(const JsonRpcSuccessResponse &response);
+std::vector<char> composeAsBinary(const JsonRpcSuccessResponse &response);
 JsonRpcError composeError(const JsonRpcException &e);
 JsonRpcErrorResponse composeErrorResponse(const JsonRpcException &e, std::optional<JsonRpcId> id = {});
 }

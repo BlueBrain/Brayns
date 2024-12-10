@@ -22,31 +22,32 @@
 #pragma once
 
 #include <brayns/core/engine/Framebuffer.h>
-#include <brayns/core/manager/ObjectRegistry.h>
+#include <brayns/core/manager/ObjectManager.h>
 
 #include "ImageOperationObjects.h"
 
 namespace brayns
 {
+struct UserFramebuffer
+{
+    std::vector<Stored<UserImageOperation>> operations;
+    FramebufferSettings settings;
+    Framebuffer value;
+};
+
 template<>
 struct EnumReflector<FramebufferChannel>
 {
     static auto reflect()
     {
         auto builder = EnumBuilder<FramebufferChannel>();
-        builder.field("Color", FramebufferChannel::Color)
-            .description("Color RGBA, uint8 or float32 depending on framebuffer format");
-        builder.field("Depth", FramebufferChannel::Depth)
-            .description("Euclidean distance from camera of the closest hit as float32");
+        builder.field("Color", FramebufferChannel::Color).description("Color RGBA, uint8 or float32 depending on framebuffer format");
+        builder.field("Depth", FramebufferChannel::Depth).description("Euclidean distance from camera of the closest hit as float32");
         builder.field("Normal", FramebufferChannel::Normal).description("Accumulated normal XYZ as 3 x float32");
-        builder.field("Albedo", FramebufferChannel::Albedo)
-            .description("Accumulated color without illumination RGB as 3 x float32");
-        builder.field("PrimitiveId", FramebufferChannel::PrimitiveId)
-            .description("Index of first primitive hit as uint32");
-        builder.field("ModelId", FramebufferChannel::ModelId)
-            .description("ID set by user of the first geometric/volumetric model hit as uint32");
-        builder.field("InstanceId", FramebufferChannel::InstanceId)
-            .description("ID set by user of the first instance hit as uint32");
+        builder.field("Albedo", FramebufferChannel::Albedo).description("Accumulated color without illumination RGB as 3 x float32");
+        builder.field("PrimitiveId", FramebufferChannel::PrimitiveId).description("Index of first primitive hit as uint32");
+        builder.field("ModelId", FramebufferChannel::ModelId).description("ID set by user of the first geometric/volumetric model hit as uint32");
+        builder.field("InstanceId", FramebufferChannel::InstanceId).description("ID set by user of the first instance hit as uint32");
         return builder.build();
     }
 };
@@ -64,22 +65,9 @@ struct EnumReflector<FramebufferFormat>
     }
 };
 
-template<>
-struct JsonObjectReflector<Accumulation>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<Accumulation>();
-        builder.field("variance", [](auto &object) { return &object.variance; })
-            .description("Wether to store per-pixel variance in a channel")
-            .defaultValue(false);
-        return builder.build();
-    }
-};
-
 struct FramebufferParams
 {
-    FramebufferSettings settings;
+    FramebufferSettings value;
     std::vector<ObjectId> operations;
 };
 
@@ -89,76 +77,54 @@ struct JsonObjectReflector<FramebufferParams>
     static auto reflect()
     {
         auto builder = JsonBuilder<FramebufferParams>();
-        builder.field("resolution", [](auto &object) { return &object.settings.resolution; })
+        builder.field("resolution", [](auto &object) { return &object.value.resolution; })
             .description("Framebuffer resolution in pixel")
+            .defaultValue(Size2(1'920, 1'080))
             .items()
             .minimum(64)
             .maximum(20'000);
-        builder.field("format", [](auto &object) { return &object.settings.format; })
+        builder.field("format", [](auto &object) { return &object.value.format; })
             .description("Format of the framebuffer color channel")
             .defaultValue(FramebufferFormat::Srgba8);
-        builder.field("channels", [](auto &object) { return &object.settings.channels; })
+        builder.field("channels", [](auto &object) { return &object.value.channels; })
             .description("Framebuffer channels that can be accessed by user")
             .defaultValue(std::set<FramebufferChannel>{FramebufferChannel::Color});
-        builder.field("accumulation", [](auto &object) { return &object.settings.accumulation; })
-            .description("If not null, the framebuffer will use accumulation with given settings");
+        builder.field("accumulation", [](auto &object) { return &object.value.accumulation; })
+            .description("Wether to use an accumulation channel (progressive rendering)")
+            .defaultValue(false);
+        builder.field("variance", [](auto &object) { return &object.value.variance; })
+            .description("Wether to use a variance channel if accumulation is enabled (to have an estimate)")
+            .defaultValue(false);
         builder.field("operations", [](auto &object) { return &object.operations; })
             .description("List of image operation IDs that will be applied on the framebuffer")
-            .defaultValue(std::vector<ObjectId>())
-            .uniqueItems(true);
+            .defaultValue(std::vector<ObjectId>());
         return builder.build();
     }
 };
 
-struct FramebufferInfo
+struct FramebufferResult
 {
-    FramebufferParams params;
+    FramebufferParams settings;
     std::optional<float> variance;
 };
 
 template<>
-struct JsonObjectReflector<FramebufferInfo>
+struct JsonObjectReflector<FramebufferResult>
 {
     static auto reflect()
     {
-        auto builder = JsonBuilder<FramebufferInfo>();
-        builder.field("params", [](auto &object) { return &object.params; })
-            .description("Params used to create the framebuffer");
-        builder.field("variance", [](auto &object) { return &object.variance; })
-            .description("Variance of the framebuffer (null if no estimate is available)");
+        auto builder = JsonBuilder<FramebufferResult>();
+        builder.extend([](auto &object) { return &object.settings; });
+        builder.field("varianceEstimate", [](auto &object) { return &object.variance; })
+            .description("Variance of the framebuffer (null if no variance channels or nothing has been rendered yet)");
         return builder.build();
     }
 };
 
-struct FramebufferOperations
-{
-    std::vector<ObjectId> operations;
-};
+using CreateFramebufferParams = CreateParamsOf<FramebufferParams>;
+using GetFramebufferResult = GetResultOf<FramebufferResult>;
 
-template<>
-struct JsonObjectReflector<FramebufferOperations>
-{
-    static auto reflect()
-    {
-        auto builder = JsonBuilder<FramebufferOperations>();
-        builder.field("operations", [](auto &object) { return &object.operations; })
-            .description("IDs of the image operations to attach to the framebuffer");
-        return builder.build();
-    }
-};
-
-using FramebufferUpdate = UpdateParams<FramebufferOperations>;
-
-struct UserFramebuffer
-{
-    std::reference_wrapper<Device> device;
-    FramebufferSettings settings;
-    std::vector<Stored<UserImageOperation>> operations;
-    Framebuffer value;
-};
-
-ObjectResult createFramebuffer(ObjectRegistry &objects, Device &device, const FramebufferParams &params);
-FramebufferInfo getFramebuffer(ObjectRegistry &objects, const ObjectParams &params);
-void updateFramebuffer(ObjectRegistry &objects, const FramebufferUpdate &params);
-void clearFramebuffer(ObjectRegistry &objects, const ObjectParams &params);
+CreateObjectResult createFramebuffer(ObjectManager &objects, Device &device, const CreateFramebufferParams &params);
+GetFramebufferResult getFramebuffer(ObjectManager &objects, const GetObjectParams &params);
+void clearFramebuffer(ObjectManager &objects, const GetObjectParams &params);
 }

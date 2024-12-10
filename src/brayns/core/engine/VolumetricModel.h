@@ -30,8 +30,6 @@ namespace brayns
 {
 struct VolumetricModelSettings
 {
-    Volume volume;
-    TransferFunction transferFunction;
     float densityScale = 1.0F;
     float anisotropy = 0.0F;
     std::uint32_t id = std::uint32_t(-1);
@@ -41,7 +39,13 @@ class VolumetricModel : public Managed<OSPVolumetricModel>
 {
 public:
     using Managed::Managed;
+
+    void update(const Volume &volume, const TransferFunction &transferFunction, const VolumetricModelSettings &settings);
 };
 
-VolumetricModel createVolumetricModel(Device &device, const VolumetricModelSettings &settings);
+VolumetricModel createVolumetricModel(
+    Device &device,
+    const Volume &volume,
+    const TransferFunction &transferFunction,
+    const VolumetricModelSettings &settings = {});
 }
