@@ -1,0 +1,32 @@
+import requests
+
+START = "https://vsm.kcp.bbp.epfl.ch/start"
+STATUS = "https://vsm.kcp.bbp.epfl.ch/status/{job_id}"
+TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5T0R3Z1JSTFVsTTJHbFphVDZjVklnenJsb0lzUWJmbTBDck1icXNjNHQ4In0.eyJleHAiOjE2ODY4MzIzMDQsImlhdCI6MTY4NjgyODcwNCwiYXV0aF90aW1lIjoxNjg2ODI4NTA4LCJqdGkiOiI1M2FhNGFlOS1jNDY1LTRjOTItYTcyYS0zNTIwMjkxN2E2MWMiLCJpc3MiOiJodHRwczovL2JicGF1dGguZXBmbC5jaC9hdXRoL3JlYWxtcy9CQlAiLCJhdWQiOlsiaHR0cHM6Ly9zbGFjay5jb20iLCJjb3Jlc2VydmljZXMtZ2l0bGFiIiwiYWNjb3VudCJdLCJzdWIiOiJmOjBmZGFkZWY3LWIyYjktNDkyYi1hZjQ2LWM2NTQ5MmQ0NTljMjphY2ZsZXVyeSIsInR5cCI6IkJlYXJlciIsImF6cCI6ImJicC1icmF5bnNjaXJjdWl0c3R1ZGlvIiwic2Vzc2lvbl9zdGF0ZSI6IjZkYTRhMjU5LWFlOGItNDViMS1iZjZkLTE3YTMxN2YyNDdjNyIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vYnJheW5zY2lyY3VpdHN0dWRpby5rY3AuYmJwLmVwZmwuY2giLCJodHRwczovL2Rldi5icmF5bnNjaXJjdWl0c3R1ZGlvLmtjcC5iYnAuZXBmbC5jaCIsImh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImh0dHBzOi8vczIuYnJheW5zY2lyY3VpdHN0dWRpby5rY3AuYmJwLmVwZmwuY2giLCJodHRwOi8vczIuYnJheW5zY2lyY3VpdHN0dWRpby5rY3AuYmJwLmVwZmwuY2giLCJodHRwOi8vbG9jYWxob3N0OjgwODEiLCJodHRwOi8vZGV2LmJyYXluc2NpcmN1aXRzdHVkaW8ua2NwLmJicC5lcGZsLmNoIiwiaHR0cHM6Ly9icmF5bnNjaXJjdWl0c3R1ZGlvLmtjcC5iYnAuZXBmbC5jaCIsImh0dHA6Ly9zMS5icmF5bnNjaXJjdWl0c3R1ZGlvLmtjcC5iYnAuZXBmbC5jaCIsImh0dHBzOi8vczMuYnJheW5zY2lyY3VpdHN0dWRpby5rY3AuYmJwLmVwZmwuY2giLCJodHRwOi8vczMuYnJheW5zY2lyY3VpdHN0dWRpby5rY3AuYmJwLmVwZmwuY2giLCJodHRwczovL3MxLmJyYXluc2NpcmN1aXRzdHVkaW8ua2NwLmJicC5lcGZsLmNoIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJiYnAtcGFtLWF1dGhlbnRpY2F0aW9uIiwib2ZmbGluZV9hY2Nlc3MiLCJ1bWFfYXV0aG9yaXphdGlvbiIsImRlZmF1bHQtcm9sZXMtYmJwIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiaHR0cHM6Ly9zbGFjay5jb20iOnsicm9sZXMiOlsicmVzdHJpY3RlZC1hY2Nlc3MiXX0sImNvcmVzZXJ2aWNlcy1naXRsYWIiOnsicm9sZXMiOlsicmVzdHJpY3RlZC1hY2Nlc3MiXX0sImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIG5leHVzIHByb2ZpbGUgbG9jYXRpb24gZ3JvdXBzIGVtYWlsIiwic2lkIjoiNmRhNGEyNTktYWU4Yi00NWIxLWJmNmQtMTdhMzE3ZjI0N2M3IiwiZW1haWxfdmVyaWZpZWQiOnRydWUsIm5hbWUiOiJBZHJpZW4gQ2hyaXN0aWFuIEZsZXVyeSIsImxvY2F0aW9uIjoiQjEgNCAyNjEuMDM4IiwicHJlZmVycmVkX3VzZXJuYW1lIjoiYWNmbGV1cnkiLCJnaXZlbl9uYW1lIjoiQWRyaWVuIENocmlzdGlhbiIsImZhbWlseV9uYW1lIjoiRmxldXJ5IiwiZW1haWwiOiJhZHJpZW4uZmxldXJ5QGVwZmwuY2gifQ.d4bzjMm5eeuSdHNBfJEJU75plDnD03k_Nfd5iiUEUn9LdskzE4h9aG33UbvCYwInEFmEGqIu9GWuNpVb7c6FRE75tT57ZTPsXj3y4_eNKZsuOdXbEfBfhAcvT96rvW_wmRRiWqkOPyKUNoBZeEzWGDgkquBMn9G5ikPVW9NBPqz5LZ7gO3s0SeoUHs3OdwKfSlRj4EbgNlAXU9ib0Bp712e4Ufr9G7AEaxrmbu8dULnCtzc8cZrAup3OQ6YDwOVKmbkv2sFWBxE-fr9tpGeyrRShe3-3cloODF2_f0dYtFR9TvofhhZhOOMqNf_yPYO7tqsGla_xkd04x4k_YxySIA"
+
+
+def start() -> str:
+    reply = requests.post(
+        url=START,
+        json={"usecase": "SBO1"},
+        headers={"Authorization": f"Bearer {TOKEN}"},
+        verify=False,
+    )
+    reply.raise_for_status()
+    job = reply.json()
+    return job["job_id"]
+
+
+def status(job_id: str) -> bool:
+    reply = requests.get(
+        url=STATUS.format(job_id=job_id),
+        headers={"Authorization": f"Bearer {TOKEN}"},
+        verify=False,
+    )
+    reply.raise_for_status()
+    job = reply.json()
+    return job["job_running"] and job["brayns_started"]
+
+
+if __name__ == "__main__":
+    print(status("cb424de2-296b-4626-8010-3062a841c62d"))
