@@ -93,7 +93,7 @@ Circuits
 --------
 
 Now we can use the loader to load models (here circuits) from a file and
-retreive them.
+retrieve them.
 
 .. code-block:: python
 
@@ -107,7 +107,7 @@ retreive them.
 It returns a list of ``Model`` created by the loader (usually it is a single
 model). It is important to get their ID (``model.id``) if you need to update them.
 
-Model can also be retreived with ``get_model`` and removed using ``remove_models``
+Model can also be retrieved with ``get_model`` and removed using ``remove_models``
 (from their IDs) or ``clear_models`` (remove all).
 
 Update a model
@@ -131,7 +131,7 @@ Models can be moved and made invisible using the ``update_model`` function.
     # Rotate the model of 90 degrees around Y.
     transform.rotation = brayns.euler(0, 90, 0, degrees=True)
 
-    # Upload the model and retreive its new state.
+    # Upload the model and retrieve its new state.
     # It is important to use the model returned by update_model as the bounds
     # will be updated if we change the transform.
     model = brayns.update_model(
